@@ -7,6 +7,7 @@ import '../balance/balance.dart';
 import 'economy.dart';
 import 'levels.dart';
 import 'meditation_rules.dart';
+import 'shop.dart';
 
 /// Una piedra de la torre guardada en el jardín (unidades del mundo del
 /// minijuego: centro x relativo a la base, ancho y alto).
@@ -23,10 +24,19 @@ class Progress extends ChangeNotifier {
   late Economy economy;
   late LevelRules levels;
   late MeditationRules meditationRules;
+  late ShopRules shop;
 
   int pebbles = 0;
   final essences = {for (final e in Essence.values) e: 0};
   int serenity = 0;
+
+  /// Lotos: moneda escasa que se gana por constancia y se usa en el Mercado.
+  int lotus = 0;
+  int _lotusDay = -1;
+
+  /// Trueques del Mercado hechos hoy, por oferta (para el límite diario).
+  int _shopDay = 0;
+  Map<String, int> _shopBought = {};
 
   List<TowerStone> tower = [];
   int bestTower = 0;
@@ -61,6 +71,7 @@ class Progress extends ChangeNotifier {
     economy = Economy(balance);
     levels = LevelRules(balance);
     meditationRules = MeditationRules(balance);
+    shop = ShopRules(balance);
     _prefs = await SharedPreferences.getInstance();
     now ??= DateTime.now();
     pebbles = _prefs.getInt('pebbles') ?? 0;
@@ -90,6 +101,12 @@ class Progress extends ChangeNotifier {
     gardenNameOffered = _prefs.getBool('gardenNameOffered') ?? false;
     calm = _prefs.getInt('calm') ?? 0;
     expansions = (_prefs.getStringList('expansions') ?? []).toSet();
+    lotus = _prefs.getInt('lotus') ?? 0;
+    _lotusDay = _prefs.getInt('lotus.day') ?? -1;
+    _shopDay = _prefs.getInt('shop.day') ?? 0;
+    _shopBought = (jsonDecode(_prefs.getString('shop.bought') ?? '{}') as Map).map(
+      (k, v) => MapEntry(k as String, v as int),
+    );
     final medAt = _prefs.getInt('meditation.startedAt');
     meditationStartedAt = medAt == null ? null : DateTime.fromMillisecondsSinceEpoch(medAt);
     meditationChosen = _prefs.getInt('meditation.chosen') ?? 0;
@@ -159,6 +176,72 @@ class Progress extends ChangeNotifier {
     return true;
   }
 
+  /// Lotos ganados ahora: la ofrenda del día (la primera partida o meditación
+  /// del día), uno por cada nivel subido y [bonus]. Se guardan con la billetera.
+  int _earnLotus(DateTime now, {int levelsUp = 0, int bonus = 0}) {
+    var gain = levelsUp * shop.lotusPerLevel + bonus;
+    final today = _dayIndex(now);
+    if (today != _lotusDay) {
+      _lotusDay = today;
+      _prefs.setInt('lotus.day', today);
+      gain += shop.lotusDaily;
+    }
+    lotus += gain;
+    return gain;
+  }
+
+  /// Cuánto tiene de una moneda del Mercado ('pebbles', 'lotus' o una esencia).
+  int walletOf(String key) => switch (key) {
+    'pebbles' => pebbles,
+    'lotus' => lotus,
+    _ => essences[Essence.values.byName(key)]!,
+  };
+
+  void _addTo(String key, int amount) {
+    switch (key) {
+      case 'pebbles':
+        pebbles += amount;
+      case 'lotus':
+        lotus += amount;
+      default:
+        final e = Essence.values.byName(key);
+        essences[e] = essences[e]! + amount;
+    }
+  }
+
+  /// Veces que todavía se puede hacer [o] hoy; null si no tiene límite.
+  int? shopLeft(ShopOffer o, {DateTime? now}) {
+    if (o.daily == null) return null;
+    final used = _dayIndex(now ?? DateTime.now()) == _shopDay ? (_shopBought[o.id] ?? 0) : 0;
+    return (o.daily! - used).clamp(0, o.daily!);
+  }
+
+  bool canPayOffer(ShopOffer o) => o.cost.entries.every((c) => walletOf(c.key) >= c.value);
+
+  bool canTrade(ShopOffer o, {DateTime? now}) => shopLeft(o, now: now) != 0 && canPayOffer(o);
+
+  bool trade(ShopOffer o, {DateTime? now}) {
+    now ??= DateTime.now();
+    if (!canTrade(o, now: now)) return false;
+    final today = _dayIndex(now);
+    if (today != _shopDay) {
+      _shopDay = today;
+      _shopBought = {};
+    }
+    for (final c in o.cost.entries) {
+      _addTo(c.key, -c.value);
+    }
+    for (final g in o.give.entries) {
+      _addTo(g.key, g.value);
+    }
+    _shopBought[o.id] = (_shopBought[o.id] ?? 0) + 1;
+    _prefs.setInt('shop.day', _shopDay);
+    _prefs.setString('shop.bought', jsonEncode(_shopBought));
+    _saveWallet();
+    notifyListeners();
+    return true;
+  }
+
   static int _dayIndex(DateTime t) => DateTime.utc(t.year, t.month, t.day).millisecondsSinceEpoch ~/ 86400000;
 
   Duration meditationElapsed({DateTime? now}) {
@@ -186,9 +269,9 @@ class Progress extends ChangeNotifier {
   }
 
   /// Termina la sesión (completa o cortada) y paga con el reloj real.
-  ({MeditationReward reward, int? newLevel}) finishMeditation({DateTime? now}) {
+  ({MeditationReward reward, int? newLevel, int lotus}) finishMeditation({DateTime? now}) {
     now ??= DateTime.now();
-    if (meditationStartedAt == null) return (reward: MeditationReward.none, newLevel: null);
+    if (meditationStartedAt == null) return (reward: MeditationReward.none, newLevel: null, lotus: 0);
     final minutes = meditationElapsed(now: now).inMinutes;
     final today = _dayIndex(now);
     if (today != _meditationDay) {
@@ -200,6 +283,7 @@ class Progress extends ChangeNotifier {
     pebbles += reward.pebbles;
     essences[Essence.light] = essences[Essence.light]! + reward.light;
     serenity = (serenity + reward.serenity).clamp(0, economy.balance.serenity.i('max'));
+    var streakBonus = 0;
     if (minutes >= economy.balance.meditation.i('streakMinMinutes')) {
       final next = meditationRules.nextStreak(
         today: today,
@@ -207,6 +291,9 @@ class Progress extends ChangeNotifier {
         streak: meditationStreak,
         graceDay: _meditationGraceDay,
       );
+      if (next.streak != meditationStreak && next.streak % shop.lotusStreakEvery == 0) {
+        streakBonus = shop.lotusStreakBonus;
+      }
       meditationStreak = next.streak;
       _meditationGraceDay = next.graceDay;
       _meditationLastDay = today;
@@ -214,7 +301,11 @@ class Progress extends ChangeNotifier {
       _prefs.setInt('meditation.lastDay', today);
       if (next.graceDay != null) _prefs.setInt('meditation.graceDay', next.graceDay!);
     }
+    final before = level;
     final newLevel = _addCalm(reward.calm);
+    final lotusGain = reward.minutes > 0
+        ? _earnLotus(now, levelsUp: newLevel == null ? 0 : newLevel - before, bonus: streakBonus)
+        : 0;
     meditationStartedAt = null;
     _prefs.remove('meditation.startedAt');
     _prefs.setInt('meditation.day', _meditationDay);
@@ -222,7 +313,7 @@ class Progress extends ChangeNotifier {
     _saveWallet();
     _saveSerenity(now);
     notifyListeners();
-    return (reward: reward, newLevel: newLevel);
+    return (reward: reward, newLevel: newLevel, lotus: lotusGain);
   }
 
   /// Registra una partida terminada de [game] y paga la recompensa.
@@ -240,13 +331,15 @@ class Progress extends ChangeNotifier {
     essences[reward.essence] = essences[reward.essence]! + reward.essenceAmount;
     serenity = economy.serenityAfterPlay(serenity);
     final gained = levels.calmFor(stars);
+    final before = level;
     final newLevel = _addCalm(gained);
+    final lotusGain = _earnLotus(now, levelsUp: newLevel == null ? 0 : newLevel - before);
     _prefs.setString('playsDay', _playsDay);
     _prefs.setString('plays', jsonEncode(_plays));
     _saveWallet();
     _saveSerenity(now);
     notifyListeners();
-    return reward.withCalm(gained, newLevel);
+    return reward.withCalm(gained, newLevel, lotus: lotusGain);
   }
 
   /// La torre nueva reemplaza a la anterior; lo juntado hasta ahora se cobra.
@@ -303,6 +396,7 @@ class Progress extends ChangeNotifier {
 
   void _saveWallet() {
     _prefs.setInt('pebbles', pebbles);
+    _prefs.setInt('lotus', lotus);
     for (final e in Essence.values) {
       _prefs.setInt('essence.${e.name}', essences[e]!);
     }

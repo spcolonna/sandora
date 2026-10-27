@@ -10,6 +10,7 @@ import '../minigames/catalog.dart';
 import '../minigames/sand/sand_painter.dart';
 import '../minigames/sand/sand_shapes.dart';
 import 'expansions_sheet.dart';
+import 'shop_sheet.dart';
 import 'fx/calm.dart';
 import 'widgets/garden_sign.dart';
 import 'fx/sfx.dart';
@@ -94,14 +95,25 @@ class _GardenScreenState extends State<GardenScreen> {
                         Positioned(
                           right: 10,
                           top: 10,
-                          child: Badge(
-                            isLabelVisible: p.expansionAvailable,
-                            smallSize: 12,
-                            child: FilledButton.tonalIcon(
-                              onPressed: () => showExpansionsSheet(context),
-                              icon: const Icon(Icons.open_in_full_rounded, size: 18),
-                              label: Text(tr('exp.button')),
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Badge(
+                                isLabelVisible: p.expansionAvailable,
+                                smallSize: 12,
+                                child: FilledButton.tonalIcon(
+                                  onPressed: () => showExpansionsSheet(context),
+                                  icon: const Icon(Icons.open_in_full_rounded, size: 18),
+                                  label: Text(tr('exp.button')),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              FilledButton.tonalIcon(
+                                onPressed: () => showShopSheet(context),
+                                icon: const Icon(Icons.storefront_rounded, size: 18),
+                                label: Text(tr('shop.button')),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -141,7 +153,10 @@ class _Header extends StatelessWidget {
                 child: Wrap(
                   spacing: 12,
                   runSpacing: 4,
-                  children: [for (final e in Essence.values) CurrencyChip.essence(e, p.essences[e]!)],
+                  children: [
+                    for (final e in Essence.values) CurrencyChip.essence(e, p.essences[e]!),
+                    CurrencyChip.lotus(p.lotus),
+                  ],
                 ),
               ),
               IconButton(onPressed: onSettings, icon: const Icon(Icons.settings_rounded)),

@@ -18,10 +18,21 @@ class Reward {
   final int calm;
   final int? newLevel;
 
-  const Reward(this.pebbles, this.essence, this.essenceAmount, {this.tired = false, this.calm = 0, this.newLevel});
+  /// Lotos ganados (ofrenda del día y niveles subidos).
+  final int lotus;
 
-  Reward withCalm(int calm, int? newLevel) =>
-      Reward(pebbles, essence, essenceAmount, tired: tired, calm: calm, newLevel: newLevel);
+  const Reward(
+    this.pebbles,
+    this.essence,
+    this.essenceAmount, {
+    this.tired = false,
+    this.calm = 0,
+    this.newLevel,
+    this.lotus = 0,
+  });
+
+  Reward withCalm(int calm, int? newLevel, {int lotus = 0}) =>
+      Reward(pebbles, essence, essenceAmount, tired: tired, calm: calm, newLevel: newLevel, lotus: lotus);
 }
 
 /// Reglas de la economía, en Dart puro para poder probarlas.

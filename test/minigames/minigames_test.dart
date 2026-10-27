@@ -1,10 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:zen_garden/minigames/common/grade.dart';
-import 'package:zen_garden/minigames/rain/rain_chart.dart';
-import 'package:zen_garden/minigames/sand/sand_shapes.dart';
-import 'package:zen_garden/minigames/stack/stack_rules.dart';
+import 'package:sandora/minigames/common/grade.dart';
+import 'package:sandora/minigames/rain/rain_chart.dart';
+import 'package:sandora/minigames/sand/sand_shapes.dart';
+import 'package:sandora/minigames/stack/stack_rules.dart';
 
 import '../helpers.dart';
 

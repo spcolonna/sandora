@@ -810,5 +810,75 @@
   "pt": "Bambu Sussurrante",
   "ja": "ささやく竹",
   "zh": "竹语园"
+ },
+ "currency.lotus": {
+  "es": "Lotos",
+  "en": "Lotus",
+  "pt": "Lótus",
+  "ja": "蓮",
+  "zh": "莲花"
+ },
+ "shop.title": {
+  "es": "Mercado",
+  "en": "Market",
+  "pt": "Mercado",
+  "ja": "市場",
+  "zh": "市集"
+ },
+ "shop.button": {
+  "es": "Mercado",
+  "en": "Market",
+  "pt": "Mercado",
+  "ja": "市場",
+  "zh": "市集"
+ },
+ "shop.desc": {
+  "es": "Cambiá lo que te sobra por lo que te falta.",
+  "en": "Trade what you have spare for what you need.",
+  "pt": "Troque o que sobra pelo que falta.",
+  "ja": "余ったものを足りないものと交換しよう。",
+  "zh": "用多余的换取需要的。"
+ },
+ "shop.lotusHint": {
+  "es": "Los lotos se ganan con la ofrenda del día (tu primera partida o meditación), al subir de nivel y con cada semana de racha meditando.",
+  "en": "Earn lotus with your daily offering (your first game or meditation), each new level and every week of meditation streak.",
+  "pt": "Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao subir de nível e a cada semana de sequência meditando.",
+  "ja": "蓮は毎日の奉納（その日最初のプレイか瞑想）、レベルアップ、瞑想の連続1週間ごとにもらえます。",
+  "zh": "每日供奉（当天第一局或第一次冥想）、升级以及每连续冥想一周都能获得莲花。"
+ },
+ "shop.trades": {
+  "es": "Trueques del día",
+  "en": "Today's trades",
+  "pt": "Trocas do dia",
+  "ja": "今日の交換",
+  "zh": "今日交换"
+ },
+ "shop.withLotus": {
+  "es": "Con lotos",
+  "en": "With lotus",
+  "pt": "Com lótus",
+  "ja": "蓮で交換",
+  "zh": "用莲花"
+ },
+ "shop.left": {
+  "es": "Quedan {n} hoy",
+  "en": "{n} left today",
+  "pt": "Restam {n} hoje",
+  "ja": "今日あと{n}回",
+  "zh": "今天还剩{n}次"
+ },
+ "shop.soldOut": {
+  "es": "Vuelve mañana",
+  "en": "Back tomorrow",
+  "pt": "Volta amanhã",
+  "ja": "また明日",
+  "zh": "明天再来"
+ },
+ "shop.trade": {
+  "es": "Cambiar",
+  "en": "Trade",
+  "pt": "Trocar",
+  "ja": "交換",
+  "zh": "交换"
  }
 }

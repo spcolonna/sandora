@@ -117,4 +117,15 @@ const es = <String, String>{
   'garden.suggest.6': 'Refugio de Lluvia',
   'garden.suggest.7': 'Jardín del Farol',
   'garden.suggest.8': 'Bambú Susurrante',
+  'currency.lotus': 'Lotos',
+  'shop.title': 'Mercado',
+  'shop.button': 'Mercado',
+  'shop.desc': 'Cambiá lo que te sobra por lo que te falta.',
+  'shop.lotusHint':
+      'Los lotos se ganan con la ofrenda del día (tu primera partida o meditación), al subir de nivel y con cada semana de racha meditando.',
+  'shop.trades': 'Trueques del día',
+  'shop.withLotus': 'Con lotos',
+  'shop.left': 'Quedan {n} hoy',
+  'shop.soldOut': 'Vuelve mañana',
+  'shop.trade': 'Cambiar',
 };

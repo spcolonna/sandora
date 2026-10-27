@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:zen_garden/i18n/i18n.dart';
+import 'package:sandora/i18n/i18n.dart';
 
 void main() {
   test('todos los idiomas tienen las mismas claves y marcadores', () {

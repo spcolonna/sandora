@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:zen_garden/garden/economy.dart';
-import 'package:zen_garden/garden/levels.dart';
-import 'package:zen_garden/garden/meditation_rules.dart';
-import 'package:zen_garden/garden/progress.dart';
+import 'package:sandora/garden/economy.dart';
+import 'package:sandora/garden/levels.dart';
+import 'package:sandora/garden/meditation_rules.dart';
+import 'package:sandora/garden/progress.dart';
 
 import '../helpers.dart';
 

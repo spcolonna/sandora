@@ -18,6 +18,7 @@ abstract final class Palette {
   static const wood = Color(0xFF8A5A3C);
   static const water = Color(0xFF5C9EA8);
   static const lantern = Color(0xFFE9A84C);
+  static const lotus = Color(0xFFE3A6B4);
   static const skyTop = Color(0xFFBFD8DC);
   static const skyBottom = Color(0xFFF4E7CF);
   static const dusk = Color(0xFF3A4660);

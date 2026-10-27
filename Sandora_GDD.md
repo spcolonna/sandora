@@ -86,12 +86,13 @@ Más adelante, el jugador podrá tener **varios jardines**, cada uno con su nomb
 
 ## Economía
 
-Hay tres monedas: dos se ganan jugando y una se compra. Ninguna compra puntos de ranking directamente.
+Hay cuatro monedas: dos se ganan jugando, una por constancia y una se compra. Ninguna compra puntos de ranking directamente.
 
 | Moneda | Cómo se gana | Para qué sirve |
 | --- | --- | --- |
 | **Piedritas** (blanda) | Jugando cualquier minijuego; más con mejor puntaje | Reparar, comprar objetos comunes, mantener el jardín |
 | **Esencias** (por zona: Agua, Arena, Madera, Luz) | Cada minijuego da la esencia de su zona; el Modo meditación da Luz | Desbloquear objetos y mejoras de esa zona; obliga a variar de minijuego |
+| **Lotos** (escasa) | La ofrenda del día (la primera partida o meditación), cada nivel nuevo y cada semana de racha meditando | Trueques del Mercado sin límite diario. A futuro, también se venden |
 | **Jade** (premium) | Compra; pequeñas cantidades por logros y concursos | Cosméticos premium, pase de estación, acelerar crecimiento |
 
 ### Qué se compra con tokens
@@ -100,6 +101,15 @@ Hay tres monedas: dos se ganan jugando y una se compra. Ninguna compra puntos de
 - **Objetos:** faroles, puentes, plantas, piedras decorativas. Cada objeto tiene una rareza, que afecta la originalidad del jardín.
 - **Mejoras de minijuego:** un rastrillo mejor que deja trazos más finos, vasijas con mejor sonido, una base más ancha para apilar. Dan comodidad y estética, no puntos de ranking.
 - **Ampliaciones:** agrandar el patio o abrir una zona nueva del jardín (ver Nivel del jardín y Minijuegos de ampliación). Cada una pide un nivel mínimo; cada zona trae minijuegos, objetos y su propia esencia.
+
+### Mercado
+
+Ningún minijuego da todas las esencias (hoy nadie da Madera). Lo que falta se consigue en el Mercado, con trueques:
+
+- **Trueques del día:** piedritas o una esencia por otra, con un límite de veces por día. Así una moneda escasa sigue escasa y conviene volver mañana.
+- **Con lotos:** sin límite diario, porque el loto ya es escaso. Es la moneda para hacer escaso algo y, más adelante, venderlo.
+
+Diversificar las monedas permite ajustar qué es escaso sin tocar los minijuegos. Ofertas y límites viven en `game_balance.json` (`shop`).
 
 ### Reglas de balance
 

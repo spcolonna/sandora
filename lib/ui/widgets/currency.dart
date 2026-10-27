@@ -16,6 +16,16 @@ class CurrencyChip extends StatelessWidget {
   factory CurrencyChip.pebbles(int n, {String prefix = ''}) =>
       CurrencyChip._(const _Dot(Palette.stone), '$prefix$n', tr('currency.pebbles'));
 
+  factory CurrencyChip.lotus(int n, {String prefix = ''}) =>
+      CurrencyChip._(const _Dot(Palette.lotus, petal: true), '$prefix$n', tr('currency.lotus'));
+
+  /// Cualquier moneda del Mercado por su clave ('pebbles', 'lotus' o una esencia).
+  factory CurrencyChip.of(String key, int n, {String prefix = ''}) => switch (key) {
+    'pebbles' => CurrencyChip.pebbles(n, prefix: prefix),
+    'lotus' => CurrencyChip.lotus(n, prefix: prefix),
+    _ => CurrencyChip.essence(Essence.values.byName(key), n, prefix: prefix),
+  };
+
   factory CurrencyChip.essence(Essence e, int n, {String prefix = ''}) =>
       CurrencyChip._(_Dot(essenceColor(e), diamond: true), '$prefix$n', tr('essence.${e.name}'));
 
@@ -44,8 +54,8 @@ class CurrencyChip extends StatelessWidget {
 
 class _Dot extends StatelessWidget {
   final Color color;
-  final bool diamond;
-  const _Dot(this.color, {this.diamond = false});
+  final bool diamond, petal;
+  const _Dot(this.color, {this.diamond = false, this.petal = false});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +64,9 @@ class _Dot extends StatelessWidget {
       height: 16,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(diamond ? 3 : 8),
+        borderRadius: petal
+            ? const BorderRadius.only(topLeft: Radius.circular(12), bottomRight: Radius.circular(12))
+            : BorderRadius.circular(diamond ? 3 : 8),
         border: Border.all(color: Palette.ink.withValues(alpha: 0.25)),
       ),
     );

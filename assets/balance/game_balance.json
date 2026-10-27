@@ -36,6 +36,19 @@
     { "id": "bamboo", "kind": "zone", "level": 16, "cost": { "pebbles": 1000, "wood": 40 }, "ready": false },
     { "id": "river", "kind": "zone", "level": 18, "cost": { "pebbles": 1100, "water": 40 }, "ready": false }
   ],
+  "shop": {
+    "_comment": "Mercado: trueques para conseguir lo que los minijuegos no dan (hoy, Madera). daily: veces por día (sin daily, sin límite). Lotos: moneda escasa por constancia (ofrenda del día, niveles, racha de meditación); a futuro se podrán vender.",
+    "lotus": { "daily": 1, "perLevel": 1, "streakEvery": 7, "streakBonus": 2 },
+    "offers": [
+      { "id": "wood_pebbles", "give": { "wood": 5 }, "cost": { "pebbles": 90 }, "daily": 3 },
+      { "id": "wood_sand", "give": { "wood": 4 }, "cost": { "sand": 12 }, "daily": 2 },
+      { "id": "water_sand", "give": { "water": 4 }, "cost": { "sand": 10 }, "daily": 2 },
+      { "id": "sand_water", "give": { "sand": 4 }, "cost": { "water": 10 }, "daily": 2 },
+      { "id": "wood_lotus", "give": { "wood": 12 }, "cost": { "lotus": 1 } },
+      { "id": "light_lotus", "give": { "light": 5 }, "cost": { "lotus": 1 } },
+      { "id": "pebbles_lotus", "give": { "pebbles": 60 }, "cost": { "lotus": 1 } }
+    ]
+  },
   "meditation": {
     "_comment": "rewards: sesión completa de esa duración. perMinute: sesión cortada o duración a medida, sin bonus. Pasado dailyCapMinutes en el día no paga.",
     "unlockLevel": 5,

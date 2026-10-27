@@ -117,4 +117,15 @@ const en = <String, String>{
   'garden.suggest.6': 'Rain Shelter',
   'garden.suggest.7': 'Lantern Garden',
   'garden.suggest.8': 'Whispering Bamboo',
+  'currency.lotus': 'Lotus',
+  'shop.title': 'Market',
+  'shop.button': 'Market',
+  'shop.desc': 'Trade what you have spare for what you need.',
+  'shop.lotusHint':
+      'Earn lotus with your daily offering (your first game or meditation), each new level and every week of meditation streak.',
+  'shop.trades': 'Today\'s trades',
+  'shop.withLotus': 'With lotus',
+  'shop.left': '{n} left today',
+  'shop.soldOut': 'Back tomorrow',
+  'shop.trade': 'Trade',
 };

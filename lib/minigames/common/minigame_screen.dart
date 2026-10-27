@@ -198,6 +198,7 @@ class _ResultPanel extends StatelessWidget {
                       CurrencyChip.pebbles(reward.pebbles, prefix: '+'),
                       if (reward.essenceAmount > 0)
                         CurrencyChip.essence(reward.essence, reward.essenceAmount, prefix: '+'),
+                      if (reward.lotus > 0) CurrencyChip.lotus(reward.lotus, prefix: '+'),
                       CalmChip(reward.calm),
                     ],
                   ),

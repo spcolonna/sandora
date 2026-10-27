@@ -36,6 +36,9 @@ class BalanceSection {
   String s(String key) => _m[key] as String;
   List<double> list(String key) => [for (final v in _m[key] as List) (v as num).toDouble()];
   BalanceSection sub(String key) => BalanceSection(_m[key] as Map<String, dynamic>);
+  List<BalanceSection> sections(String key) => [
+    for (final v in _m[key] as List) BalanceSection(v as Map<String, dynamic>),
+  ];
   bool has(String key) => _m.containsKey(key);
   bool flag(String key, {bool orElse = false}) => (_m[key] as bool?) ?? orElse;
   Map<String, num> nums(String key) => (_m[key] as Map<String, dynamic>).map((k, v) => MapEntry(k, v as num));

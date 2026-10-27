@@ -32,7 +32,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
   bool _intervalBell = false;
   Timer? _tick;
   int _bellsRung = 0;
-  ({MeditationReward reward, int? newLevel})? _result;
+  ({MeditationReward reward, int? newLevel, int lotus})? _result;
 
   @override
   void initState() {
@@ -265,7 +265,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
             const SizedBox(height: 12),
             Text(trN('meditation.done', r.minutes), style: text.headlineSmall, textAlign: TextAlign.center),
             const SizedBox(height: 20),
-            if (r.pebbles + r.light + r.calm > 0)
+            if (r.pebbles + r.light + r.calm + _result!.lotus > 0)
               DefaultTextStyle.merge(
                 style: TextStyle(color: light),
                 child: Wrap(
@@ -275,6 +275,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   children: [
                     CurrencyChip.pebbles(r.pebbles, prefix: '+'),
                     if (r.light > 0) CurrencyChip.essence(Essence.light, r.light, prefix: '+'),
+                    if (_result!.lotus > 0) CurrencyChip.lotus(_result!.lotus, prefix: '+'),
                     CalmChip(r.calm),
                   ],
                 ),
