@@ -1,0 +1,9 @@
+# Los PNG de origen viven en store/splash/ (fuera del bundle, no se commitean):
+# splash_logo.png (768, transparente) y splash_a12.png (1152, logo en 720 centrado).
+flutter_native_splash:
+  color: "#231E1A"
+  image: store/splash/splash_logo.png
+  android_12:
+    color: "#231E1A"
+    image: store/splash/splash_a12.png
+  fullscreen: true

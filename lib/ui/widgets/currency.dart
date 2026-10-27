@@ -1,0 +1,63 @@
+import 'package:flutter/material.dart';
+
+import '../../garden/economy.dart';
+import '../../i18n/i18n.dart';
+import '../theme/palette.dart';
+
+/// Monto de una moneda con su ícono. Los íconos son placeholders dibujados
+/// hasta tener `icon_pebble` e `icon_essence_*` (Lote 1).
+class CurrencyChip extends StatelessWidget {
+  final Widget icon;
+  final String text;
+  final String tooltip;
+
+  const CurrencyChip._(this.icon, this.text, this.tooltip);
+
+  factory CurrencyChip.pebbles(int n, {String prefix = ''}) =>
+      CurrencyChip._(const _Dot(Palette.stone), '$prefix$n', tr('currency.pebbles'));
+
+  factory CurrencyChip.essence(Essence e, int n, {String prefix = ''}) =>
+      CurrencyChip._(_Dot(essenceColor(e), diamond: true), '$prefix$n', tr('essence.${e.name}'));
+
+  static Color essenceColor(Essence e) => switch (e) {
+    Essence.water => Palette.water,
+    Essence.sand => Palette.sandShadow,
+    Essence.wood => Palette.wood,
+    Essence.light => Palette.lantern,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon,
+          const SizedBox(width: 6),
+          Text(text, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+        ],
+      ),
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  final Color color;
+  final bool diamond;
+  const _Dot(this.color, {this.diamond = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final dot = Container(
+      width: 16,
+      height: 16,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(diamond ? 3 : 8),
+        border: Border.all(color: Palette.ink.withValues(alpha: 0.25)),
+      ),
+    );
+    return diamond ? Transform.rotate(angle: 0.785, child: dot) : dot;
+  }
+}

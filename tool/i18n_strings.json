@@ -1,0 +1,814 @@
+{
+ "app.title": {
+  "es": "Sandora",
+  "en": "Sandora",
+  "pt": "Sandora",
+  "ja": "Sandora",
+  "zh": "Sandora"
+ },
+ "currency.pebbles": {
+  "es": "Piedritas",
+  "en": "Pebbles",
+  "pt": "Pedrinhas",
+  "ja": "小石",
+  "zh": "小石子"
+ },
+ "essence.water": {
+  "es": "Agua",
+  "en": "Water",
+  "pt": "Água",
+  "ja": "水",
+  "zh": "水"
+ },
+ "essence.sand": {
+  "es": "Arena",
+  "en": "Sand",
+  "pt": "Areia",
+  "ja": "砂",
+  "zh": "沙"
+ },
+ "essence.wood": {
+  "es": "Madera",
+  "en": "Wood",
+  "pt": "Madeira",
+  "ja": "木",
+  "zh": "木"
+ },
+ "essence.light": {
+  "es": "Luz",
+  "en": "Light",
+  "pt": "Luz",
+  "ja": "光",
+  "zh": "光"
+ },
+ "garden.serenity": {
+  "es": "Serenidad",
+  "en": "Serenity",
+  "pt": "Serenidade",
+  "ja": "静けさ",
+  "zh": "宁静"
+ },
+ "garden.tower.empty": {
+  "es": "Todavía no hay torre",
+  "en": "No tower yet",
+  "pt": "Ainda não há torre",
+  "ja": "まだ石の塔はありません",
+  "zh": "还没有石塔"
+ },
+ "garden.tower.stones.one": {
+  "es": "Torre de {n} piedra",
+  "en": "Tower of {n} stone",
+  "pt": "Torre de {n} pedra",
+  "ja": "{n}個の石の塔",
+  "zh": "{n}块石头的塔"
+ },
+ "garden.tower.stones.other": {
+  "es": "Torre de {n} piedras",
+  "en": "Tower of {n} stones",
+  "pt": "Torre de {n} pedras",
+  "ja": "{n}個の石の塔",
+  "zh": "{n}块石头的塔"
+ },
+ "garden.tower.collect": {
+  "es": "Juntar {n}",
+  "en": "Collect {n}",
+  "pt": "Coletar {n}",
+  "ja": "{n}個集める",
+  "zh": "收集 {n}"
+ },
+ "garden.sand.empty": {
+  "es": "La arena espera tu dibujo",
+  "en": "The sand awaits your drawing",
+  "pt": "A areia espera seu desenho",
+  "ja": "砂があなたの模様を待っています",
+  "zh": "沙地在等待你的图案"
+ },
+ "mg.stack.name": {
+  "es": "Apilado de piedras",
+  "en": "Stone stacking",
+  "pt": "Empilhar pedras",
+  "ja": "石積み",
+  "zh": "叠石"
+ },
+ "mg.stack.desc": {
+  "es": "Tocá para soltar la piedra",
+  "en": "Tap to drop the stone",
+  "pt": "Toque para soltar a pedra",
+  "ja": "タップして石を落とす",
+  "zh": "点击放下石头"
+ },
+ "mg.sand.name": {
+  "es": "Arenero",
+  "en": "Sand garden",
+  "pt": "Jardim de areia",
+  "ja": "砂紋",
+  "zh": "枯山水"
+ },
+ "mg.sand.desc": {
+  "es": "Recorré la figura sin levantar el dedo",
+  "en": "Trace the shape without lifting your finger",
+  "pt": "Percorra a figura sem levantar o dedo",
+  "ja": "指を離さずに形をなぞる",
+  "zh": "手指不离屏幕描出图形"
+ },
+ "mg.rain.name": {
+  "es": "Lluvia en vasijas",
+  "en": "Rain in the jars",
+  "pt": "Chuva nos vasos",
+  "ja": "雨と壺",
+  "zh": "雨落陶罐"
+ },
+ "mg.rain.desc": {
+  "es": "Tocá la vasija cuando llega la gota",
+  "en": "Tap the jar when the drop arrives",
+  "pt": "Toque o vaso quando a gota chegar",
+  "ja": "しずくが届いたら壺をタップ",
+  "zh": "雨滴落下时点击陶罐"
+ },
+ "grade.good": {
+  "es": "Bien",
+  "en": "Good",
+  "pt": "Bom",
+  "ja": "良い",
+  "zh": "不错"
+ },
+ "grade.great": {
+  "es": "¡Genial!",
+  "en": "Great!",
+  "pt": "Ótimo!",
+  "ja": "すごい！",
+  "zh": "很棒！"
+ },
+ "grade.perfect": {
+  "es": "¡Perfecto!",
+  "en": "Perfect!",
+  "pt": "Perfeito!",
+  "ja": "完璧！",
+  "zh": "完美！"
+ },
+ "stack.wind": {
+  "es": "Se acerca el viento: mantené apretado para sostener la torre",
+  "en": "Wind is coming: hold to steady the tower",
+  "pt": "O vento está chegando: segure para firmar a torre",
+  "ja": "風が来ます。長押しで塔を支えて",
+  "zh": "风要来了：按住稳住石塔"
+ },
+ "stack.finish": {
+  "es": "Terminar",
+  "en": "Finish",
+  "pt": "Terminar",
+  "ja": "終える",
+  "zh": "完成"
+ },
+ "stack.height.one": {
+  "es": "{n} piedra",
+  "en": "{n} stone",
+  "pt": "{n} pedra",
+  "ja": "{n}個",
+  "zh": "{n}块"
+ },
+ "stack.height.other": {
+  "es": "{n} piedras",
+  "en": "{n} stones",
+  "pt": "{n} pedras",
+  "ja": "{n}個",
+  "zh": "{n}块"
+ },
+ "stack.fell": {
+  "es": "La torre volvió a la tierra",
+  "en": "The tower returned to the earth",
+  "pt": "A torre voltou à terra",
+  "ja": "塔は大地に還った",
+  "zh": "石塔回归大地"
+ },
+ "sand.hint": {
+  "es": "Empezá en el punto y recorré la figura",
+  "en": "Start at the dot and trace the shape",
+  "pt": "Comece no ponto e percorra a figura",
+  "ja": "点から始めて形をなぞる",
+  "zh": "从圆点开始描出图形"
+ },
+ "sand.shape.circle": {
+  "es": "Círculo",
+  "en": "Circle",
+  "pt": "Círculo",
+  "ja": "円",
+  "zh": "圆"
+ },
+ "sand.shape.wave": {
+  "es": "Ola",
+  "en": "Wave",
+  "pt": "Onda",
+  "ja": "波",
+  "zh": "波浪"
+ },
+ "sand.shape.spiral": {
+  "es": "Espiral",
+  "en": "Spiral",
+  "pt": "Espiral",
+  "ja": "渦",
+  "zh": "螺旋"
+ },
+ "sand.shape.leaf": {
+  "es": "Hoja",
+  "en": "Leaf",
+  "pt": "Folha",
+  "ja": "葉",
+  "zh": "叶"
+ },
+ "sand.shape.mountain": {
+  "es": "Montaña",
+  "en": "Mountain",
+  "pt": "Montanha",
+  "ja": "山",
+  "zh": "山"
+ },
+ "rain.hint": {
+  "es": "Tocá cada vasija cuando la gota la alcanza",
+  "en": "Tap each jar as the drop reaches it",
+  "pt": "Toque cada vaso quando a gota o alcança",
+  "ja": "しずくが届く瞬間に壺をタップ",
+  "zh": "雨滴到达时点击对应陶罐"
+ },
+ "rain.depth": {
+  "es": "Profundidad de meditación",
+  "en": "Meditation depth",
+  "pt": "Profundidade da meditação",
+  "ja": "瞑想の深さ",
+  "zh": "冥想深度"
+ },
+ "rain.combo": {
+  "es": "Combo {n}",
+  "en": "Combo {n}",
+  "pt": "Combo {n}",
+  "ja": "コンボ {n}",
+  "zh": "连击 {n}"
+ },
+ "result.score": {
+  "es": "Puntaje",
+  "en": "Score",
+  "pt": "Pontuação",
+  "ja": "スコア",
+  "zh": "得分"
+ },
+ "result.rewards": {
+  "es": "Ganaste",
+  "en": "You earned",
+  "pt": "Você ganhou",
+  "ja": "獲得",
+  "zh": "获得"
+ },
+ "result.tired": {
+  "es": "Este rincón ya te dio mucho hoy: los otros te esperan.",
+  "en": "This corner has given you a lot today: the others are waiting.",
+  "pt": "Este cantinho já te deu muito hoje: os outros te esperam.",
+  "ja": "今日はこの場所でたくさん遊びました。ほかの場所も待っています。",
+  "zh": "今天这里已经给了你很多：其他角落在等你。"
+ },
+ "result.record": {
+  "es": "¡Nuevo récord!",
+  "en": "New record!",
+  "pt": "Novo recorde!",
+  "ja": "新記録！",
+  "zh": "新纪录！"
+ },
+ "result.again": {
+  "es": "Otra vez",
+  "en": "Again",
+  "pt": "De novo",
+  "ja": "もう一度",
+  "zh": "再来一次"
+ },
+ "result.garden": {
+  "es": "Al jardín",
+  "en": "To the garden",
+  "pt": "Ao jardim",
+  "ja": "庭へ",
+  "zh": "回到庭院"
+ },
+ "pause.title": {
+  "es": "Pausa",
+  "en": "Paused",
+  "pt": "Pausa",
+  "ja": "一時停止",
+  "zh": "暂停"
+ },
+ "pause.resume": {
+  "es": "Seguir",
+  "en": "Resume",
+  "pt": "Continuar",
+  "ja": "続ける",
+  "zh": "继续"
+ },
+ "pause.quit": {
+  "es": "Salir",
+  "en": "Quit",
+  "pt": "Sair",
+  "ja": "やめる",
+  "zh": "退出"
+ },
+ "settings.title": {
+  "es": "Ajustes",
+  "en": "Settings",
+  "pt": "Ajustes",
+  "ja": "設定",
+  "zh": "设置"
+ },
+ "settings.sound": {
+  "es": "Sonido",
+  "en": "Sound",
+  "pt": "Som",
+  "ja": "効果音",
+  "zh": "音效"
+ },
+ "settings.music": {
+  "es": "Ambiente",
+  "en": "Ambience",
+  "pt": "Ambiente",
+  "ja": "環境音",
+  "zh": "环境音"
+ },
+ "settings.haptics": {
+  "es": "Vibración",
+  "en": "Vibration",
+  "pt": "Vibração",
+  "ja": "振動",
+  "zh": "振动"
+ },
+ "settings.language": {
+  "es": "Idioma",
+  "en": "Language",
+  "pt": "Idioma",
+  "ja": "言語",
+  "zh": "语言"
+ },
+ "lang.es": {
+  "es": "Español",
+  "en": "Español",
+  "pt": "Español",
+  "ja": "Español",
+  "zh": "Español"
+ },
+ "lang.en": {
+  "es": "English",
+  "en": "English",
+  "pt": "English",
+  "ja": "English",
+  "zh": "English"
+ },
+ "lang.pt": {
+  "es": "Português",
+  "en": "Português",
+  "pt": "Português",
+  "ja": "Português",
+  "zh": "Português"
+ },
+ "lang.ja": {
+  "es": "日本語",
+  "en": "日本語",
+  "pt": "日本語",
+  "ja": "日本語",
+  "zh": "日本語"
+ },
+ "lang.zh": {
+  "es": "中文",
+  "en": "中文",
+  "pt": "中文",
+  "ja": "中文",
+  "zh": "中文"
+ },
+ "level.short": {
+  "es": "Nivel {n}",
+  "en": "Level {n}",
+  "pt": "Nível {n}",
+  "ja": "レベル{n}",
+  "zh": "等级 {n}"
+ },
+ "level.abbr": {
+  "es": "Nv. {n}",
+  "en": "Lv. {n}",
+  "pt": "Nv. {n}",
+  "ja": "Lv.{n}",
+  "zh": "{n}级"
+ },
+ "level.calm": {
+  "es": "Calma",
+  "en": "Calm",
+  "pt": "Calma",
+  "ja": "穏やかさ",
+  "zh": "平和"
+ },
+ "level.next": {
+  "es": "faltan {n} de Calma para el nivel {l}",
+  "en": "{n} Calm to level {l}",
+  "pt": "faltam {n} de Calma para o nível {l}",
+  "ja": "レベル{l}まで穏やかさあと{n}",
+  "zh": "距离{l}级还差 {n} 平和"
+ },
+ "level.up": {
+  "es": "¡Nivel {n}!",
+  "en": "Level {n}!",
+  "pt": "Nível {n}!",
+  "ja": "レベル{n}！",
+  "zh": "升到{n}级！"
+ },
+ "level.unlocked": {
+  "es": "Se destrabó: {list}",
+  "en": "Unlocked: {list}",
+  "pt": "Desbloqueado: {list}",
+  "ja": "解放：{list}",
+  "zh": "已解锁：{list}"
+ },
+ "exp.title": {
+  "es": "Ampliar el jardín",
+  "en": "Expand the garden",
+  "pt": "Ampliar o jardim",
+  "ja": "庭を広げる",
+  "zh": "扩建庭院"
+ },
+ "exp.button": {
+  "es": "Ampliar",
+  "en": "Expand",
+  "pt": "Ampliar",
+  "ja": "広げる",
+  "zh": "扩建"
+ },
+ "exp.buy": {
+  "es": "Ampliar",
+  "en": "Expand",
+  "pt": "Ampliar",
+  "ja": "広げる",
+  "zh": "扩建"
+ },
+ "exp.soon": {
+  "es": "Próximamente",
+  "en": "Coming soon",
+  "pt": "Em breve",
+  "ja": "近日公開",
+  "zh": "即将推出"
+ },
+ "exp.patio1.name": {
+  "es": "Patio I",
+  "en": "Courtyard I",
+  "pt": "Pátio I",
+  "ja": "中庭 I",
+  "zh": "庭院 I"
+ },
+ "exp.patio1.desc": {
+  "es": "El jardín crece: más lugar para tus objetos",
+  "en": "The garden grows: more room for your objects",
+  "pt": "O jardim cresce: mais espaço para seus objetos",
+  "ja": "庭が広がり、置ける物が増える",
+  "zh": "庭院变大：可以摆放更多物件"
+ },
+ "exp.patio2.name": {
+  "es": "Patio II",
+  "en": "Courtyard II",
+  "pt": "Pátio II",
+  "ja": "中庭 II",
+  "zh": "庭院 II"
+ },
+ "exp.patio2.desc": {
+  "es": "El jardín ocupa todo el terreno",
+  "en": "The garden fills the whole grounds",
+  "pt": "O jardim ocupa todo o terreno",
+  "ja": "庭が敷地いっぱいに広がる",
+  "zh": "庭院占满整块土地"
+ },
+ "exp.pond.name": {
+  "es": "Estanque",
+  "en": "Pond",
+  "pt": "Lago",
+  "ja": "池",
+  "zh": "池塘"
+ },
+ "exp.pond.desc": {
+  "es": "Koi y luciérnagas",
+  "en": "Koi and fireflies",
+  "pt": "Carpas e vaga-lumes",
+  "ja": "鯉と蛍",
+  "zh": "锦鲤与萤火虫"
+ },
+ "exp.calligraphy.name": {
+  "es": "Sala de caligrafía",
+  "en": "Calligraphy room",
+  "pt": "Sala de caligrafia",
+  "ja": "書道の間",
+  "zh": "书法室"
+ },
+ "exp.calligraphy.desc": {
+  "es": "Ensō, el círculo de un solo trazo",
+  "en": "Ensō, the one-stroke circle",
+  "pt": "Ensō, o círculo de um só traço",
+  "ja": "一筆で描く円相",
+  "zh": "圆相，一笔画成的圆"
+ },
+ "exp.teahouse.name": {
+  "es": "Casa de té",
+  "en": "Tea house",
+  "pt": "Casa de chá",
+  "ja": "茶室",
+  "zh": "茶室"
+ },
+ "exp.teahouse.desc": {
+  "es": "Preparar matcha sin apuro",
+  "en": "Whisk matcha slowly",
+  "pt": "Preparar matcha sem pressa",
+  "ja": "ゆっくり抹茶を点てる",
+  "zh": "慢慢点一碗抹茶"
+ },
+ "exp.temple.name": {
+  "es": "Templo",
+  "en": "Temple",
+  "pt": "Templo",
+  "ja": "寺",
+  "zh": "寺庙"
+ },
+ "exp.temple.desc": {
+  "es": "Campanas y gongs",
+  "en": "Bells and gongs",
+  "pt": "Sinos e gongos",
+  "ja": "鐘と銅鑼",
+  "zh": "钟与锣"
+ },
+ "exp.bamboo.name": {
+  "es": "Bosque de bambú",
+  "en": "Bamboo grove",
+  "pt": "Bosque de bambu",
+  "ja": "竹林",
+  "zh": "竹林"
+ },
+ "exp.bamboo.desc": {
+  "es": "La flauta de bambú",
+  "en": "The bamboo flute",
+  "pt": "A flauta de bambu",
+  "ja": "竹笛",
+  "zh": "竹笛"
+ },
+ "exp.river.name": {
+  "es": "Río",
+  "en": "River",
+  "pt": "Rio",
+  "ja": "川",
+  "zh": "小河"
+ },
+ "exp.river.desc": {
+  "es": "Linternas flotantes",
+  "en": "Floating lanterns",
+  "pt": "Lanternas flutuantes",
+  "ja": "灯籠流し",
+  "zh": "河灯"
+ },
+ "meditation.title": {
+  "es": "Meditar",
+  "en": "Meditate",
+  "pt": "Meditar",
+  "ja": "瞑想",
+  "zh": "冥想"
+ },
+ "meditation.desc": {
+  "es": "Un temporizador para meditar de verdad",
+  "en": "A timer to truly meditate",
+  "pt": "Um temporizador para meditar de verdade",
+  "ja": "本当に瞑想するためのタイマー",
+  "zh": "真正冥想的计时器"
+ },
+ "meditation.locked": {
+  "es": "Se destraba en el nivel {n}",
+  "en": "Unlocks at level {n}",
+  "pt": "Desbloqueia no nível {n}",
+  "ja": "レベル{n}で解放",
+  "zh": "{n}级解锁"
+ },
+ "meditation.duration": {
+  "es": "Duración",
+  "en": "Duration",
+  "pt": "Duração",
+  "ja": "時間",
+  "zh": "时长"
+ },
+ "meditation.minutes": {
+  "es": "{n} min",
+  "en": "{n} min",
+  "pt": "{n} min",
+  "ja": "{n}分",
+  "zh": "{n} 分钟"
+ },
+ "meditation.sound": {
+  "es": "Sonido",
+  "en": "Sound",
+  "pt": "Som",
+  "ja": "音",
+  "zh": "声音"
+ },
+ "meditation.silence": {
+  "es": "Silencio",
+  "en": "Silence",
+  "pt": "Silêncio",
+  "ja": "無音",
+  "zh": "静音"
+ },
+ "meditation.ambience.wind": {
+  "es": "Viento",
+  "en": "Wind",
+  "pt": "Vento",
+  "ja": "風",
+  "zh": "风"
+ },
+ "meditation.ambience.rain": {
+  "es": "Lluvia",
+  "en": "Rain",
+  "pt": "Chuva",
+  "ja": "雨",
+  "zh": "雨"
+ },
+ "meditation.intervalBell": {
+  "es": "Campana cada {n} minutos",
+  "en": "Bell every {n} minutes",
+  "pt": "Sino a cada {n} minutos",
+  "ja": "{n}分ごとに鐘",
+  "zh": "每 {n} 分钟敲钟"
+ },
+ "meditation.left": {
+  "es": "Hoy quedan {n} minutos con recompensa",
+  "en": "{n} rewarded minutes left today",
+  "pt": "Hoje restam {n} minutos com recompensa",
+  "ja": "今日の報酬対象はあと{n}分",
+  "zh": "今天还有 {n} 分钟可获得奖励"
+ },
+ "meditation.capReached": {
+  "es": "Las recompensas de hoy ya están: podés seguir meditando igual",
+  "en": "Today's rewards are complete: you can keep meditating anyway",
+  "pt": "As recompensas de hoje já foram: você pode continuar meditando",
+  "ja": "今日の報酬は受け取り済みです。瞑想はそのまま続けられます",
+  "zh": "今天的奖励已经领完：仍可以继续冥想"
+ },
+ "meditation.streak.one": {
+  "es": "Racha de meditación: {n} día",
+  "en": "Meditation streak: {n} day",
+  "pt": "Sequência de meditação: {n} dia",
+  "ja": "瞑想の連続記録：{n}日",
+  "zh": "连续冥想：{n} 天"
+ },
+ "meditation.streak.other": {
+  "es": "Racha de meditación: {n} días",
+  "en": "Meditation streak: {n} days",
+  "pt": "Sequência de meditação: {n} dias",
+  "ja": "瞑想の連続記録：{n}日",
+  "zh": "连续冥想：{n} 天"
+ },
+ "meditation.start": {
+  "es": "Comenzar",
+  "en": "Begin",
+  "pt": "Começar",
+  "ja": "始める",
+  "zh": "开始"
+ },
+ "meditation.inhale": {
+  "es": "Inhalá",
+  "en": "Breathe in",
+  "pt": "Inspire",
+  "ja": "吸って",
+  "zh": "吸气"
+ },
+ "meditation.exhale": {
+  "es": "Exhalá",
+  "en": "Breathe out",
+  "pt": "Expire",
+  "ja": "吐いて",
+  "zh": "呼气"
+ },
+ "meditation.end": {
+  "es": "Terminar",
+  "en": "End",
+  "pt": "Terminar",
+  "ja": "終える",
+  "zh": "结束"
+ },
+ "meditation.done.one": {
+  "es": "{n} minuto de calma",
+  "en": "{n} minute of calm",
+  "pt": "{n} minuto de calma",
+  "ja": "{n}分の静けさ",
+  "zh": "{n} 分钟的平静"
+ },
+ "meditation.done.other": {
+  "es": "{n} minutos de calma",
+  "en": "{n} minutes of calm",
+  "pt": "{n} minutos de calma",
+  "ja": "{n}分の静けさ",
+  "zh": "{n} 分钟的平静"
+ },
+ "meditation.capped": {
+  "es": "Las recompensas de hoy ya están completas; el resto del tiempo fue solo para vos",
+  "en": "Today's rewards were already complete; the rest of the time was just for you",
+  "pt": "As recompensas de hoje já estavam completas; o resto do tempo foi só para você",
+  "ja": "今日の報酬はすでにそろっています。残りの時間はあなただけのものです",
+  "zh": "今天的奖励已满；其余的时间只属于你"
+ },
+ "garden.unnamed": {
+  "es": "Ponele nombre a tu jardín",
+  "en": "Name your garden",
+  "pt": "Dê um nome ao seu jardim",
+  "ja": "庭に名前をつけましょう",
+  "zh": "为你的庭院取个名字"
+ },
+ "garden.name.title": {
+  "es": "¿Cómo se llama tu jardín?",
+  "en": "What is your garden called?",
+  "pt": "Como se chama o seu jardim?",
+  "ja": "あなたの庭の名前は？",
+  "zh": "你的庭院叫什么名字？"
+ },
+ "garden.name.desc": {
+  "es": "Es el nombre que verán quienes lo visiten. Podés cambiarlo cuando quieras tocando el cartel.",
+  "en": "Visitors will see this name. You can change it any time by tapping the sign.",
+  "pt": "É o nome que os visitantes verão. Você pode mudá-lo quando quiser tocando na placa.",
+  "ja": "訪れた人に表示される名前です。看板をタップすればいつでも変更できます。",
+  "zh": "来访者会看到这个名字。随时点击木牌即可修改。"
+ },
+ "garden.name.hint": {
+  "es": "Nombre del jardín",
+  "en": "Garden name",
+  "pt": "Nome do jardim",
+  "ja": "庭の名前",
+  "zh": "庭院名称"
+ },
+ "garden.name.other": {
+  "es": "Otra idea",
+  "en": "Another idea",
+  "pt": "Outra ideia",
+  "ja": "別の案",
+  "zh": "换一个"
+ },
+ "garden.name.save": {
+  "es": "Listo",
+  "en": "Done",
+  "pt": "Pronto",
+  "ja": "決定",
+  "zh": "完成"
+ },
+ "garden.name.later": {
+  "es": "Más tarde",
+  "en": "Later",
+  "pt": "Mais tarde",
+  "ja": "あとで",
+  "zh": "稍后"
+ },
+ "garden.suggest.1": {
+  "es": "Jardín de la Bruma",
+  "en": "Garden of Mist",
+  "pt": "Jardim da Névoa",
+  "ja": "霧の庭",
+  "zh": "雾之庭"
+ },
+ "garden.suggest.2": {
+  "es": "Rincón del Musgo",
+  "en": "Moss Corner",
+  "pt": "Cantinho do Musgo",
+  "ja": "苔の小径",
+  "zh": "青苔角"
+ },
+ "garden.suggest.3": {
+  "es": "Piedra Serena",
+  "en": "Serene Stone",
+  "pt": "Pedra Serena",
+  "ja": "静かな石",
+  "zh": "静石园"
+ },
+ "garden.suggest.4": {
+  "es": "Jardín del Alba",
+  "en": "Dawn Garden",
+  "pt": "Jardim da Aurora",
+  "ja": "夜明けの庭",
+  "zh": "晨曦庭"
+ },
+ "garden.suggest.5": {
+  "es": "Arena Quieta",
+  "en": "Still Sand",
+  "pt": "Areia Quieta",
+  "ja": "静かな砂",
+  "zh": "静沙园"
+ },
+ "garden.suggest.6": {
+  "es": "Refugio de Lluvia",
+  "en": "Rain Shelter",
+  "pt": "Refúgio da Chuva",
+  "ja": "雨やどりの庭",
+  "zh": "听雨庭"
+ },
+ "garden.suggest.7": {
+  "es": "Jardín del Farol",
+  "en": "Lantern Garden",
+  "pt": "Jardim da Lanterna",
+  "ja": "灯籠の庭",
+  "zh": "石灯庭"
+ },
+ "garden.suggest.8": {
+  "es": "Bambú Susurrante",
+  "en": "Whispering Bamboo",
+  "pt": "Bambu Sussurrante",
+  "ja": "ささやく竹",
+  "zh": "竹语园"
+ }
+}
