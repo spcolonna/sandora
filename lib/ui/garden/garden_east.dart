@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../theme/palette.dart';
+import 'scene_art.dart';
 
 /// Lugares de la vista del estanque, dibujados con código hasta tener arte.
 
@@ -207,96 +208,35 @@ void paintLeafPath(Canvas canvas, Rect r) {
   }
 }
 
-/// Pabellón de caligrafía: techo curvo, papel abierto y un ensō colgado.
+/// Pabellón de caligrafía, con el ensō colgado.
 void paintCalligraphyHall(Canvas canvas, Rect r) {
-  final wood = Paint()..color = Palette.wood;
-  final floor = Rect.fromLTRB(r.left + r.width * 0.06, r.bottom - r.height * 0.12, r.right - r.width * 0.06, r.bottom);
-  canvas.drawRect(floor, wood);
-  // Postes y pared de papel.
-  final wall = Rect.fromLTRB(floor.left + 6, r.top + r.height * 0.36, floor.right - 6, floor.top);
-  canvas.drawRect(wall, Paint()..color = Palette.paper);
-  for (final x in [wall.left, wall.right - 6]) {
-    canvas.drawRect(Rect.fromLTWH(x, wall.top, 6, wall.height), wood);
-  }
-  // El ensō colgado en el medio.
-  final scroll = Rect.fromCenter(center: wall.center, width: wall.width * 0.36, height: wall.height * 0.78);
-  canvas.drawRect(scroll, Paint()..color = const Color(0xFFF7F0DE));
-  canvas.drawArc(
-    Rect.fromCircle(center: scroll.center, radius: scroll.width * 0.32),
-    -pi * 0.4,
-    pi * 1.8,
-    false,
-    Paint()
-      ..color = Palette.ink
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = scroll.width * 0.08,
-  );
-  // Techo de tejas con aleros curvos.
-  canvas.drawPath(_roof(r, r.top + r.height * 0.4, r.top + r.height * 0.08), Paint()..color = Palette.stoneDark);
-  canvas.drawLine(
-    Offset(r.left + 4, r.top + r.height * 0.39),
-    Offset(r.right - 4, r.top + r.height * 0.39),
-    Paint()
-      ..color = Palette.ink.withValues(alpha: 0.4)
-      ..strokeWidth = 3,
-  );
+  drawArtIn(canvas, SceneArt.instance['obj_callig_hall'], r);
 }
 
-/// Campanario: techo, dos postes, la campana de bronce y el tronco colgado.
+/// Campanario con la campana de bronce y el tronco colgados de la viga.
 void paintBellTower(Canvas canvas, Rect r) {
-  final wood = Paint()..color = Palette.wood;
-  final postW = r.width * 0.07;
-  final top = r.top + r.height * 0.28;
-  for (final x in [r.left + r.width * 0.12, r.right - r.width * 0.12 - postW]) {
-    canvas.drawRect(Rect.fromLTWH(x, top, postW, r.bottom - top), wood);
+  final art = SceneArt.instance;
+  final t = drawArtIn(canvas, art['obj_temple_belltower'], r);
+  if (t == null) return;
+  // El gancho de `obj_temple_belltower` está al medio de la viga.
+  final hook = Offset(t.left + t.width * 0.505, t.top + t.height * 0.58);
+  final bell = art['obj_temple_bell'];
+  if (bell != null) {
+    final h = t.height * 0.3;
+    final w = h * bell.width / bell.height;
+    drawArt(canvas, bell, Rect.fromLTWH(hook.dx - w / 2, hook.dy, w, h));
   }
-  canvas.drawRect(Rect.fromLTWH(r.left + r.width * 0.08, top, r.width * 0.84, postW), wood);
-  canvas.drawPath(_roof(r, top + 4, r.top + r.height * 0.04), Paint()..color = Palette.stoneDark);
-  // Campana.
-  final bell = RRect.fromRectAndCorners(
-    Rect.fromCenter(
-      center: Offset(r.center.dx + r.width * 0.06, top + r.height * 0.36),
-      width: r.width * 0.38,
-      height: r.height * 0.42,
-    ),
-    topLeft: Radius.circular(r.width * 0.17),
-    topRight: Radius.circular(r.width * 0.17),
-    bottomLeft: const Radius.circular(3),
-    bottomRight: const Radius.circular(3),
-  );
-  canvas.drawLine(
-    Offset(bell.center.dx, top + postW),
-    Offset(bell.center.dx, bell.top),
-    Paint()
-      ..strokeWidth = 2
-      ..color = Palette.ink,
-  );
-  canvas.drawRRect(bell, Paint()..color = const Color(0xFF7A6A48));
-  canvas.drawRect(
-    Rect.fromLTWH(bell.left, bell.top + bell.height * 0.55, bell.width, 2.5),
-    Paint()..color = Palette.ink.withValues(alpha: 0.3),
-  );
-  // Tronco a un costado.
-  final log = Rect.fromLTWH(
-    r.left + r.width * 0.06,
-    bell.center.dy + bell.height * 0.1,
-    r.width * 0.28,
-    r.height * 0.08,
-  );
-  canvas.drawRRect(
-    RRect.fromRectAndRadius(log, Radius.circular(log.height / 2)),
-    Paint()..color = const Color(0xFFA9774F),
-  );
-}
-
-/// Techo japonés: cumbrera corta arriba y aleros que se curvan hacia afuera.
-Path _roof(Rect r, double eave, double ridge) {
-  final h = eave - ridge;
-  return Path()
-    ..moveTo(r.left - 6, eave)
-    ..quadraticBezierTo(r.left + r.width * 0.22, eave - h * 0.15, r.center.dx - r.width * 0.14, ridge)
-    ..lineTo(r.center.dx + r.width * 0.14, ridge)
-    ..quadraticBezierTo(r.right - r.width * 0.22, eave - h * 0.15, r.right + 6, eave)
-    ..close();
+  final log = art['obj_temple_log'];
+  if (log != null) {
+    final w = t.width * 0.22;
+    final dst = Rect.fromLTWH(hook.dx - t.width * 0.14 - w, hook.dy + t.height * 0.12, w, w * log.height / log.width);
+    final rope = Paint()
+      ..color = const Color(0xFFB59A6A)
+      ..strokeWidth = 1.5;
+    for (final f in [0.25, 0.75]) {
+      final x = dst.left + dst.width * f;
+      canvas.drawLine(Offset(x, t.top + t.height * 0.52), Offset(x, dst.center.dy), rope);
+    }
+    drawArt(canvas, log, dst);
+  }
 }

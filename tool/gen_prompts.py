@@ -529,18 +529,18 @@ BLOCKS = [
                 'Seen from the front and a little from above.', 'about 220 pixels tall'),
             obj('obj_temple_belltower', 'A small Japanese bell tower (shōrō) with NO bell inside: four wooden posts, '
                 'a dark curved tile roof and a crossbeam to hang a bell from. Seen from the front.',
-                'about 300 pixels tall'),
+                'about 300 pixels tall', '; any bell'),
             obj('obj_temple_bell', 'A single Japanese bronze temple bell (bonshō) hanging alone, tall and rounded, '
-                'aged greenish-brown bronze with raised bands and rows of small round knobs near the top.',
-                'about 260 pixels tall'),
+                'aged greenish-brown bronze with raised bands and rows of small round knobs near the top, with a small loop on '
+                'top to hang it from.', 'about 260 pixels tall', '; any rope, chain, beam or tower'),
             obj('obj_temple_log', 'A single horizontal wooden striking log (shumoku) for a temple bell, a smooth '
-                'round beam of pale wood with a darker worn tip at one end, lying exactly sideways.',
-                'about 240 pixels wide'),
+                'round beam of pale wood with a darker worn tip at the RIGHT end, lying exactly sideways.',
+                'about 240 pixels wide', '; any rope, hook or bell'),
             img('bg_enso_paper', PORTRAIT_OPAQUE,
                 f'This is the background of the ensō minigame in {GAME}. The player paints a black brush circle on '
                 'top of it.',
-                'A sheet of warm cream washi paper seen straight on, with soft visible fibers and a small red '
-                'square seal stamp near the lower right corner.',
+                'A sheet of warm cream washi paper seen straight on, with soft visible fibers, a few faint '
+                'darker fiber flecks and a slightly warmer, softly shaded edge.',
                 'Even and calm everywhere, especially the center, so the black ink reads clearly. ' + CROP_NOTE,
                 f'ink strokes or circles; characters or writing; {NO_TEXT}; frame or border; {NO_STYLE}.'),
         ]),
@@ -561,9 +561,24 @@ INCLUDED = {
                        'garden_sign.dart`). Se usa de ancho fijo con el nombre sobre la tabla, sin nine-slice.'),
     'app_icon': ('store/icon/app_icon.png', 'Ícono de la app (no se sube: `store/`). Se regenera con `dart run '
                  'flutter_launcher_icons` (`flutter_launcher_icons.yaml`); en Android, adaptable sobre arena lisa.'),
+    'icon_lotus': ('assets/images/icons/icon_lotus.webp', 'Lotos, recortado a 160 px (`currency.dart`).'),
     'icon_pebble': ('assets/images/icons/icon_pebble.webp', 'Piedritas, recortado a 160 px (`lib/ui/widgets/currency.dart`).'),
     'icon_essence_water': ('assets/images/icons/icon_essence_water.webp', 'Agua, recortado a 160 px (`currency.dart`).'),
     'icon_essence_sand': ('assets/images/icons/icon_essence_sand.webp', 'Arena, recortado a 160 px (`currency.dart`).'),
+    'icon_essence_wood': ('assets/images/icons/icon_essence_wood.webp', 'Madera, recortado a 160 px (`currency.dart`).'),
+    'icon_essence_light': ('assets/images/icons/icon_essence_light.webp', 'Luz, recortado a 160 px (`currency.dart`).'),
+    'icon_star': ('assets/images/icons/icon_star.webp', 'Estrellas del resultado de cada partida, apagadas con '
+                  'transparencia (`minigame_screen.dart`).'),
+    'obj_callig_hall': ('assets/images/temple/obj_callig_hall.webp', 'Pabellón del Ensō en la vista del estanque '
+                        '(`garden_east.dart`, cargado por `scene_art.dart`).'),
+    'obj_temple_belltower': ('assets/images/temple/obj_temple_belltower.webp', 'Campanario del estanque; la campana '
+                             'y el tronco se cuelgan del gancho de la viga (`garden_east.dart`).'),
+    'obj_temple_bell': ('assets/images/temple/obj_temple_bell.webp', 'Campana: en el campanario y en el juego de la '
+                        'Campana, donde tiembla y se entibia al sonar (`bell_game.dart`).'),
+    'obj_temple_log': ('assets/images/temple/obj_temple_log.webp', 'Tronco (shumoku), punta gastada a la derecha; '
+                       'el código dibuja las sogas (`bell_game.dart`).'),
+    'bg_enso_paper': ('assets/images/temple/bg_enso_paper.webp', 'Papel washi del Ensō, recortado para llenar la '
+                      'pantalla; el sello rojo lo dibuja el código (`enso_game.dart`).'),
 }
 
 

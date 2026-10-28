@@ -3,12 +3,13 @@ import 'dart:ui';
 
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/painting.dart' show TextStyle, FontWeight, TextPainter, TextSpan, TextAlign, LinearGradient;
+import 'package:flutter/painting.dart' show TextStyle, FontWeight, TextPainter, TextSpan, TextAlign;
 
 import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -166,56 +167,39 @@ class BellGame extends FlameGame with DragCallbacks {
     }
   }
 
-  /// La campana de bronce (bonshō), que tiembla un poco al sonar.
+  /// La campana de bronce (bonshō), que tiembla y se entibia al sonar.
   void _drawBell(Canvas canvas) {
+    final img = SceneArt.instance['obj_temple_bell'];
+    if (img == null) return;
     final shake = sin(_t * 40) * 2.5 * _ring;
-    final c = _bell + Offset(shake, 0);
-    final r = _bellR;
+    final w = _bellR * 1.8, h = w * img.height / img.width;
+    final body = Rect.fromCenter(center: _bell + Offset(shake, 0), width: w, height: h);
     canvas.drawLine(
-      Offset(c.dx, size.y * 0.08),
-      c - Offset(0, r * 1.3),
+      Offset(body.center.dx, size.y * 0.08),
+      body.topCenter,
       Paint()
         ..color = Palette.stoneDark
         ..strokeWidth = 5,
     );
-    final body = RRect.fromRectAndCorners(
-      Rect.fromCenter(center: c, width: r * 1.9, height: r * 2.5),
-      topLeft: Radius.circular(r * 0.9),
-      topRight: Radius.circular(r * 0.9),
-      bottomLeft: Radius.circular(r * 0.12),
-      bottomRight: Radius.circular(r * 0.12),
-    );
-    final bronze = Color.lerp(const Color(0xFF5E5240), const Color(0xFF8E7A4E), 0.5 + 0.5 * _ring)!;
-    canvas.drawRRect(
-      body,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [Color.lerp(bronze, Palette.ink, 0.3)!, bronze, Color.lerp(bronze, Palette.ink, 0.4)!],
-        ).createShader(body.outerRect),
-    );
-    // Bandas y botones del bronce.
-    final band = Paint()..color = Palette.ink.withValues(alpha: 0.25);
-    for (final f in [0.3, 0.62]) {
-      final y = body.top + body.height * f;
-      canvas.drawRect(Rect.fromLTRB(body.left, y - 2, body.right, y + 2), band);
+    drawArt(canvas, img, body);
+    if (_ring > 0.02) {
+      drawArt(
+        canvas,
+        img,
+        body,
+        paint: Paint()
+          ..colorFilter = ColorFilter.mode(Palette.lantern.withValues(alpha: 0.35 * _ring), BlendMode.srcATop),
+      );
     }
-    for (var i = 0; i < 4; i++) {
-      for (var j = 0; j < 3; j++) {
-        canvas.drawCircle(
-          Offset(c.dx - r * 0.6 + i * r * 0.4, body.top + body.height * (0.1 + j * 0.06)),
-          2.4,
-          Paint()..color = Palette.ink.withValues(alpha: 0.3),
-        );
-      }
-    }
-    // El punto donde pega el tronco.
-    canvas.drawCircle(Offset(c.dx - r * 0.55, _logY), r * 0.14, Paint()..color = Palette.ink.withValues(alpha: 0.2));
   }
 
   /// El tronco (shumoku) colgado de dos sogas.
   void _drawLog(Canvas canvas) {
+    final img = SceneArt.instance['obj_temple_log'];
+    if (img == null) return;
     final tip = _tipX;
-    final log = Rect.fromLTRB(tip - _logLen, _logY - 13, tip, _logY + 13);
+    final h = _logLen * img.height / img.width;
+    final log = Rect.fromLTRB(tip - _logLen, _logY - h / 2, tip, _logY + h / 2);
     final rope = Paint()
       ..color = const Color(0xFFB59A6A)
       ..strokeWidth = 2.5;
@@ -223,14 +207,9 @@ class BellGame extends FlameGame with DragCallbacks {
       final x = log.left + log.width * f;
       // Las sogas cuelgan de un punto fijo: al tirar, se inclinan.
       final anchor = Offset(_bell.dx - _bellR * 0.92 - _logLen * (1 - f), size.y * 0.08 + 16);
-      canvas.drawLine(anchor, Offset(x, log.top), rope);
+      canvas.drawLine(anchor, Offset(x, log.center.dy), rope);
     }
-    canvas.drawRRect(RRect.fromRectAndRadius(log, const Radius.circular(12)), Paint()..color = Palette.wood);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(log.deflate(4).translate(0, -3), const Radius.circular(10)),
-      Paint()..color = const Color(0xFFA9774F),
-    );
-    canvas.drawCircle(Offset(log.right - 4, log.center.dy), 10, Paint()..color = const Color(0xFF6D4630));
+    drawArt(canvas, img, log);
   }
 
   /// Debajo del tronco: hasta dónde tirar este golpe (la banda) y cuánto se

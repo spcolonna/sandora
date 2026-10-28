@@ -189,10 +189,14 @@ class _ResultPanel extends StatelessWidget {
                           delay: Duration(milliseconds: 550 + 280 * i),
                           fromScale: 0.8,
                           rise: 0,
-                          child: Icon(
-                            i < outcome.stars ? Icons.star_rounded : Icons.star_outline_rounded,
-                            size: 44,
-                            color: i < outcome.stars ? Palette.perfect : Palette.stoneLight,
+                          child: Opacity(
+                            opacity: i < outcome.stars ? 1 : 0.22,
+                            child: Image.asset(
+                              'assets/images/icons/icon_star.webp',
+                              width: 46,
+                              height: 46,
+                              filterQuality: FilterQuality.medium,
+                            ),
                           ),
                         ),
                     ],

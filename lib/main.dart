@@ -13,6 +13,7 @@ import 'settings.dart';
 import 'ui/brand_intro.dart';
 import 'ui/fx/sfx.dart';
 import 'ui/garden/garden_gate.dart';
+import 'ui/garden/scene_art.dart';
 import 'ui/garden_screen.dart';
 import 'ui/title_intro.dart';
 import 'ui/theme/palette.dart';
@@ -26,6 +27,7 @@ Future<void> main() async {
   await Progress.instance.load(Balance.instance);
   await WeatherService.instance.load(Balance.instance);
   await Reminders.instance.load(Balance.instance);
+  await SceneArt.instance.load();
   // La venta de lotos (si está prendida) carga en segundo plano.
   LotusStore.instance.load(Balance.instance);
   // El clima real (si el jugador lo eligió) llega cuando llega.

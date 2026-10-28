@@ -9,6 +9,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -127,16 +128,10 @@ class EnsoGame extends FlameGame with DragCallbacks {
     }
   }
 
-  /// Papel con fibras y un sello rojo en la esquina.
+  /// Papel washi y un sello rojo en la esquina.
   void _paper(Canvas canvas) {
-    final rng = Random(8);
-    final fiber = Paint()
-      ..color = Palette.sandShadow.withValues(alpha: 0.18)
-      ..strokeWidth = 0.8;
-    for (var i = 0; i < 90; i++) {
-      final o = Offset(rng.nextDouble() * size.x, rng.nextDouble() * size.y);
-      canvas.drawLine(o, o + Offset.fromDirection(rng.nextDouble() * pi, 6 + rng.nextDouble() * 14), fiber);
-    }
+    final paper = SceneArt.instance['bg_enso_paper'];
+    if (paper != null) drawArtCover(canvas, paper, Rect.fromLTWH(0, 0, size.x, size.y));
     final seal = Rect.fromLTWH(size.x - 62, size.y * 0.7, 30, 30);
     canvas.drawRRect(
       RRect.fromRectAndRadius(seal, const Radius.circular(4)),
