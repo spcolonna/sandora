@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'balance/balance.dart';
 import 'garden/progress.dart';
+import 'garden/weather_service.dart';
 import 'i18n/i18n.dart';
 import 'settings.dart';
 import 'ui/brand_intro.dart';
@@ -20,6 +21,9 @@ Future<void> main() async {
   final locales = WidgetsBinding.instance.platformDispatcher.locales.map((l) => l.languageCode);
   await AppSettings.instance.load(locales);
   await Progress.instance.load(Balance.instance);
+  await WeatherService.instance.load(Balance.instance);
+  // El clima real (si el jugador lo eligió) llega cuando llega.
+  WeatherService.instance.refresh();
   // El audio carga en segundo plano: la app abre sin esperarlo.
   SoundBoard.instance.init();
   runApp(const SandoraApp());
@@ -41,7 +45,9 @@ class SandoraApp extends StatelessWidget {
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         // Estudio (continúa la pantalla de carga nativa) → título → puertas
         // que se abren al jardín.
-        home: const BrandIntro(next: TitleIntro(next: GardenGate(child: GardenScreen()))),
+        home: const BrandIntro(
+          next: TitleIntro(next: GardenGate(child: GardenScreen())),
+        ),
       ),
     );
   }

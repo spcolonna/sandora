@@ -42,9 +42,17 @@
     "dusk": 18,
     "night": 20.5,
     "gifts": [
-      { "id": "dew", "phase": "dawn", "give": { "water": 2 }, "daily": 3 },
-      { "id": "firefly", "phase": "night", "give": { "light": 1 }, "daily": 3 }
+      { "id": "dew", "phase": "dawn", "weather": ["clear", "cloudy", "fog"], "give": { "water": 2 }, "daily": 3 },
+      { "id": "firefly", "phase": "night", "weather": ["clear", "cloudy"], "give": { "light": 1 }, "daily": 3 },
+      { "id": "rainjar", "weather": ["rain", "storm"], "give": { "water": 2 }, "daily": 3 },
+      { "id": "snowflake", "weather": ["snow"], "give": { "light": 1 }, "daily": 2 }
     ]
+  },
+  "weather": {
+    "blockHours": 3,
+    "odds": { "clear": 45, "cloudy": 25, "rain": 15, "storm": 4, "fog": 8, "snow": 3 },
+    "refreshMinutes": 30,
+    "realMaxAgeMinutes": 180
   },
   "shop": {
     "_comment": "Mercado: trueques para conseguir lo que los minijuegos no dan (hoy, Madera). daily: veces por día (sin daily, sin límite). Lotos: moneda escasa por constancia (ofrenda del día, niveles, racha de meditación); a futuro se podrán vender.",

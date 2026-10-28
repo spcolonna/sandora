@@ -6,6 +6,8 @@
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Sandora uses your approximate location only to give your garden the same weather as outside.</string>
 		<key>CFBundleDisplayName</key>
 		<string>Sandora</string>
 		<key>CFBundleExecutable</key>

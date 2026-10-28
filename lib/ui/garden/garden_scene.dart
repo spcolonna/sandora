@@ -98,6 +98,11 @@ class GardenPainter extends CustomPainter {
   final double daylight, warmth, arc;
   final bool morning;
 
+  /// Cuánto tapan las nubes (0 despejado, 1 tormenta): agrisa el cielo y
+  /// esconde el sol o la luna. [snowy] cubre la tierra de blanco.
+  final double overcast;
+  final bool snowy;
+
   GardenPainter({
     required this.layout,
     required this.tower,
@@ -107,6 +112,8 @@ class GardenPainter extends CustomPainter {
     required this.warmth,
     required this.arc,
     required this.morning,
+    this.overcast = 0,
+    this.snowy = false,
   });
 
   Size get size => layout.size;
@@ -114,7 +121,8 @@ class GardenPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final all = Offset.zero & size;
-    final sky = skyColors(daylight, warmth, morning: morning);
+    final grey = Color.lerp(const Color(0xFF2B3038), const Color(0xFFB8C0C6), daylight)!;
+    final sky = [for (final c in skyColors(daylight, warmth, morning: morning)) Color.lerp(c, grey, overcast * 0.8)!];
     canvas.drawRect(
       all,
       Paint()
@@ -130,6 +138,14 @@ class GardenPainter extends CustomPainter {
     canvas.saveLayer(all, Paint());
     _paintHills(canvas);
     _paintGround(canvas);
+    if (snowy) {
+      canvas.drawRect(
+        all,
+        Paint()
+          ..color = const Color(0xFFF4F7FA).withValues(alpha: 0.5)
+          ..blendMode = BlendMode.srcATop,
+      );
+    }
     _paintSandBed(canvas, layout.places[Place.sand]!);
     _paintFence(canvas);
     _paintTower(canvas, layout.places[Place.stack]!);
@@ -147,9 +163,17 @@ class GardenPainter extends CustomPainter {
     canvas.drawRect(
       all,
       Paint()
-        ..color = const Color(0xFFE8955A).withValues(alpha: warmth * 0.16)
+        ..color = const Color(0xFFE8955A).withValues(alpha: warmth * 0.16 * (1 - overcast))
         ..blendMode = BlendMode.srcATop,
     );
+    if (overcast > 0) {
+      canvas.drawRect(
+        all,
+        Paint()
+          ..color = const Color(0xFF5C6670).withValues(alpha: overcast * 0.18)
+          ..blendMode = BlendMode.srcATop,
+      );
+    }
     canvas.restore();
     _paintLanternLight(canvas);
   }
@@ -159,6 +183,8 @@ class GardenPainter extends CustomPainter {
     final y = size.height * (0.3 - 0.22 * sin(pi * arc));
     final r = size.width * 0.055;
     final c = Offset(x, y);
+    final hidden = 1 - overcast;
+    canvas.saveLayer(Offset.zero & size, Paint()..color = Colors.white.withValues(alpha: hidden));
     if (daylight > 0 || warmth > 0) {
       final sun = Color.lerp(const Color(0xFFFFF0C4), const Color(0xFFF4A261), warmth)!;
       final a = (daylight * 1.6 + warmth).clamp(0.0, 1.0);
@@ -172,6 +198,7 @@ class GardenPainter extends CustomPainter {
       canvas.drawCircle(c + Offset(-r * 0.25, -r * 0.2), r * 0.18, crater);
       canvas.drawCircle(c + Offset(r * 0.3, r * 0.25), r * 0.12, crater);
     }
+    canvas.restore();
   }
 
   void _paintHills(Canvas canvas) {
@@ -561,5 +588,7 @@ class GardenPainter extends CustomPainter {
       (old.daylight - daylight).abs() > 0.004 ||
       (old.warmth - warmth).abs() > 0.004 ||
       (old.arc - arc).abs() > 0.002 ||
-      old.morning != morning;
+      old.morning != morning ||
+      old.overcast != overcast ||
+      old.snowy != snowy;
 }

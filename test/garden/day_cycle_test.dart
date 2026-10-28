@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandora/garden/day_cycle.dart';
 import 'package:sandora/garden/economy.dart';
 import 'package:sandora/garden/progress.dart';
+import 'package:sandora/garden/weather.dart';
 
 import '../helpers.dart';
 
@@ -41,14 +42,22 @@ void main() {
       final p = Progress.instance;
       await p.load(balance, now: at(12));
       final fireflies = cycle.gifts.firstWhere((g) => g.id == 'firefly');
-      expect(p.giftsLeft(fireflies, now: at(12)), 0, reason: 'de día no hay');
-      expect(p.takeGift(fireflies, now: at(12)), isFalse);
+      expect(
+        p.giftsLeft(fireflies, weather: Weather.clear, now: at(12)),
+        0,
+        reason: 'de día no hay',
+      );
+      expect(p.takeGift(fireflies, weather: Weather.clear, now: at(12)), isFalse);
       for (var i = 0; i < fireflies.daily; i++) {
-        expect(p.takeGift(fireflies, now: at(23)), isTrue);
+        expect(p.takeGift(fireflies, weather: Weather.clear, now: at(23)), isTrue);
       }
-      expect(p.takeGift(fireflies, now: at(1, day: 28)), isFalse, reason: 'la misma noche');
+      expect(
+        p.takeGift(fireflies, weather: Weather.clear, now: at(1, day: 28)),
+        isFalse,
+        reason: 'la misma noche',
+      );
       expect(p.essences[Essence.light], fireflies.give['light']! * fireflies.daily);
-      expect(p.giftsLeft(fireflies, now: at(23, day: 28)), fireflies.daily);
+      expect(p.giftsLeft(fireflies, weather: Weather.clear, now: at(23, day: 28)), fireflies.daily);
     });
   });
 }

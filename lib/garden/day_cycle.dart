@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../balance/balance.dart';
 import 'shop.dart';
+import 'weather.dart';
 
 /// Momentos del día del jardín, según la hora del dispositivo.
 enum DayPhase { dawn, day, dusk, night }
@@ -17,21 +18,32 @@ DateTime gardenNow() {
   return DateTime(now.year, now.month, now.day).add(Duration(minutes: (h * 60).round()));
 }
 
-/// Un regalo de un momento del día (el rocío del amanecer, las luciérnagas de
-/// la noche): se toca en el jardín y da [give], hasta [daily] veces por día.
+/// Un regalo del jardín según el momento del día y el clima (el rocío del
+/// amanecer, las luciérnagas de la noche, las vasijas que llenó la lluvia): se
+/// toca en el jardín y da [give], hasta [daily] veces por día. Sin [phase]
+/// aparece a cualquier hora; sin [weather], con cualquier clima.
 class DayGift {
   final String id;
-  final DayPhase phase;
+  final DayPhase? phase;
+  final Set<Weather>? weather;
   final Map<String, int> give;
   final int daily;
 
-  const DayGift(this.id, {required this.phase, required this.give, required this.daily});
+  const DayGift(this.id, {this.phase, this.weather, required this.give, required this.daily});
+
+  bool activeAt(DayPhase p, Weather w) => (phase == null || phase == p) && (weather?.contains(w) ?? true);
 
   factory DayGift.from(BalanceSection s) {
     final give = s.nums('give').map((k, v) => MapEntry(k, v.round()));
     final bad = give.keys.where((k) => !walletKeys.contains(k));
     if (bad.isNotEmpty) throw FormatException('Moneda desconocida en ${s.s('id')}: $bad');
-    return DayGift(s.s('id'), phase: DayPhase.values.byName(s.s('phase')), give: give, daily: s.i('daily'));
+    return DayGift(
+      s.s('id'),
+      phase: s.has('phase') ? DayPhase.values.byName(s.s('phase')) : null,
+      weather: s.has('weather') ? {for (final w in s.strings('weather')) Weather.values.byName(w)} : null,
+      give: give,
+      daily: s.i('daily'),
+    );
   }
 }
 
@@ -97,5 +109,8 @@ class DayCycle {
     return DateTime.utc(shifted.year, shifted.month, shifted.day).millisecondsSinceEpoch ~/ 86400000;
   }
 
-  List<DayGift> giftsAt(DateTime t) => [for (final g in gifts) if (g.phase == phaseAt(t)) g];
+  List<DayGift> giftsAt(DateTime t, Weather w) => [
+    for (final g in gifts)
+      if (g.activeAt(phaseAt(t), w)) g,
+  ];
 }

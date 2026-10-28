@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../garden/day_cycle.dart';
 import '../garden/economy.dart';
 import '../garden/progress.dart';
+import '../garden/weather.dart';
+import '../garden/weather_service.dart';
 import '../i18n/i18n.dart';
 import '../minigames/catalog.dart';
 import 'board_sheet.dart';
@@ -35,10 +37,14 @@ class _GardenScreenState extends State<GardenScreen> {
   @override
   void initState() {
     super.initState();
-    // La torre junta Piedritas y la luz del día cambia en tiempo real: se
-    // refresca cada tanto.
-    _tick = Timer.periodic(const Duration(seconds: 20), (_) => setState(() {}));
-    SoundBoard.instance.loop(Ambience.wind, volume: 0.18);
+    // La torre junta Piedritas y la luz del día y el clima cambian en tiempo
+    // real: se refresca cada tanto.
+    _tick = Timer.periodic(const Duration(seconds: 20), (_) {
+      WeatherService.instance.refresh();
+      setState(() {});
+      _gardenSound();
+    });
+    _gardenSound();
     // Una meditación que quedó a medias al cerrar la app se retoma.
     if (Progress.instance.meditationStartedAt != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _meditate());
@@ -72,17 +78,36 @@ class _GardenScreenState extends State<GardenScreen> {
     }
   }
 
+  /// Viento de fondo y, si llueve, la lluvia.
+  void _gardenSound() {
+    final sound = SoundBoard.instance;
+    sound.loop(Ambience.wind, volume: 0.18);
+    switch (WeatherService.instance.at(gardenNow())) {
+      case Weather.rain:
+        sound.loop(Ambience.rain, volume: 0.22);
+      case Weather.storm:
+        sound.loop(Ambience.rain, volume: 0.32);
+      default:
+        sound.stopLoop(Ambience.rain);
+    }
+  }
+
+  void _quiet() {
+    SoundBoard.instance.stopLoop(Ambience.wind);
+    SoundBoard.instance.stopLoop(Ambience.rain);
+  }
+
   Future<void> _open(MinigameInfo m) async {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-    SoundBoard.instance.stopLoop(Ambience.wind);
+    _quiet();
     await Navigator.of(context).push(calmRoute<void>(m.screen()));
-    if (mounted) SoundBoard.instance.loop(Ambience.wind, volume: 0.18);
+    if (mounted) _gardenSound();
   }
 
   Future<void> _meditate() async {
-    SoundBoard.instance.stopLoop(Ambience.wind);
+    _quiet();
     await Navigator.of(context).push(calmRoute<void>(const MeditationScreen()));
-    if (mounted) SoundBoard.instance.loop(Ambience.wind, volume: 0.18);
+    if (mounted) _gardenSound();
   }
 
   @override
@@ -91,7 +116,7 @@ class _GardenScreenState extends State<GardenScreen> {
     return Scaffold(
       body: SafeArea(
         child: ListenableBuilder(
-          listenable: p,
+          listenable: Listenable.merge([p, WeatherService.instance]),
           builder: (context, _) => Column(
             children: [
               _Header(onSettings: () => showSettingsSheet(context)),
@@ -100,7 +125,11 @@ class _GardenScreenState extends State<GardenScreen> {
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: GardenView(now: gardenNow(), onPlace: _enter),
+                    child: GardenView(
+                      now: gardenNow(),
+                      weather: WeatherService.instance.at(gardenNow()),
+                      onPlace: _enter,
+                    ),
                   ),
                 ),
               ),

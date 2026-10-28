@@ -992,5 +992,124 @@
   "pt": "Toque nos vaga-lumes para juntar Luz.",
   "ja": "蛍に触れて光を集めましょう。",
   "zh": "轻触萤火虫来收集光。"
+ },
+ "weather.clear": {
+  "es": "Despejado",
+  "en": "Clear",
+  "pt": "Céu limpo",
+  "ja": "晴れ",
+  "zh": "晴"
+ },
+ "weather.cloudy": {
+  "es": "Nublado",
+  "en": "Cloudy",
+  "pt": "Nublado",
+  "ja": "くもり",
+  "zh": "多云"
+ },
+ "weather.rain": {
+  "es": "Lluvia",
+  "en": "Rain",
+  "pt": "Chuva",
+  "ja": "雨",
+  "zh": "雨"
+ },
+ "weather.storm": {
+  "es": "Tormenta",
+  "en": "Storm",
+  "pt": "Tempestade",
+  "ja": "嵐",
+  "zh": "雷雨"
+ },
+ "weather.fog": {
+  "es": "Niebla",
+  "en": "Fog",
+  "pt": "Neblina",
+  "ja": "霧",
+  "zh": "雾"
+ },
+ "weather.snow": {
+  "es": "Nieve",
+  "en": "Snow",
+  "pt": "Neve",
+  "ja": "雪",
+  "zh": "雪"
+ },
+ "weather.title": {
+  "es": "El jardín ahora",
+  "en": "The garden now",
+  "pt": "O jardim agora",
+  "ja": "いまの庭",
+  "zh": "此刻的庭园"
+ },
+ "weather.own": {
+  "es": "Clima propio del jardín: cambia cada pocas horas.",
+  "en": "The garden's own weather: it changes every few hours.",
+  "pt": "Clima próprio do jardim: muda a cada poucas horas.",
+  "ja": "庭だけの天気：数時間ごとに変わります。",
+  "zh": "庭园自己的天气：每隔几小时变化一次。"
+ },
+ "weather.real.title": {
+  "es": "Clima de donde estás",
+  "en": "Weather where you are",
+  "pt": "Clima de onde você está",
+  "ja": "いる場所の天気",
+  "zh": "你所在地的天气"
+ },
+ "weather.real.desc": {
+  "es": "Usa tu ubicación aproximada para que en el jardín llueva cuando llueve afuera. La ubicación no se guarda.",
+  "en": "Uses your approximate location so it rains in the garden when it rains outside. Your location is not stored.",
+  "pt": "Usa sua localização aproximada para que chova no jardim quando chove lá fora. A localização não é guardada.",
+  "ja": "おおよその位置を使い、外で雨が降ると庭にも雨が降ります。位置は保存されません。",
+  "zh": "使用你的大致位置，外面下雨时庭园里也会下雨。位置不会被保存。"
+ },
+ "weather.real.denied": {
+  "es": "Sin permiso de ubicación, el jardín sigue con su propio clima.",
+  "en": "Without location permission, the garden keeps its own weather.",
+  "pt": "Sem permissão de localização, o jardim continua com seu próprio clima.",
+  "ja": "位置の許可がないため、庭は自分の天気のままです。",
+  "zh": "没有位置权限，庭园将保持自己的天气。"
+ },
+ "weather.real.failed": {
+  "es": "No se pudo traer el clima ahora; se vuelve a intentar solo.",
+  "en": "Couldn't get the weather right now; it will try again on its own.",
+  "pt": "Não foi possível obter o clima agora; tentará de novo sozinho.",
+  "ja": "いまは天気を取得できませんでした。自動で再試行します。",
+  "zh": "暂时无法获取天气，稍后会自动重试。"
+ },
+ "weather.source": {
+  "es": "Pronóstico: MET Norway",
+  "en": "Forecast: MET Norway",
+  "pt": "Previsão: MET Norway",
+  "ja": "予報：MET Norway",
+  "zh": "预报：MET Norway"
+ },
+ "gift.rainjar": {
+  "es": "Agua de lluvia",
+  "en": "Rainwater",
+  "pt": "Água da chuva",
+  "ja": "雨水",
+  "zh": "雨水"
+ },
+ "gift.rainjar.hint": {
+  "es": "La lluvia llenó las vasijas: tocá las gotas para juntar Agua.",
+  "en": "The rain filled the jars: tap the drops to collect Water.",
+  "pt": "A chuva encheu os vasos: toque nas gotas para juntar Água.",
+  "ja": "雨がかめを満たしました。しずくに触れて水を集めましょう。",
+  "zh": "雨水装满了陶罐：轻触水滴来收集水。"
+ },
+ "gift.snowflake": {
+  "es": "Copos",
+  "en": "Snowflakes",
+  "pt": "Flocos",
+  "ja": "雪の結晶",
+  "zh": "雪花"
+ },
+ "gift.snowflake.hint": {
+  "es": "Algunos copos brillan: tocalos para juntar Luz.",
+  "en": "Some snowflakes shine: tap them to collect Light.",
+  "pt": "Alguns flocos brilham: toque neles para juntar Luz.",
+  "ja": "光る雪の結晶に触れて光を集めましょう。",
+  "zh": "有些雪花在发光：轻触它们来收集光。"
  }
 }

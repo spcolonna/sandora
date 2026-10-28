@@ -9,6 +9,7 @@ import 'economy.dart';
 import 'levels.dart';
 import 'meditation_rules.dart';
 import 'shop.dart';
+import 'weather.dart';
 
 /// Una piedra de la torre guardada en el jardín (unidades del mundo del
 /// minijuego: centro x relativo a la base, ancho y alto).
@@ -253,17 +254,18 @@ class Progress extends ChangeNotifier {
     return true;
   }
 
-  /// Cuántos [g] quedan por juntar ahora: 0 si no es su momento del día.
-  int giftsLeft(DayGift g, {DateTime? now}) {
+  /// Cuántos [g] quedan por juntar ahora: 0 si no es su momento del día o su
+  /// clima.
+  int giftsLeft(DayGift g, {required Weather weather, DateTime? now}) {
     now ??= gardenNow();
-    if (dayCycle.phaseAt(now) != g.phase) return 0;
+    if (!g.activeAt(dayCycle.phaseAt(now), weather)) return 0;
     final used = dayCycle.gardenDay(now) == _giftDay ? (_giftsTaken[g.id] ?? 0) : 0;
     return (g.daily - used).clamp(0, g.daily);
   }
 
-  bool takeGift(DayGift g, {DateTime? now}) {
+  bool takeGift(DayGift g, {required Weather weather, DateTime? now}) {
     now ??= gardenNow();
-    if (giftsLeft(g, now: now) == 0) return false;
+    if (giftsLeft(g, weather: weather, now: now) == 0) return false;
     final today = dayCycle.gardenDay(now);
     if (today != _giftDay) {
       _giftDay = today;

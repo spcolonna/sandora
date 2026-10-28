@@ -30,7 +30,15 @@
       Para probar otra hora: `flutter run --dart-define=SANDORA_HOUR=22`.
 - [ ] **Ranking online:** el tablón muestra los récords propios y avisa que el ranking llega pronto (necesita backend).
 - [ ] Más eventos del día (atardecer, día) y más lugares cuando se sumen minijuegos.
-- [ ] **Clima:** si se puede, el mismo clima que muestra el celular; si no, uno por defecto.
+- [x] **Clima** (`lib/garden/weather.dart`, `weather_service.dart`, sección `weather` del balance): despejado,
+      nublado, lluvia, tormenta, niebla y nieve. Por defecto, clima propio que cambia cada 3 horas. Opcional (se elige
+      tocando el cartel de arriba a la derecha): clima real con ubicación aproximada y pronóstico de MET Norway.
+      Regalos: agua de lluvia en las vasijas (Agua) y copos que brillan (Luz). Con lluvia suena la lluvia.
+      Para probar: `flutter run --dart-define=SANDORA_WEATHER=rain` (clear, cloudy, rain, storm, fog, snow).
+- [ ] Clima, antes de publicar: poner un contacto (web o mail) en el User-Agent de MET Norway (`_agent` en
+      `weather_service.dart`), como piden sus condiciones; nombrar la ubicación y a MET Norway en la política de
+      privacidad; traducir el texto del permiso de ubicación de iOS (`InfoPlist.strings`, hoy solo en inglés).
+- [ ] Más eventos del clima: arcoíris cuando para de llover, charcos, hojas con viento.
 
 ## Etapa avanzada
 - [ ] **Vender lotos** (compra dentro de la app): ya son la moneda escasa del Mercado.

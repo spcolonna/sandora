@@ -34,6 +34,7 @@ class BalanceSection {
   double d(String key) => (_m[key] as num).toDouble();
   int i(String key) => (_m[key] as num).round();
   String s(String key) => _m[key] as String;
+  List<String> strings(String key) => [for (final v in _m[key] as List) v as String];
   List<double> list(String key) => [for (final v in _m[key] as List) (v as num).toDouble()];
   BalanceSection sub(String key) => BalanceSection(_m[key] as Map<String, dynamic>);
   List<BalanceSection> sections(String key) => [
