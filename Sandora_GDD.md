@@ -524,7 +524,7 @@ Paleta por estación, una imagen clave del jardín, hoja de referencia de piedra
 | `obj_rain_vessel_01` a `_05` | 5 | Vasijas de distintos tamaños |
 | `fx_rain_drop`, `fx_rain_splash` | 2 | Gota y salpicadura |
 | `char_meditator.riv`, `char_cat.riv`, `char_monk.riv` | 3 | Personajes con state machines |
-| `icon_pebble`, `icon_essence_water/sand/wood/light`, `icon_jade`, `icon_star` | 7 | Monedas y estrellas |
+| `icon_pebble`, `icon_essence_water/sand/wood/light`, `icon_lotus`, `icon_star` | 7 | Monedas y estrellas |
 | `ui_*` (botón, panel, marco de puntaje, barra de serenidad, resultado, pausa) | 6 | Interfaz base |
 | `icon_app` | 1 | Ícono de la app |
 | `sfx_stack_place_01–03`, `sfx_stack_fall`, `sfx_rain_note_01–05`, `sfx_sand_rake`, `sfx_base_wind`, `sfx_cat_meow`, `sfx_ui_tap`, `sfx_ui_perfect` | 14 | Notas de vasijas en escala pentatónica |

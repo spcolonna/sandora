@@ -537,7 +537,7 @@ DO NOT INCLUDE: any background, ground or cast shadow; any text, letters, number
 
 ## Bloque 6 — Íconos de monedas y estrella (4) ⬜
 
-Archivos, en orden: `icon_essence_wood.png`, `icon_essence_light.png`, `icon_jade.png`, `icon_star.png`. Carpeta: `store/art/icons/`.
+Archivos, en orden: `icon_essence_wood.png`, `icon_essence_light.png`, `icon_lotus.png`, `icon_star.png`. Carpeta: `store/art/icons/`.
 Se ven a 32–48 px: tienen que leerse al instante. Adjuntá `store/art/style/style_keyart.webp`.
 
 ```
@@ -569,12 +569,12 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 
-Image 3 — icon_jade:
+Image 3 — icon_lotus:
 Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
 
 PURPOSE: This is a currency or interface icon in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown very small (about 32 to 48 pixels) next to a number, so it must read instantly at that size.
 
-SUBJECT: A polished green jade gem carved into a smooth rounded hexagon, translucent with a deep inner glow and a bright highlight: the premium currency.
+SUBJECT: A single small lotus flower seen from the side, soft pink petals (#E8A6B4) with pale tips opening around a warm golden center, resting on a tiny round green lily pad: the premium currency.
 
 STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
 

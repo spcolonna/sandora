@@ -348,8 +348,9 @@ BLOCKS = [
                  'showing its growth rings, glowing softly.'),
             icon('icon_essence_light', 'A small paper lantern flame shape in warm amber (#E9A84C), a soft glowing '
                  'teardrop of light with a few tiny sparks around it.'),
-            icon('icon_jade', 'A polished green jade gem carved into a smooth rounded hexagon, translucent with a '
-                 'deep inner glow and a bright highlight: the premium currency.'),
+            icon('icon_lotus', 'A single small lotus flower seen from the side, soft pink petals (#E8A6B4) with '
+                 'pale tips opening around a warm golden center, resting on a tiny round green lily pad: the '
+                 'premium currency.'),
             icon('icon_star', 'A soft five-pointed star with rounded points in warm gold (#E9A84C), slightly '
                  'puffy, with a gentle highlight, like a star cut from washi paper.'),
         ]),
