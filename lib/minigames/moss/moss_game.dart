@@ -4,7 +4,7 @@ import 'dart:ui';
 
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show TextPainter, TextSpan, TextStyle, FontWeight, TextDirection;
 
 import '../../balance/balance.dart';
 import '../../garden/progress.dart';
@@ -88,7 +88,15 @@ class MossGame extends FlameGame with DragCallbacks {
   bool _over = false;
   Offset? _last;
   final _rocks = <Rect>[];
+  final _rockPaths = <Path>[];
   double _growT = 0;
+
+  /// Lo que se ve de cada celda: se acerca al musgo real, así crece de a poco.
+  late Float32List _shown;
+
+  /// Para no recalcular la cobertura en cada cuadro.
+  double _covered = 0;
+  bool _onSand = false;
 
   static const _cols = 48;
   double get _cell => size.x / _cols;
@@ -104,7 +112,7 @@ class MossGame extends FlameGame with DragCallbacks {
     for (var k = 0; k < n; k++) {
       final w = _cols * (0.3 + _rng.nextDouble() * 0.25);
       final h = _rows * (0.18 + _rng.nextDouble() * 0.14);
-      final cx = _cols * (0.25 + 0.5 * _rng.nextDouble());
+      final cx = w * 0.54 + 1 + (_cols - w * 1.08 - 2) * _rng.nextDouble();
       final cy = _rows * (k + 0.5) / n;
       _rocks.add(Rect.fromCenter(center: Offset(cx, cy), width: w, height: h));
     }
@@ -113,12 +121,34 @@ class MossGame extends FlameGame with DragCallbacks {
         final p = Offset(i + 0.5, j + 0.5);
         for (final r in _rocks) {
           final d = Offset((p.dx - r.center.dx) / (r.width / 2), (p.dy - r.center.dy) / (r.height / 2));
-          // Óvalo con relieve: no son elipses perfectas.
-          final wobble = 1 + 0.08 * sin(atan2(d.dy, d.dx) * 3 + r.left);
-          if (d.distance < wobble) _field.rock[j * _cols + i] = 1;
+          if (d.distance < _wobble(r, atan2(d.dy, d.dx))) _field.rock[j * _cols + i] = 1;
         }
       }
     }
+    _shown = Float32List(_field.moss.length);
+  }
+
+  /// Borde de la piedra: un óvalo con relieve, no una elipse perfecta. El
+  /// dibujo y la grilla usan el mismo, así lo que se ve es lo que cuenta.
+  static double _wobble(Rect r, double a) => 1 + 0.08 * sin(a * 3 + r.left);
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    _rockPaths.clear();
+  }
+
+  Path _rockPath(Rect r) {
+    final c = _cell;
+    final center = Offset(r.center.dx * c, _top + r.center.dy * c);
+    final path = Path();
+    for (var k = 0; k <= 64; k++) {
+      final a = 2 * pi * k / 64;
+      final w = _wobble(r, a);
+      final p = center + Offset(cos(a) * r.width / 2 * c * w, sin(a) * r.height / 2 * c * w);
+      k == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
+    }
+    return path..close();
   }
 
   Offset _toField(Vector2 p) => Offset(p.x / _cell, (p.y - _top) / _cell);
@@ -146,6 +176,11 @@ class MossGame extends FlameGame with DragCallbacks {
   void _brush(Offset p) {
     // El pincel varía un poco: el musgo no se pinta parejo.
     final r = b.d('brush') * (0.85 + 0.3 * _rng.nextDouble());
+    // Se siente cuando el pincel sale de la piedra.
+    final i = p.dx.floor(), j = p.dy.floor();
+    final onSand = i >= 0 && j >= 0 && i < _cols && j < _rows && _field.rock[j * _cols + i] == 0;
+    if (onSand && !_onSand) Haptics.light();
+    _onSand = onSand;
     _field.paint(p.dx, p.dy, r, b.d('amount') * (0.7 + 0.6 * _rng.nextDouble()));
   }
 
@@ -158,14 +193,19 @@ class MossGame extends FlameGame with DragCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
+    final k = min(1.0, dt * 7);
+    for (var i = 0; i < _shown.length; i++) {
+      _shown[i] += (_field.moss[i] - _shown[i]) * k;
+    }
     if (_over) return;
     _left -= dt;
     _growT += dt;
     if (_growT > 0.25) {
       _growT = 0;
       _field.grow(_rng, b.d('growChance'));
+      _covered = _field.covered;
     }
-    if (_left <= 0 || _field.covered >= 0.98) _end();
+    if (_left <= 0 || _covered >= 0.98) _end();
   }
 
   void _end() {
@@ -189,22 +229,45 @@ class MossGame extends FlameGame with DragCallbacks {
     });
   }
 
+  static const _levels = 6, _tones = 3;
+  static const _mossLight = [Color(0xFFA6C474), Color(0xFF9DBF6E), Color(0xFFB4C97A)];
+  static const _mossDark = [Color(0xFF5E8A3E), Color(0xFF4F7A36), Color(0xFF6E9446)];
+
+  /// Un número fijo entre 0 y 1 por celda.
+  static double _hash(int k) {
+    final x = sin(k * 12.9898) * 43758.5453;
+    return x - x.floorToDouble();
+  }
+
   @override
   void render(Canvas canvas) {
     canvas.drawRect(Offset.zero & Size(size.x, size.y), Paint()..color = Palette.sand);
     final c = _cell;
-    final rock = Paint()..color = Palette.stone;
-    final rockDark = Paint()..color = Palette.stoneDark;
-    for (final r in _rocks) {
+    if (_rockPaths.isEmpty) _rockPaths.addAll(_rocks.map(_rockPath));
+    for (var n = 0; n < _rocks.length; n++) {
+      final r = _rocks[n], path = _rockPaths[n];
       final rect = Rect.fromLTWH(r.left * c, _top + r.top * c, r.width * c, r.height * c);
-      canvas.drawOval(rect.shift(const Offset(0, 6)), Paint()..color = Palette.ink.withValues(alpha: 0.12));
-      canvas.drawOval(rect.inflate(2), rockDark);
-      canvas.drawOval(rect, rock);
+      canvas.drawPath(path.shift(const Offset(0, 6)), Paint()..color = Palette.ink.withValues(alpha: 0.12));
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = Palette.stoneDark
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4,
+      );
+      canvas.drawPath(
+        path,
+        Paint()
+          ..shader = Gradient.radial(rect.center - Offset(rect.width * 0.15, rect.height * 0.2), rect.width * 0.7, [
+            const Color(0xFFA9A397),
+            Palette.stone,
+          ]),
+      );
       // Motas para que se lea como piedra.
       final rng = Random(r.left.round());
       final speck = Paint()..color = Palette.stoneDark.withValues(alpha: 0.35);
       for (var k = 0; k < 30; k++) {
-        final a = rng.nextDouble() * 2 * pi, d = sqrt(rng.nextDouble()) * 0.9;
+        final a = rng.nextDouble() * 2 * pi, d = sqrt(rng.nextDouble()) * 0.85;
         canvas.drawCircle(
           rect.center + Offset(cos(a) * d * rect.width / 2, sin(a) * d * rect.height / 2),
           1.5 + rng.nextDouble() * 2,
@@ -212,27 +275,54 @@ class MossGame extends FlameGame with DragCallbacks {
         );
       }
     }
-    // Musgo y manchas, celda por celda (como puntitos superpuestos).
-    final moss = Paint();
+    // Musgo y manchas como puntitos superpuestos, agrupados por intensidad y
+    // tono (pocas llamadas de dibujo aunque haya miles de celdas). Cada celda
+    // tiene su tono y su corrimiento fijos, así el musgo se ve moteado.
+    final buckets = [for (var i = 0; i < _levels * (_tones + 1); i++) <double>[]];
     for (var j = 0; j < _rows; j++) {
       for (var i = 0; i < _cols; i++) {
         final k = j * _cols + i;
-        final m = _field.moss[k];
+        final m = _shown[k];
         if (m < 0.05) continue;
-        final onRock = _field.rock[k] == 1;
-        moss.color = (onRock ? const Color(0xFF7FA35A) : const Color(0xFF9C8B63)).withValues(
-          alpha: min(1, m) * (onRock ? 1 : 0.7),
-        );
-        final jitter = sin(k * 12.9898) * 0.25;
-        canvas.drawCircle(Offset((i + 0.5 + jitter) * c, _top + (j + 0.5 - jitter) * c), c * (0.55 + 0.25 * m), moss);
+        final level = min(_levels - 1, (m * _levels).floor());
+        final h1 = _hash(k), h2 = _hash(k + 7919);
+        final group = _field.rock[k] == 1 ? (h1 * _tones).floor() % _tones : _tones;
+        buckets[group * _levels + level]
+          ..add((i + 0.5 + (h2 - 0.5) * 0.9) * c)
+          ..add(_top + (j + 0.5 + (h1 - 0.5) * 0.9) * c);
       }
     }
-    // Tiempo: una barra fina arriba.
+    for (var n = 0; n < buckets.length; n++) {
+      if (buckets[n].isEmpty) continue;
+      final group = n ~/ _levels;
+      final m = (n % _levels + 1) / _levels;
+      final onRock = group < _tones;
+      final color = onRock
+          ? Color.lerp(_mossLight[group], _mossDark[group], m)!.withValues(alpha: min(1, 0.35 + m))
+          : const Color(0xFF9C8B63).withValues(alpha: 0.35 * m);
+      canvas.drawRawPoints(
+        PointMode.points,
+        Float32List.fromList(buckets[n]),
+        Paint()
+          ..color = color
+          ..strokeWidth = c * (onRock ? 1.1 + 0.5 * m : 1.0)
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+    // Tiempo: una barra fina arriba, y cuánto va cubierto.
     final k = (_left / b.d('seconds')).clamp(0.0, 1.0);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(24, size.y * 0.1, (size.x - 48) * k, 6), const Radius.circular(3)),
+      RRect.fromRectAndRadius(Rect.fromLTWH(24, size.y * 0.1, (size.x - 110) * k, 6), const Radius.circular(3)),
       Paint()..color = Palette.moss,
     );
+    final tp = TextPainter(
+      text: TextSpan(
+        text: tr('moss.covered', {'n': (_covered * 100).round()}),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Palette.mossDark),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, Offset((size.x - tp.width) / 2, size.y * 0.1 + 14));
     super.render(canvas);
   }
 }

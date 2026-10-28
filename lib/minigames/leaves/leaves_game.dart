@@ -78,13 +78,16 @@ class LeavesGame extends FlameGame with DragCallbacks {
     for (var i = 0; i < n; i++) {
       Offset p;
       do {
-        p = Offset(30 + _rng.nextDouble() * (size.x - 60), size.y * 0.18 + _rng.nextDouble() * size.y * 0.66);
+        p = Offset(30 + _rng.nextDouble() * (size.x - 60), size.y * 0.2 + _rng.nextDouble() * size.y * 0.66);
       } while ((p - _pile).distance < _pileR * 1.4);
       _leaves.add(Leaf(p, _rng.nextDouble() * pi, 0.6 + _rng.nextDouble() * 0.9, _rng.nextInt(4)));
     }
     _windNext = b.d('windFirst') + _rng.nextDouble() * 3;
     _publish();
   }
+
+  /// El camino de grava (el resto es pasto).
+  Rect get _path => Rect.fromLTRB(0, size.y * 0.15, size.x, size.y * 0.92);
 
   bool _inPile(Leaf l) => (l.p - _pile).distance < _pileR;
 
@@ -142,8 +145,11 @@ class LeavesGame extends FlameGame with DragCallbacks {
       l.v *= friction;
       l.angle += l.spin * dt;
       l.spin *= friction;
-      // Bordes del camino.
-      l.p = Offset(l.p.dx.clamp(10, size.x - 10), l.p.dy.clamp(size.y * 0.12, size.y * 0.9));
+      // Bordes del camino: la hoja rebota apenas contra el pasto y frena.
+      final r = _path.deflate(10);
+      if (l.p.dx < r.left || l.p.dx > r.right) l.v = Offset(-l.v.dx * 0.3, l.v.dy * 0.6);
+      if (l.p.dy < r.top || l.p.dy > r.bottom) l.v = Offset(l.v.dx * 0.6, -l.v.dy * 0.3);
+      l.p = Offset(l.p.dx.clamp(r.left, r.right), l.p.dy.clamp(r.top, r.bottom));
     }
     _publish();
   }
@@ -219,8 +225,8 @@ class LeavesGame extends FlameGame with DragCallbacks {
   @override
   void render(Canvas canvas) {
     canvas.drawRect(Offset.zero & Size(size.x, size.y), Paint()..color = Palette.moss);
-    // Camino de grava.
-    final path = Rect.fromLTRB(0, size.y * 0.1, size.x, size.y * 0.92);
+    // Camino de grava con un borde de piedritas contra el pasto.
+    final path = _path;
     canvas.drawRect(path, Paint()..color = Palette.sand);
     final rng = Random(2);
     final grit = Paint()..color = Palette.sandShadow.withValues(alpha: 0.6);
@@ -230,6 +236,16 @@ class LeavesGame extends FlameGame with DragCallbacks {
         0.8 + rng.nextDouble() * 1.4,
         grit,
       );
+    }
+    final edge = Paint()..color = Palette.stone;
+    final edgeDark = Paint()..color = Palette.stoneDark.withValues(alpha: 0.5);
+    for (final y in [path.top, path.bottom]) {
+      for (var x = 4.0; x < size.x; x += 13 + rng.nextDouble() * 6) {
+        final r = 5 + rng.nextDouble() * 2.5;
+        final c = Offset(x, y + rng.nextDouble() * 4 - 2);
+        canvas.drawCircle(c + const Offset(0, 1.5), r, edgeDark);
+        canvas.drawCircle(c, r, edge);
+      }
     }
     // El montón: un círculo de barrido en la grava.
     canvas.drawCircle(_pile, _pileR, Paint()..color = Palette.sandShadow.withValues(alpha: 0.35));
@@ -248,15 +264,24 @@ class LeavesGame extends FlameGame with DragCallbacks {
         Paint()..color = const Color(0x22FFFFFF).withValues(alpha: 0.12 * life / 0.35),
       );
     }
+    // Las hojas: con sombra; las que vuelan rápido se levantan (sombra más
+    // lejos y un poco más grandes).
+    final shadow = Paint()..color = Palette.ink.withValues(alpha: 0.14);
     for (final l in _leaves) {
-      canvas.save();
-      canvas.translate(l.p.dx, l.p.dy);
-      canvas.rotate(l.angle);
-      final s = 10 + 5 * l.weight;
+      final lift = min(1.0, l.v.distance / 420);
+      final s = (10 + 5 * l.weight) * (1 + 0.18 * lift);
       final leaf = Path()
         ..moveTo(-s, 0)
         ..quadraticBezierTo(0, -s * 0.6, s, 0)
         ..quadraticBezierTo(0, s * 0.6, -s, 0);
+      canvas.save();
+      canvas.translate(l.p.dx + 2 + 6 * lift, l.p.dy + 3 + 10 * lift);
+      canvas.rotate(l.angle);
+      canvas.drawPath(leaf, shadow);
+      canvas.restore();
+      canvas.save();
+      canvas.translate(l.p.dx, l.p.dy);
+      canvas.rotate(l.angle);
       canvas.drawPath(leaf, Paint()..color = _colors[l.color]);
       canvas.drawLine(Offset(-s, 0), Offset(s, 0), Paint()..color = const Color(0x55000000));
       canvas.restore();

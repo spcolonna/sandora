@@ -113,6 +113,8 @@ class _GardenScreenState extends State<GardenScreen> {
 
   /// Anuncia una vez los minijuegos que se abrieron (por día o por zona).
   void _announceUnlocks() {
+    // Si hay un minijuego (u otra pantalla) encima, se avisa al volver.
+    if (ModalRoute.of(context)?.isCurrent == false) return;
     final p = Progress.instance;
     final fresh = p.newUnlocks(minigames.map((m) => m.id));
     if (fresh.isEmpty) return;

@@ -195,4 +195,5 @@ const ja = <String, String>{
   'garden.opensIn.one': '明日ひらきます',
   'garden.opensIn.other': 'あと{n}日遊ぶとひらきます',
   'board.percent': '{n}%',
+  'moss.covered': '苔 {n}%',
 };

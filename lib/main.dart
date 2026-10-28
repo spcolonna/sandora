@@ -6,6 +6,7 @@ import 'balance/balance.dart';
 import 'garden/progress.dart';
 import 'garden/weather_service.dart';
 import 'i18n/i18n.dart';
+import 'minigames/catalog.dart';
 import 'settings.dart';
 import 'ui/brand_intro.dart';
 import 'ui/fx/sfx.dart';
@@ -45,10 +46,37 @@ class SandoraApp extends StatelessWidget {
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         // Estudio (continúa la pantalla de carga nativa) → título → puertas
         // que se abren al jardín.
-        home: const BrandIntro(
-          next: TitleIntro(next: GardenGate(child: GardenScreen())),
-        ),
+        home: _gameOverride.isNotEmpty
+            ? const _DebugGame()
+            : const BrandIntro(
+                next: TitleIntro(next: GardenGate(child: GardenScreen())),
+              ),
       ),
     );
   }
+}
+
+/// Para probar un minijuego directo: `flutter run --dart-define=SANDORA_GAME=moss`.
+/// Abre el jardín y encima el juego (al salir se vuelve al jardín).
+const _gameOverride = String.fromEnvironment('SANDORA_GAME');
+
+class _DebugGame extends StatefulWidget {
+  const _DebugGame();
+
+  @override
+  State<_DebugGame> createState() => _DebugGameState();
+}
+
+class _DebugGameState extends State<_DebugGame> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final game = minigames.firstWhere((m) => m.id == _gameOverride);
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => game.screen()));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const GardenScreen();
 }

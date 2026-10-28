@@ -29,6 +29,7 @@ class _Branch {
   final bool wild;
   double length = 0;
   double fall = -1; // >= 0 mientras cae cortada
+  int get seed => (target * 997).round();
   _Branch(this.base, this.dir, this.target, this.speed, this.bend, {required this.wild});
 
   Offset at(double l) {
@@ -79,10 +80,11 @@ class BonsaiGame extends FlameGame with DragCallbacks {
 
   Offset get _pot => Offset(size.x / 2, size.y * 0.7);
 
-  /// Nodos del tronco y de las ramas madre, de donde salen las ramas nuevas.
+  /// Nodos de las ramas madre, de donde salen las ramas nuevas: cerca de las
+  /// copas, así algunas quedan adentro y otras se escapan (hay que elegir).
   List<Offset> get _nodes => [
     for (final r in _pads)
-      for (final f in [0.2, 0.5, 0.8]) Offset.lerp(_pot - Offset(0, size.y * 0.12), r.center, f)!,
+      for (final f in [0.6, 0.85, 1.0]) Offset.lerp(_pot - Offset(0, size.y * 0.12), r.center, f)!,
   ];
 
   @override
@@ -140,7 +142,7 @@ class BonsaiGame extends FlameGame with DragCallbacks {
     _trail.add((to, 0.3));
     for (final br in _branches) {
       if (br.fall >= 0 || br.length < 6) continue;
-      if (!segmentsCross(from, to, br.base, br.tip)) continue;
+      if (!_crosses(from, to, br)) continue;
       br.fall = 0;
       SoundBoard.instance.play(Sfx.uiTap, volume: 0.5);
       if (br.wild) {
@@ -153,6 +155,17 @@ class BonsaiGame extends FlameGame with DragCallbacks {
         Haptics.medium();
       }
     }
+  }
+
+  /// Si el trazo cruza la rama tal como se dibuja (curvada, no recta).
+  bool _crosses(Offset from, Offset to, _Branch br) {
+    var a = br.base;
+    for (var s = 1; s <= 8; s++) {
+      final p = br.at(br.length * s / 8);
+      if (segmentsCross(from, to, a, p)) return true;
+      a = p;
+    }
+    return false;
   }
 
   @override
@@ -174,6 +187,33 @@ class BonsaiGame extends FlameGame with DragCallbacks {
     Future.delayed(const Duration(milliseconds: 700), () {
       finish(RunOutcome(score: pct, stars: stars, headline: tr('bonsai.result', {'n': pct}), record: record));
     });
+  }
+
+  /// Follaje como una nube de círculos: sombra abajo, cuerpo y brillo arriba.
+  /// [light] es el verde claro de lo que crece fuera de la silueta.
+  void _foliage(Canvas canvas, Rect r, double alpha, int seed, {bool light = false}) {
+    // Semilla fija: la nube crece sin cambiar de forma.
+    final rng = Random(seed);
+    final blobs = [
+      for (var k = 0; k < 7; k++)
+        (
+          r.center + Offset((rng.nextDouble() - 0.5) * r.width * 0.6, (rng.nextDouble() - 0.5) * r.height * 0.45),
+          r.height * (0.32 + 0.12 * rng.nextDouble()),
+        ),
+    ];
+    final shade = Paint()..color = (light ? const Color(0xFF7E9A55) : Palette.mossDark).withValues(alpha: alpha);
+    final body = Paint()..color = (light ? const Color(0xFF9BB36B) : Palette.moss).withValues(alpha: alpha);
+    final shine = Paint()
+      ..color = (light ? const Color(0xFFC2D58F) : const Color(0xFF8DB06A)).withValues(alpha: 0.8 * alpha);
+    for (final (c, rad) in blobs) {
+      canvas.drawCircle(c + Offset(0, rad * 0.25), rad, shade);
+    }
+    for (final (c, rad) in blobs) {
+      canvas.drawCircle(c, rad * 0.92, body);
+    }
+    for (final (c, rad) in blobs.take(4)) {
+      canvas.drawCircle(c - Offset(rad * 0.25, rad * 0.3), rad * 0.4, shine);
+    }
   }
 
   @override
@@ -219,10 +259,11 @@ class BonsaiGame extends FlameGame with DragCallbacks {
     for (final r in _pads) {
       canvas.drawLine(fork, r.center, trunk..strokeWidth = 8);
     }
-    // Copas base (lo que ya está bien).
-    final leaf = Paint()..color = Palette.moss;
-    for (final r in _pads) {
-      canvas.drawOval(Rect.fromCenter(center: r.center, width: r.width * 0.55, height: r.height * 0.5), leaf);
+    // Copas base (lo que ya está bien): nubes de follaje con sombra y luz.
+    final pads = _pads;
+    for (var i = 0; i < pads.length; i++) {
+      final r = pads[i];
+      _foliage(canvas, Rect.fromCenter(center: r.center, width: r.width * 0.6, height: r.height * 0.55), 1, i);
     }
     // Ramas nuevas con su mechón de hojas en la punta.
     for (final br in _branches) {
@@ -250,20 +291,28 @@ class BonsaiGame extends FlameGame with DragCallbacks {
           ..strokeCap = StrokeCap.round,
       );
       final tuft = 6 + 10 * (br.length / br.target);
-      canvas.drawCircle(
-        br.tip,
-        tuft,
-        Paint()..color = (outside ? const Color(0xFF9BB36B) : Palette.moss).withValues(alpha: alpha),
-      );
+      final bloom = Rect.fromCenter(center: br.tip, width: tuft * 2.4, height: tuft * 1.8);
+      _foliage(canvas, bloom, alpha, br.seed, light: outside);
       canvas.restore();
     }
-    for (final (p, life) in _trail) {
-      canvas.drawCircle(p, 4, Paint()..color = Palette.ink.withValues(alpha: 0.3 * life / 0.3));
+    // El corte de la tijera: una línea fina que se apaga.
+    for (var i = 1; i < _trail.length; i++) {
+      final (a, _) = _trail[i - 1];
+      final (b, life) = _trail[i];
+      if ((b - a).distance > size.x * 0.3) continue;
+      canvas.drawLine(
+        a,
+        b,
+        Paint()
+          ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.9 * life / 0.3)
+          ..strokeWidth = 1 + 3 * life / 0.3
+          ..strokeCap = StrokeCap.round,
+      );
     }
     // Tiempo.
     final k = (_left / b.d('seconds')).clamp(0.0, 1.0);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(24, size.y * 0.1, (size.x - 48) * k, 6), const Radius.circular(3)),
+      RRect.fromRectAndRadius(Rect.fromLTWH(24, size.y * 0.1, (size.x - 110) * k, 6), const Radius.circular(3)),
       Paint()..color = Palette.moss,
     );
     super.render(canvas);

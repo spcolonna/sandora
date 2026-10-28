@@ -1356,5 +1356,12 @@
   "pt": "{n}%",
   "ja": "{n}%",
   "zh": "{n}%"
+ },
+ "moss.covered": {
+  "es": "Musgo {n}%",
+  "en": "Moss {n}%",
+  "pt": "Musgo {n}%",
+  "ja": "苔 {n}%",
+  "zh": "苔藓 {n}%"
  }
 }

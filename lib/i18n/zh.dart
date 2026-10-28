@@ -195,4 +195,5 @@ const zh = <String, String>{
   'garden.opensIn.one': '明天开放',
   'garden.opensIn.other': '再玩{n}天开放',
   'board.percent': '{n}%',
+  'moss.covered': '苔藓 {n}%',
 };

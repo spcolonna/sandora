@@ -56,6 +56,11 @@
       tamaño, giro, espejo y forma; a veces una piedrita cerca del camino que desvía el trazo (rodearla limpio suma).
 - [x] **Lluvia:** chubascos (la densidad sube y baja) y ráfagas avisadas en las que las gotas caen en diagonal y se
       adelantan o atrasan hasta 0,1 s.
+- [x] **Pulido de los juegos del estanque** (probados en el simulador): Shishi con caño fijo y soporte, piedra donde
+      apoya, vuelco que derrama al cuenco y "toc" al volver; Musgo con el borde dibujado igual al que puntúa,
+      crecimiento suave, textura moteada y porcentaje; Hojas con sombra, vuelo y borde de piedritas; Bonsái con
+      follaje en nubes, ramas mejor repartidas y corte sobre la rama curva; Estanque con asentado suave.
+      Probar un juego directo: `--dart-define=SANDORA_GAME=moss` (stack, sand, rain, pond, shishi, leaves, moss, bonsai).
 - [ ] Lluvia: vasija que rebalsa (idea del plan, quedó para después si hace falta).
 - [x] Prompts de arte: bloques 10 (estanque de lotos), 11 (shishi, hojas, musgo, bonsái) y 12 (vista del estanque).
 - [x] Quitado `flame_forge2d`.

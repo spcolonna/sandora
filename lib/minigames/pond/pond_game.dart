@@ -66,7 +66,7 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
   Vector2? _dragStart;
   int? _selected;
 
-  double get _cell => min((size.x - 32) / _board.cols, (size.y * 0.62) / _board.rows);
+  double get _cell => min((size.x - 48) / _board.cols, (size.y * 0.62) / _board.rows);
   Offset get _origin => Offset((size.x - _cell * _board.cols) / 2, size.y * 0.56 - _cell * _board.rows / 2);
 
   Offset _screen(Offset cell) => _origin + Offset((cell.dx + 0.5) * _cell, (cell.dy + 0.5) * _cell);
@@ -285,13 +285,13 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
       _ghosts[p.id] = p;
       _ghostAt[p.id] = i;
     }
-    const speed = 11.0;
     for (var i = 0; i < _board.cells.length; i++) {
       final id = _board.cells[i]!.id;
       final home = _home(i);
       final p = _pos[id] ?? home;
       final d = home - p;
-      final step = speed * dt;
+      // Rápido de lejos y suave al llegar: las piezas se asientan.
+      final step = (6 + 10 * d.distance) * dt;
       _pos[id] = d.distance <= step ? home : p + d / d.distance * step;
     }
     for (final v in _vanish) {

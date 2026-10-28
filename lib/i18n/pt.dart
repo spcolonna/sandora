@@ -197,4 +197,5 @@ const pt = <String, String>{
   'garden.opensIn.one': 'Abre amanhã',
   'garden.opensIn.other': 'Abre em {n} dias de jogo',
   'board.percent': '{n}%',
+  'moss.covered': 'Musgo {n}%',
 };

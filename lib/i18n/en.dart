@@ -197,4 +197,5 @@ const en = <String, String>{
   'garden.opensIn.one': 'Opens tomorrow',
   'garden.opensIn.other': 'Opens in {n} days of play',
   'board.percent': '{n}%',
+  'moss.covered': 'Moss {n}%',
 };
