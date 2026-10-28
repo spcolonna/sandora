@@ -49,8 +49,12 @@ class Economy {
     final factor = tired ? rep.d('factorAfter') : 1.0;
     final pebbles = ((r.i('pebblesBase') + r.i('pebblesPerStar') * stars) * factor).round();
     final essence = ((r.i('essencePerStar') * stars) * factor).round();
-    return Reward(pebbles, Essence.values.byName(r.s('essence')), essence, tired: tired);
+    return Reward(pebbles, essenceOf(game), essence, tired: tired);
   }
+
+  /// La esencia que da [game]: la de su material (Agua, Arena, Madera o Luz).
+  /// Vive solo en el balance (`rewards.<id>.essence`).
+  Essence essenceOf(String game) => Essence.values.byName(balance.rewards(game).s('essence'));
 
   /// Serenidad después de [days] días sin cuidado: baja un porcentaje por día
   /// sin pasar del piso (nunca se pierde todo).

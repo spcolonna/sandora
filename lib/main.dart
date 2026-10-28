@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'balance/balance.dart';
+import 'garden/lotus_store.dart';
 import 'garden/progress.dart';
+import 'garden/reminders.dart';
 import 'garden/weather_service.dart';
 import 'i18n/i18n.dart';
 import 'minigames/catalog.dart';
@@ -23,6 +25,9 @@ Future<void> main() async {
   await AppSettings.instance.load(locales);
   await Progress.instance.load(Balance.instance);
   await WeatherService.instance.load(Balance.instance);
+  await Reminders.instance.load(Balance.instance);
+  // La venta de lotos (si está prendida) carga en segundo plano.
+  LotusStore.instance.load(Balance.instance);
   // El clima real (si el jugador lo eligió) llega cuando llega.
   WeatherService.instance.refresh();
   // El audio carga en segundo plano: la app abre sin esperarlo.

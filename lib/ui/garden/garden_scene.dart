@@ -25,7 +25,9 @@ enum Place {
   shishi,
   leaves,
   moss,
-  bonsai;
+  bonsai,
+  enso,
+  bell;
 
   /// 0 el patio, 1 el estanque.
   int get side => index >= Place.pond.index ? 1 : 0;
@@ -106,11 +108,24 @@ class GardenLayout {
     final bonsai = Rect.fromLTRB(w * 0.34, h * 0.3, w * 0.64, ground.top - h * 0.01);
     final moss = Rect.fromLTRB(w * 0.04, ground.top + gh * 0.6, w * 0.46, h - gh * 0.04);
     final leaves = Rect.fromLTRB(w * 0.5, ground.top + gh * 0.58, w * 0.96, h - gh * 0.04);
+    // Sobre la loma del fondo: el pabellón de caligrafía y el campanario.
+    final enso = Rect.fromLTRB(w * 0.04, h * 0.3, w * 0.3, ground.top - h * 0.01);
+    final bell = Rect.fromLTRB(w * 0.7, h * 0.13, w * 0.96, shishi.top - h * 0.02);
     return GardenLayout._(
       size,
       ground,
-      {Place.pond: pond, Place.shishi: shishi, Place.bonsai: bonsai, Place.moss: moss, Place.leaves: leaves},
       {
+        Place.pond: pond,
+        Place.shishi: shishi,
+        Place.bonsai: bonsai,
+        Place.moss: moss,
+        Place.leaves: leaves,
+        Place.enso: enso,
+        Place.bell: bell,
+      },
+      {
+        Place.enso: enso.bottomCenter,
+        Place.bell: bell.bottomCenter,
         Place.pond: Offset(pond.center.dx, pond.bottom),
         Place.shishi: shishi.bottomCenter,
         Place.bonsai: bonsai.bottomCenter,
@@ -162,6 +177,12 @@ class GardenPainter extends CustomPainter {
   final double overcast;
   final bool snowy;
 
+  /// Agua en el suelo (1 lloviendo o recién parado): charcos que se secan.
+  final double wet;
+
+  /// Cuánto se ve el arcoíris (0 a 1), detrás de las lomas.
+  final double rainbow;
+
   GardenPainter({
     required this.layout,
     required this.tower,
@@ -174,6 +195,8 @@ class GardenPainter extends CustomPainter {
     required this.morning,
     this.overcast = 0,
     this.snowy = false,
+    this.wet = 0,
+    this.rainbow = 0,
   });
 
   Size get size => layout.size;
@@ -193,11 +216,13 @@ class GardenPainter extends CustomPainter {
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height * 0.45)),
     );
     _paintSunOrMoon(canvas);
+    if (rainbow > 0) _paintRainbow(canvas, size);
     // La tierra se dibuja en una capa aparte para oscurecerla de noche sin
     // tocar el cielo.
     canvas.saveLayer(all, Paint());
     _paintHills(canvas);
     _paintGround(canvas);
+    if (wet > 0) _paintPuddles(canvas);
     if (snowy) {
       canvas.drawRect(
         all,
@@ -221,6 +246,8 @@ class GardenPainter extends CustomPainter {
       paintShishi(canvas, at[Place.shishi]!);
       paintMossRocks(canvas, at[Place.moss]!, moss);
       paintLeafPath(canvas, at[Place.leaves]!);
+      paintCalligraphyHall(canvas, at[Place.enso]!);
+      paintBellTower(canvas, at[Place.bell]!);
     }
     final dark = 1 - daylight;
     canvas.drawRect(
@@ -315,6 +342,54 @@ class GardenPainter extends CustomPainter {
     canvas.translate(g.left, g.top);
     canvas.drawPicture(sandTexture(g.size, seed: 11));
     canvas.restore();
+  }
+
+  /// Arco suave detrás de las nubes, con los colores apenas marcados.
+  void _paintRainbow(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+    final c = Offset(w * 0.6, h * 0.62);
+    final r = w * 0.62;
+    const bands = [
+      Color(0xFFE57373),
+      Color(0xFFFFB74D),
+      Color(0xFFFFF176),
+      Color(0xFF81C784),
+      Color(0xFF64B5F6),
+      Color(0xFF9575CD),
+    ];
+    canvas.save();
+    canvas.clipRect(Rect.fromLTRB(0, 0, w, h * 0.62));
+    for (final (i, color) in bands.indexed) {
+      canvas.drawArc(
+        Rect.fromCircle(center: c, radius: r - i * 5),
+        pi,
+        pi,
+        false,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 5.5
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2)
+          ..color = color.withValues(alpha: 0.32 * rainbow),
+      );
+    }
+    canvas.restore();
+  }
+
+  /// Charcos en el pasto y en el borde del patio, que se achican al secarse.
+  void _paintPuddles(Canvas canvas) {
+    final w = size.width, h = size.height;
+    final rng = Random(17);
+    final sky = Color.lerp(const Color(0xFF5E6B78), const Color(0xFFBFD8DC), daylight)!;
+    for (var i = 0; i < 6; i++) {
+      final c = Offset(w * (0.06 + 0.88 * rng.nextDouble()), h * (0.5 + 0.47 * rng.nextDouble()));
+      final rw = (18 + 22 * rng.nextDouble()) * (0.35 + 0.65 * wet);
+      final rect = Rect.fromCenter(center: c, width: rw * 2, height: rw * 0.7);
+      canvas.drawOval(rect, Paint()..color = sky.withValues(alpha: 0.55 * wet));
+      canvas.drawOval(
+        rect.deflate(rw * 0.25).translate(-rw * 0.2, -rw * 0.06),
+        Paint()..color = Colors.white.withValues(alpha: 0.18 * wet),
+      );
+    }
   }
 
   /// Arenero con marco de madera y el último dibujo.
@@ -684,5 +759,7 @@ class GardenPainter extends CustomPainter {
       (old.arc - arc).abs() > 0.002 ||
       old.morning != morning ||
       old.overcast != overcast ||
-      old.snowy != snowy;
+      old.snowy != snowy ||
+      (old.wet - wet).abs() > 0.01 ||
+      (old.rainbow - rainbow).abs() > 0.01;
 }

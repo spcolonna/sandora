@@ -83,18 +83,121 @@ class Progress extends ChangeNotifier {
   int _lastDay = -1;
   late Map<String, num> _unlockDays;
 
+  /// Minijuegos que abre una zona con otro id (Ensō abre la caligrafía).
+  Map<String, String> _zoneOf = {};
+
   /// Minijuegos destrabados que ya se anunciaron en el jardín.
   Set<String> unlocksSeen = {};
 
+  /// Primera partida guiada: 0 = señalar un lugar para jugar, 1 = después de
+  /// la primera partida, señalar el nivel y el Mercado, 2 = terminada.
+  int guideStep = 0;
+
+  /// Minijuegos cuya tarjeta de cómo se juega ya se vio.
+  Set<String> introSeen = {};
+
+  late Balance _balance;
+
+  // --- Varios jardines -------------------------------------------------
+  //
+  // El jardín actual vive en las claves de siempre; los demás, guardados
+  // aparte como una foto de esas claves. Cambiar de jardín guarda la foto del
+  // actual y pone la del elegido. Monedas, nivel, meditación y récords son de
+  // la cuenta y no cambian.
+
+  static const _gardenKeys = [
+    'tower',
+    'towerCollectedAt',
+    'sandDrawing',
+    'sandLastShape',
+    'gardenName',
+    'gardenNameOffered',
+    'expansions',
+    'serenity',
+    'serenityAt',
+  ];
+
+  /// Fotos de cada jardín (la del actual puede estar vieja: manda lo vivo).
+  List<Map<String, dynamic>> _gardens = [{}];
+  int currentGarden = 0;
+
+  int get gardenCount => _gardens.length;
+
+  /// Nombre de cada jardín, para elegir entre ellos.
+  String? gardenNameAt(int i) => i == currentGarden ? gardenName : _gardens[i]['gardenName'] as String?;
+
+  int get gardenCost => _balance.section('gardens').i('lotus');
+  int get gardenMinLevel => _balance.section('gardens').i('minLevel');
+  int get gardenMax => _balance.section('gardens').i('max');
+  bool get canBuyGarden => level >= gardenMinLevel && lotus >= gardenCost && gardenCount < gardenMax;
+
+  Map<String, dynamic> _snapshot() => {for (final k in _gardenKeys) k: ?_prefs.get(k)};
+
+  Future<void> _restore(Map<String, dynamic> snap) async {
+    for (final k in _gardenKeys) {
+      final v = snap[k];
+      switch (v) {
+        case null:
+          await _prefs.remove(k);
+        case int():
+          await _prefs.setInt(k, v);
+        case double():
+          await _prefs.setDouble(k, v);
+        case bool():
+          await _prefs.setBool(k, v);
+        case String():
+          await _prefs.setString(k, v);
+        case List():
+          await _prefs.setStringList(k, [for (final e in v) e as String]);
+      }
+    }
+  }
+
+  Future<void> _saveGardens() async {
+    await _prefs.setString('gardens', jsonEncode(_gardens));
+    await _prefs.setInt('garden.current', currentGarden);
+  }
+
+  /// Pasa al jardín [i]: guarda el actual y carga el elegido.
+  Future<void> switchGarden(int i, {DateTime? now}) async {
+    if (i == currentGarden || i < 0 || i >= _gardens.length) return;
+    _gardens[currentGarden] = _snapshot();
+    await _restore(_gardens[i]);
+    currentGarden = i;
+    await _saveGardens();
+    await load(_balance, now: now);
+    notifyListeners();
+  }
+
+  /// Compra un jardín nuevo con lotos y pasa a él (empieza vacío).
+  Future<bool> buyGarden({DateTime? now}) async {
+    if (!canBuyGarden) return false;
+    lotus -= gardenCost;
+    _saveWallet();
+    _gardens[currentGarden] = _snapshot();
+    _gardens.add({});
+    await _saveGardens();
+    await switchGarden(_gardens.length - 1, now: now);
+    return true;
+  }
+
   Future<void> load(Balance balance, {DateTime? now}) async {
+    _balance = balance;
     economy = Economy(balance);
     levels = LevelRules(balance);
     meditationRules = MeditationRules(balance);
     shop = ShopRules(balance);
     dayCycle = DayCycle(balance);
     _unlockDays = balance.section('unlocks').nums('days');
+    final unlocks = balance.section('unlocks');
+    _zoneOf = unlocks.has('zones') ? unlocks.sub('zones').stringMap() : {};
     _prefs = await SharedPreferences.getInstance();
     now ??= DateTime.now();
+    // Si nunca hubo varios jardines, el de siempre es el primero.
+    _gardens = [
+      for (final g in jsonDecode(_prefs.getString('gardens') ?? '[{}]') as List) (g as Map).cast<String, dynamic>(),
+    ];
+    currentGarden = (_prefs.getInt('garden.current') ?? 0).clamp(0, _gardens.length - 1);
     pebbles = _prefs.getInt('pebbles') ?? 0;
     for (final e in Essence.values) {
       essences[e] = _prefs.getInt('essence.${e.name}') ?? 0;
@@ -131,7 +234,10 @@ class Progress extends ChangeNotifier {
     _plays = (jsonDecode(_prefs.getString('plays') ?? '{}') as Map).map((k, v) => MapEntry(k as String, v as int));
     gardenName = _prefs.getString('gardenName');
     gardenNameOffered = _prefs.getBool('gardenNameOffered') ?? false;
+    introSeen = (_prefs.getStringList('intro.seen') ?? []).toSet();
     calm = _prefs.getInt('calm') ?? 0;
+    // Quien ya jugaba antes de la guía no la ve.
+    guideStep = _prefs.getInt('guide.step') ?? (calm > 0 ? 2 : 0);
     expansions = (_prefs.getStringList('expansions') ?? []).toSet();
     lotus = _prefs.getInt('lotus') ?? 0;
     _lotusDay = _prefs.getInt('lotus.day') ?? -1;
@@ -164,6 +270,19 @@ class Progress extends ChangeNotifier {
   }
 
   static const gardenNameMax = 24;
+
+  /// Avanza la guía hasta [step] (nunca vuelve atrás).
+  void advanceGuide(int step) {
+    if (step <= guideStep) return;
+    guideStep = step;
+    _prefs.setInt('guide.step', step);
+    notifyListeners();
+  }
+
+  void markIntroSeen(String game) {
+    if (!introSeen.add(game)) return;
+    _prefs.setStringList('intro.seen', introSeen.toList());
+  }
 
   void markGardenNameOffered() {
     gardenNameOffered = true;
@@ -202,7 +321,10 @@ class Progress extends ChangeNotifier {
 
   /// La zona que destraba [game], si tiene una con su mismo id (el Estanque
   /// de lotos se abre al comprar el Estanque).
-  Expansion? unlockZone(String game) => levels.expansions.where((e) => e.zone && e.id == game).firstOrNull;
+  Expansion? unlockZone(String game) {
+    final id = _zoneOf[game] ?? game;
+    return levels.expansions.where((e) => e.zone && e.id == id).firstOrNull;
+  }
 
   bool gameUnlocked(String game) {
     final zone = unlockZone(game);
@@ -277,6 +399,14 @@ class Progress extends ChangeNotifier {
     _ => essences[Essence.values.byName(key)]!,
   };
 
+  /// Lotos comprados en la tienda de la app.
+  void grantLotus(int n) {
+    if (n <= 0) return;
+    lotus += n;
+    _saveWallet();
+    notifyListeners();
+  }
+
   void _addTo(String key, int amount) {
     switch (key) {
       case 'pebbles':
@@ -324,16 +454,16 @@ class Progress extends ChangeNotifier {
 
   /// Cuántos [g] quedan por juntar ahora: 0 si no es su momento del día o su
   /// clima.
-  int giftsLeft(DayGift g, {required Weather weather, DateTime? now}) {
+  int giftsLeft(DayGift g, {required Weather weather, bool afterRain = false, DateTime? now}) {
     now ??= gardenNow();
-    if (!g.activeAt(dayCycle.phaseAt(now), weather)) return 0;
+    if (!g.activeAt(dayCycle.phaseAt(now), weather, afterRain: afterRain)) return 0;
     final used = dayCycle.gardenDay(now) == _giftDay ? (_giftsTaken[g.id] ?? 0) : 0;
     return (g.daily - used).clamp(0, g.daily);
   }
 
-  bool takeGift(DayGift g, {required Weather weather, DateTime? now}) {
+  bool takeGift(DayGift g, {required Weather weather, bool afterRain = false, DateTime? now}) {
     now ??= gardenNow();
-    if (giftsLeft(g, weather: weather, now: now) == 0) return false;
+    if (giftsLeft(g, weather: weather, afterRain: afterRain, now: now) == 0) return false;
     final today = dayCycle.gardenDay(now);
     if (today != _giftDay) {
       _giftDay = today;
@@ -427,6 +557,7 @@ class Progress extends ChangeNotifier {
   /// Registra una partida terminada de [game] y paga la recompensa.
   Reward finishRun(String game, int stars, {DateTime? now}) {
     now ??= DateTime.now();
+    advanceGuide(1);
     final day = '${now.year}-${now.month}-${now.day}';
     if (day != _playsDay) {
       _playsDay = day;

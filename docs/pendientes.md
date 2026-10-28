@@ -15,12 +15,15 @@
 - [ ] Calibrar la latencia de audio de la lluvia en Android (`audioOffsetMs`).
 - [ ] Probar con 10 personas sin explicación.
 - [ ] Integrar el arte del Lote 1 (`docs/prompts.md`) cuando esté.
-- [ ] Meditación: notificación local con la campana final (`flutter_local_notifications`) y objetos de racha cada 7 días
-      (cuenco, cojín, farol) cuando exista el sistema de objetos.
+- [x] Meditación: notificación local con la campana final (`lib/garden/reminders.dart`), por si la app queda en
+      segundo plano.
+- [ ] Meditación: objetos de racha cada 7 días (cuenco, cojín, farol) cuando exista el sistema de objetos.
 - [ ] Integrar `store_feature` (Bloque 9, solo para la tienda). Ya están el logo, el fondo del título
       (`title_bg`) y el cartel del jardín (`ui_garden_sign`).
-- [ ] Ampliaciones: los patios agrandan el jardín y el Estanque abre el Estanque de lotos; las demás zonas quedan
-      "Próximamente" (`ready: false` en el balance).
+- [x] Ampliaciones: los patios agrandan el jardín; el Estanque abre el Estanque de lotos, la Sala de caligrafía el
+      Ensō y el Templo la Campana (`unlocks.zones` en el balance).
+- [ ] Zonas que siguen "Próximamente": Casa de té (Matcha), Bosque de bambú (Flauta) y Río (Linternas).
+- [ ] Ensō: colgar el mejor ensō en el jardín (GDD); hoy el pabellón muestra uno fijo.
 
 ## Próximo: menú y jardín vivo
 - [x] **Entrada al jardín:** puertas shoji que se corren con un destello (`lib/ui/garden/garden_gate.dart`).
@@ -30,7 +33,7 @@
       atardecer y noche, faroles de noche. Regalos: rocío al amanecer (Agua) y luciérnagas de noche (Luz), 3 por día.
       Para probar otra hora: `flutter run --dart-define=SANDORA_HOUR=22`.
 - [ ] **Ranking online:** el tablón muestra los récords propios y avisa que el ranking llega pronto (necesita backend).
-- [ ] Más eventos del día (atardecer, día) y más lugares cuando se sumen minijuegos.
+- [x] Más eventos del día: semillas que vuelan de día (Madera) y el último rayo del atardecer (Luz).
 - [x] **Clima** (`lib/garden/weather.dart`, `weather_service.dart`, sección `weather` del balance): despejado,
       nublado, lluvia, tormenta, niebla y nieve. Por defecto, clima propio que cambia cada 3 horas. Opcional (se elige
       tocando el cartel de arriba a la derecha): clima real con ubicación aproximada y pronóstico de MET Norway.
@@ -38,8 +41,10 @@
       Para probar: `flutter run --dart-define=SANDORA_WEATHER=rain` (clear, cloudy, rain, storm, fog, snow).
 - [ ] Clima, antes de publicar: poner un contacto (web o mail) en el User-Agent de MET Norway (`_agent` en
       `weather_service.dart`), como piden sus condiciones; nombrar la ubicación y a MET Norway en la política de
-      privacidad; traducir el texto del permiso de ubicación de iOS (`InfoPlist.strings`, hoy solo en inglés).
-- [ ] Más eventos del clima: arcoíris cuando para de llover, charcos, hojas con viento.
+      privacidad.
+- [x] Permiso de ubicación de iOS traducido (`ios/Runner/*.lproj/InfoPlist.strings`, 5 idiomas).
+- [x] Más eventos del clima: arcoíris un rato después de la lluvia (se toca: Luz), charcos que se secan y hojas con
+      viento en algunos bloques. Probar: `--dart-define=SANDORA_AFTER_RAIN=20 --dart-define=SANDORA_WEATHER=clear`.
 
 ## Minijuegos (2026-10-28)
 - [x] **Apilado nuevo:** sin Forge2D; bolsa de 12 piedras por partida (6 tipos) que se suman a la torre guardada.
@@ -61,21 +66,33 @@
       crecimiento suave, textura moteada y porcentaje; Hojas con sombra, vuelo y borde de piedritas; Bonsái con
       follaje en nubes, ramas mejor repartidas y corte sobre la rama curva; Estanque con asentado suave.
       Probar un juego directo: `--dart-define=SANDORA_GAME=moss` (stack, sand, rain, pond, shishi, leaves, moss, bonsai).
-- [ ] Lluvia: vasija que rebalsa (idea del plan, quedó para después si hace falta).
+- [x] Lluvia: la vasija se llena con los aciertos y a veces rebalsa; no resta, suena apagada hasta vaciarla con doble
+      toque (bonus).
 - [x] Prompts de arte: bloques 10 (estanque de lotos), 11 (shishi, hojas, musgo, bonsái) y 12 (vista del estanque).
 - [x] Quitado `flame_forge2d`.
 - [x] Primer toque perdido: la puerta shoji quedaba encima si se la apuraba tocando, y el jardín se recreaba al
       terminar. Ahora el jardín vive bajo una `GlobalKey` y el PageView se asienta más rápido (300 ms).
 
+## Para la prueba con gente (2026-10-28)
+- [x] **Primera partida guiada:** brillo y burbuja sobre el arenero ("Tocá un lugar"), después sobre el Mercado; quien ya
+      jugaba no la ve. Cada minijuego muestra la primera vez una tarjeta con el gesto animado y qué hacer.
+- [x] **Recordatorio diario** (19:00, se cambia o apaga en Ajustes): se reprograman los próximos 7 días al abrir la app,
+      empezando mañana; el texto habla de la racha, la torre, la serenidad o algo tranquilo. El permiso se pide después de
+      la primera partida. Probar: `--dart-define=SANDORA_REMINDER_MIN=1` (el primero llega en un minuto).
+- [ ] Recordatorios en Android: probar en un teléfono real (permiso de Android 13+, reinicio del teléfono).
+
 ## Etapa avanzada
-- [ ] **Vender lotos** (compra dentro de la app): ya son la moneda escasa del Mercado.
-- [ ] **Más de un jardín:** comprar espacios para tener varios jardines con nombre (GDD, "Más de un jardín"). Implica
-      pasar el estado del jardín (torre, arena, ampliaciones, nombre) a una lista por jardín en `Progress`.
+- [ ] **Vender lotos:** el código está (`lib/garden/lotus_store.dart`, `in_app_purchase`) pero apagado. Para
+      prenderlo: crear los consumibles `com.oraki.sandora.lotus5`, `lotus12` y `lotus30` en App Store Connect y Play
+      Console con sus precios y poner `shop.lotusPacks.enabled: true`. Falta validar recibos en un servidor si hace falta.
+- [x] **Más de un jardín:** tocando el cartel se ven los jardines; uno nuevo cuesta 10 lotos desde el nivel 8 (hasta
+      4, sección `gardens`). Cada uno tiene torre, arena, nombre, ampliaciones y serenidad; monedas, nivel y récords son
+      de la cuenta.
 
 ## Diseño (inconsistencias del GDD)
 - [x] El Apilado duraba "sin límite" contra el pilar 3 ("menos de 90 s"): ahora es una bolsa de 12 piedras.
-- [ ] La regla de las esencias por zona no es uniforme (Piedra da Arena en Apilado y Madera en Musgo; Ensō da Arena).
-      Ningún minijuego da Luz (la da el Modo meditación, desde el nivel 5). La Madera ya sale de hojas, musgo y bonsái.
+- [x] Regla de las esencias: cada minijuego da la de su material (Agua, Arena, Madera; Luz de meditación, regalos y
+      Campana). La esencia vive solo en el balance (`rewards.<id>.essence`) y un test la fija.
 - [x] Casa de té y Bosque de bambú cuestan Madera y ningún minijuego la da: ahora se consigue en el Mercado
       (trueque por piedritas o arena con límite diario, o por lotos).
-- [ ] La zona "Piedra" no existe en la convención de nombres de assets: se usan `stack`, `moss` y `east`.
+- [x] La zona "Piedra" usa `stack` y `moss` en los assets (aclarado en la convención del GDD).

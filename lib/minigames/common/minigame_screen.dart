@@ -9,6 +9,7 @@ import '../../ui/fx/sfx.dart';
 import '../../ui/theme/palette.dart';
 import '../../ui/widgets/currency.dart';
 import '../../ui/widgets/level_up.dart';
+import 'intro_card.dart';
 
 /// Cómo terminó una partida. Nunca hay game over duro: siempre hay puntaje,
 /// estrellas o una altura alcanzada (GDD, pilar 6).
@@ -42,6 +43,9 @@ class _MinigameScreenState extends State<MinigameScreen> {
   RunOutcome? _outcome;
   Reward? _reward;
   int _round = 0;
+
+  /// La primera vez, antes de jugar, la tarjeta de cómo se juega.
+  late bool _intro = !Progress.instance.introSeen.contains(widget.id);
 
   @override
   void initState() {
@@ -97,8 +101,19 @@ class _MinigameScreenState extends State<MinigameScreen> {
     super.dispose();
   }
 
+  void _closeIntro() {
+    SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+    Progress.instance.markIntroSeen(widget.id);
+    setState(() => _intro = false);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_intro) {
+      return Scaffold(
+        body: IntroCard(id: widget.id, onStart: _closeIntro),
+      );
+    }
     return Scaffold(
       body: Stack(
         children: [

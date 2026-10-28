@@ -28,6 +28,9 @@ class WeatherService extends ChangeNotifier {
   bool useReal = false;
   Weather? _real;
   DateTime? _realAt;
+
+  /// Cuándo dejó de llover según el clima real (se guarda).
+  DateTime? _realDryAt;
   bool _busy = false;
 
   Future<void> load(Balance balance) async {
@@ -37,6 +40,8 @@ class WeatherService extends ChangeNotifier {
     _real = Weather.values.asNameMap()[_prefs.getString('weather.code')];
     final at = _prefs.getInt('weather.at');
     _realAt = at == null ? null : DateTime.fromMillisecondsSinceEpoch(at);
+    final dry = _prefs.getInt('weather.dryAt');
+    _realDryAt = dry == null ? null : DateTime.fromMillisecondsSinceEpoch(dry);
   }
 
   bool _fresh(DateTime now, Duration age) => _realAt != null && now.difference(_realAt!) < age;
@@ -45,6 +50,15 @@ class WeatherService extends ChangeNotifier {
   bool isReal(DateTime now) => weatherOverride == null && useReal && _real != null && _fresh(now, rules.realMaxAge);
 
   Weather at(DateTime now) => weatherOverride ?? (isReal(now) ? _real! : rules.simulated(now));
+
+  /// Cuándo paró de llover, si ahora no llueve (null si llueve o si no se sabe).
+  /// Con eso el jardín muestra el arcoíris y los charcos que se secan.
+  DateTime? rainStoppedAt(DateTime now) {
+    if (afterRainOverride > 0) return now.subtract(const Duration(minutes: afterRainOverride));
+    if (at(now).wet) return null;
+    if (isReal(now)) return _realDryAt;
+    return rules.simulatedRainStop(now);
+  }
 
   /// Pide permiso de ubicación y trae el clima. Solo se llama cuando el
   /// jugador lo elige.
@@ -83,7 +97,12 @@ class WeatherService extends ChangeNotifier {
           );
       final symbol = await _fetchSymbol(pos.latitude, pos.longitude);
       if (symbol == null) return false;
-      _real = weatherFromSymbol(symbol);
+      final next = weatherFromSymbol(symbol);
+      if (_real != null && _real!.wet && !next.wet) {
+        _realDryAt = DateTime.now();
+        await _prefs.setInt('weather.dryAt', _realDryAt!.millisecondsSinceEpoch);
+      }
+      _real = next;
       _realAt = DateTime.now();
       await _prefs.setString('weather.code', _real!.name);
       await _prefs.setInt('weather.at', _realAt!.millisecondsSinceEpoch);

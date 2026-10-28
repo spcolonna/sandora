@@ -42,5 +42,7 @@ class BalanceSection {
   ];
   bool has(String key) => _m.containsKey(key);
   bool flag(String key, {bool orElse = false}) => (_m[key] as bool?) ?? orElse;
+  Map<String, String> stringMap() =>
+      _m.map((k, v) => MapEntry(k, v as String))..removeWhere((k, _) => k.startsWith('_'));
   Map<String, num> nums(String key) => (_m[key] as Map<String, dynamic>).map((k, v) => MapEntry(k, v as num));
 }

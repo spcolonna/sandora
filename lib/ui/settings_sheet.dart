@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../i18n/i18n.dart';
+import '../garden/reminders.dart';
 import '../settings.dart';
 import 'fx/sfx.dart';
 
@@ -27,6 +28,35 @@ Future<void> showSettingsSheet(BuildContext context) {
                 },
               ),
               SwitchListTile(title: Text(tr('settings.haptics')), value: s.haptics, onChanged: s.setHaptics),
+              SwitchListTile(
+                title: Text(tr('settings.reminders')),
+                value: s.reminders,
+                onChanged: (v) {
+                  s.setReminders(v);
+                  v
+                      ? Reminders.instance.askOnce().then((_) => Reminders.instance.reschedule())
+                      : Reminders.instance.reschedule();
+                },
+              ),
+              if (s.reminders)
+                ListTile(
+                  title: Text(tr('settings.reminderTime')),
+                  trailing: Builder(
+                    builder: (context) {
+                      final m = s.reminderMinutes ?? Reminders.instance.rules.defaultMinutes;
+                      final t = TimeOfDay(hour: m ~/ 60, minute: m % 60);
+                      return TextButton(
+                        onPressed: () async {
+                          final picked = await showTimePicker(context: context, initialTime: t);
+                          if (picked == null) return;
+                          s.setReminderMinutes(picked.hour * 60 + picked.minute);
+                          Reminders.instance.reschedule();
+                        },
+                        child: Text(t.format(context)),
+                      );
+                    },
+                  ),
+                ),
               ListTile(
                 title: Text(tr('settings.language')),
                 trailing: DropdownButton<String>(

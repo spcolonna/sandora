@@ -1,0 +1,2 @@
+/* Permiso de ubicación (clima real). */
+"NSLocationWhenInUseUsageDescription" = "Sandora uses your approximate location only to give your garden the same weather as outside.";

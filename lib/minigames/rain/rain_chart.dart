@@ -86,11 +86,26 @@ class RainJudge {
   int bestCombo = 0;
   int score = 0;
 
-  RainJudge(this.notes, BalanceSection b)
+  /// Agua en cada vasija (aciertos desde que se vació) y si rebalsa. Rebalsar
+  /// no resta: la vasija suena apagada hasta que se la vacía con doble toque,
+  /// que da un pequeño bonus.
+  final List<int> fill;
+  final List<bool> overflowing;
+  final int overflowAt, emptyBonus;
+  final double overflowChance;
+  final Random _rng;
+
+  RainJudge(this.notes, BalanceSection b, {Random? rng})
     : perfect = b.d('perfectMs') / 1000,
       great = b.d('greatMs') / 1000,
       good = b.d('goodMs') / 1000,
-      offset = b.d('audioOffsetMs') / 1000;
+      offset = b.d('audioOffsetMs') / 1000,
+      overflowAt = b.i('overflowAt'),
+      overflowChance = b.d('overflowChance'),
+      emptyBonus = b.i('emptyBonus'),
+      _rng = rng ?? Random(),
+      fill = List.filled(notes.fold(0, (m, n) => max(m, n.vessel + 1)), 0),
+      overflowing = List.filled(notes.fold(0, (m, n) => max(m, n.vessel + 1)), false);
 
   /// Toque en [vessel] en el segundo [time]: la gota pendiente más cercana de
   /// esa vasija dentro de la ventana, o null si no había ninguna.
@@ -108,8 +123,34 @@ class RainJudge {
     combo++;
     bestCombo = max(bestCombo, combo);
     score += (best.grade!.points * 10 * (1 + min(combo, 20) / 20)).round();
+    _pour(vessel);
     return best;
   }
+
+  /// Una gota más en [vessel]: al llenarse, a veces rebalsa; si no, se le va
+  /// la mitad del agua por el borde.
+  void _pour(int vessel) {
+    if (overflowing[vessel]) return;
+    fill[vessel]++;
+    if (fill[vessel] < overflowAt) return;
+    if (_rng.nextDouble() < overflowChance) {
+      overflowing[vessel] = true;
+    } else {
+      fill[vessel] = overflowAt ~/ 2;
+    }
+  }
+
+  /// Vacía [vessel] si rebalsaba (doble toque): true si había que vaciarla.
+  bool empty(int vessel) {
+    if (vessel >= overflowing.length || !overflowing[vessel]) return false;
+    overflowing[vessel] = false;
+    fill[vessel] = 0;
+    score += emptyBonus;
+    return true;
+  }
+
+  /// 0..1: qué tan llena está [vessel].
+  double level(int vessel) => vessel < fill.length ? min(1, fill[vessel] / overflowAt) : 0;
 
   /// Marca como perdidas las gotas que ya pasaron su ventana.
   List<RainNote> expire(double time) {

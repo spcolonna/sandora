@@ -4,8 +4,10 @@ import '../garden/economy.dart';
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
 import '../ui/theme/palette.dart';
+import 'bell/bell_game.dart';
 import 'bonsai/bonsai_game.dart';
 import 'common/minigame_screen.dart';
+import 'enso/enso_game.dart';
 import 'leaves/leaves_game.dart';
 import 'moss/moss_game.dart';
 import 'pond/pond_game.dart';
@@ -18,16 +20,18 @@ import 'stack/stack_game.dart';
 /// (`mg.<id>.name`) y `game_balance.json`.
 class MinigameInfo {
   final String id;
-  final Essence essence;
   final IconData icon;
   final Widget Function() screen;
 
   /// Unidad del récord en el tablón.
   final RecordUnit unit;
-  const MinigameInfo(this.id, this.essence, this.icon, this.screen, {this.unit = RecordUnit.points});
+  const MinigameInfo(this.id, this.icon, this.screen, {this.unit = RecordUnit.points});
 
   String get name => tr('mg.$id.name');
   String get description => tr('mg.$id.desc');
+
+  /// La esencia que da, leída del balance.
+  Essence get essence => Progress.instance.economy.essenceOf(id);
 
   /// El récord propio, como se lee en el tablón.
   String get record {
@@ -45,7 +49,7 @@ enum RecordUnit { points, stones, figures, percent }
 
 /// Los minijuegos del jardín.
 final minigames = [
-  MinigameInfo('stack', Essence.sand, Icons.filter_hdr_rounded, unit: RecordUnit.stones, () {
+  MinigameInfo('stack', Icons.filter_hdr_rounded, unit: RecordUnit.stones, () {
     return MinigameScreen(
       id: 'stack',
       build: StackGame.new,
@@ -54,27 +58,16 @@ final minigames = [
   }),
   MinigameInfo(
     'sand',
-    Essence.sand,
     Icons.gesture_rounded,
     unit: RecordUnit.figures,
     () => const MinigameScreen(id: 'sand', build: SandGame.new),
   ),
-  MinigameInfo(
-    'rain',
-    Essence.water,
-    Icons.water_drop_rounded,
-    () => const MinigameScreen(id: 'rain', build: RainGame.new),
-  ),
-  MinigameInfo('pond', Essence.water, Icons.local_florist_rounded, () {
+  MinigameInfo('rain', Icons.water_drop_rounded, () => const MinigameScreen(id: 'rain', build: RainGame.new)),
+  MinigameInfo('pond', Icons.local_florist_rounded, () {
     return MinigameScreen(id: 'pond', build: PondGame.new, overlay: (context, game) => _PondOverlay(game as PondGame));
   }),
-  MinigameInfo(
-    'shishi',
-    Essence.water,
-    Icons.water_rounded,
-    () => const MinigameScreen(id: 'shishi', build: ShishiGame.new),
-  ),
-  MinigameInfo('leaves', Essence.wood, Icons.eco_rounded, () {
+  MinigameInfo('shishi', Icons.water_rounded, () => const MinigameScreen(id: 'shishi', build: ShishiGame.new)),
+  MinigameInfo('leaves', Icons.eco_rounded, () {
     return MinigameScreen(
       id: 'leaves',
       build: LeavesGame.new,
@@ -83,17 +76,27 @@ final minigames = [
   }),
   MinigameInfo(
     'moss',
-    Essence.wood,
     Icons.grass_rounded,
     unit: RecordUnit.percent,
     () => const MinigameScreen(id: 'moss', build: MossGame.new),
   ),
   MinigameInfo(
     'bonsai',
-    Essence.wood,
     Icons.park_rounded,
     unit: RecordUnit.percent,
     () => const MinigameScreen(id: 'bonsai', build: BonsaiGame.new),
+  ),
+  MinigameInfo(
+    'enso',
+    Icons.circle_outlined,
+    unit: RecordUnit.percent,
+    () => const MinigameScreen(id: 'enso', build: EnsoGame.new),
+  ),
+  MinigameInfo(
+    'bell',
+    Icons.notifications_rounded,
+    unit: RecordUnit.percent,
+    () => const MinigameScreen(id: 'bell', build: BellGame.new),
   ),
 ];
 

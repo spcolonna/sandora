@@ -7,15 +7,18 @@ import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../fx/calm.dart';
 import '../fx/sfx.dart';
+import '../garden/garden_gate.dart';
+import '../garden_screen.dart';
 import '../theme/palette.dart';
+import 'currency.dart';
 
 /// Cuántas sugerencias de nombre hay en i18n (`garden.suggest.N`).
 const _suggestions = 8;
 
 const _art = 'assets/images/ui/ui_garden_sign.webp';
 
-/// Cartel de madera colgado en el jardín con su nombre. Tocarlo permite
-/// cambiarlo.
+/// Cartel de madera colgado en el jardín con su nombre. Tocarlo abre los
+/// jardines: cambiarle el nombre, pasar a otro o comprar uno nuevo.
 class GardenSign extends StatelessWidget {
   const GardenSign({super.key});
 
@@ -38,7 +41,7 @@ class GardenSign extends StatelessWidget {
   Widget _sign(BuildContext context) {
     final name = Progress.instance.gardenName;
     return GestureDetector(
-      onTap: () => showGardenNameSheet(context),
+      onTap: () => showGardensSheet(context),
       child: SizedBox(
         width: _width,
         height: _width / _aspect,
@@ -80,6 +83,84 @@ class GardenSign extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Los jardines del jugador: el actual (con su nombre para cambiar), los
+/// otros para pasar a ellos y uno nuevo para comprar con lotos.
+Future<void> showGardensSheet(BuildContext context) {
+  SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+  return showModalBottomSheet(
+    context: context,
+    showDragHandle: true,
+    backgroundColor: Palette.paper,
+    builder: (sheet) => ListenableBuilder(
+      listenable: Progress.instance,
+      builder: (sheet, _) {
+        final p = Progress.instance;
+        final text = Theme.of(sheet).textTheme;
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(tr('gardens.title'), style: text.titleLarge, textAlign: TextAlign.center),
+                const SizedBox(height: 8),
+                for (var i = 0; i < p.gardenCount; i++)
+                  ListTile(
+                    leading: Icon(i == p.currentGarden ? Icons.spa_rounded : Icons.spa_outlined, color: Palette.moss),
+                    title: Text(p.gardenNameAt(i) ?? tr('gardens.number', {'n': i + 1})),
+                    subtitle: i == p.currentGarden ? Text(tr('gardens.here')) : null,
+                    trailing: i == p.currentGarden
+                        ? IconButton(
+                            tooltip: tr('garden.name.title'),
+                            icon: const Icon(Icons.edit_rounded),
+                            onPressed: () {
+                              Navigator.pop(sheet);
+                              showGardenNameSheet(context);
+                            },
+                          )
+                        : const Icon(Icons.chevron_right_rounded),
+                    onTap: i == p.currentGarden
+                        ? null
+                        : () async {
+                            Navigator.pop(sheet);
+                            await p.switchGarden(i);
+                            if (context.mounted) _enterGarden(context);
+                          },
+                  ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.add_rounded),
+                  title: Text(tr('gardens.new')),
+                  subtitle: Text(
+                    p.gardenCount >= p.gardenMax
+                        ? tr('gardens.full')
+                        : p.level < p.gardenMinLevel
+                        ? tr('gardens.level', {'n': p.gardenMinLevel})
+                        : tr('gardens.newDesc'),
+                  ),
+                  trailing: CurrencyChip.lotus(p.gardenCost),
+                  enabled: p.canBuyGarden,
+                  onTap: () async {
+                    Navigator.pop(sheet);
+                    SoundBoard.instance.play(Sfx.good, volume: 0.5);
+                    if (await p.buyGarden() && context.mounted) _enterGarden(context);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
+/// Entra al jardín elegido como al abrir la app: con las puertas shoji.
+void _enterGarden(BuildContext context) {
+  Navigator.of(context).pushAndRemoveUntil(calmRoute<void>(const GardenGate(child: GardenScreen())), (route) => false);
 }
 
 /// Hoja para elegir o cambiar el nombre del jardín, con una sugerencia ya

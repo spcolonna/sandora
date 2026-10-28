@@ -1,0 +1,2 @@
+/* Permiso de ubicación (clima real). */
+"NSLocationWhenInUseUsageDescription" = "Sandoraは、庭の天気を外と同じにするためだけに、おおよその位置情報を使います。";

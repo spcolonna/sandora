@@ -91,7 +91,7 @@ Hay cuatro monedas: dos se ganan jugando, una por constancia y una se compra. Ni
 | Moneda | Cómo se gana | Para qué sirve |
 | --- | --- | --- |
 | **Piedritas** (blanda) | Jugando cualquier minijuego; más con mejor puntaje | Reparar, comprar objetos comunes, mantener el jardín |
-| **Esencias** (por zona: Agua, Arena, Madera, Luz) | Cada minijuego da la esencia de su zona; el Modo meditación da Luz | Desbloquear objetos y mejoras de esa zona; obliga a variar de minijuego |
+| **Esencias** (por material: Agua, Arena, Madera, Luz) | Cada minijuego da la esencia de su material (ver Regla de las esencias); el Modo meditación da Luz | Desbloquear objetos y mejoras de esa zona; obliga a variar de minijuego |
 | **Lotos** (escasa) | La ofrenda del día (la primera partida o meditación), cada nivel nuevo y cada semana de racha meditando | Trueques del Mercado sin límite diario. A futuro, también se venden |
 | **Jade** (premium) | Compra; pequeñas cantidades por logros y concursos | Cosméticos premium, pase de estación, acelerar crecimiento |
 
@@ -104,7 +104,7 @@ Hay cuatro monedas: dos se ganan jugando, una por constancia y una se compra. Ni
 
 ### Mercado
 
-Ningún minijuego da todas las esencias (la Madera sale de Hojas, Musgo y Bonsái; la Luz, del Modo meditación). Lo que falta se consigue en el Mercado, con trueques:
+Ningún minijuego da todas las esencias (la Madera sale de Hojas, Musgo y Bonsái; la Luz, del Modo meditación, los regalos de la noche y la nieve y, desde el nivel 14, la Campana del templo). Lo que falta se consigue en el Mercado, con trueques:
 
 - **Trueques del día:** piedritas o una esencia por otra, con un límite de veces por día. Así una moneda escasa sigue escasa y conviene volver mañana.
 - **Con lotos:** sin límite diario, porque el loto ya es escaso. Es la moneda para hacer escaso algo y, más adelante, venderlo.
@@ -159,9 +159,11 @@ Reemplaza la idea de penalizar copias, que es difícil de detectar y castiga a l
 
 ## Minijuegos del jardín inicial
 
-El jardín inicial trae 7 minijuegos: 3 desde el primer minuto y 4 que se desbloquean en la primera semana. Cada uno da Piedritas y la esencia de su zona.
+El jardín inicial trae 7 minijuegos: 3 desde el primer minuto y 4 que se desbloquean en la primera semana. Cada uno da Piedritas y la esencia de su material.
 
-| Minijuego | Zona / esencia | Desbloqueo | Gesto | Duración |
+**Regla de las esencias:** cada minijuego da la esencia de lo que se toca en él, no de la zona donde está. Agua: lluvia, shishi y estanque. Arena: arenero, apilado (piedras, arena) y Ensō. Madera: hojas, musgo y bonsái. Luz: meditación, Campana y los regalos de noche y de nieve. La esencia de cada minijuego vive solo en `game_balance.json` (`rewards.<id>.essence`).
+
+| Minijuego | Zona / esencia (material) | Desbloqueo | Gesto | Duración |
 | --- | --- | --- | --- | --- |
 | Apilado de piedras | Piedra / Arena | Inicio | Tocar para soltar | Bolsa de 12 piedras (≈ 30–60 s) |
 | Arenero | Arena / Arena | Inicio | Trazo continuo | 20–40 s |
@@ -254,7 +256,7 @@ Cada ampliación abre una zona nueva con 1 o 2 minijuegos propios, objetos exclu
 | Orden | Zona | Nivel | Minijuegos | Esencia |
 | --- | --- | --- | --- | --- |
 | 1 | Estanque | 7 | Koi, Luciérnagas (de noche) | Agua / Luz |
-| 2 | Sala de caligrafía | 10 | Ensō | Arena |
+| 2 | Sala de caligrafía | 10 | Ensō | Arena (tinta y papel) |
 | 3 | Casa de té | 12 | Matcha | Madera |
 | 4 | Templo | 14 | Campana, Gongs | Luz |
 | 5 | Bosque de bambú | 16 | Flauta de bambú | Madera |
@@ -503,7 +505,7 @@ El lanzamiento necesita unos 120 assets (lotes 1 a 3); el juego completo con amp
 | `shd` | Shader | `.frag` (GLSL) |
 | `sfx` / `mus` | Sonido / música | OGG (Android), M4A o CAF (iOS) |
 
-Zonas: `base`, `stack`, `sand`, `rain`, `shishi`, `leaves`, `moss`, `bonsai`, `pond`, `callig`, `tea`, `temple`, `bamboo`, `river`, `sakura`, `winter`, `shop`.
+Zonas (una por minijuego, no por zona del jardín: la zona Piedra usa `stack` y `moss`, y la vista del estanque, `east`): `base`, `east`, `stack`, `sand`, `rain`, `shishi`, `leaves`, `moss`, `bonsai`, `pond`, `callig`, `tea`, `temple`, `bamboo`, `river`, `sakura`, `winter`, `shop`.
 
 ### Lote 0: guía de estilo (antes de todo)
 

@@ -21,6 +21,28 @@ void main() {
     expect(tired.pebbles, greaterThan(0), reason: 'sin energía: siempre se gana algo');
   });
 
+  test('regla de esencias: cada minijuego da la de su material', () {
+    const rule = {
+      'stack': Essence.sand,
+      'sand': Essence.sand,
+      'rain': Essence.water,
+      'pond': Essence.water,
+      'shishi': Essence.water,
+      'leaves': Essence.wood,
+      'moss': Essence.wood,
+      'bonsai': Essence.wood,
+      'enso': Essence.sand,
+      'bell': Essence.light,
+    };
+    for (final e in rule.entries) {
+      expect(eco.essenceOf(e.key), e.value, reason: e.key);
+    }
+    // La Luz no sale de los minijuegos iniciales: la dan la meditación, los regalos y la Campana.
+    final gifts = balance.section('dayCycle').sections('gifts');
+    expect(gifts.any((g) => g.sub('give').has('light')), isTrue);
+    expect(balance.meditation.sub('rewards').sub('3').i('light'), greaterThan(0));
+  });
+
   test('la serenidad baja con los días pero nunca del piso', () {
     final max = balance.serenity.i('max');
     final floor = (max * balance.serenity.d('floor')).round();

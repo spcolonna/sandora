@@ -93,5 +93,53 @@ void main() {
       expect(p.giftsLeft(fireflies, weather: Weather.rain, now: at(23)), 0);
       expect(cycle.giftsAt(at(23), Weather.rain).map((g) => g.id), ['rainjar']);
     });
+
+    test('el arcoíris solo aparece de día y poco después de que para la lluvia', () async {
+      final p = Progress.instance;
+      await p.load(balance, now: at(12));
+      final rainbow = cycle.gifts.firstWhere((g) => g.id == 'rainbow');
+      expect(
+        p.giftsLeft(rainbow, weather: Weather.clear, now: at(12)),
+        0,
+        reason: 'sin lluvia antes',
+      );
+      expect(p.giftsLeft(rainbow, weather: Weather.clear, afterRain: true, now: at(12)), 1);
+      expect(
+        p.giftsLeft(rainbow, weather: Weather.clear, afterRain: true, now: at(23)),
+        0,
+        reason: 'de noche no',
+      );
+      expect(p.takeGift(rainbow, weather: Weather.clear, afterRain: true, now: at(12)), isTrue);
+      expect(
+        p.giftsLeft(rainbow, weather: Weather.clear, afterRain: true, now: at(12.5)),
+        0,
+        reason: 'uno por día',
+      );
+    });
+  });
+
+  test('la lluvia para al empezar un bloque seco que sigue a uno lluvioso', () {
+    // Busca un bloque seco después de uno con lluvia en el clima propio.
+    var t = DateTime(2026, 1, 1);
+    for (var k = 0; k < 4000; k++, t = t.add(Duration(hours: rules.blockHours))) {
+      final prev = rules.simulated(t.subtract(Duration(hours: rules.blockHours)));
+      final now = rules.simulated(t);
+      if (prev.wet && !now.wet) break;
+    }
+    final start = rules.blockStart(t);
+    expect(rules.simulatedRainStop(t.add(const Duration(minutes: 40))), start);
+    expect(rules.wetness(Weather.clear, start, start), 1);
+    expect(rules.wetness(Weather.clear, start.add(rules.puddlesFor), start), 0, reason: 'los charcos se secan');
+    expect(rules.wetness(Weather.rain, start, null), 1);
+    expect(rules.wetness(Weather.clear, start, null), 0);
+  });
+
+  test('el viento con hojas solo sopla despejado o nublado', () {
+    expect(rules.windy(Weather.rain, at(9)), isFalse);
+    var windy = 0;
+    for (var d = 0; d < 300; d++) {
+      if (rules.windy(Weather.clear, DateTime(2026, 1, 1).add(Duration(days: d)))) windy++;
+    }
+    expect(windy / 300, closeTo(rules.windChance, 0.08));
   });
 }

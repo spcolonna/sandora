@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../garden/lotus_store.dart';
 import '../garden/progress.dart';
 import '../garden/shop.dart';
 import '../i18n/i18n.dart';
@@ -40,6 +41,29 @@ Future<void> showShopSheet(BuildContext context) {
               const SizedBox(height: 12),
               Text(tr('shop.withLotus'), style: text.titleSmall),
               for (final o in lotus) _OfferRow(o),
+              // Paquetes de lotos: solo si la venta está prendida y la tienda los devolvió.
+              ValueListenableBuilder(
+                valueListenable: LotusStore.instance.products,
+                builder: (context, products, _) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (products.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(tr('shop.buyLotus'), style: text.titleSmall),
+                      for (final pr in products)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: CurrencyChip.lotus(LotusStore.instance.lotusOf(pr), prefix: '+'),
+                          title: Text(pr.title),
+                          trailing: FilledButton.tonal(
+                            onPressed: () => LotusStore.instance.buy(pr),
+                            child: Text(pr.price),
+                          ),
+                        ),
+                    ],
+                  ],
+                ),
+              ),
               const SizedBox(height: 10),
               Text(tr('shop.lotusHint'), style: text.bodySmall, textAlign: TextAlign.center),
             ],

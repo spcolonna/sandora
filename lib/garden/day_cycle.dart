@@ -29,9 +29,13 @@ class DayGift {
   final Map<String, int> give;
   final int daily;
 
-  const DayGift(this.id, {this.phase, this.weather, required this.give, required this.daily});
+  /// Solo aparece un rato después de que para la lluvia (el arcoíris).
+  final bool afterRain;
 
-  bool activeAt(DayPhase p, Weather w) => (phase == null || phase == p) && (weather?.contains(w) ?? true);
+  const DayGift(this.id, {this.phase, this.weather, required this.give, required this.daily, this.afterRain = false});
+
+  bool activeAt(DayPhase p, Weather w, {bool afterRain = false}) =>
+      (phase == null || phase == p) && (weather?.contains(w) ?? true) && (!this.afterRain || afterRain);
 
   factory DayGift.from(BalanceSection s) {
     final give = s.nums('give').map((k, v) => MapEntry(k, v.round()));
@@ -43,6 +47,7 @@ class DayGift {
       weather: s.has('weather') ? {for (final w in s.strings('weather')) Weather.values.byName(w)} : null,
       give: give,
       daily: s.i('daily'),
+      afterRain: s.flag('afterRain'),
     );
   }
 }
@@ -109,8 +114,8 @@ class DayCycle {
     return DateTime.utc(shifted.year, shifted.month, shifted.day).millisecondsSinceEpoch ~/ 86400000;
   }
 
-  List<DayGift> giftsAt(DateTime t, Weather w) => [
+  List<DayGift> giftsAt(DateTime t, Weather w, {bool afterRain = false}) => [
     for (final g in gifts)
-      if (g.activeAt(phaseAt(t), w)) g,
+      if (g.activeAt(phaseAt(t), w, afterRain: afterRain)) g,
   ];
 }

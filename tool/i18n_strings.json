@@ -1363,5 +1363,292 @@
   "pt": "Musgo {n}%",
   "ja": "苔 {n}%",
   "zh": "苔藓 {n}%"
+ },
+ "intro.start": {
+  "es": "Empezar",
+  "en": "Start",
+  "pt": "Começar",
+  "ja": "はじめる",
+  "zh": "开始"
+ },
+ "guide.play": {
+  "es": "Tocá un lugar del jardín para jugar",
+  "en": "Tap a place in the garden to play",
+  "pt": "Toque num lugar do jardim para jogar",
+  "ja": "庭の場所をタップして遊ぼう",
+  "zh": "点按花园里的地方来玩"
+ },
+ "guide.market": {
+  "es": "Jugando ganás Calma para subir de nivel y monedas para el Mercado",
+  "en": "Playing earns Calm to level up and coins for the Market",
+  "pt": "Jogando você ganha Calma para subir de nível e moedas para o Mercado",
+  "ja": "遊ぶと、レベルを上げる「穏やかさ」と市場で使うコインがもらえます",
+  "zh": "游玩可获得升级用的「平和」和市集用的货币"
+ },
+ "reminder.title": {
+  "es": "Tu jardín",
+  "en": "Your garden",
+  "pt": "Seu jardim",
+  "ja": "あなたの庭",
+  "zh": "你的花园"
+ },
+ "reminder.channel": {
+  "es": "Recordatorio del jardín",
+  "en": "Garden reminder",
+  "pt": "Lembrete do jardim",
+  "ja": "庭のリマインダー",
+  "zh": "花园提醒"
+ },
+ "reminder.streak": {
+  "es": "Llevás {n} días meditando. Un rato hoy mantiene la racha",
+  "en": "You've meditated {n} days in a row. A few minutes today keeps the streak",
+  "pt": "Você medita há {n} dias seguidos. Alguns minutos hoje mantêm a sequência",
+  "ja": "{n}日連続で瞑想しています。今日も少しで記録が続きます",
+  "zh": "你已连续冥想 {n} 天。今天花几分钟就能保持"
+ },
+ "reminder.tower": {
+  "es": "La torre de piedras juntó piedritas para vos",
+  "en": "Your stone tower gathered pebbles for you",
+  "pt": "Sua torre de pedras juntou pedrinhas para você",
+  "ja": "石の塔が小石をためています",
+  "zh": "石塔为你攒了一些小石子"
+ },
+ "reminder.serenity": {
+  "es": "La serenidad del jardín baja si nadie lo cuida",
+  "en": "The garden's serenity fades when no one tends it",
+  "pt": "A serenidade do jardim diminui se ninguém cuida dele",
+  "ja": "手入れをしないと庭の安らぎが下がります",
+  "zh": "没人照料时，花园的安宁会慢慢减少"
+ },
+ "reminder.calm1": {
+  "es": "El jardín te espera. Un minuto alcanza",
+  "en": "The garden is waiting. One minute is enough",
+  "pt": "O jardim espera por você. Um minuto basta",
+  "ja": "庭が待っています。1分で十分です",
+  "zh": "花园在等你。一分钟就够了"
+ },
+ "reminder.calm2": {
+  "es": "Cayeron hojas sobre el camino",
+  "en": "Leaves have fallen on the path",
+  "pt": "Caíram folhas no caminho",
+  "ja": "小道に葉が落ちています",
+  "zh": "小路上落了些叶子"
+ },
+ "reminder.calm3": {
+  "es": "La arena quedó lisa, lista para un trazo nuevo",
+  "en": "The sand is smooth, ready for a new pattern",
+  "pt": "A areia ficou lisa, pronta para um novo traço",
+  "ja": "砂がならされ、新しい模様を待っています",
+  "zh": "沙子已经抚平，等着新的纹路"
+ },
+ "reminder.calm4": {
+  "es": "Las vasijas esperan la lluvia",
+  "en": "The jars are waiting for the rain",
+  "pt": "Os vasos esperam a chuva",
+  "ja": "甕が雨を待っています",
+  "zh": "陶罐在等雨"
+ },
+ "reminder.meditationDone": {
+  "es": "Terminó tu meditación. Volvé despacio",
+  "en": "Your meditation is over. Come back slowly",
+  "pt": "Sua meditação terminou. Volte devagar",
+  "ja": "瞑想が終わりました。ゆっくり戻りましょう",
+  "zh": "冥想结束了。慢慢回来"
+ },
+ "settings.reminders": {
+  "es": "Recordatorio diario",
+  "en": "Daily reminder",
+  "pt": "Lembrete diário",
+  "ja": "毎日のリマインダー",
+  "zh": "每日提醒"
+ },
+ "settings.reminderTime": {
+  "es": "Hora del recordatorio",
+  "en": "Reminder time",
+  "pt": "Hora do lembrete",
+  "ja": "リマインダーの時刻",
+  "zh": "提醒时间"
+ },
+ "gift.rainbow": {
+  "es": "Arcoíris",
+  "en": "Rainbow",
+  "pt": "Arco-íris",
+  "ja": "虹",
+  "zh": "彩虹"
+ },
+ "gift.rainbow.hint": {
+  "es": "Paró la lluvia: tocá la gota del arcoíris para juntar Luz.",
+  "en": "The rain stopped: tap the rainbow drop to collect Light.",
+  "pt": "A chuva parou: toque na gota do arco-íris para juntar Luz.",
+  "ja": "雨がやみました。虹のしずくをタップして光を集めましょう。",
+  "zh": "雨停了：点按彩虹水滴来收集光。"
+ },
+ "gift.seed": {
+  "es": "Semilla",
+  "en": "Seed",
+  "pt": "Semente",
+  "ja": "種",
+  "zh": "种子"
+ },
+ "gift.seed.hint": {
+  "es": "Tocá las semillas que vuelan para juntar Madera.",
+  "en": "Tap the drifting seeds to collect Wood.",
+  "pt": "Toque nas sementes que voam para juntar Madeira.",
+  "ja": "飛んでいる種をタップして木を集めましょう。",
+  "zh": "点按飘飞的种子来收集木。"
+ },
+ "gift.lastray": {
+  "es": "Último rayo",
+  "en": "Last ray",
+  "pt": "Último raio",
+  "ja": "夕日の光",
+  "zh": "最后一缕阳光"
+ },
+ "gift.lastray.hint": {
+  "es": "Tocá el último rayo de sol para juntar Luz.",
+  "en": "Tap the last ray of sun to collect Light.",
+  "pt": "Toque no último raio de sol para juntar Luz.",
+  "ja": "夕日の最後の光をタップして光を集めましょう。",
+  "zh": "点按最后一缕阳光来收集光。"
+ },
+ "rain.overflow": {
+  "es": "¡Rebalsa! Tocá dos veces la vasija para vaciarla",
+  "en": "It's overflowing! Double-tap the jar to empty it",
+  "pt": "Transbordou! Toque duas vezes no vaso para esvaziar",
+  "ja": "あふれています！甕をダブルタップして空にしましょう",
+  "zh": "溢出来了！双击陶罐把它倒空"
+ },
+ "mg.enso.name": {
+  "es": "Ensō",
+  "en": "Ensō",
+  "pt": "Ensō",
+  "ja": "円相",
+  "zh": "圆相"
+ },
+ "mg.enso.desc": {
+  "es": "Dibujá un círculo de un solo trazo, sin levantar el dedo",
+  "en": "Draw a circle in a single stroke, without lifting your finger",
+  "pt": "Desenhe um círculo num só traço, sem levantar o dedo",
+  "ja": "指を離さずに、一筆で円を描きましょう",
+  "zh": "一笔画出一个圆，手指不要离开"
+ },
+ "enso.hint": {
+  "es": "Un solo trazo. Despacio, la tinta es más gruesa",
+  "en": "One stroke. Slowly, the ink gets thicker",
+  "pt": "Um só traço. Devagar, a tinta fica mais grossa",
+  "ja": "一筆で。ゆっくり描くと墨が太くなります",
+  "zh": "一笔完成。慢一点，墨迹会更粗"
+ },
+ "enso.retry": {
+  "es": "Más grande y de una sola vez",
+  "en": "Bigger, and all at once",
+  "pt": "Maior e de uma vez só",
+  "ja": "もっと大きく、一度に",
+  "zh": "画大一点，一次画完"
+ },
+ "enso.result": {
+  "es": "Ensō: {n}%",
+  "en": "Ensō: {n}%",
+  "pt": "Ensō: {n}%",
+  "ja": "円相：{n}%",
+  "zh": "圆相：{n}%"
+ },
+ "enso.parts": {
+  "es": "Redondez {round}% · Cierre {close}% · Fluidez {flow}%",
+  "en": "Roundness {round}% · Closure {close}% · Flow {flow}%",
+  "pt": "Redondeza {round}% · Fechamento {close}% · Fluidez {flow}%",
+  "ja": "丸み {round}% ・ 閉じ {close}% ・ 流れ {flow}%",
+  "zh": "圆度 {round}% · 闭合 {close}% · 流畅 {flow}%"
+ },
+ "mg.bell.name": {
+  "es": "Campana del templo",
+  "en": "Temple bell",
+  "pt": "Sino do templo",
+  "ja": "寺の鐘",
+  "zh": "寺钟"
+ },
+ "mg.bell.desc": {
+  "es": "Tirá el tronco hasta la marca y soltalo. Esperá a que la campana se apague",
+  "en": "Pull the log back to the mark and let go. Wait for the bell to fade",
+  "pt": "Puxe o tronco até a marca e solte. Espere o sino silenciar",
+  "ja": "撞木を印まで引いて放します。鐘の音が消えるのを待ちましょう",
+  "zh": "把撞木拉到标记处再放开。等钟声消散"
+ },
+ "bell.hint": {
+  "es": "Arrastrá el tronco hacia atrás hasta la marca dorada",
+  "en": "Drag the log back to the golden mark",
+  "pt": "Arraste o tronco para trás até a marca dourada",
+  "ja": "撞木を金色の印まで後ろに引きましょう",
+  "zh": "把撞木向后拖到金色标记处"
+ },
+ "bell.wait": {
+  "es": "Esperá a que la campana se apague…",
+  "en": "Wait for the bell to fade…",
+  "pt": "Espere o sino silenciar…",
+  "ja": "鐘の音が消えるのを待って…",
+  "zh": "等钟声消散……"
+ },
+ "bell.result": {
+  "es": "Armonía de la campana: {n}%",
+  "en": "Bell harmony: {n}%",
+  "pt": "Harmonia do sino: {n}%",
+  "ja": "鐘の調和：{n}%",
+  "zh": "钟声和谐度：{n}%"
+ },
+ "gardens.title": {
+  "es": "Tus jardines",
+  "en": "Your gardens",
+  "pt": "Seus jardins",
+  "ja": "あなたの庭",
+  "zh": "你的花园"
+ },
+ "gardens.number": {
+  "es": "Jardín {n}",
+  "en": "Garden {n}",
+  "pt": "Jardim {n}",
+  "ja": "庭 {n}",
+  "zh": "花园 {n}"
+ },
+ "gardens.here": {
+  "es": "Estás acá",
+  "en": "You are here",
+  "pt": "Você está aqui",
+  "ja": "現在の庭",
+  "zh": "当前所在"
+ },
+ "gardens.new": {
+  "es": "Nuevo jardín",
+  "en": "New garden",
+  "pt": "Novo jardim",
+  "ja": "新しい庭",
+  "zh": "新花园"
+ },
+ "gardens.newDesc": {
+  "es": "Empieza vacío, con su propio nombre y ampliaciones. Las monedas y el nivel se comparten.",
+  "en": "Starts empty, with its own name and expansions. Coins and level are shared.",
+  "pt": "Começa vazio, com nome e ampliações próprios. Moedas e nível são compartilhados.",
+  "ja": "空の状態から始まり、名前と拡張は庭ごと。コインとレベルは共通です。",
+  "zh": "从空白开始，名称和扩建各自独立。货币和等级共享。"
+ },
+ "gardens.level": {
+  "es": "Desde el nivel {n}",
+  "en": "From level {n}",
+  "pt": "A partir do nível {n}",
+  "ja": "レベル{n}から",
+  "zh": "{n}级起开放"
+ },
+ "gardens.full": {
+  "es": "Ya tenés todos los jardines posibles",
+  "en": "You already have every garden you can",
+  "pt": "Você já tem todos os jardins possíveis",
+  "ja": "持てる庭はすべてそろっています",
+  "zh": "你已经拥有所有可用的花园"
+ },
+ "shop.buyLotus": {
+  "es": "Comprar lotos",
+  "en": "Buy lotus",
+  "pt": "Comprar lótus",
+  "ja": "蓮を買う",
+  "zh": "购买莲花"
  }
 }

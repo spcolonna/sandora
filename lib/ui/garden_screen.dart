@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../garden/day_cycle.dart';
 import '../garden/economy.dart';
 import '../garden/progress.dart';
+import '../garden/reminders.dart';
 import '../garden/weather.dart';
 import '../garden/weather_service.dart';
 import '../i18n/i18n.dart';
@@ -31,7 +32,7 @@ class GardenScreen extends StatefulWidget {
   State<GardenScreen> createState() => _GardenScreenState();
 }
 
-class _GardenScreenState extends State<GardenScreen> {
+class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver {
   final _pages = PageController();
   int _page = 0;
 
@@ -40,6 +41,9 @@ class _GardenScreenState extends State<GardenScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Hoy ya se entró: los recordatorios arrancan mañana.
+    Reminders.instance.reschedule();
     // La torre junta Piedritas y la luz del día y el clima cambian en tiempo
     // real: se refresca cada tanto.
     _tick = Timer.periodic(const Duration(seconds: 20), (_) {
@@ -68,7 +72,13 @@ class _GardenScreenState extends State<GardenScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) Reminders.instance.reschedule();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tick?.cancel();
     _pages.dispose();
     super.dispose();
@@ -78,6 +88,7 @@ class _GardenScreenState extends State<GardenScreen> {
     switch (place) {
       case Place.market:
         SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+        Progress.instance.advanceGuide(2);
         showShopSheet(context);
       case Place.board:
         SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
@@ -147,6 +158,8 @@ class _GardenScreenState extends State<GardenScreen> {
     _quiet();
     await Navigator.of(context).push(calmRoute<void>(m.screen()));
     if (mounted) _gardenSound();
+    // Después de la primera partida (no al abrir la app) se ofrecen los avisos.
+    if (Progress.instance.guideStep >= 1) Reminders.instance.askOnce();
   }
 
   Future<void> _meditate() async {

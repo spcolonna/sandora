@@ -87,6 +87,46 @@ void main() {
     });
   });
 
+  group('Lluvia: vasija que rebalsa', () {
+    final b = balance.rain;
+    final full = b.i('overflowAt');
+    List<RainNote> chart(int n) => [for (var k = 0; k < n; k++) RainNote(1.0 + k, 0)];
+
+    test('se llena, rebalsa y el doble toque la vacía con bonus', () {
+      final j = RainJudge(chart(full + 2), b, rng: _Always(0));
+      for (var k = 0; k < full; k++) {
+        j.tap(0, 1.0 + k);
+      }
+      expect(j.overflowing[0], isTrue);
+      expect(j.level(0), 1);
+      final before = j.score;
+      expect(j.empty(0), isTrue);
+      expect(j.score, before + b.i('emptyBonus'));
+      expect(j.overflowing[0], isFalse);
+      expect(j.level(0), 0);
+      expect(j.empty(0), isFalse, reason: 'vacía no da bonus');
+    });
+
+    test('si no rebalsa pierde la mitad del agua', () {
+      final j = RainJudge(chart(full), b, rng: _Always(0.99));
+      for (var k = 0; k < full; k++) {
+        j.tap(0, 1.0 + k);
+      }
+      expect(j.overflowing[0], isFalse);
+      expect(j.fill[0], full ~/ 2);
+    });
+
+    test('rebalsar no resta: se llega igual al 100 %', () {
+      final notes = chart(full * 2);
+      final j = RainJudge(notes, b, rng: _Always(0));
+      for (final n in notes) {
+        j.tap(n.vessel, n.time);
+      }
+      expect(j.overflowing[0], isTrue);
+      expect(j.accuracy, 1);
+    });
+  });
+
   group('Arenero', () {
     final b = balance.sand;
 
@@ -240,4 +280,16 @@ void main() {
       expect(starsFor(99, h), 3);
     });
   });
+}
+
+/// Azar fijo para los tests.
+class _Always implements Random {
+  final double v;
+  _Always(this.v);
+  @override
+  double nextDouble() => v;
+  @override
+  int nextInt(int max) => (v * max).floor();
+  @override
+  bool nextBool() => v < 0.5;
 }

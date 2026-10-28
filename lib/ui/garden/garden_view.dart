@@ -52,8 +52,12 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
     super.dispose();
   }
 
+  /// Cuándo paró la lluvia y si todavía se ve el arcoíris.
+  DateTime? get _stoppedAt => WeatherService.instance.rainStoppedAt(widget.now);
+  bool get _afterRain => _rainbowTime(widget.now);
+
   void _take(DayGift g, int index, Offset at) {
-    if (!Progress.instance.takeGift(g, weather: widget.weather, now: widget.now)) return;
+    if (!Progress.instance.takeGift(g, weather: widget.weather, afterRain: _afterRain, now: widget.now)) return;
     _gone.add('${g.id}$index');
     SoundBoard.instance.play(Sfx.good, volume: 0.4);
     Haptics.light();
@@ -79,6 +83,13 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
       Weather.rain => 0.75,
       Weather.storm => 0.95,
     };
+    final rules = WeatherService.instance.rules;
+    final afterRain = _afterRain;
+    final wet = rules.wetness(weather, now, _stoppedAt);
+    // El arcoíris se ve de día y se va apagando a medida que pasa el rato.
+    final rainbow = afterRain && (weather == Weather.clear || weather == Weather.cloudy)
+        ? daylight * (1 - now.difference(_stoppedAt!).inSeconds / rules.rainbowFor.inSeconds).clamp(0.0, 1.0)
+        : 0.0;
     return LayoutBuilder(
       builder: (context, box) {
         final layout = GardenLayout(box.biggest, p.patioSize, side: widget.side);
@@ -99,6 +110,8 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
                     morning: now.hour < 12,
                     overcast: overcast,
                     snowy: weather == Weather.snow,
+                    wet: wet,
+                    rainbow: rainbow,
                   ),
                 ),
               ),
@@ -106,7 +119,13 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
             Positioned.fill(
               child: IgnorePointer(
                 child: CustomPaint(
-                  painter: _SkyLifePainter(_life, daylight: daylight, warmth: warmth, weather: weather),
+                  painter: _SkyLifePainter(
+                    _life,
+                    daylight: daylight,
+                    warmth: warmth,
+                    weather: weather,
+                    windy: rules.windy(weather, now),
+                  ),
                 ),
               ),
             ),
@@ -119,11 +138,11 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
               _Label(at: e.value, place: e.key, onTap: () => widget.onPlace(e.key)),
             if (widget.side == 0) _TowerCollect(above: layout.places[Place.stack]!),
             if (widget.side == 0)
-              for (final g in cycle.giftsAt(now, weather))
+              for (final g in cycle.giftsAt(now, weather, afterRain: afterRain))
                 for (final i in [
                   for (var i = 0; i < g.daily; i++)
                     if (!_gone.contains('${g.id}$i')) i,
-                ].take(p.giftsLeft(g, weather: weather, now: now)))
+                ].take(p.giftsLeft(g, weather: weather, afterRain: afterRain, now: now)))
                   _GiftSpot(
                     key: ValueKey('${g.id}$i'),
                     gift: g,
@@ -134,6 +153,17 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
                     onTake: (at) => _take(g, i, at),
                   ),
             for (final pop in _pops) _PopUp(key: ValueKey(pop.id), pop: pop),
+            // Primera partida guiada: primero un lugar para jugar, después el Mercado.
+            if (widget.side == 0 && p.gardenNameOffered && p.guideStep == 0)
+              _GuideHint(key: const ValueKey('guide0'), around: layout.places[Place.sand]!, text: tr('guide.play')),
+            if (widget.side == 0 && p.guideStep == 1)
+              _GuideHint(
+                key: const ValueKey('guide1'),
+                around: layout.places[Place.market]!,
+                text: tr('guide.market'),
+                below: true,
+                onTap: () => p.advanceGuide(2),
+              ),
             const Positioned(left: 12, top: 4, child: GardenSign()),
             Positioned(
               right: 10,
@@ -145,6 +175,89 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
       },
     );
   }
+}
+
+/// Un brillo que late alrededor de un lugar y una burbuja que dice qué hacer.
+/// Sin [onTap] no tapa los toques: el lugar se sigue pudiendo tocar.
+class _GuideHint extends StatefulWidget {
+  final Rect around;
+  final String text;
+  final bool below;
+  final VoidCallback? onTap;
+  const _GuideHint({super.key, required this.around, required this.text, this.below = false, this.onTap});
+
+  @override
+  State<_GuideHint> createState() => _GuideHintState();
+}
+
+class _GuideHintState extends State<_GuideHint> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.around;
+    final bubble = Container(
+      constraints: const BoxConstraints(maxWidth: 240),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Palette.paper,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [BoxShadow(color: Palette.ink.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 3))],
+      ),
+      child: Text(
+        widget.text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Palette.ink),
+      ),
+    );
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          Positioned.fromRect(
+            rect: r.inflate(6),
+            child: IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _c,
+                builder: (context, _) => DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Palette.lantern.withValues(alpha: 0.4 + 0.5 * _c.value), width: 3),
+                    color: Palette.lantern.withValues(alpha: 0.08 * _c.value),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 16,
+            right: 16,
+            top: widget.below ? r.bottom + 12 : max(8, r.top - 64),
+            child: Center(
+              child: CalmAppear(
+                delay: const Duration(milliseconds: 400),
+                child: widget.onTap == null
+                    ? IgnorePointer(child: bubble)
+                    : GestureDetector(onTap: widget.onTap, child: bubble),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Si paró de llover hace poco (todavía se ve el arcoíris).
+bool _rainbowTime(DateTime now) {
+  final ws = WeatherService.instance;
+  final at = ws.rainStoppedAt(now);
+  return at != null && now.difference(at) < ws.rules.rainbowFor;
 }
 
 /// Zona tocable de un lugar: un velo de luz suave mientras se apoya el dedo.
@@ -196,7 +309,13 @@ class _Label extends StatelessWidget {
     Place.sand => tr('mg.sand.name'),
     Place.stack => tr('mg.stack.name'),
     Place.rain => tr('mg.rain.name'),
-    Place.pond || Place.shishi || Place.leaves || Place.moss || Place.bonsai => tr('mg.${p.name}.name'),
+    Place.pond ||
+    Place.shishi ||
+    Place.leaves ||
+    Place.moss ||
+    Place.bonsai ||
+    Place.enso ||
+    Place.bell => tr('mg.${p.name}.name'),
   };
 
   @override
@@ -337,12 +456,18 @@ class _GiftSpot extends StatelessWidget {
     'dew': [Offset(0.05, 0.64), Offset(0.37, 0.57), Offset(0.95, 0.9)],
     'firefly': [Offset(0.3, 0.5), Offset(0.62, 0.42), Offset(0.88, 0.62)],
     'snowflake': [Offset(0.24, 0.36), Offset(0.7, 0.3)],
+    'rainbow': [Offset(0.5, 0.27)],
+    'seed': [Offset(0.15, 0.4), Offset(0.6, 0.46)],
+    'lastray': [Offset(0.82, 0.4)],
   };
 
   _GiftLook get _look => switch (gift.id) {
     'firefly' => _GiftLook.firefly,
     'snowflake' => _GiftLook.flake,
     'rainjar' => _GiftLook.rain,
+    'rainbow' => _GiftLook.rainbow,
+    'seed' => _GiftLook.seed,
+    'lastray' => _GiftLook.ray,
     _ => _GiftLook.dew,
   };
 
@@ -366,6 +491,9 @@ class _GiftSpot extends StatelessWidget {
       // El copo baja despacio meciéndose y vuelve a empezar.
       _GiftLook.flake => base + Offset(14 * sin(t * 0.7 + index), 40 * (((t * 0.06 + index * 0.37) % 1) - 0.5)),
       _GiftLook.rain => base + Offset(0, 3 * sin(t * 1.6 + index)),
+      // La semilla de diente de león flota y va y viene con la brisa.
+      _GiftLook.seed => base + Offset(30 * sin(t * 0.25 + index * 2), 10 * sin(t * 0.9 + index)),
+      _GiftLook.rainbow || _GiftLook.ray => base + Offset(0, 4 * sin(t * 0.8 + index)),
       _GiftLook.dew => base,
     };
   }
@@ -400,7 +528,7 @@ class _GiftSpot extends StatelessWidget {
   }
 }
 
-enum _GiftLook { dew, firefly, rain, flake }
+enum _GiftLook { dew, firefly, rain, flake, rainbow, seed, ray }
 
 class _GiftPainter extends CustomPainter {
   final _GiftLook look;
@@ -440,6 +568,51 @@ class _GiftPainter extends CustomPainter {
           canvas.drawLine(c + d * 0.55, c + d * 0.55 + Offset.fromDirection(i * pi / 3 + 0.7, 3), arm);
           canvas.drawLine(c + d * 0.55, c + d * 0.55 + Offset.fromDirection(i * pi / 3 - 0.7, 3), arm);
         }
+      case _GiftLook.rainbow:
+        // Una gota que refleja el arcoíris.
+        _glow(canvas, c, const Color(0xFFFFF3C4), 18, 0.55 * pulse);
+        canvas.drawCircle(
+          c,
+          7,
+          Paint()
+            ..shader = const SweepGradient(
+              colors: [
+                Color(0xFFE57373),
+                Color(0xFFFFB74D),
+                Color(0xFFFFF176),
+                Color(0xFF81C784),
+                Color(0xFF64B5F6),
+                Color(0xFF9575CD),
+                Color(0xFFE57373),
+              ],
+            ).createShader(Rect.fromCircle(center: c, radius: 7)),
+        );
+        canvas.drawCircle(c + const Offset(-2, -2), 2, Paint()..color = Colors.white.withValues(alpha: 0.8));
+      case _GiftLook.seed:
+        // Vilano: un tallito con pelos finos en abanico.
+        _glow(canvas, c, Colors.white, 14, 0.35 * pulse);
+        final hair = Paint()
+          ..color = Colors.white.withValues(alpha: 0.9)
+          ..strokeWidth = 1
+          ..strokeCap = StrokeCap.round;
+        final top = c + const Offset(0, -2);
+        for (var i = 0; i < 9; i++) {
+          canvas.drawLine(top, top + Offset.fromDirection(-pi + pi * i / 8, 8), hair);
+        }
+        canvas.drawLine(top, c + const Offset(0, 8), hair..color = const Color(0xFFD8CBB0));
+        canvas.drawCircle(c + const Offset(0, 8), 1.6, Paint()..color = Palette.wood);
+      case _GiftLook.ray:
+        // Destello dorado del último rayo de sol.
+        _glow(canvas, c, Palette.lantern, 18, 0.6 * pulse);
+        final beam = Paint()
+          ..color = const Color(0xFFFFE6A8).withValues(alpha: 0.9)
+          ..strokeWidth = 1.6
+          ..strokeCap = StrokeCap.round;
+        for (var i = 0; i < 4; i++) {
+          final d = Offset.fromDirection(i * pi / 4, 4 + 5 * pulse);
+          canvas.drawLine(c - d, c + d, beam);
+        }
+        canvas.drawCircle(c, 2.4, Paint()..color = Colors.white);
       case _GiftLook.dew || _GiftLook.rain:
         final rain = look == _GiftLook.rain;
         final drop = Path()
@@ -531,9 +704,10 @@ class _MomentChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = Progress.instance;
     final phase = p.dayCycle.phaseAt(now);
-    final gifts = p.dayCycle.giftsAt(now, weather);
-    final left = gifts.fold(0, (n, g) => n + p.giftsLeft(g, weather: weather, now: now));
-    final open = gifts.where((g) => p.giftsLeft(g, weather: weather, now: now) > 0).firstOrNull;
+    final after = _rainbowTime(now);
+    final gifts = p.dayCycle.giftsAt(now, weather, afterRain: after);
+    final left = gifts.fold(0, (n, g) => n + p.giftsLeft(g, weather: weather, afterRain: after, now: now));
+    final open = gifts.where((g) => p.giftsLeft(g, weather: weather, afterRain: after, now: now) > 0).firstOrNull;
     return GestureDetector(
       onTap: () => _showNowSheet(context, now: now, weather: weather),
       child: Container(
@@ -580,7 +754,7 @@ Future<void> _showNowSheet(BuildContext context, {required DateTime now, require
         final p = Progress.instance;
         final phase = p.dayCycle.phaseAt(now);
         final w = ws.at(now);
-        final gifts = p.dayCycle.giftsAt(now, w);
+        final gifts = p.dayCycle.giftsAt(now, w, afterRain: _rainbowTime(now));
         final hint = gifts.isEmpty ? tr('moment.${phase.name}.hint') : tr('gift.${gifts.first.id}.hint');
         return SafeArea(
           child: Padding(
@@ -640,7 +814,10 @@ class _SkyLifePainter extends CustomPainter {
   final Animation<double> life;
   final double daylight, warmth;
   final Weather weather;
-  _SkyLifePainter(this.life, {required this.daylight, required this.warmth, required this.weather})
+
+  /// Si cruzan hojas con el viento.
+  final bool windy;
+  _SkyLifePainter(this.life, {required this.daylight, required this.warmth, required this.weather, this.windy = false})
     : super(repaint: life);
 
   bool get _wet => weather == Weather.rain || weather == Weather.storm;
@@ -664,6 +841,7 @@ class _SkyLifePainter extends CustomPainter {
       }
     }
     _paintClouds(canvas, size, t);
+    if (windy) _paintWindLeaves(canvas, size, t);
     switch (weather) {
       case Weather.rain || Weather.storm:
         _paintRain(canvas, size, t);
@@ -719,6 +897,31 @@ class _SkyLifePainter extends CustomPainter {
     }
   }
 
+  /// Algunas hojas que cruzan el jardín con el viento, girando.
+  void _paintWindLeaves(Canvas canvas, Size size, double t) {
+    final w = size.width, h = size.height;
+    final rng = Random(37);
+    for (var i = 0; i < 7; i++) {
+      final speed = 40 + 30 * rng.nextDouble();
+      final y0 = h * (0.25 + 0.6 * rng.nextDouble());
+      final span = w + 80;
+      final x = (rng.nextDouble() * span + t * speed) % span - 40;
+      final y = y0 + 18 * sin(t * 1.3 + i * 2) + x * 0.06;
+      final spin = t * (2 + rng.nextDouble() * 2) + i;
+      final color = [Palette.moss, Palette.lantern, Palette.wood][i % 3];
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(spin);
+      canvas.scale(1, 0.4 + 0.6 * cos(spin * 0.7).abs());
+      final leaf = Path()
+        ..moveTo(-6, 0)
+        ..quadraticBezierTo(0, -4, 6, 0)
+        ..quadraticBezierTo(0, 4, -6, 0);
+      canvas.drawPath(leaf, Paint()..color = color.withValues(alpha: 0.75));
+      canvas.restore();
+    }
+  }
+
   void _paintSnow(Canvas canvas, Size size, double t) {
     final rng = Random(11);
     final paint = Paint()..color = Colors.white.withValues(alpha: 0.85);
@@ -768,5 +971,6 @@ class _SkyLifePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SkyLifePainter old) => old.daylight != daylight || old.warmth != warmth || old.weather != weather;
+  bool shouldRepaint(_SkyLifePainter old) =>
+      old.daylight != daylight || old.warmth != warmth || old.weather != weather || old.windy != windy;
 }

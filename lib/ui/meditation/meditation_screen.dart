@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../garden/economy.dart';
 import '../../garden/meditation_rules.dart';
 import '../../garden/progress.dart';
+import '../../garden/reminders.dart';
 import '../../i18n/i18n.dart';
 import '../fx/sfx.dart';
 import '../theme/palette.dart';
@@ -49,6 +50,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   void _start() {
     p.startMeditation(_minutes);
+    Reminders.instance.meditationStarted(p.meditationStartedAt!, _minutes);
     _bellsRung = 0;
     SoundBoard.instance.play(Sfx.bell, volume: 0.7);
     if (_ambience != null) SoundBoard.instance.loop(_ambience!, volume: 0.3);
@@ -80,6 +82,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
     Haptics.light();
     setState(() {
       _result = p.finishMeditation();
+      Reminders.instance.meditationEnded();
       _phase = _Phase.result;
     });
   }

@@ -40,6 +40,12 @@ class RainGame extends FlameGame with TapCallbacks {
   double? _outroAt;
   bool _finished = false;
   final _wobble = <int, double>{};
+
+  /// Último toque en cada vasija, para el doble toque que la vacía.
+  final _lastTap = <int, double>{};
+
+  /// Desde cuándo se avisa cómo vaciar una vasija que rebalsa (solo la primera vez).
+  double? _overflowHintAt;
   final _rng = Random();
   final _bgDrops = <_Drop>[]; // lluvia decorativa
   bool _windSound = false;
@@ -142,13 +148,27 @@ class RainGame extends FlameGame with TapCallbacks {
     // Toda la columna de la vasija bajo el alero cuenta: el blanco es enorme.
     if (p.y < size.y * 0.35) return;
     final i = (p.x / colW).floor().clamp(0, vessels - 1);
+    final last = _lastTap[i];
+    _lastTap[i] = _t;
+    if (last != null && _t - last < b.d('doubleTapMs') / 1000 && judge.empty(i)) {
+      // Vaciada: el agua sobrante se derrama y suena limpia otra vez.
+      _wobble[i] = 1;
+      _lastTap.remove(i);
+      SoundBoard.instance.play(Sfx.good, volume: 0.4);
+      _splash(Vector2(vesselX(i), rimY), Grade.perfect);
+      return;
+    }
+    final spilling = judge.overflowing[i];
     final note = judge.tap(i, _t);
     _wobble[i] = 1;
+    if (!spilling && judge.overflowing[i]) _overflowHintAt ??= _t;
     if (note == null) {
       SoundBoard.instance.play(Sfx.uiTap, volume: 0.2);
       return;
     }
-    SoundBoard.instance.play(Sfx.rainNote, variant: i + 1, volume: 0.5 + 0.1 * note.grade!.index);
+    // Rebalsando, la nota suena apagada.
+    final muffle = spilling ? 0.35 : 1.0;
+    SoundBoard.instance.play(Sfx.rainNote, variant: i + 1, volume: (0.5 + 0.1 * note.grade!.index) * muffle);
     final at = Vector2(vesselX(i), rimY);
     _splash(at, note.grade!);
     celebrate(world, at, note.grade!, sound: false);
@@ -245,10 +265,27 @@ class RainGame extends FlameGame with TapCallbacks {
       Rect.fromCenter(center: Offset(x, rimY), width: r * 1.6, height: r * 0.42),
       Paint()..color = Color.lerp(hue, Palette.ink, 0.55)!,
     );
+    // El agua sube con los aciertos; rebalsando, desborda por los costados.
+    final level = judge.level(i);
+    final water = Color.lerp(const Color(0xFF2C4650), const Color(0xFF5C9EA8), level)!;
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(x, rimY + 2), width: r * 1.3, height: r * 0.28),
-      Paint()..color = const Color(0xFF2C4650),
+      Rect.fromCenter(center: Offset(x, rimY + 2 - 3 * level), width: r * 1.3, height: r * 0.28),
+      Paint()..color = water,
     );
+    if (judge.overflowing[i]) {
+      final drip = Paint()..color = const Color(0xFF8FC6D0).withValues(alpha: 0.85);
+      for (final side in [-1.0, 1.0]) {
+        for (var k = 0; k < 3; k++) {
+          final fallK = ((_t * 0.9 + k / 3 + (side > 0 ? 0.5 : 0)) % 1);
+          final dx = x + side * (r * 0.8 + r * 0.45 * sin(fallK * pi * 0.6));
+          canvas.drawCircle(Offset(dx, rimY + r * 1.5 * fallK), 2.6 * (1 - fallK * 0.5), drip);
+        }
+      }
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(x, rimY + r * 1.65), width: r * 2.2, height: r * 0.3),
+        Paint()..color = const Color(0xFF8FC6D0).withValues(alpha: 0.35),
+      );
+    }
   }
 
   void _drawNotes(Canvas canvas) {
@@ -309,6 +346,10 @@ class RainGame extends FlameGame with TapCallbacks {
       _text(canvas, tr('rain.combo', {'n': judge.combo}), Offset(size.x / 2, size.y * 0.27), 22);
     }
     if (_t < leadIn + 1.5) _text(canvas, tr('rain.hint'), Offset(size.x / 2, size.y * 0.88), 16);
+    final hintAt = _overflowHintAt;
+    if (hintAt != null && _t - hintAt < 4 && judge.overflowing.contains(true)) {
+      _text(canvas, tr('rain.overflow'), Offset(size.x / 2, size.y * 0.88), 16);
+    }
     final gust = _gustComing;
     if (gust != null) {
       // Aviso: líneas de viento que cruzan y el texto mientras se acerca.

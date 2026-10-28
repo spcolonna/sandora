@@ -517,6 +517,32 @@ BLOCKS = [
                 f'lanterns, trees, bamboo or objects; sky; {NO_TEXT}; people or animals; frame or border; '
                 f'{NO_STYLE}.'),
         ]),
+    dict(
+        id='13', title='Caligrafía (Ensō) y Templo (Campana)', folder='store/art/temple/',
+        intro=('Las dos zonas nuevas de la vista del estanque y las piezas de sus minijuegos. El código dibuja la '
+               'tinta del ensō y mueve el tronco y la campana, así que cada pieza va sola y recortada. Adjuntá '
+               '`store/art/style/style_keyart.webp`.'),
+        images=[
+            obj('obj_callig_hall', 'A tiny open Japanese calligraphy pavilion: dark curved tile roof, two wooden '
+                'posts, a paper back wall with one hanging scroll showing a black ensō circle, on a low wooden floor. '
+                'Seen from the front and a little from above.', 'about 220 pixels tall'),
+            obj('obj_temple_belltower', 'A small Japanese bell tower (shōrō) with NO bell inside: four wooden posts, '
+                'a dark curved tile roof and a crossbeam to hang a bell from. Seen from the front.',
+                'about 300 pixels tall'),
+            obj('obj_temple_bell', 'A single Japanese bronze temple bell (bonshō) hanging alone, tall and rounded, '
+                'aged greenish-brown bronze with raised bands and rows of small round knobs near the top.',
+                'about 260 pixels tall'),
+            obj('obj_temple_log', 'A single horizontal wooden striking log (shumoku) for a temple bell, a smooth '
+                'round beam of pale wood with a darker worn tip at one end, lying exactly sideways.',
+                'about 240 pixels wide'),
+            img('bg_enso_paper', PORTRAIT_OPAQUE,
+                f'This is the background of the ensō minigame in {GAME}. The player paints a black brush circle on '
+                'top of it.',
+                'A sheet of warm cream washi paper seen straight on, with soft visible fibers and a small red '
+                'square seal stamp near the lower right corner.',
+                'Even and calm everywhere, especially the center, so the black ink reads clearly. ' + CROP_NOTE,
+                f'ink strokes or circles; characters or writing; {NO_TEXT}; frame or border; {NO_STYLE}.'),
+        ]),
 ]
 
 
