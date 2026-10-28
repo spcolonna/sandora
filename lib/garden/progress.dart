@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../balance/balance.dart';
+import '../minigames/sand/sand_shapes.dart';
 import 'day_cycle.dart';
 import 'economy.dart';
 import 'levels.dart';
@@ -13,7 +14,9 @@ import 'weather.dart';
 
 /// Una piedra de la torre guardada en el jardín (unidades del mundo del
 /// minijuego: centro x relativo a la base, ancho y alto).
-typedef TowerStone = ({double x, double w, double h});
+/// Una piedra de la torre: centro, tamaño y cómo se ve (tipo, tono y semilla
+/// de `StoneShape`).
+typedef TowerStone = ({double x, double w, double h, int kind, int tone, int seed});
 
 /// Progreso del jugador: monedas, serenidad y lo que quedó en el jardín.
 /// Singleton sobre SharedPreferences; todo se guarda al momento, así cerrar
@@ -52,6 +55,7 @@ class Progress extends ChangeNotifier {
   /// Último dibujo del arenero: puntos normalizados 0..1, x e y alternados.
   List<double> sandDrawing = [];
   int sandFigures = 0;
+  SandShape? sandLastShape;
   int rainBest = 0;
 
   /// Nombre que el jugador le puso a su jardín; null hasta que lo elige.
@@ -74,12 +78,21 @@ class Progress extends ChangeNotifier {
   String _playsDay = '';
   Map<String, int> _plays = {};
 
+  /// Días distintos en que se abrió el jardín: destraban minijuegos (GDD).
+  int daysPlayed = 0;
+  int _lastDay = -1;
+  late Map<String, num> _unlockDays;
+
+  /// Minijuegos destrabados que ya se anunciaron en el jardín.
+  Set<String> unlocksSeen = {};
+
   Future<void> load(Balance balance, {DateTime? now}) async {
     economy = Economy(balance);
     levels = LevelRules(balance);
     meditationRules = MeditationRules(balance);
     shop = ShopRules(balance);
     dayCycle = DayCycle(balance);
+    _unlockDays = balance.section('unlocks').nums('days');
     _prefs = await SharedPreferences.getInstance();
     now ??= DateTime.now();
     pebbles = _prefs.getInt('pebbles') ?? 0;
@@ -93,15 +106,26 @@ class Progress extends ChangeNotifier {
       final days = now.difference(DateTime.fromMillisecondsSinceEpoch(savedAt)).inMinutes / (60 * 24);
       serenity = economy.decayedSerenity(serenity, days);
     }
+    final saved = jsonDecode(_prefs.getString('tower') ?? '[]') as List;
     tower = [
-      for (final s in jsonDecode(_prefs.getString('tower') ?? '[]') as List)
-        (x: (s[0] as num).toDouble(), w: (s[1] as num).toDouble(), h: (s[2] as num).toDouble()),
+      for (var i = 0; i < saved.length; i++)
+        (
+          x: (saved[i][0] as num).toDouble(),
+          w: (saved[i][1] as num).toDouble(),
+          h: (saved[i][2] as num).toDouble(),
+          // Las torres guardadas antes de los tipos de piedra solo tenían x, w y h.
+          kind: saved[i].length > 3 ? saved[i][3] as int : 0,
+          tone: saved[i].length > 3 ? saved[i][4] as int : i % 3,
+          seed: saved[i].length > 3 ? saved[i][5] as int : i * 7919,
+        ),
     ];
     bestTower = _prefs.getInt('bestTower') ?? 0;
     final collected = _prefs.getInt('towerCollectedAt');
     towerCollectedAt = collected == null ? null : DateTime.fromMillisecondsSinceEpoch(collected);
     sandDrawing = [for (final v in jsonDecode(_prefs.getString('sandDrawing') ?? '[]') as List) (v as num).toDouble()];
     sandFigures = _prefs.getInt('sandFigures') ?? 0;
+    final lastShape = _prefs.getInt('sandLastShape');
+    sandLastShape = lastShape == null ? null : SandShape.values[lastShape];
     rainBest = _prefs.getInt('rainBest') ?? 0;
     _playsDay = _prefs.getString('playsDay') ?? '';
     _plays = (jsonDecode(_prefs.getString('plays') ?? '{}') as Map).map((k, v) => MapEntry(k as String, v as int));
@@ -127,6 +151,10 @@ class Progress extends ChangeNotifier {
     _meditationGraceDay = _prefs.getInt('meditation.graceDay');
     _meditationDay = _prefs.getInt('meditation.day') ?? 0;
     _meditationMinutesToday = _prefs.getInt('meditation.minutesToday') ?? 0;
+    daysPlayed = _prefs.getInt('days.played') ?? 0;
+    _lastDay = _prefs.getInt('days.last') ?? -1;
+    unlocksSeen = (_prefs.getStringList('unlocks.seen') ?? []).toSet();
+    countDay(now);
     // Una sesión que ya cumplió su tiempo con la app cerrada se cobra al abrir;
     // si todavía no terminó, el jardín la retoma.
     if (meditationStartedAt != null && meditationElapsed(now: now).inMinutes >= meditationChosen) {
@@ -152,6 +180,46 @@ class Progress extends ChangeNotifier {
       _prefs.setString('gardenName', gardenName!);
     }
     notifyListeners();
+  }
+
+  /// Suma el día de hoy a los días de juego, una sola vez por día.
+  void countDay(DateTime now) {
+    final today = _dayIndex(now);
+    if (today == _lastDay) return;
+    _lastDay = today;
+    daysPlayed++;
+    _prefs.setInt('days.last', today);
+    _prefs.setInt('days.played', daysPlayed);
+  }
+
+  /// Para probar: `--dart-define=SANDORA_DAY=5` juega como si fuera el día 5
+  /// (y abre las zonas cuyo nivel no supere ese número).
+  static const _dayOverride = int.fromEnvironment('SANDORA_DAY');
+  int get playDay => _dayOverride > 0 ? _dayOverride : daysPlayed;
+
+  /// Día de juego en que se abre [game] (1: desde el principio).
+  int unlockDay(String game) => (_unlockDays[game] ?? 1).toInt();
+
+  /// La zona que destraba [game], si tiene una con su mismo id (el Estanque
+  /// de lotos se abre al comprar el Estanque).
+  Expansion? unlockZone(String game) => levels.expansions.where((e) => e.zone && e.id == game).firstOrNull;
+
+  bool gameUnlocked(String game) {
+    final zone = unlockZone(game);
+    if (zone != null) return expansions.contains(zone.id) || _dayOverride >= zone.level;
+    return playDay >= unlockDay(game);
+  }
+
+  /// Minijuegos que se abrieron y todavía no se anunciaron (los del primer
+  /// día no se anuncian).
+  List<String> newUnlocks(Iterable<String> games) => [
+    for (final g in games)
+      if (gameUnlocked(g) && !unlocksSeen.contains(g) && (unlockDay(g) > 1 || unlockZone(g) != null)) g,
+  ];
+
+  void markUnlocksSeen(Iterable<String> games) {
+    unlocksSeen.addAll(games);
+    _prefs.setStringList('unlocks.seen', unlocksSeen.toList());
   }
 
   int get level => levels.levelFor(calm);
@@ -382,7 +450,7 @@ class Progress extends ChangeNotifier {
     return reward.withCalm(gained, newLevel, lotus: lotusGain);
   }
 
-  /// La torre nueva reemplaza a la anterior; lo juntado hasta ahora se cobra.
+  /// La torre como quedó después de una partida; lo juntado hasta ahora se cobra.
   void setTower(List<TowerStone> stones, {DateTime? now}) {
     collectTower(now: now);
     tower = stones;
@@ -391,7 +459,7 @@ class Progress extends ChangeNotifier {
     _prefs.setString(
       'tower',
       jsonEncode([
-        for (final s in stones) [s.x, s.w, s.h],
+        for (final s in stones) [s.x, s.w, s.h, s.kind, s.tone, s.seed],
       ]),
     );
     _prefs.setInt('bestTower', bestTower);
@@ -418,9 +486,11 @@ class Progress extends ChangeNotifier {
     return gain;
   }
 
-  void setSandDrawing(List<double> points) {
+  void setSandDrawing(List<double> points, {SandShape? shape}) {
     sandDrawing = points;
     sandFigures++;
+    sandLastShape = shape;
+    if (shape != null) _prefs.setInt('sandLastShape', shape.index);
     _prefs.setString('sandDrawing', jsonEncode(points.map((v) => double.parse(v.toStringAsFixed(4))).toList()));
     _prefs.setInt('sandFigures', sandFigures);
     notifyListeners();
@@ -431,6 +501,16 @@ class Progress extends ChangeNotifier {
     if (score <= rainBest) return false;
     rainBest = score;
     _prefs.setInt('rainBest', score);
+    return true;
+  }
+
+  /// Mejor puntaje de los minijuegos que no guardan otra cosa.
+  int best(String game) => _prefs.getInt('best.$game') ?? 0;
+
+  /// Devuelve true si es récord.
+  bool setBest(String game, int score) {
+    if (score <= best(game)) return false;
+    _prefs.setInt('best.$game', score);
     return true;
   }
 

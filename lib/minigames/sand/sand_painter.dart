@@ -71,7 +71,8 @@ Path pathOf(List<P> pts, Rect r) {
       final off = (k - (tines - 1) / 2) * spacing;
       final groove = Path(), ridge = Path();
       for (var i = 0; i < pts.length; i++) {
-        final o = pts[i] + normals[i] * off;
+        // Cada diente tiembla un poco: la arena no deja surcos perfectos.
+        final o = pts[i] + normals[i] * (off + spacing * 0.14 * sin(i * 0.41 + k * 1.9));
         final o2 = o + normals[i] * (shine.strokeWidth * 0.9);
         if (i == 0) {
           groove.moveTo(o.dx, o.dy);

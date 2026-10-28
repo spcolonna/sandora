@@ -31,8 +31,9 @@ void main() {
   });
 
   test('la torre junta por hora según su altura, con tope', () {
-    expect(eco.towerYield(10, 1), 10 * balance.stack.d('pebblesPerHourPerStone'));
+    expect(eco.towerYield(16, 1), (4 * balance.stack.d('pebblesPerHour')).floor());
     expect(eco.towerYield(10, 1000), eco.towerYield(10, balance.stack.d('maxHoursStored')));
+    expect(eco.towerRate(500), lessThan(eco.towerRate(10) * 10), reason: 'rinde por la raíz de la altura');
   });
 
   test('una sesión de 3 minutos alcanza para algo visible (GDD)', () {
@@ -52,7 +53,10 @@ void main() {
       final r = p.finishRun('sand', 2, now: day);
       expect(p.pebbles, before + r.pebbles);
       expect(p.essences[Essence.sand], greaterThan(0));
-      p.setTower([(x: 0, w: 2, h: 0.6), (x: 0.1, w: 1.8, h: 0.5)], now: day);
+      p.setTower([
+        (x: 0, w: 2, h: 0.6, kind: 0, tone: 0, seed: 1),
+        (x: 0.1, w: 1.8, h: 0.5, kind: 1, tone: 2, seed: 2),
+      ], now: day);
       expect(p.bestTower, 2);
       expect(p.towerPending(now: day.add(const Duration(hours: 3))), eco.towerYield(2, 3));
       final got = p.collectTower(now: day.add(const Duration(hours: 3)));

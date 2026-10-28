@@ -12,6 +12,8 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
+import '../stack/stack_rules.dart';
+import '../stack/stone_painter.dart';
 import '../common/minigame_screen.dart';
 import 'sand_painter.dart';
 import 'sand_shapes.dart';
@@ -20,7 +22,9 @@ enum _Phase { draw, rake, done }
 
 /// Arenero: se recorre una figura guía sin levantar el dedo; después un
 /// rastrillo pasa por el trazo del jugador (no por la guía) y deja surcos.
-/// El dibujo queda en el jardín hasta el próximo.
+/// La figura sale al azar y cada vez distinta (tamaño, giro, rasgo), y a veces
+/// hay una piedrita cerca del camino: el rastrillo la rodea, y rodearla limpio
+/// suma un poco. El dibujo queda en el jardín hasta el próximo.
 class SandGame extends FlameGame with DragCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.sand;
@@ -30,6 +34,9 @@ class SandGame extends FlameGame with DragCallbacks {
   late final SandShape shape;
   late final List<P> guide;
   late final SandScorer scorer;
+  Pebble? pebble;
+  bool _pebbleTouched = false, _pebbleNear = false;
+  final _rng = Random();
 
   final strokes = <List<P>>[];
   P? _smoothed;
@@ -47,11 +54,14 @@ class SandGame extends FlameGame with DragCallbacks {
   @override
   Future<void> onLoad() async {
     camera.viewfinder.anchor = Anchor.topLeft;
-    final done = Progress.instance.sandFigures;
-    shape = SandShape.values[done % SandShape.values.length];
-    guide = shapePoints(shape);
-    final tol = done < b.i('hardAfterFigures') ? b.d('toleranceEasy') : b.d('toleranceHard');
+    final p = Progress.instance;
+    final done = p.sandFigures;
+    final learning = b.i('hardAfterFigures');
+    shape = pickShape(_rng, done: done, last: p.sandLastShape, learning: learning);
+    guide = shapePoints(shape, done == 0 ? plainVariant : randomVariant(_rng, b));
+    final tol = done < learning ? b.d('toleranceEasy') : b.d('toleranceHard');
     scorer = SandScorer(b, guide, tol);
+    if (done >= b.i('pebbleFrom')) pebble = placePebble(_rng, guide, tol, b);
   }
 
   /// Cuadro de dibujo en pantalla.
@@ -66,7 +76,7 @@ class SandGame extends FlameGame with DragCallbacks {
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     if (_phase != _Phase.draw) return;
-    final p = _toBox(event.canvasPosition);
+    final p = _avoid(_toBox(event.canvasPosition));
     _smoothed = p;
     strokes.add([p]);
     SoundBoard.instance.loop(Ambience.rake, volume: 0.4, fade: const Duration(milliseconds: 150));
@@ -78,9 +88,23 @@ class SandGame extends FlameGame with DragCallbacks {
     final raw = _toBox(event.canvasEndPosition);
     // Suavizado en tiempo real (asistencia invisible).
     final k = b.d('smoothing');
-    final s = (x: _smoothed!.x * k + raw.x * (1 - k), y: _smoothed!.y * k + raw.y * (1 - k));
+    final s = _avoid((x: _smoothed!.x * k + raw.x * (1 - k), y: _smoothed!.y * k + raw.y * (1 - k)));
     _smoothed = s;
     strokes.last.add(s);
+  }
+
+  /// Corre el trazo fuera de la piedrita y anota si se la rozó o se la rodeó.
+  P _avoid(P p) {
+    final s = pebble;
+    if (s == null) return p;
+    final d = sqrt(pow(p.x - s.at.x, 2) + pow(p.y - s.at.y, 2));
+    if (d < s.r * b.d('pebbleNear')) _pebbleNear = true;
+    if (d < s.r && !_pebbleTouched) {
+      _pebbleTouched = true;
+      Haptics.light();
+      SoundBoard.instance.play(Sfx.stackPlace, volume: 0.2);
+    }
+    return deflect(p, s);
   }
 
   @override
@@ -93,7 +117,8 @@ class SandGame extends FlameGame with DragCallbacks {
 
   void _startRake() {
     _phase = _Phase.rake;
-    _score = scorer.score(strokes);
+    final clean = pebble != null && _pebbleNear && !_pebbleTouched;
+    _score = scorer.score(strokes, bonus: clean ? b.d('pebbleBonus') : 0);
     // El rastrillo pasa por una versión más suave del trazo: el jugador ve su
     // dibujo, pero más prolijo (asistencia invisible).
     for (var i = 0; i < strokes.length; i++) {
@@ -131,7 +156,7 @@ class SandGame extends FlameGame with DragCallbacks {
       for (final st in strokes)
         for (final p in resample(st, 0.012)) ...[p.x, p.y],
     ];
-    Progress.instance.setSandDrawing(flat);
+    Progress.instance.setSandDrawing(flat, shape: shape);
     Future.delayed(const Duration(milliseconds: 1300), () {
       finish(RunOutcome(score: (s.total * 1000).round(), stars: s.stars, headline: tr('sand.shape.${shape.name}')));
     });
@@ -146,6 +171,20 @@ class SandGame extends FlameGame with DragCallbacks {
     }
     canvas.drawPicture(_sandTexture!);
     final r = box;
+    final stone = pebble;
+    if (stone != null) {
+      final c = Offset(r.left + stone.at.x * r.width, r.top + stone.at.y * r.height);
+      final px = stone.r * r.width * 2;
+      canvas.drawOval(
+        Rect.fromCenter(center: c + Offset(px * 0.08, px * 0.22), width: px * 1.1, height: px * 0.7),
+        Paint()..color = Palette.sandShadow.withValues(alpha: 0.7),
+      );
+      canvas.save();
+      canvas.translate(c.dx, c.dy);
+      canvas.scale(px / 0.36);
+      paintStone(canvas, _pebbleLook);
+      canvas.restore();
+    }
     // Guía tenue.
     if (_guideAlpha > 0) {
       final path = pathOf(guide, r);
@@ -194,6 +233,8 @@ class SandGame extends FlameGame with DragCallbacks {
     }
     super.render(canvas);
   }
+
+  late final _pebbleLook = StoneShape(StoneKind.pebble, 0.36, 0.28, _rng.nextInt(stoneTones), _rng.nextInt(1 << 20));
 
   void _hint(Canvas canvas, String s) {
     final tp = TextPainter(

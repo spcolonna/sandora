@@ -19,7 +19,8 @@
       (cuenco, cojín, farol) cuando exista el sistema de objetos.
 - [ ] Integrar `store_feature` (Bloque 9, solo para la tienda). Ya están el logo, el fondo del título
       (`title_bg`) y el cartel del jardín (`ui_garden_sign`).
-- [ ] Ampliaciones: hoy solo los patios hacen algo; las zonas quedan "Próximamente" (`ready: false` en el balance).
+- [ ] Ampliaciones: los patios agrandan el jardín y el Estanque abre el Estanque de lotos; las demás zonas quedan
+      "Próximamente" (`ready: false` en el balance).
 
 ## Próximo: menú y jardín vivo
 - [x] **Entrada al jardín:** puertas shoji que se corren con un destello (`lib/ui/garden/garden_gate.dart`).
@@ -40,16 +41,36 @@
       privacidad; traducir el texto del permiso de ubicación de iOS (`InfoPlist.strings`, hoy solo en inglés).
 - [ ] Más eventos del clima: arcoíris cuando para de llover, charcos, hojas con viento.
 
+## Minijuegos (2026-10-28)
+- [x] **Apilado nuevo:** sin Forge2D; bolsa de 12 piedras por partida (6 tipos) que se suman a la torre guardada.
+      Equilibrio con azar (`StackRules`): el balanceo y el riesgo dependen de qué tan centrada cayó y de la altura;
+      si cede, se cae un tramo (≈ 2·altura^0.6 según lo mal que quedó). Probar torres altas:
+      `--dart-define=SANDORA_TOWER=500`.
+- [x] **Vista del estanque** (deslizar o tocar "Estanque" abajo): Estanque de lotos (3 en línea), Shishi-odoshi,
+      Hojas al viento, Musgo y Poda del bonsái. Todos disponibles desde el inicio.
+- [x] **Desbloqueos por días de juego** (días distintos en que se abrió el jardín; sección `unlocks` del balance):
+      shishi día 2, hojas día 3, musgo día 4, bonsái día 5. Se anuncian una vez al entrar. El Estanque de lotos se
+      abre al comprar la ampliación Estanque (nivel 7). Probar: `--dart-define=SANDORA_DAY=7` (abre todo).
+- [x] Tablón con los récords de los 8 minijuegos (los cerrados muestran "—").
+- [x] **Arenero:** figura al azar sin repetir la anterior (la espiral no sale mientras se aprende), variantes de
+      tamaño, giro, espejo y forma; a veces una piedrita cerca del camino que desvía el trazo (rodearla limpio suma).
+- [x] **Lluvia:** chubascos (la densidad sube y baja) y ráfagas avisadas en las que las gotas caen en diagonal y se
+      adelantan o atrasan hasta 0,1 s.
+- [ ] Lluvia: vasija que rebalsa (idea del plan, quedó para después si hace falta).
+- [x] Prompts de arte: bloques 10 (estanque de lotos), 11 (shishi, hojas, musgo, bonsái) y 12 (vista del estanque).
+- [x] Quitado `flame_forge2d`.
+- [x] Primer toque perdido: la puerta shoji quedaba encima si se la apuraba tocando, y el jardín se recreaba al
+      terminar. Ahora el jardín vive bajo una `GlobalKey` y el PageView se asienta más rápido (300 ms).
+
 ## Etapa avanzada
 - [ ] **Vender lotos** (compra dentro de la app): ya son la moneda escasa del Mercado.
 - [ ] **Más de un jardín:** comprar espacios para tener varios jardines con nombre (GDD, "Más de un jardín"). Implica
       pasar el estado del jardín (torre, arena, ampliaciones, nombre) a una lista por jardín en `Progress`.
 
 ## Diseño (inconsistencias del GDD)
-- [ ] El Apilado dura "sin límite" y el pilar 3 dice "menos de 90 s". Hoy se termina cuando el jugador quiere o
-      cuando se cae la torre.
+- [x] El Apilado duraba "sin límite" contra el pilar 3 ("menos de 90 s"): ahora es una bolsa de 12 piedras.
 - [ ] La regla de las esencias por zona no es uniforme (Piedra da Arena en Apilado y Madera en Musgo; Ensō da Arena).
-      Ningún minijuego inicial da Luz (ahora la da el Modo meditación, desde el nivel 5).
+      Ningún minijuego da Luz (la da el Modo meditación, desde el nivel 5). La Madera ya sale de hojas, musgo y bonsái.
 - [x] Casa de té y Bosque de bambú cuestan Madera y ningún minijuego la da: ahora se consigue en el Mercado
       (trueque por piedritas o arena con límite diario, o por lotos).
-- [ ] La zona "Piedra" no existe en la convención de nombres de assets (`stack`, `moss`).
+- [ ] La zona "Piedra" no existe en la convención de nombres de assets: se usan `stack`, `moss` y `east`.

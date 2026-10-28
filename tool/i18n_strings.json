@@ -146,13 +146,6 @@
   "ja": "{n}個",
   "zh": "{n}块"
  },
- "stack.fell": {
-  "es": "La torre volvió a la tierra",
-  "en": "The tower returned to the earth",
-  "pt": "A torre voltou à terra",
-  "ja": "塔は大地に還った",
-  "zh": "石塔回归大地"
- },
  "sand.hint": {
   "es": "Empezá en el punto y recorré la figura",
   "en": "Start at the dot and trace the shape",
@@ -1111,5 +1104,257 @@
   "pt": "Alguns flocos brilham: toque neles para juntar Luz.",
   "ja": "光る雪の結晶に触れて光を集めましょう。",
   "zh": "有些雪花在发光：轻触它们来收集光。"
+ },
+ "stack.added.one": {
+  "es": "Sumaste {n} piedra",
+  "en": "You added {n} stone",
+  "pt": "Você somou {n} pedra",
+  "ja": "{n}個積んだ",
+  "zh": "叠上了{n}块"
+ },
+ "stack.added.other": {
+  "es": "Sumaste {n} piedras",
+  "en": "You added {n} stones",
+  "pt": "Você somou {n} pedras",
+  "ja": "{n}個積んだ",
+  "zh": "叠上了{n}块"
+ },
+ "stack.lost.one": {
+  "es": "Se cayó {n} piedra",
+  "en": "{n} stone fell",
+  "pt": "Caiu {n} pedra",
+  "ja": "{n}個落ちた",
+  "zh": "掉了{n}块"
+ },
+ "stack.lost.other": {
+  "es": "Se cayeron {n} piedras",
+  "en": "{n} stones fell",
+  "pt": "Caíram {n} pedras",
+  "ja": "{n}個落ちた",
+  "zh": "掉了{n}块"
+ },
+ "stack.bag.one": {
+  "es": "Queda {n} en la bolsa",
+  "en": "{n} left in the bag",
+  "pt": "Resta {n} na bolsa",
+  "ja": "袋に残り{n}個",
+  "zh": "袋里还剩{n}块"
+ },
+ "stack.bag.other": {
+  "es": "Quedan {n} en la bolsa",
+  "en": "{n} left in the bag",
+  "pt": "Restam {n} na bolsa",
+  "ja": "袋に残り{n}個",
+  "zh": "袋里还剩{n}块"
+ },
+ "mg.pond.name": {
+  "es": "Estanque de lotos",
+  "en": "Lotus pond",
+  "pt": "Lago de lótus",
+  "ja": "蓮の池",
+  "zh": "莲花池"
+ },
+ "mg.pond.desc": {
+  "es": "Cambiá dos vecinas para alinear tres iguales",
+  "en": "Swap two neighbors to line up three alike",
+  "pt": "Troque duas vizinhas para alinhar três iguais",
+  "ja": "となり同士を入れ替えて3つそろえよう",
+  "zh": "交换相邻两块，连成三个相同"
+ },
+ "pond.moves.one": {
+  "es": "Queda {n} jugada",
+  "en": "{n} move left",
+  "pt": "Resta {n} jogada",
+  "ja": "残り{n}手",
+  "zh": "还剩{n}步"
+ },
+ "pond.moves.other": {
+  "es": "Quedan {n} jugadas",
+  "en": "{n} moves left",
+  "pt": "Restam {n} jogadas",
+  "ja": "残り{n}手",
+  "zh": "还剩{n}步"
+ },
+ "pond.points": {
+  "es": "{n} puntos",
+  "en": "{n} points",
+  "pt": "{n} pontos",
+  "ja": "{n}点",
+  "zh": "{n}分"
+ },
+ "pond.bloomed.one": {
+  "es": "Floreció {n} loto",
+  "en": "{n} lotus bloomed",
+  "pt": "Floresceu {n} lótus",
+  "ja": "蓮が{n}輪咲いた",
+  "zh": "开了{n}朵莲花"
+ },
+ "pond.bloomed.other": {
+  "es": "Florecieron {n} lotos",
+  "en": "{n} lotuses bloomed",
+  "pt": "Floresceram {n} lótus",
+  "ja": "蓮が{n}輪咲いた",
+  "zh": "开了{n}朵莲花"
+ },
+ "pond.current": {
+  "es": "Se acerca una corriente: esa fila se va a correr",
+  "en": "A current is coming: that row will drift",
+  "pt": "Vem uma correnteza: essa fileira vai se mover",
+  "ja": "流れが来ます。その列がずれます",
+  "zh": "水流将至：那一行会移动"
+ },
+ "garden.patio": {
+  "es": "Patio",
+  "en": "Courtyard",
+  "pt": "Pátio",
+  "ja": "中庭",
+  "zh": "庭院"
+ },
+ "garden.pond": {
+  "es": "Estanque",
+  "en": "Pond",
+  "pt": "Lago",
+  "ja": "池",
+  "zh": "池塘"
+ },
+ "mg.shishi.name": {
+  "es": "Shishi-odoshi",
+  "en": "Shishi-odoshi",
+  "pt": "Shishi-odoshi",
+  "ja": "鹿威し",
+  "zh": "惊鹿"
+ },
+ "mg.shishi.desc": {
+  "es": "Mantené para llenar el bambú y soltá justo antes de que rebalse",
+  "en": "Hold to fill the bamboo and let go just before it overflows",
+  "pt": "Segure para encher o bambu e solte logo antes de transbordar",
+  "ja": "長押しで竹に水をため、あふれる直前に離そう",
+  "zh": "按住给竹筒注水，在溢出前松手"
+ },
+ "mg.leaves.name": {
+  "es": "Hojas al viento",
+  "en": "Leaves in the wind",
+  "pt": "Folhas ao vento",
+  "ja": "風の落ち葉",
+  "zh": "风中落叶"
+ },
+ "mg.leaves.desc": {
+  "es": "Barré las hojas al montón antes de que el viento las desparrame",
+  "en": "Sweep the leaves into the pile before the wind scatters them",
+  "pt": "Varra as folhas para o monte antes que o vento as espalhe",
+  "ja": "風に散らされる前に落ち葉を集めよう",
+  "zh": "在风吹散之前把落叶扫成一堆"
+ },
+ "mg.moss.name": {
+  "es": "Musgo",
+  "en": "Moss",
+  "pt": "Musgo",
+  "ja": "苔",
+  "zh": "苔藓"
+ },
+ "mg.moss.desc": {
+  "es": "Pintá musgo sobre las piedras sin manchar la arena",
+  "en": "Paint moss on the stones without staining the sand",
+  "pt": "Pinte musgo nas pedras sem sujar a areia",
+  "ja": "砂を汚さずに石に苔を描こう",
+  "zh": "在石头上画苔藓，别弄脏沙子"
+ },
+ "mg.bonsai.name": {
+  "es": "Poda del bonsái",
+  "en": "Bonsai pruning",
+  "pt": "Poda do bonsai",
+  "ja": "盆栽の剪定",
+  "zh": "修剪盆景"
+ },
+ "mg.bonsai.desc": {
+  "es": "Cortá las ramas que se salen de la silueta",
+  "en": "Cut the branches that grow out of the silhouette",
+  "pt": "Corte os galhos que saem da silhueta",
+  "ja": "形からはみ出た枝を切ろう",
+  "zh": "剪掉超出轮廓的枝条"
+ },
+ "shishi.hint": {
+  "es": "Mantené apretado para llenar el bambú",
+  "en": "Hold to fill the bamboo",
+  "pt": "Segure para encher o bambu",
+  "ja": "長押しで竹に水をためよう",
+  "zh": "按住给竹筒注水"
+ },
+ "shishi.result": {
+  "es": "{n} de {total} en su punto justo",
+  "en": "{n} of {total} just right",
+  "pt": "{n} de {total} no ponto certo",
+  "ja": "{total}回中{n}回ぴったり",
+  "zh": "{total}次中{n}次恰到好处"
+ },
+ "leaves.result": {
+  "es": "{n} de {total} hojas en el montón",
+  "en": "{n} of {total} leaves in the pile",
+  "pt": "{n} de {total} folhas no monte",
+  "ja": "{total}枚中{n}枚を集めた",
+  "zh": "{total}片中{n}片扫成了堆"
+ },
+ "leaves.time": {
+  "es": "{n} s",
+  "en": "{n} s",
+  "pt": "{n} s",
+  "ja": "{n}秒",
+  "zh": "{n}秒"
+ },
+ "leaves.pile": {
+  "es": "{n} de {total} en el montón",
+  "en": "{n} of {total} in the pile",
+  "pt": "{n} de {total} no monte",
+  "ja": "{total}枚中{n}枚",
+  "zh": "{total}片中{n}片"
+ },
+ "leaves.wind": {
+  "es": "Viene una ráfaga",
+  "en": "A gust is coming",
+  "pt": "Vem uma rajada",
+  "ja": "突風が来ます",
+  "zh": "一阵风要来了"
+ },
+ "moss.result": {
+  "es": "Piedra cubierta: {n}% · Arena manchada: {stain}%",
+  "en": "Stone covered: {n}% · Sand stained: {stain}%",
+  "pt": "Pedra coberta: {n}% · Areia manchada: {stain}%",
+  "ja": "石の苔: {n}% ・ 砂の汚れ: {stain}%",
+  "zh": "石头覆盖：{n}% · 沙子弄脏：{stain}%"
+ },
+ "bonsai.result": {
+  "es": "Armonía del bonsái: {n}%",
+  "en": "Bonsai harmony: {n}%",
+  "pt": "Harmonia do bonsai: {n}%",
+  "ja": "盆栽の調和: {n}%",
+  "zh": "盆景和谐度：{n}%"
+ },
+ "garden.lockedDay": {
+  "es": "Día {n}",
+  "en": "Day {n}",
+  "pt": "Dia {n}",
+  "ja": "{n}日目",
+  "zh": "第{n}天"
+ },
+ "garden.opensIn.one": {
+  "es": "Se abre mañana",
+  "en": "Opens tomorrow",
+  "pt": "Abre amanhã",
+  "ja": "明日ひらきます",
+  "zh": "明天开放"
+ },
+ "garden.opensIn.other": {
+  "es": "Se abre en {n} días de juego",
+  "en": "Opens in {n} days of play",
+  "pt": "Abre em {n} dias de jogo",
+  "ja": "あと{n}日遊ぶとひらきます",
+  "zh": "再玩{n}天开放"
+ },
+ "board.percent": {
+  "es": "{n} %",
+  "en": "{n}%",
+  "pt": "{n}%",
+  "ja": "{n}%",
+  "zh": "{n}%"
  }
 }

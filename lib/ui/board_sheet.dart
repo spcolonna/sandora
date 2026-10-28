@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
+import '../minigames/catalog.dart';
 import 'theme/palette.dart';
 
 /// Tablón del jardín: los récords propios. El ranking con otros jardines
@@ -10,16 +11,16 @@ Future<void> showBoardSheet(BuildContext context) {
   final p = Progress.instance;
   final text = Theme.of(context).textTheme;
   final rows = [
-    (Icons.filter_hdr_rounded, tr('mg.stack.name'), trN('board.stones', p.bestTower)),
-    (Icons.water_drop_rounded, tr('mg.rain.name'), tr('board.points', {'n': p.rainBest})),
-    (Icons.gesture_rounded, tr('mg.sand.name'), trN('board.figures', p.sandFigures)),
+    // Los que todavía no se abrieron no tienen récord.
+    for (final m in minigames) (m.icon, m.name, p.gameUnlocked(m.id) ? m.record : '—'),
     (Icons.self_improvement_rounded, tr('meditation.title'), trN('board.days', p.meditationStreak)),
   ];
   return showModalBottomSheet(
     context: context,
     showDragHandle: true,
+    isScrollControlled: true,
     builder: (context) => SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,

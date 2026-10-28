@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flame/events.dart';
-import 'package:flame_forge2d/flame_forge2d.dart';
+import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../balance/balance.dart';
@@ -13,78 +13,160 @@ import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'stack_rules.dart';
+import 'stone_painter.dart';
 
 /// Estado que muestra la capa de Flutter encima del juego.
 class StackHud {
-  final int height;
+  final int height, bag;
   final bool windWarning, windBlowing, over;
-  const StackHud({this.height = 0, this.windWarning = false, this.windBlowing = false, this.over = false});
+
+  /// Piedras que se cayeron en el último derrumbe y su número (para el aviso).
+  final int lost, lostAt;
+  const StackHud({
+    this.height = 0,
+    this.bag = 0,
+    this.windWarning = false,
+    this.windBlowing = false,
+    this.over = false,
+    this.lost = 0,
+    this.lostAt = 0,
+  });
 }
 
-/// Apilado de piedras: una piedra se balancea arriba y se toca para soltarla.
-/// La torre queda en el jardín y junta Piedritas por hora según su altura.
-/// A veces llega una ráfaga (avisada 3 s antes con hojas): mantener el dedo
-/// apretado sostiene la torre.
-class StackGame extends Forge2DGame with TapCallbacks {
+/// Una piedra apoyada en la torre. [y] es su centro (negativo hacia arriba;
+/// el pedestal está en 0) y [tilt], cuánto quedó inclinada.
+class _Placed {
+  final StoneShape shape;
+  final double x, y, tilt;
+  _Placed(this.shape, this.x, this.y, this.tilt);
+
+  double get top => y - shape.height / 2;
+}
+
+/// Piedra en el aire: la que se soltó o una que se cae de la torre.
+class _Loose {
+  final StoneShape shape;
+  double x, y, vx, vy, angle, spin;
+  double fade = 1;
+  _Loose(this.shape, this.x, this.y, {this.vx = 0, this.vy = 0, this.angle = 0, this.spin = 0});
+}
+
+const _debugTower = int.fromEnvironment('SANDORA_TOWER');
+
+/// Apilado de piedras. Cada partida trae una bolsa de piedras de formas y
+/// tamaños distintos que se suman a la torre guardada, así crece día a día.
+/// Al apoyarse, la torre se balancea según qué tan centrada cayó la piedra y
+/// la altura. Si queda muy corrida puede ceder: se cae un tramo de arriba que
+/// depende de lo mal que quedó y de la altura, con algo de azar
+/// ([StackRules]). A veces llega una ráfaga: mantener apretado la sostiene.
+class StackGame extends FlameGame with TapCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.stack;
+  late final rules = StackRules(b);
   final hud = ValueNotifier(const StackHud());
 
-  StackGame(this.finish) : super(gravity: Vector2(0, Balance.instance.stack.d('gravity')));
+  StackGame(this.finish);
+
+  static const _pedestalWidth = 3.4;
 
   final _rng = Random();
-  final _placed = <_Stone>[];
-  _Stone? _falling;
-  double _settle = 0;
-  double _prevVy = 0;
-  late StoneShape _next;
+  final _tower = <_Placed>[];
+  final _bag = <StoneShape>[];
+  final _debris = <_Loose>[];
+  StoneShape? _hanging;
+  _Loose? _drop;
+
   double _t = 0;
+  double _swing = 0;
   double _camY = 0;
-  int _perfects = 0;
-  int _peak = 0;
+  bool _camReady = false;
+
+  /// Balanceo de la torre (0 quieta; 1 o más, se cae) y su fase.
+  double _wobble = 0;
+  double _phase = 0;
+
+  int _startHeight = 0, _peak = 0, _placedRun = 0, _lostRun = 0, _perfects = 0, _collapses = 0;
   bool _over = false;
   bool _holding = false;
+  double _quiet = 0;
+  double _pause = 0;
 
   // Viento: aviso -> ráfaga -> calma.
   double? _windAt;
   double _windDir = 1;
   final _leaves = <_Leaf>[];
 
-  double get _visibleH => size.y / camera.viewfinder.zoom;
-  double get _topY => _placed.isEmpty ? 0 : _placed.map((s) => s.body.position.y - s.shape.height / 2).reduce(min);
+  double get _ppm => size.x / b.d('worldWidth');
+  double get _visibleH => size.y / _ppm;
+  int get _height => _tower.length;
+  double get _topY => _tower.isEmpty ? 0 : _tower.last.top;
+
+  Offset _toScreen(double x, double y) => Offset(size.x / 2 + x * _ppm, size.y / 2 + (y - _camY) * _ppm);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    world.add(_Ground());
-    world.add(_Pedestal());
-    _next = randomStone(_rng, 0);
+    // La torre guardada, de abajo hacia arriba.
+    for (final s in Progress.instance.tower) {
+      final kind = StoneKind.values[s.kind.clamp(0, StoneKind.values.length - 1)];
+      _stack(StoneShape(kind, s.w, s.h, s.tone, s.seed), s.x);
+    }
+    // Para probar torres altas: flutter run --dart-define=SANDORA_TOWER=500
+    if (_tower.isEmpty) {
+      for (var i = 0; i < _debugTower; i++) {
+        _stack(randomStone(_rng), (_rng.nextDouble() - 0.5) * 0.3);
+      }
+    }
+    _startHeight = _peak = _height;
+    for (var i = 0; i < b.i('bagSize'); i++) {
+      _bag.add(randomStone(_rng));
+    }
+    _hanging = _bag.removeLast();
+    _publish();
   }
 
-  @override
-  void onGameResize(Vector2 size) {
-    super.onGameResize(size);
-    if (size.x > 0) camera.viewfinder.zoom = size.x / b.d('worldWidth');
+  /// Apoya [shape] arriba de todo con su centro en [x].
+  void _stack(StoneShape shape, double x) {
+    final below = _tower.isEmpty ? null : _tower.last;
+    // Las piedras son redondeadas: la de arriba se hunde un poco en la curva.
+    final sink = below == null ? 0.0 : 0.12 * min(below.shape.height, shape.height);
+    final bottom = (below?.top ?? 0) + sink;
+    final belowW = below?.shape.width ?? _pedestalWidth;
+    final tilt = ((x - (below?.x ?? 0)) / belowW * 0.35).clamp(-0.2, 0.2);
+    _tower.add(_Placed(shape, x, bottom - shape.height / 2, tilt));
   }
 
   bool get _windy => _windAt != null;
-  bool get _canDrop => !_over && _falling == null && !_windy;
+  bool get _canDrop => !_over && _drop == null && _hanging != null && !_windy && _pause <= 0;
 
-  Vector2 get _hoverPos {
-    final speed = b.d('swingSpeed') + b.d('swingSpeedPerStone') * _placed.length;
-    return Vector2(b.d('swingAmplitude') * sin(_t * speed), _topY - 3.2);
+  double get _swingSpeed =>
+      b.d('swingSpeed') +
+      b.d('swingSpeedPerStone') * _placedRun +
+      b.d('swingSpeedPerHeight') * rules.heightFactor(_height);
+
+  double get _hoverX => b.d('swingAmplitude') * sin(_swing);
+  double get _hoverY => _topY - 3.2;
+
+  /// Corrimiento de la piedra [i] por el balanceo: la punta es la que más se
+  /// mueve; la base, nada.
+  double _sway(int i) {
+    if (_tower.isEmpty) return 0;
+    final top = -_topY;
+    final h = -_tower[i].y;
+    return _swayTop * pow(h / top, 2);
   }
+
+  double get _swayTop => _wobble * b.d('swayMeters') * (1 + rules.heightFactor(_height)) * sin(_phase) + _windLean;
+  double _windLean = 0;
 
   @override
   void onTapDown(TapDownEvent event) {
     _holding = true;
     if (!_canDrop) return;
-    final stone = _Stone(_next, _hoverPos, damped: _placed.length < b.i('dampedStones'));
-    _falling = stone;
-    _settle = 0;
-    _prevVy = 0;
-    world.add(stone);
-    _next = randomStone(_rng, _placed.length + 1);
+    // Al soltarla conserva parte del impulso del balanceo: no da lo mismo cuándo.
+    final vx = b.d('swingAmplitude') * _swingSpeed * cos(_swing) * b.d('releaseCarry');
+    _drop = _Loose(_hanging!, _hoverX, _hoverY, vx: vx);
+    _hanging = null;
   }
 
   @override
@@ -96,16 +178,23 @@ class StackGame extends Forge2DGame with TapCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
+    if (size.x == 0) return;
     _t += dt;
+    _pause = max(0, _pause - dt);
+    _swing += dt * _swingSpeed;
+    _phase += dt * 2 * pi / (1.1 + 1.2 * rules.heightFactor(_height));
+    _wobble = rules.wobbleDecay(_wobble, dt, _height);
+    _windLean *= exp(-dt * 1.5);
     if (!_over) {
-      _updateFalling(dt);
+      _updateDrop(dt);
       _updateWind(dt);
-      _checkCollapse();
+      _maybeFinish(dt);
     }
+    _updateDebris(dt);
     // La cámara sigue la punta de la torre, suave.
     final target = min(-0.28 * _visibleH, _topY + 0.08 * _visibleH);
-    _camY += (target - _camY) * min(1, dt * 3);
-    camera.viewfinder.position = Vector2(0, _camY);
+    _camY = _camReady ? _camY + (target - _camY) * min(1, dt * 2.5) : target;
+    _camReady = true;
     for (final l in _leaves) {
       l.x += l.vx * dt;
       l.y += sin(_t * 3 + l.phase) * 30 * dt;
@@ -114,55 +203,132 @@ class StackGame extends Forge2DGame with TapCallbacks {
     _leaves.removeWhere((l) => l.x < -60 || l.x > size.x + 60);
   }
 
-  void _updateFalling(double dt) {
-    final s = _falling;
-    if (s == null || !s.isMounted) return;
-    final body = s.body;
-    final below = _placed.isEmpty ? null : _placed.last;
-    final targetX = below?.body.position.x ?? 0;
-    final top = _topY;
-    // Imán sutil hacia el centro de la de abajo mientras cae (asistencia invisible).
-    if (body.position.y < top - 0.2) {
-      body.applyForce(Vector2(b.d('magnet') * (targetX - body.position.x) * body.mass, 0));
-    }
-    final vy = body.linearVelocity.y;
-    if (_prevVy > 2.5 && vy < _prevVy * 0.4) {
-      SoundBoard.instance.play(Sfx.stackPlace, volume: min(0.8, _prevVy / 10));
-      Haptics.light();
-    }
-    _prevVy = vy;
-    if (body.position.y > 0.6) {
-      // No cayó en la torre: rueda al suelo y se va, sin castigo.
-      _falling = null;
-      s.fadeOut();
+  void _updateDrop(double dt) {
+    final d = _drop;
+    if (d == null) return;
+    d.vy += b.d('gravity') * dt;
+    d.x += d.vx * dt;
+    d.y += d.vy * dt;
+    final below = _tower.isEmpty ? null : _tower.last;
+    final belowX = below == null ? 0.0 : below.x + _sway(_height - 1);
+    final belowW = below?.shape.width ?? _pedestalWidth;
+    // Si ni la roza, sigue de largo: se pierde esa piedra y nada más.
+    if ((d.x - belowX).abs() > belowW / 2 + d.shape.width * 0.45) {
+      if (d.y > _topY + 1.5) {
+        _debris.add(d..spin = d.vx.sign * 1.5);
+        _drop = null;
+        _next();
+      }
       return;
     }
-    final still = body.linearVelocity.length < 0.15 && body.angularVelocity.abs() < 0.2;
-    _settle = still ? _settle + dt : 0;
-    if (_settle > 0.35) {
-      _falling = null;
-      // Quedó de costado junto a la torre, no arriba: no cuenta y se va.
-      final onTop = below == null
-          ? body.position.x.abs() < _Pedestal.width / 2
-          : body.position.y < below.body.position.y - 0.15;
-      if (!onTop) {
-        s.fadeOut();
-        return;
-      }
-      final belowW = below?.shape.width ?? _Pedestal.width;
-      final grade = stoneGrade(body.position.x - targetX, belowW, b);
-      if (grade == Grade.perfect) _perfects++;
-      _placed.add(s);
-      s.calm();
-      _peak = max(_peak, _placed.length);
-      celebrate(camera.viewport, worldToScreen(body.position - Vector2(0, s.shape.height)), grade);
-      _publish();
-      _maybeWind();
+    if (d.y + d.shape.height / 2 < _topY) return;
+    _drop = null;
+    _land(d, below, belowX, belowW);
+  }
+
+  void _land(_Loose d, _Placed? below, double belowX, double belowW) {
+    var dx = d.x - belowX;
+    // Asistencia invisible en una torre recién empezada.
+    if (_height < b.i('assistStones')) dx *= 1 - b.d('assistPull');
+    final ratio = StackRules.offRatio(dx, belowW);
+    final safe = rules.safeRatio(d.shape.kind, below?.shape.kind.stability ?? b.d('pedestalStability'), _height);
+    final sev = rules.severity(ratio, safe, wobble: _wobble, lean: _lean(dx));
+    final impact = d.vx.abs() + d.vy * 0.05;
+    SoundBoard.instance.play(Sfx.stackPlace, volume: min(0.8, 0.3 + d.vy / 20));
+    if (_rng.nextDouble() < rules.fallChance(sev)) {
+      _collapse(rules.collapseLoss(_height + 1, sev, _rng), dx.sign == 0 ? 1 : dx.sign, extra: d);
+      _next();
+      return;
     }
+    _stack(d.shape, (below?.x ?? 0) + dx);
+    _placedRun++;
+    _peak = max(_peak, _height);
+    _wobble += rules.wobbleAdd(ratio, impact, _height);
+    _phase = dx >= 0 ? 0 : pi;
+    final grade = stoneGrade(dx, belowW, b);
+    if (grade == Grade.perfect) _perfects++;
+    final p = _toScreen(_tower.last.x, _tower.last.top);
+    celebrate(world, Vector2(p.dx, p.dy), grade);
+    _maybeWind();
+    _next();
+  }
+
+  /// Si las últimas piedras ya cargan hacia el lado de [dx], 0 a 1.
+  double _lean(double dx) {
+    if (_tower.length < 2) return 0;
+    var sum = 0.0;
+    final n = min(4, _tower.length - 1);
+    for (var i = _tower.length - n; i < _tower.length; i++) {
+      sum += (_tower[i].x - _tower[i - 1].x) / (_tower[i - 1].shape.width / 2);
+    }
+    return max(0, sum / n * dx.sign);
+  }
+
+  void _next() {
+    _hanging = _bag.isEmpty ? null : _bag.removeLast();
+    _publish();
+  }
+
+  /// Se caen [count] piedras de arriba (contando [extra], la que se soltó).
+  void _collapse(int count, double dir, {_Loose? extra}) {
+    var fromTower = count - (extra == null ? 0 : 1);
+    fromTower = min(fromTower, _height);
+    final fallen = _tower.sublist(_height - fromTower);
+    _tower.removeRange(_height - fromTower, _height);
+    _lostRun += fromTower;
+    // Solo se animan las de arriba (las que se ven); el resto se va sin ruido.
+    final shown = fallen.reversed.take(30).toList();
+    for (var i = 0; i < shown.length; i++) {
+      final s = shown[i];
+      final k = 1 - i / max(1, shown.length);
+      _debris.add(
+        _Loose(
+          s.shape,
+          s.x,
+          s.y,
+          vx: dir * (0.6 + 2.4 * k + _rng.nextDouble()),
+          vy: -_rng.nextDouble() * 2,
+          angle: s.tilt,
+          spin: dir * (0.8 + _rng.nextDouble() * 3),
+        ),
+      );
+    }
+    if (extra != null) {
+      _debris.add(extra..spin = dir * 3);
+      extra.vx = dir * 2.5;
+    }
+    _wobble = 0.25;
+    _windAt = null;
+    SoundBoard.instance.stopLoop(Ambience.wind);
+    // Una caída se cuenta con calma: un "toc" grave y un golpe suave (pilar 8).
+    SoundBoard.instance.play(Sfx.stackFall, volume: 0.55);
+    Haptics.medium();
+    _pause = 1.2;
+    hud.value = _hudNow(lost: count, lostAt: ++_collapses);
+  }
+
+  void _updateDebris(double dt) {
+    final ground = 1.0;
+    for (final d in _debris) {
+      d.vy += b.d('gravity') * dt;
+      d.x += d.vx * dt;
+      d.y += d.vy * dt;
+      d.angle += d.spin * dt;
+      if (d.y + d.shape.height / 2 > ground) {
+        d.y = ground - d.shape.height / 2;
+        d.vy *= -0.2;
+        d.vx *= 0.6;
+        d.spin *= 0.5;
+        d.fade -= dt * 1.2;
+      }
+      // Muy abajo de la cámara: ya no se ve.
+      if (d.y > _camY + _visibleH) d.fade = 0;
+    }
+    _debris.removeWhere((d) => d.fade <= 0);
   }
 
   void _maybeWind() {
-    if (_placed.length < b.i('windFromStone')) return;
+    if (_height < b.i('windFromHeight')) return;
     if (_rng.nextDouble() > b.d('windChancePerStone')) return;
     _windAt = _t;
     _windDir = _rng.nextBool() ? 1 : -1;
@@ -189,11 +355,13 @@ class StackGame extends Forge2DGame with TapCallbacks {
         SoundBoard.instance.loop(Ambience.wind, volume: 0.42, fade: const Duration(milliseconds: 700));
         _publish(blowing: true);
       }
-      final f = b.d('windForce') * (_holding ? b.d('windHoldFactor') : 1) * _windDir;
-      for (final s in _placed) {
-        // Empuja más arriba: la punta de la torre es la que sufre.
-        final h = (-s.body.position.y).clamp(0, 30) / 10;
-        s.body.applyForce(Vector2(f * s.body.mass * h, 0));
+      // La ráfaga empuja la punta; apretado, apenas.
+      final push = b.d('windForce') * (_holding ? b.d('windHoldFactor') : 1) * (1 + rules.heightFactor(_height));
+      _wobble += push * dt;
+      _windLean += _windDir * push * dt * 0.4;
+      if (_wobble >= 1) {
+        final sev = 0.4 + (_wobble - 1);
+        _collapse(rules.collapseLoss(_height, sev, _rng), _windDir);
       }
     } else if (e >= warn + b.d('windDuration')) {
       _windAt = null;
@@ -202,74 +370,94 @@ class StackGame extends Forge2DGame with TapCallbacks {
     }
   }
 
-  void _checkCollapse() {
-    final fallen = _placed.any((s) => s.body.position.y > 0.3);
-    if (!fallen) return;
-    _over = true;
-    _windAt = null;
-    SoundBoard.instance.stopLoop(Ambience.wind);
-    // Una caída se cuenta con calma: un "toc" grave y un golpe suave (pilar 8).
-    SoundBoard.instance.play(Sfx.stackFall, volume: 0.55);
-    Haptics.medium();
-    _publish();
-    Future.delayed(const Duration(milliseconds: 1600), () => _end(collapsed: true));
+  /// Sin piedras en la bolsa y con la torre quieta, termina sola.
+  void _maybeFinish(double dt) {
+    final done = _hanging == null && _drop == null && _debris.isEmpty && !_windy && _wobble < 0.12;
+    _quiet = done ? _quiet + dt : 0;
+    if (_quiet > 0.6) endRun();
   }
 
-  /// Termina la partida: lo que sigue en pie queda en el jardín.
+  /// Termina la partida: la torre queda en el jardín como quedó.
   void endRun() {
     if (_over) return;
     _over = true;
+    // Una piedra que todavía venía cayendo vuelve a la bolsa.
+    _drop = null;
+    _windAt = null;
+    SoundBoard.instance.stopLoop(Ambience.wind);
     _publish();
-    _end(collapsed: false);
-  }
-
-  void _end({required bool collapsed}) {
-    // De abajo hacia arriba, como quedaron (no como se soltaron).
-    final up = _placed.where((s) => s.body.position.y < 0).toList()
-      ..sort((a, b) => b.body.position.y.compareTo(a.body.position.y));
-    final standing = [for (final s in up) (x: s.body.position.x, w: s.shape.width, h: s.shape.height)];
     final record = _peak > Progress.instance.bestTower;
-    Progress.instance.setTower(standing);
-    final stars = starsFor(_peak.toDouble(), b.list('starHeights'));
-    final head = trN('stack.height', _peak);
+    Progress.instance.setTower([
+      for (final s in _tower)
+        (x: s.x, w: s.shape.width, h: s.shape.height, kind: s.shape.kind.index, tone: s.shape.tone, seed: s.shape.seed),
+    ]);
+    final net = _height - _startHeight;
+    final stars = starsFor(max(0, net).toDouble(), b.list('starNet'));
     finish(
       RunOutcome(
-        score: _peak + _perfects * b.i('perfectBonus'),
+        score: max(0, net) + _perfects * b.i('perfectBonus'),
         stars: stars,
-        headline: collapsed ? '${tr('stack.fell')}\n$head' : head,
+        headline: [
+          if (_placedRun > 0) trN('stack.added', _placedRun),
+          if (_lostRun > 0) trN('stack.lost', _lostRun),
+          trN('stack.height', _height),
+        ].join('\n'),
         record: record,
       ),
     );
   }
 
-  void _publish({bool? blowing}) {
+  StackHud _hudNow({bool? blowing, int? lost, int? lostAt}) {
     final e = _windAt == null ? -1 : _t - _windAt!;
-    hud.value = StackHud(
-      height: _placed.length,
+    return StackHud(
+      height: _height,
+      bag: _bag.length + (_hanging == null ? 0 : 1),
       windWarning: e >= 0 && e < b.d('windWarning'),
       windBlowing: blowing ?? (e >= b.d('windWarning')),
       over: _over,
+      lost: lost ?? hud.value.lost,
+      lostAt: lostAt ?? hud.value.lostAt,
     );
   }
 
+  void _publish({bool? blowing}) => hud.value = _hudNow(blowing: blowing);
+
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(
-      Offset.zero & Size(size.x, size.y),
-      Paint()..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [Palette.skyTop, Palette.skyBottom]),
-    );
-    super.render(canvas);
-    if (_canDrop) {
-      final p = worldToScreen(_hoverPos);
-      final zoom = camera.viewfinder.zoom;
-      // Hilo y piedra que se balancea (no es un cuerpo físico hasta soltarla).
-      canvas.drawLine(Offset(p.x, 0), Offset(p.x, p.y), Paint()..color = Palette.ink.withValues(alpha: 0.15));
-      canvas.save();
-      canvas.translate(p.x, p.y);
-      canvas.scale(zoom);
-      paintStone(canvas, _next);
-      canvas.restore();
+    _paintSky(canvas);
+    final ppm = _ppm;
+    canvas.save();
+    canvas.translate(size.x / 2, size.y / 2 - _camY * ppm);
+    canvas.scale(ppm);
+    _paintGround(canvas);
+    // Solo las piedras que entran en pantalla.
+    final top = _camY - _visibleH / 2 - 2, bottom = _camY + _visibleH / 2 + 2;
+    for (var i = 0; i < _tower.length; i++) {
+      final s = _tower[i];
+      if (s.y < top || s.y > bottom) continue;
+      final sway = _sway(i);
+      final lean = _tower.isEmpty ? 0.0 : 2 * sway / max(1, -_tower[i].y);
+      _paintAt(canvas, s.shape, s.x + sway, s.y, s.tilt + lean);
     }
+    for (final d in _debris) {
+      _paintAt(canvas, d.shape, d.x, d.y, d.angle, opacity: d.fade);
+    }
+    final drop = _drop;
+    if (drop != null) _paintAt(canvas, drop.shape, drop.x, drop.y, 0);
+    final hanging = _hanging;
+    if (hanging != null && !_over) {
+      // Hilo y piedra que se balancea.
+      final alpha = _canDrop ? 1.0 : 0.5;
+      canvas.drawLine(
+        Offset(_hoverX, _camY - _visibleH / 2),
+        Offset(_hoverX, _hoverY),
+        Paint()
+          ..color = Palette.ink.withValues(alpha: 0.15 * alpha)
+          ..strokeWidth = 0.02,
+      );
+      _paintAt(canvas, hanging, _hoverX, _hoverY, 0, opacity: alpha);
+    }
+    canvas.restore();
     final leaf = Paint()..color = Palette.moss;
     for (final l in _leaves) {
       canvas.save();
@@ -278,125 +466,49 @@ class StackGame extends Forge2DGame with TapCallbacks {
       canvas.drawOval(const Rect.fromLTWH(-7, -3, 14, 6), leaf);
       canvas.restore();
     }
+    super.render(canvas);
   }
-}
 
-/// Pinta una piedra en coordenadas del mundo (metros).
-void paintStone(Canvas canvas, StoneShape shape) {
-  final path = Path();
-  for (var i = 0; i < shape.vertices.length; i++) {
-    final (x, y) = shape.vertices[i];
-    i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
+  void _paintAt(Canvas canvas, StoneShape s, double x, double y, double angle, {double opacity = 1}) {
+    canvas.save();
+    canvas.translate(x, y);
+    canvas.rotate(angle);
+    paintStone(canvas, s, opacity: opacity);
+    canvas.restore();
   }
-  path.close();
-  final base = [Palette.stone, Palette.stoneDark, Palette.stoneLight][shape.tone];
-  canvas.drawPath(path, Paint()..color = base);
-  // Brillo arriba y sombra abajo para que se lea el volumen.
-  canvas.save();
-  canvas.clipPath(path);
-  canvas.drawOval(
-    Rect.fromCenter(
-      center: Offset(-shape.width * 0.1, -shape.height * 0.35),
-      width: shape.width * 0.8,
-      height: shape.height * 0.5,
-    ),
-    Paint()..color = const Color(0x33FFFFFF),
-  );
-  canvas.drawRect(
-    Rect.fromLTWH(-shape.width, shape.height * 0.18, shape.width * 2, shape.height),
-    Paint()..color = const Color(0x22000000),
-  );
-  canvas.restore();
-}
 
-class _Stone extends BodyComponent {
-  final StoneShape shape;
-  final Vector2 start;
-  final bool damped;
-  double _fade = 1;
-  bool _fading = false;
-
-  _Stone(this.shape, this.start, {required this.damped}) : super(renderBody: false);
-
-  @override
-  Body createBody() {
-    final body = world.createBody(
-      BodyDef(
-        type: BodyType.dynamic,
-        position: start,
-        // Física amortiguada en las primeras piedras (asistencia invisible).
-        linearDamping: damped ? 1.2 : 0.2,
-        angularDamping: damped ? 4 : 1.5,
-      ),
+  /// El cielo se va oscureciendo con la altura y pasan nubes con paralaje.
+  void _paintSky(Canvas canvas) {
+    final alt = (-_camY / 120).clamp(0.0, 1.0);
+    final top = Color.lerp(Palette.skyTop, const Color(0xFF7FA6C2), alt)!;
+    final bottom = Color.lerp(Palette.skyBottom, Palette.skyTop, alt)!;
+    canvas.drawRect(
+      Offset.zero & Size(size.x, size.y),
+      Paint()..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [top, bottom]),
     );
-    body.createFixture(
-      FixtureDef(
-        PolygonShape()..set([for (final (x, y) in shape.vertices) Vector2(x, y)]),
-        density: 1,
-        friction: 0.9,
-        restitution: 0,
-      ),
-    );
-    return body;
-  }
-
-  /// Ya apoyada: un poco más de amortiguación para que la torre no tiemble.
-  void calm() {
-    body.angularDamping = max(body.angularDamping, 2.5);
-  }
-
-  void fadeOut() => _fading = true;
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    if (_fading) {
-      _fade -= dt * 1.5;
-      if (_fade <= 0) removeFromParent();
+    final cloud = Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: 0.5);
+    const spacing = 260.0;
+    final scroll = -_camY * _ppm * 0.3;
+    final first = ((scroll - size.y) / spacing).floor();
+    for (var k = first; k < first + size.y / spacing + 3; k++) {
+      final r = Random(k);
+      final y = size.y - (k * spacing - scroll) - spacing;
+      final x = (r.nextDouble() * 1.4 - 0.2) * size.x + sin(_t * 0.05 + k) * 20;
+      final w = 90 + r.nextDouble() * 80;
+      canvas.drawOval(Rect.fromCenter(center: Offset(x, y), width: w, height: w * 0.32), cloud);
+      canvas.drawOval(Rect.fromCenter(center: Offset(x + w * 0.2, y - 10), width: w * 0.6, height: w * 0.3), cloud);
     }
   }
 
-  @override
-  void render(Canvas canvas) {
-    if (_fade < 1) canvas.saveLayer(null, Paint()..color = Color.fromRGBO(0, 0, 0, _fade.clamp(0, 1)));
-    paintStone(canvas, shape);
-    if (_fade < 1) canvas.restore();
-  }
-}
-
-class _Pedestal extends BodyComponent {
-  static const width = 3.4;
-  _Pedestal() : super(renderBody: false);
-
-  @override
-  Body createBody() {
-    final body = world.createBody(BodyDef(position: Vector2(0, 0.5)));
-    body.createFixture(FixtureDef(PolygonShape()..setAsBoxXY(width / 2, 0.5), friction: 1));
-    return body;
-  }
-
-  @override
-  void render(Canvas canvas) {
-    final r = RRect.fromRectAndRadius(const Rect.fromLTWH(-width / 2, -0.5, width, 1), const Radius.circular(0.15));
-    canvas.drawRRect(r, Paint()..color = Palette.stoneDark);
-    canvas.drawRect(const Rect.fromLTWH(-width / 2, -0.5, width, 0.12), Paint()..color = Palette.moss);
-  }
-}
-
-class _Ground extends BodyComponent {
-  _Ground() : super(renderBody: false);
-
-  @override
-  Body createBody() {
-    final body = world.createBody(BodyDef(position: Vector2(0, 6)));
-    body.createFixture(FixtureDef(PolygonShape()..setAsBoxXY(40, 5), friction: 1));
-    return body;
-  }
-
-  @override
-  void render(Canvas canvas) {
-    canvas.drawRect(const Rect.fromLTWH(-40, -5, 80, 30), Paint()..color = Palette.sand);
-    canvas.drawRect(const Rect.fromLTWH(-40, -5, 80, 0.15), Paint()..color = Palette.sandShadow);
+  void _paintGround(Canvas canvas) {
+    canvas.drawRect(const Rect.fromLTWH(-40, 1, 80, 30), Paint()..color = Palette.sand);
+    canvas.drawRect(const Rect.fromLTWH(-40, 1, 80, 0.15), Paint()..color = Palette.sandShadow);
+    final ped = RRect.fromRectAndRadius(
+      const Rect.fromLTWH(-_pedestalWidth / 2, 0, _pedestalWidth, 1),
+      const Radius.circular(0.15),
+    );
+    canvas.drawRRect(ped, Paint()..color = Palette.stoneDark);
+    canvas.drawRect(const Rect.fromLTWH(-_pedestalWidth / 2, 0, _pedestalWidth, 0.12), Paint()..color = Palette.moss);
   }
 }
 

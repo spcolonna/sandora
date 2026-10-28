@@ -32,6 +32,9 @@ class GardenScreen extends StatefulWidget {
 }
 
 class _GardenScreenState extends State<GardenScreen> {
+  final _pages = PageController();
+  int _page = 0;
+
   Timer? _tick;
 
   @override
@@ -41,14 +44,21 @@ class _GardenScreenState extends State<GardenScreen> {
     // real: se refresca cada tanto.
     _tick = Timer.periodic(const Duration(seconds: 20), (_) {
       WeatherService.instance.refresh();
+      Progress.instance.countDay(DateTime.now());
       setState(() {});
       _gardenSound();
+      _announceUnlocks();
     });
     _gardenSound();
     // Una meditación que quedó a medias al cerrar la app se retoma.
     if (Progress.instance.meditationStartedAt != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _meditate());
-    } else if (!Progress.instance.gardenNameOffered) {
+    } else if (Progress.instance.gardenNameOffered) {
+      // Después de que se abren las puertas.
+      Future.delayed(const Duration(milliseconds: 3600), () {
+        if (mounted) _announceUnlocks();
+      });
+    } else {
       // La primera vez, después de mirar el jardín un momento, se ofrece
       // ponerle nombre (después de que se abren las puertas).
       Future.delayed(const Duration(milliseconds: 3400), () {
@@ -60,10 +70,11 @@ class _GardenScreenState extends State<GardenScreen> {
   @override
   void dispose() {
     _tick?.cancel();
+    _pages.dispose();
     super.dispose();
   }
 
-  void _enter(Place place) {
+  Future<void> _enter(Place place) async {
     switch (place) {
       case Place.market:
         SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
@@ -73,9 +84,41 @@ class _GardenScreenState extends State<GardenScreen> {
         showBoardSheet(context);
       case Place.meditation:
         Progress.instance.meditationUnlocked ? _meditate() : showExpansionsSheet(context);
-      case Place.sand || Place.stack || Place.rain:
-        _open(minigames.firstWhere((m) => m.id == place.name));
+      default:
+        final m = minigames.where((m) => m.id == place.name).firstOrNull;
+        if (m == null) return;
+        final p = Progress.instance;
+        if (p.gameUnlocked(m.id)) return _open(m);
+        if (p.unlockZone(m.id) != null) {
+          await showExpansionsSheet(context);
+          if (mounted) _announceUnlocks();
+          return;
+        }
+        SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+        _toast(trN('garden.opensIn', p.unlockDay(m.id) - p.playDay));
     }
+  }
+
+  void _toast(String text) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(text, textAlign: TextAlign.center),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(milliseconds: 2400),
+        ),
+      );
+  }
+
+  /// Anuncia una vez los minijuegos que se abrieron (por día o por zona).
+  void _announceUnlocks() {
+    final p = Progress.instance;
+    final fresh = p.newUnlocks(minigames.map((m) => m.id));
+    if (fresh.isEmpty) return;
+    p.markUnlocksSeen(fresh);
+    SoundBoard.instance.play(Sfx.good, volume: 0.4);
+    _toast(tr('level.unlocked', {'list': fresh.map((id) => tr('mg.$id.name')).join(', ')}));
   }
 
   /// Viento de fondo y, si llueve, la lluvia.
@@ -123,13 +166,33 @@ class _GardenScreenState extends State<GardenScreen> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: GardenView(
-                      now: gardenNow(),
-                      weather: WeatherService.instance.at(gardenNow()),
-                      onPlace: _enter,
-                    ),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          // El patio y, deslizando, el estanque.
+                          child: PageView(
+                            controller: _pages,
+                            physics: const _QuickPagePhysics(),
+                            onPageChanged: (i) => setState(() => _page = i),
+                            children: [
+                              for (final side in [0, 1])
+                                GardenView(
+                                  side: side,
+                                  now: gardenNow(),
+                                  weather: WeatherService.instance.at(gardenNow()),
+                                  onPlace: _enter,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      _SideDots(
+                        page: _page,
+                        onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -139,6 +202,20 @@ class _GardenScreenState extends State<GardenScreen> {
       ),
     );
   }
+}
+
+/// Mientras la página se mueve, el PageView no deja tocar los lugares (el
+/// primer toque solo la frena): se asienta rápido para que eso casi no pase.
+const _pageTurn = Duration(milliseconds: 300);
+
+class _QuickPagePhysics extends PageScrollPhysics {
+  const _QuickPagePhysics({super.parent});
+
+  @override
+  _QuickPagePhysics applyTo(ScrollPhysics? ancestor) => _QuickPagePhysics(parent: buildParent(ancestor));
+
+  @override
+  SpringDescription get spring => SpringDescription.withDampingRatio(mass: 0.5, stiffness: 420, ratio: 1.1);
 }
 
 class _Header extends StatelessWidget {
@@ -229,6 +306,55 @@ class _Bar extends StatelessWidget {
           color: color,
           backgroundColor: Palette.sandShadow.withValues(alpha: 0.4),
         ),
+      ),
+    );
+  }
+}
+
+/// Dos puntos debajo del jardín: el patio y el estanque.
+class _SideDots extends StatelessWidget {
+  final int page;
+  final void Function(int) onTap;
+  const _SideDots({required this.page, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (final (i, key) in [(0, 'garden.patio'), (1, 'garden.pond')])
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onTap(i),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                child: Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      width: page == i ? 18 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: page == i ? Palette.moss : Palette.ink.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      tr(key),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: page == i ? FontWeight.w700 : FontWeight.w400,
+                        color: Palette.ink.withValues(alpha: page == i ? 0.85 : 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

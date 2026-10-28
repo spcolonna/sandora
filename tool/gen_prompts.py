@@ -90,6 +90,18 @@ def ui(name, subject, composition):
         f'element; {NO_STYLE}.')
 
 
+def tile(name, subject):
+    """Ficha de un tablero: una sola cosa centrada, que se lea chica."""
+    return img(
+        name, SQUARE_ALPHA + ALPHA_FALLBACK,
+        f'This is a tile of a match-three board in {GAME}. It is shown small (about 60 to 80 pixels) on dark '
+        'water, next to many other tiles, so it must read instantly by its shape and color.',
+        subject,
+        'One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft '
+        'light rim around the edge. All four corners stay empty and transparent.',
+        f'any background, water, frame, tile border or square; {NO_TEXT}; extra objects; {NO_STYLE}.')
+
+
 BLOCKS = [
     dict(
         id='0', title='Guía de estilo', folder='store/art/style/',
@@ -186,8 +198,9 @@ BLOCKS = [
         ]),
     dict(
         id='2', title='Piedras para apilar', folder='store/art/stack/',
-        intro=('Seis piedras distintas para el minijuego de apilado. La física usa su propio polígono, así que '
-               'tienen que ser chatas, más anchas que altas y con base plana. Adjuntá `store/art/style/style_keyart.webp`.'),
+        intro=('Seis piedras distintas para el minijuego de apilado. Hoy se dibujan con código (río, laja, canto '
+               'rodado, huevo, peñasco y cuña); estas las reemplazarían. Tienen que ser más anchas que altas y con '
+               'base plana. Adjuntá `store/art/style/style_keyart.webp`.'),
         images=[obj(f'obj_stack_stone_{i:02d}', s, 'about 90 to 160 pixels wide') for i, s in enumerate([
             'A flat, smooth oval river stone in cool medium gray, seen from the side, about three times wider than '
             'tall, with a gently flat bottom and a softly domed top.',
@@ -422,6 +435,87 @@ BLOCKS = [
                'The sign is centered, about 80% of the canvas width and 35% of its height including the bamboo bar '
                'and ropes, perfectly symmetrical. The plank face is plain wood with no pattern so a name fits on it. '
                'Everything around it is transparent.'),
+        ]),
+    dict(
+        id='10', title='Estanque de lotos (3 en línea)', folder='store/art/pond/',
+        intro=('Fichas y poderes del 3 en línea del estanque. Se ven chicas (60 a 80 px) sobre agua oscura, así que '
+               'cada una tiene que leerse por su forma y su color, no por el detalle. Adjuntá '
+               '`store/art/style/style_keyart.webp`.'),
+        images=[
+            *[tile(f'spr_pond_tile_{n}', d) for n, d in [
+                ('lotus', 'A single open lotus flower seen from slightly above, soft pink petals with a pale yellow '
+                 'center.'),
+                ('pad', 'A single round lily pad seen from above, bright green with its typical notch and a few soft '
+                 'veins.'),
+                ('stone', 'A single smooth, round river stone seen from above, pale gray, wet and slightly shiny.'),
+                ('koi', 'A single small koi fish seen from above, curved as if swimming, white with orange-red '
+                 'patches.'),
+                ('drop', 'A single big water drop, clear blue with a bright highlight, slightly flattened as if '
+                 'resting on a leaf.'),
+            ]],
+            *[tile(f'spr_pond_power_{n}', d) for n, d in [
+                ('wave', 'A small curling water wave in teal and white foam, stylized like a sumi-e ink wave, '
+                 'clearly moving to the side.'),
+                ('bloom', 'A burst of lotus petals opening outward from a bright center, like a flower blooming in '
+                 'one instant, with a soft golden glow.'),
+                ('moon', 'A pale full moon reflected on water: a glowing cream disk with soft concentric ripples '
+                 'around it.'),
+            ]],
+            img('bg_pond_water', PORTRAIT_OPAQUE,
+                f'This is the background of the lotus pond match-three minigame in {GAME}. The game draws a grid of '
+                'tiles on top of it.',
+                'Calm, deep pond water seen straight from above: dark green-blue with soft light ripples, a few '
+                'out-of-focus lily pads and stones only along the edges.',
+                'The central 80% of the image is calm, even and dark so the tiles on top stay readable. ' + CROP_NOTE,
+                f'tiles or grid; fish or flowers in the center; {NO_TEXT}; frame or border; {NO_STYLE}.'),
+        ]),
+    dict(
+        id='11', title='Shishi-odoshi, hojas, musgo y bonsái', folder='store/art/east/',
+        intro=('Piezas de los cuatro minijuegos de la vista del estanque. El código las mueve (el bambú vuelca, las '
+               'hojas giran, las ramas crecen), así que cada pieza va sola y recortada. Adjuntá '
+               '`store/art/style/style_keyart.webp`.'),
+        images=[
+            obj('obj_shishi_bamboo', 'A single thick green bamboo tube cut at a slant at one end, lying horizontally, '
+                'with two visible nodes. Seen exactly from the side.', 'about 260 pixels wide'),
+            obj('obj_shishi_basin', 'A low round stone water basin (tsukubai) seen from the front and a little from '
+                'above, gray granite with moss at its base and dark water inside.', 'about 140 pixels wide'),
+            *[obj(f'spr_leaf_{i:02d}', d, 'about 30 pixels long') for i, d in enumerate([
+                'A single fallen Japanese maple leaf, bright orange, seen flat from above.',
+                'A single fallen Japanese maple leaf, deep red, seen flat from above.',
+                'A single fallen ginkgo leaf, golden yellow, seen flat from above.',
+                'A single fallen dry oak-like leaf, warm brown, slightly curled, seen flat from above.',
+            ], start=1)],
+            img('tex_moss', SQUARE_OPAQUE,
+                f'This is a seamless texture used to paint moss on rocks in {GAME}. The game masks it with the '
+                'player\'s brush strokes.',
+                'Dense, soft cushion moss seen from directly above: many tiny green tufts in light and dark greens, '
+                'very even.',
+                'Perfectly tileable on all four sides, uniform with no focal point and no lighting gradient.',
+                f'rocks, sand or soil; flowers; {NO_TEXT}; frame or border; {NO_STYLE}.'),
+            obj('obj_moss_rock', 'A large, low, rounded garden rock seen from slightly above, bare gray stone with '
+                'subtle cracks and NO moss at all (the player paints it).', 'about 260 pixels wide'),
+            obj('obj_bonsai_pot', 'A wide, shallow rectangular bonsai pot in dark reddish-brown unglazed clay, with '
+                'small feet, empty and seen from the front.', 'about 200 pixels wide'),
+            obj('obj_bonsai_trunk', 'The bare trunk of a small bonsai tree with no leaves: a twisting dark trunk '
+                'rising from a little mound of soil and splitting into three main branches that end in bare tips.',
+                'about 260 pixels tall'),
+        ]),
+    dict(
+        id='12', title='Vista del estanque', folder='store/art/bg/',
+        intro=('Segunda vista del jardín (se llega deslizando). Va encima del mismo cielo y las mismas colinas que '
+               'el patio. Adjuntá `store/art/style/style_keyart.webp` y `bg_base_ground`.'),
+        images=[
+            img('bg_east_ground', PORTRAIT_ALPHA + ALPHA_FALLBACK,
+                f'This is the ground layer of the second garden view in {GAME}, the pond side. The game places the '
+                'shishi-odoshi, the bonsai, the mossy rocks and the leafy path on top of it.',
+                'A small Japanese garden seen from a gentle three-quarter view from above: grass and moss ground with '
+                'a calm irregular pond in the lower left, a curving gravel path from the bottom edge to the right, '
+                'and a few low flat stones around the pond edge.',
+                'The ground fills only the lower 55% of the image; above it everything is fully transparent. Leave '
+                'open, calm areas at the upper right, the middle right and above the pond for the objects. '
+                + CROP_NOTE,
+                f'lanterns, trees, bamboo or objects; sky; {NO_TEXT}; people or animals; frame or border; '
+                f'{NO_STYLE}.'),
         ]),
 ]
 

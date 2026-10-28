@@ -96,6 +96,34 @@ void main() {
       expect(p.gardenName, isNull);
     });
 
+    test('los días de juego cuentan una vez por día y abren minijuegos', () async {
+      final p = Progress.instance;
+      await p.load(balance, now: DateTime(2026, 10, 27, 10));
+      expect(p.daysPlayed, 1);
+      expect(p.gameUnlocked('stack'), isTrue);
+      expect(p.gameUnlocked('shishi'), isFalse);
+      p.countDay(DateTime(2026, 10, 27, 22));
+      expect(p.daysPlayed, 1, reason: 'el mismo día no suma');
+      // Un día sin jugar no cuenta: el siguiente que se abre es el día 2.
+      await p.load(balance, now: DateTime(2026, 10, 29, 9));
+      expect(p.daysPlayed, 2);
+      expect(p.gameUnlocked('shishi'), isTrue);
+      expect(p.gameUnlocked('leaves'), isFalse);
+      expect(p.newUnlocks(['sand', 'shishi', 'leaves']), ['shishi']);
+      p.markUnlocksSeen(['shishi']);
+      expect(p.newUnlocks(['shishi']), isEmpty);
+    });
+
+    test('el Estanque de lotos se abre al comprar el Estanque', () async {
+      final p = Progress.instance;
+      await p.load(balance);
+      expect(p.unlockZone('pond')?.level, 7);
+      expect(p.gameUnlocked('pond'), isFalse);
+      p.expansions.add('pond');
+      expect(p.gameUnlocked('pond'), isTrue);
+      expect(p.newUnlocks(['pond']), ['pond']);
+    });
+
     test('una ampliación necesita el nivel y los tokens', () async {
       final p = Progress.instance;
       final day = DateTime(2026, 10, 27, 10);

@@ -25,7 +25,10 @@ class GardenView extends StatefulWidget {
   final DateTime now;
   final Weather weather;
 
-  const GardenView({super.key, required this.onPlace, required this.now, required this.weather});
+  /// 0 el patio, 1 el estanque.
+  final int side;
+
+  const GardenView({super.key, required this.onPlace, required this.now, required this.weather, this.side = 0});
 
   @override
   State<GardenView> createState() => _GardenViewState();
@@ -78,7 +81,7 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
     };
     return LayoutBuilder(
       builder: (context, box) {
-        final layout = GardenLayout(box.biggest, p.patioSize);
+        final layout = GardenLayout(box.biggest, p.patioSize, side: widget.side);
         return Stack(
           children: [
             Positioned.fill(
@@ -89,6 +92,7 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
                     tower: p.tower,
                     drawing: p.sandDrawing,
                     meditationOpen: p.meditationUnlocked,
+                    moss: p.best('moss') / 100,
                     daylight: daylight,
                     warmth: warmth,
                     arc: cycle.arc(now),
@@ -113,21 +117,22 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
               ),
             for (final e in layout.labels.entries)
               _Label(at: e.value, place: e.key, onTap: () => widget.onPlace(e.key)),
-            _TowerCollect(above: layout.places[Place.stack]!),
-            for (final g in cycle.giftsAt(now, weather))
-              for (final i in [
-                for (var i = 0; i < g.daily; i++)
-                  if (!_gone.contains('${g.id}$i')) i,
-              ].take(p.giftsLeft(g, weather: weather, now: now)))
-                _GiftSpot(
-                  key: ValueKey('${g.id}$i'),
-                  gift: g,
-                  index: i,
-                  layout: layout,
-                  life: _life,
-                  seconds: () => _t,
-                  onTake: (at) => _take(g, i, at),
-                ),
+            if (widget.side == 0) _TowerCollect(above: layout.places[Place.stack]!),
+            if (widget.side == 0)
+              for (final g in cycle.giftsAt(now, weather))
+                for (final i in [
+                  for (var i = 0; i < g.daily; i++)
+                    if (!_gone.contains('${g.id}$i')) i,
+                ].take(p.giftsLeft(g, weather: weather, now: now)))
+                  _GiftSpot(
+                    key: ValueKey('${g.id}$i'),
+                    gift: g,
+                    index: i,
+                    layout: layout,
+                    life: _life,
+                    seconds: () => _t,
+                    onTake: (at) => _take(g, i, at),
+                  ),
             for (final pop in _pops) _PopUp(key: ValueKey(pop.id), pop: pop),
             const Positioned(left: 12, top: 4, child: GardenSign()),
             Positioned(
@@ -191,18 +196,25 @@ class _Label extends StatelessWidget {
     Place.sand => tr('mg.sand.name'),
     Place.stack => tr('mg.stack.name'),
     Place.rain => tr('mg.rain.name'),
+    Place.pond || Place.shishi || Place.leaves || Place.moss || Place.bonsai => tr('mg.${p.name}.name'),
   };
 
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
-    final locked = place == Place.meditation && !p.meditationUnlocked;
-    final text = locked ? '${nameOf(place)} · ${tr('level.short', {'n': p.levels.meditationLevel})}' : nameOf(place);
-    return Positioned(
-      left: at.dx,
-      top: at.dy,
-      child: FractionalTranslation(
-        translation: const Offset(-0.5, -0.5),
+    final zone = p.unlockZone(place.name);
+    final (locked, why) = switch (place) {
+      Place.meditation => (!p.meditationUnlocked, tr('level.short', {'n': p.levels.meditationLevel})),
+      Place.market || Place.board => (false, ''),
+      _ when zone != null => (!p.gameUnlocked(place.name), tr('level.short', {'n': zone.level})),
+      _ => (!p.gameUnlocked(place.name), tr('garden.lockedDay', {'n': p.unlockDay(place.name)})),
+    };
+    final text = locked ? '${nameOf(place)} · $why' : nameOf(place);
+    // Centrado en su lugar, pero sin salirse del jardín (los nombres largos
+    // con candado no entran cerca de los bordes).
+    return Positioned.fill(
+      child: CustomSingleChildLayout(
+        delegate: _LabelLayout(at),
         child: GestureDetector(
           onTap: onTap,
           child: Container(
@@ -237,6 +249,21 @@ class _Label extends StatelessWidget {
       ),
     );
   }
+}
+
+class _LabelLayout extends SingleChildLayoutDelegate {
+  final Offset at;
+  _LabelLayout(this.at);
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size child) =>
+      Offset((at.dx - child.width / 2).clamp(6, max(6, size.width - child.width - 6)), at.dy - child.height / 2);
+
+  @override
+  bool shouldRelayout(_LabelLayout old) => old.at != at;
 }
 
 /// Lo que la torre juntó: aparece arriba de ella para cobrarlo con un toque.

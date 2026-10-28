@@ -104,7 +104,7 @@ Hay cuatro monedas: dos se ganan jugando, una por constancia y una se compra. Ni
 
 ### Mercado
 
-Ningún minijuego da todas las esencias (hoy nadie da Madera). Lo que falta se consigue en el Mercado, con trueques:
+Ningún minijuego da todas las esencias (la Madera sale de Hojas, Musgo y Bonsái; la Luz, del Modo meditación). Lo que falta se consigue en el Mercado, con trueques:
 
 - **Trueques del día:** piedritas o una esencia por otra, con un límite de veces por día. Así una moneda escasa sigue escasa y conviene volver mañana.
 - **Con lotos:** sin límite diario, porque el loto ya es escaso. Es la moneda para hacer escaso algo y, más adelante, venderlo.
@@ -163,7 +163,7 @@ El jardín inicial trae 7 minijuegos: 3 desde el primer minuto y 4 que se desblo
 
 | Minijuego | Zona / esencia | Desbloqueo | Gesto | Duración |
 | --- | --- | --- | --- | --- |
-| Apilado de piedras | Piedra / Arena | Inicio | Tocar para soltar | Sin límite |
+| Apilado de piedras | Piedra / Arena | Inicio | Tocar para soltar | Bolsa de 12 piedras (≈ 30–60 s) |
 | Arenero | Arena / Arena | Inicio | Trazo continuo | 20–40 s |
 | Lluvia en vasijas | Techo / Agua | Inicio | Tocar a tiempo | 60–90 s |
 | Shishi-odoshi | Agua / Agua | Día 2 | Mantener y soltar | 45 s |
@@ -175,11 +175,11 @@ El jardín inicial trae 7 minijuegos: 3 desde el primer minuto y 4 que se desblo
 
 **Qué busca:** la tensión suave de "una más" y una recompensa pasiva que crece con el tiempo.
 
-**Gameplay:** una piedra se balancea arriba de la pantalla. El jugador toca para soltarla sobre la torre. La torre queda en el jardín y **genera Piedritas por hora según su altura**. En cualquier momento un evento puede tirarla: ráfaga de viento (avisada 3 segundos antes con hojas volando) o el gato de la vecina.
+**Gameplay:** una piedra se balancea arriba de la pantalla. El jugador toca para soltarla sobre la torre. Cada partida trae una bolsa de 12 piedras de 6 tipos (río, laja, canto rodado, huevo, peñasco, cuña) que se suman a la torre guardada, que crece día a día. La torre queda en el jardín y **genera Piedritas por hora según su altura** (raíz de la altura). Cada piedra mece la torre según qué tan centrada cayó y la altura; si cede, se cae un tramo proporcional a lo mal que quedó y a la altura, con algo de azar. En cualquier momento un evento puede tirarla: ráfaga de viento (avisada 3 segundos antes con hojas volando) o el gato de la vecina.
 
 **Puntaje:** altura de la torre más un bonus por piedra "perfecta" (centrada dentro del 10%).
 
-**Asistencia invisible:** un imán sutil hacia el centro y física amortiguada en las primeras 5 piedras.
+**Asistencia invisible:** un imán sutil hacia el centro y balanceo amortiguado en las primeras piedras.
 
 **Defensa ante eventos:** durante el aviso de viento, tocar la torre la "sostiene" (gesto de mantener). Si se cae, queda registrada la altura récord.
 
@@ -444,7 +444,7 @@ Sí: todos los efectos y animaciones del documento, incluidos los koi, se pueden
 | Pieza | Herramienta | Para qué |
 | --- | --- | --- |
 | Motor de juego | [Flame](https://gamedev.net/news/topic/flame-engine/) 1.38.x, compatible con Flutter 3.47 | Loop de juego, componentes, input, cámara |
-| Física | flame_forge2d 0.20 (basado en Box2D v3) | Apilado de piedras, linternas en el río |
+| Física | Propia y simple (sin motor): equilibrio con azar en `StackRules`. Forge2D solo si lo pide un minijuego futuro | Apilado de piedras |
 | Animación vectorial | [Rive](https://pub.dev/packages/rive) 0.14 (runtime nativo en C++) | Monje, gato, meditador, UI animada |
 | Efectos de GPU | [Fragment shaders](https://docs.flutter.dev/ui/design/graphics/fragment-shaders) (GLSL) con Impeller | Agua, ondas, arena, tinta, lluvia, día/noche |
 | Estado y arquitectura | Riverpod, go_router; capas Domain / Infrastructure / Delivery | Fuera del juego: jardín, tienda, ranking |
@@ -462,7 +462,7 @@ Sí: todos los efectos y animaciones del documento, incluidos los koi, se pueden
 | Surcos del rastrillo | Se dibuja el trazo como path; un shader de relieve sobre una textura de arena genera los surcos paralelos | Media-alta | Medio. Probar temprano en Android de gama media |
 | Trazo de tinta (ensō) | Trazo de ancho variable según velocidad, con textura de pincel y bordes irregulares | Media | Bajo |
 | Lluvia y gotas | Partículas de Flame + splash por sprite o shader | Baja | Bajo |
-| Apilado con física | Forge2D con amortiguación y un imán al centro aplicado como fuerza | Media | Bajo. Ajustar la estabilidad con varias piedras |
+| Apilado con equilibrio | Modelo propio: balanceo y probabilidad de caída según centrado, altura y estabilidad de cada piedra | Media | Bajo. Calibrado con tests |
 | Personajes (monje, gato) | Rive con state machines (caminar, dormir, empujar piedra) | Media | Bajo |
 | Día/noche y estaciones | Shader de gradación de color sobre la escena + capas de sprites por estación | Baja | Bajo |
 | Luciérnagas | Partículas con brillo aditivo y movimiento por ruido | Baja | Bajo |

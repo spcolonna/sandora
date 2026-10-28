@@ -6,11 +6,30 @@ import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../minigames/sand/sand_painter.dart';
 import '../../minigames/sand/sand_shapes.dart';
+import '../../minigames/stack/stack_rules.dart';
+import '../../minigames/stack/stone_painter.dart';
 import '../theme/palette.dart';
+import 'garden_east.dart';
 
 /// Lugares del jardín que se tocan: cada minijuego, el Mercado, el tablón y
-/// el cojín de meditación.
-enum Place { market, board, meditation, sand, stack, rain }
+/// el cojín de meditación. Los del patio están en la primera vista; los del
+/// estanque, en la segunda (a la derecha).
+enum Place {
+  market,
+  board,
+  meditation,
+  sand,
+  stack,
+  rain,
+  pond,
+  shishi,
+  leaves,
+  moss,
+  bonsai;
+
+  /// 0 el patio, 1 el estanque.
+  int get side => index >= Place.pond.index ? 1 : 0;
+}
 
 /// Dónde está cada cosa del jardín. La usan el dibujo y las zonas tocables,
 /// así siempre coinciden.
@@ -29,7 +48,11 @@ class GardenLayout {
 
   GardenLayout._(this.size, this.ground, this.places, this.labels, this.lanterns);
 
-  factory GardenLayout(Size size, int patio) {
+  /// 0 el patio, 1 el estanque.
+  int get side => places.keys.first.side;
+
+  factory GardenLayout(Size size, int patio, {int side = 0}) {
+    if (side == 1) return GardenLayout._east(size);
     final w = size.width, h = size.height;
     const inset = [0.1, 0.04, 0.0], top = [0.6, 0.56, 0.52];
     final k = patio.clamp(0, 2);
@@ -71,6 +94,32 @@ class GardenLayout {
       ],
     );
   }
+
+  /// La vista del estanque: el agua con lotos, el shishi-odoshi, el bonsái,
+  /// las piedras con musgo y el camino de hojas.
+  factory GardenLayout._east(Size size) {
+    final w = size.width, h = size.height;
+    final ground = Rect.fromLTRB(0, h * 0.56, w, h);
+    final gh = ground.height;
+    final pond = Rect.fromLTRB(w * 0.05, ground.top + gh * 0.06, w * 0.64, ground.top + gh * 0.52);
+    final shishi = Rect.fromLTRB(w * 0.68, ground.top - h * 0.1, w * 0.97, ground.top + gh * 0.46);
+    final bonsai = Rect.fromLTRB(w * 0.34, h * 0.3, w * 0.64, ground.top - h * 0.01);
+    final moss = Rect.fromLTRB(w * 0.04, ground.top + gh * 0.6, w * 0.46, h - gh * 0.04);
+    final leaves = Rect.fromLTRB(w * 0.5, ground.top + gh * 0.58, w * 0.96, h - gh * 0.04);
+    return GardenLayout._(
+      size,
+      ground,
+      {Place.pond: pond, Place.shishi: shishi, Place.bonsai: bonsai, Place.moss: moss, Place.leaves: leaves},
+      {
+        Place.pond: Offset(pond.center.dx, pond.bottom),
+        Place.shishi: shishi.bottomCenter,
+        Place.bonsai: bonsai.bottomCenter,
+        Place.moss: Offset(moss.center.dx, moss.bottom - gh * 0.02),
+        Place.leaves: Offset(leaves.center.dx, leaves.bottom - gh * 0.02),
+      },
+      [Offset(bonsai.left - w * 0.06, bonsai.bottom - bonsai.height * 0.3)],
+    );
+  }
 }
 
 /// Colores del cielo en cada momento: arriba y abajo.
@@ -88,11 +137,21 @@ List<Color> skyColors(double daylight, double warmth, {required bool morning}) {
 
 /// El jardín dibujado con código hasta tener los fondos y objetos del Lote 1.
 /// Lo vivo (nubes, estrellas, luciérnagas) va aparte, en `garden_view.dart`.
+const List<TowerStone> _ghostTower = [
+  (x: 0, w: 1.7, h: 0.55, kind: 0, tone: 0, seed: 11),
+  (x: 0.1, w: 1.1, h: 0.6, kind: 2, tone: 2, seed: 23),
+];
+
+final _stoneCache = <int, StoneShape>{};
+
 class GardenPainter extends CustomPainter {
   final GardenLayout layout;
   final List<TowerStone> tower;
   final List<double> drawing;
   final bool meditationOpen;
+
+  /// Cuánto musgo hay en las piedras de la vista del estanque (0 a 1).
+  final double moss;
 
   /// Luz del día (0 noche, 1 día), tono cálido y recorrido del sol o la luna.
   final double daylight, warmth, arc;
@@ -108,6 +167,7 @@ class GardenPainter extends CustomPainter {
     required this.tower,
     required this.drawing,
     required this.meditationOpen,
+    this.moss = 0,
     required this.daylight,
     required this.warmth,
     required this.arc,
@@ -146,13 +206,22 @@ class GardenPainter extends CustomPainter {
           ..blendMode = BlendMode.srcATop,
       );
     }
-    _paintSandBed(canvas, layout.places[Place.sand]!);
-    _paintFence(canvas);
-    _paintTower(canvas, layout.places[Place.stack]!);
-    _paintJars(canvas, layout.places[Place.rain]!);
-    _paintMarket(canvas, layout.places[Place.market]!);
-    _paintBoard(canvas, layout.places[Place.board]!);
-    _paintMeditation(canvas, layout.places[Place.meditation]!);
+    final at = layout.places;
+    if (layout.side == 0) {
+      _paintSandBed(canvas, at[Place.sand]!);
+      _paintFence(canvas);
+      _paintTower(canvas, at[Place.stack]!);
+      _paintJars(canvas, at[Place.rain]!);
+      _paintMarket(canvas, at[Place.market]!);
+      _paintBoard(canvas, at[Place.board]!);
+      _paintMeditation(canvas, at[Place.meditation]!);
+    } else {
+      paintBonsai(canvas, at[Place.bonsai]!);
+      paintPond(canvas, at[Place.pond]!);
+      paintShishi(canvas, at[Place.shishi]!);
+      paintMossRocks(canvas, at[Place.moss]!, moss);
+      paintLeafPath(canvas, at[Place.leaves]!);
+    }
     final dark = 1 - daylight;
     canvas.drawRect(
       all,
@@ -234,11 +303,12 @@ class GardenPainter extends CustomPainter {
     final rng = Random(5);
     for (var i = 0; i < 40; i++) {
       final o = Offset(rng.nextDouble() * w, h * (0.47 + rng.nextDouble() * 0.5));
-      if (layout.ground.contains(o)) continue;
+      if (layout.side == 0 && layout.ground.contains(o)) continue;
       for (final d in [-3.0, 0.0, 3.0]) {
         canvas.drawLine(o, o + Offset(d, -6 - rng.nextDouble() * 3), tuft);
       }
     }
+    if (layout.side == 1) return;
     final g = layout.ground;
     canvas.save();
     canvas.clipRect(g);
@@ -309,7 +379,8 @@ class GardenPainter extends CustomPainter {
     canvas.drawLine(Offset(g.left, g.top - 4), Offset(g.right, g.top - 4), rail);
   }
 
-  /// La torre guardada del Apilado, sobre su pedestal.
+  /// La torre guardada del Apilado, sobre su pedestal. Una torre muy alta
+  /// sigue hacia arriba hasta salir de la escena.
   void _paintTower(Canvas canvas, Rect r) {
     final scale = r.width / 3.8;
     final base = Offset(r.center.dx, r.bottom - scale * 1.1);
@@ -319,16 +390,37 @@ class GardenPainter extends CustomPainter {
       Paint()..color = Palette.ink.withValues(alpha: 0.12),
     );
     canvas.drawRRect(RRect.fromRectAndRadius(ped, Radius.circular(scale * 0.15)), Paint()..color = Palette.stoneDark);
-    var y = base.dy;
-    final tones = [Palette.stone, Palette.stoneLight, Palette.stoneDark];
-    final stones = tower.isEmpty ? const [(x: 0.0, w: 1.6, h: 0.7), (x: 0.1, w: 1.1, h: 0.55)] : tower;
-    for (var i = 0; i < stones.length; i++) {
-      final s = stones[i];
-      final rr = Rect.fromLTWH(base.dx + (s.x - s.w / 2) * scale, y - s.h * scale, s.w * scale, s.h * scale);
-      final paint = Paint()..color = tones[i % 3].withValues(alpha: tower.isEmpty ? 0.45 : 1);
-      canvas.drawRRect(RRect.fromRectAndRadius(rr, Radius.circular(s.h * scale * 0.45)), paint);
-      y -= s.h * scale;
+    final ghost = tower.isEmpty;
+    final stones = ghost ? _ghostTower : tower;
+    // Una torre alta se achica para no tapar el jardín; si ni así entra,
+    // sigue hacia arriba fuera de la escena.
+    final meters = stones.fold(0.0, (a, s) => a + s.h * 0.88);
+    final stoneScale = max(scale * 0.3, min(scale, (r.height - scale * 1.1) * 1.2 / max(meters, 0.1)));
+    canvas.save();
+    canvas.translate(base.dx, base.dy);
+    canvas.scale(stoneScale);
+    var bottom = 0.0;
+    double? prevH;
+    for (final s in stones) {
+      // La silueta se arma una vez por piedra.
+      final shape = _stoneCache[s.seed] ??= StoneShape(
+        StoneKind.values[s.kind.clamp(0, StoneKind.values.length - 1)],
+        s.w,
+        s.h,
+        s.tone,
+        s.seed,
+      );
+      bottom += prevH == null ? 0 : 0.12 * min(prevH, s.h);
+      final y = bottom - s.h / 2;
+      if (base.dy + (y - s.h) * stoneScale < r.top - r.height * 0.2) break;
+      canvas.save();
+      canvas.translate(s.x, y);
+      paintStone(canvas, shape, opacity: ghost ? 0.45 : 1);
+      canvas.restore();
+      bottom -= s.h;
+      prevH = s.h;
     }
+    canvas.restore();
   }
 
   /// Vasijas de la Lluvia, con agua quieta adentro.
@@ -585,6 +677,8 @@ class GardenPainter extends CustomPainter {
       old.tower != tower ||
       old.drawing != drawing ||
       old.meditationOpen != meditationOpen ||
+      old.moss != moss ||
+      old.layout.side != layout.side ||
       (old.daylight - daylight).abs() > 0.004 ||
       (old.warmth - warmth).abs() > 0.004 ||
       (old.arc - arc).abs() > 0.002 ||

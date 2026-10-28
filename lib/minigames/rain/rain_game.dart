@@ -31,6 +31,7 @@ class RainGame extends FlameGame with TapCallbacks {
 
   late final int vessels;
   late final List<RainNote> notes;
+  late final List<RainGust> gusts;
   late final RainJudge judge;
   late final double fall;
 
@@ -41,6 +42,7 @@ class RainGame extends FlameGame with TapCallbacks {
   final _wobble = <int, double>{};
   final _rng = Random();
   final _bgDrops = <_Drop>[]; // lluvia decorativa
+  bool _windSound = false;
 
   @override
   Color backgroundColor() => const Color(0xFF7F95A0);
@@ -50,7 +52,9 @@ class RainGame extends FlameGame with TapCallbacks {
     camera.viewfinder.anchor = Anchor.topLeft;
     final best = Progress.instance.rainBest;
     vessels = (b.i('vesselsStart') + (best >= 600 ? 2 : (best >= 300 ? 1 : 0))).clamp(3, b.i('vesselsMax'));
-    notes = buildRainChart(b, vessels: vessels, seed: DateTime.now().millisecondsSinceEpoch, leadIn: leadIn);
+    final seed = DateTime.now().millisecondsSinceEpoch;
+    notes = buildRainChart(b, vessels: vessels, seed: seed, leadIn: leadIn);
+    gusts = rainGusts(b, seed: seed, leadIn: leadIn);
     judge = RainJudge(notes, b);
     fall = b.d('fallSeconds');
     SoundBoard.instance.loop(Ambience.rain, volume: 0.35);
@@ -78,6 +82,7 @@ class RainGame extends FlameGame with TapCallbacks {
       if (!_finished && _t - _outroAt! > panSeconds + 1.6) {
         _finished = true;
         SoundBoard.instance.stopLoop(Ambience.rain);
+        SoundBoard.instance.stopLoop(Ambience.wind);
         final acc = judge.accuracy;
         final record = Progress.instance.setRainScore(judge.score);
         finish(
@@ -97,11 +102,36 @@ class RainGame extends FlameGame with TapCallbacks {
     if (_bgDrops.length < 70) {
       _bgDrops.add(_Drop(_rng.nextDouble() * size.x, -_rng.nextDouble() * size.y, 500 + _rng.nextDouble() * 300));
     }
+    final wind = _windNow;
+    if (wind != 0 && !_windSound) {
+      _windSound = true;
+      SoundBoard.instance.loop(Ambience.wind, volume: 0.25, fade: const Duration(milliseconds: 600));
+    } else if (wind == 0 && _windSound) {
+      _windSound = false;
+      SoundBoard.instance.stopLoop(Ambience.wind, fade: const Duration(milliseconds: 800));
+    }
     for (final d in _bgDrops) {
       d.y += d.v * dt;
+      d.x += wind * 260 * dt;
       if (d.y > size.y * 2) d.y = -20;
+      if (d.x < -20) d.x += size.x + 40;
+      if (d.x > size.x + 20) d.x -= size.x + 40;
     }
   }
+
+  /// Viento ahora (-1 a 1), con subida y bajada suaves.
+  double get _windNow {
+    for (final g in gusts) {
+      final e = _t - g.start;
+      if (e < 0 || e > g.length) continue;
+      return g.dir * sin(pi * e / g.length).clamp(0.0, 1.0);
+    }
+    return 0;
+  }
+
+  /// Ráfaga que viene (para avisar), o null.
+  RainGust? get _gustComing =>
+      gusts.where((g) => _t >= g.start - b.d('windWarning') && _t < g.start + g.length).firstOrNull;
 
   static double _ease(double x) => x < 0.5 ? 2 * x * x : 1 - pow(-2 * x + 2, 2) / 2;
 
@@ -180,8 +210,9 @@ class RainGame extends FlameGame with TapCallbacks {
     final p = Paint()
       ..color = const Color(0x55E6F3F5)
       ..strokeWidth = 1.2;
+    final slant = -1.5 + _windNow * 9;
     for (final d in _bgDrops) {
-      canvas.drawLine(Offset(d.x, d.y), Offset(d.x - 1.5, d.y + 14), p);
+      canvas.drawLine(Offset(d.x, d.y), Offset(d.x - slant, d.y + 14), p);
     }
   }
 
@@ -227,10 +258,19 @@ class RainGame extends FlameGame with TapCallbacks {
       final spawn = n.time - fall;
       if (_t < spawn) continue;
       final p = ((_t - spawn) / fall).clamp(0.0, 1.2);
-      final x = vesselX(n.vessel);
+      // Con viento entra de costado y llega igual a su vasija.
+      final x = vesselX(n.vessel) - n.wind * colW * b.d('windDrift') * pow(1 - p.clamp(0.0, 1.0), 1.4);
       // Caída con aceleración suave, como gravedad.
       final y = eaveY + (rimY - eaveY) * (0.35 * p + 0.65 * p * p);
-      canvas.drawOval(Rect.fromCenter(center: Offset(x, y), width: 9, height: 15), drop);
+      if (n.wind == 0) {
+        canvas.drawOval(Rect.fromCenter(center: Offset(x, y), width: 9, height: 15), drop);
+      } else {
+        canvas.save();
+        canvas.translate(x, y);
+        canvas.rotate(-n.wind * 0.35 * (1 - p).clamp(0.2, 1.0));
+        canvas.drawOval(Rect.fromCenter(center: Offset.zero, width: 9, height: 15), drop);
+        canvas.restore();
+      }
       // Anillo que se cierra justo sobre la vasija en el momento del acierto.
       final ringR = vesselR * (0.8 + 2.2 * (1 - p).clamp(0, 1));
       canvas.drawCircle(
@@ -269,6 +309,22 @@ class RainGame extends FlameGame with TapCallbacks {
       _text(canvas, tr('rain.combo', {'n': judge.combo}), Offset(size.x / 2, size.y * 0.27), 22);
     }
     if (_t < leadIn + 1.5) _text(canvas, tr('rain.hint'), Offset(size.x / 2, size.y * 0.88), 16);
+    final gust = _gustComing;
+    if (gust != null) {
+      // Aviso: líneas de viento que cruzan y el texto mientras se acerca.
+      final a = (_t < gust.start ? 0.2 : 0.35) * (0.6 + 0.4 * sin(_t * 6));
+      final line = Paint()
+        ..color = const Color(0xFFFFFFFF).withValues(alpha: a)
+        ..strokeWidth = 2
+        ..strokeCap = StrokeCap.round;
+      for (var k = 0; k < 7; k++) {
+        final r = Random(k);
+        final y = size.y * (0.22 + 0.4 * r.nextDouble());
+        final x = (gust.dir * (_t * 220 + k * 110)) % (size.x + 160) - 80;
+        canvas.drawLine(Offset(x, y), Offset(x + gust.dir * 46, y), line);
+      }
+      if (_t < gust.start) _text(canvas, tr('leaves.wind'), Offset(size.x / 2, size.y * 0.33), 18);
+    }
     final last = notes.isEmpty ? 1.0 : notes.last.time;
     final p = (_t / last).clamp(0.0, 1.0);
     canvas.drawRect(Rect.fromLTWH(0, size.y - 4, size.x * p, 4), Paint()..color = const Color(0x88FFFFFF));

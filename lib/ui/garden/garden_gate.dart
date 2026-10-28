@@ -20,14 +20,20 @@ class _GardenGateState extends State<GardenGate> with SingleTickerProviderStateM
   late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 3000));
   bool _open = false;
 
+  /// El jardín vive siempre bajo la misma llave: al terminar la puerta no se
+  /// vuelve a crear (antes se perdía el toque que caía en ese cuadro).
+  final _garden = GlobalKey();
+
   @override
   void initState() {
     super.initState();
+    // Por estado y no por el future de forward(): apurar con animateTo cancela
+    // ese future y la puerta quedaba encima para siempre.
+    _c.addStatusListener((s) {
+      if (s == AnimationStatus.completed && mounted) setState(() => _open = true);
+    });
     Future.delayed(const Duration(milliseconds: 450), () {
-      if (!mounted) return;
-      _c.forward().whenComplete(() {
-        if (mounted) setState(() => _open = true);
-      });
+      if (mounted) _c.forward();
     });
     // Un golpe suave cuando las puertas se destraban.
     Future.delayed(const Duration(milliseconds: 1100), () {
@@ -53,13 +59,14 @@ class _GardenGateState extends State<GardenGate> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    if (_open) return widget.child;
+    final garden = KeyedSubtree(key: _garden, child: widget.child);
+    if (_open) return garden;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _hurry,
       child: AnimatedBuilder(
         animation: _c,
-        child: widget.child,
+        child: garden,
         builder: (context, garden) {
           // Luz que se cuela por el papel y la rendija, puertas que se corren,
           // destello que crece al abrirse y se apaga mientras el jardín se asienta.
@@ -71,7 +78,12 @@ class _GardenGateState extends State<GardenGate> with SingleTickerProviderStateM
             fit: StackFit.expand,
             children: [
               ColoredBox(color: Palette.paper),
-              Transform.scale(scale: 1.08 - 0.08 * settle, child: garden),
+              // Mientras las puertas tapan el jardín, el toque apura la entrada;
+              // en cuanto se corren, ya se puede tocar el jardín.
+              IgnorePointer(
+                ignoring: slide < 1,
+                child: Transform.scale(scale: 1.08 - 0.08 * settle, child: garden),
+              ),
               IgnorePointer(
                 child: CustomPaint(
                   painter: _DoorsPainter(slide: slide, light: light, flash: flash),

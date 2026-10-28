@@ -68,10 +68,14 @@ class Economy {
   }
 
   /// Piedritas que juntó una torre de [stones] piedras en [hours] horas, con
-  /// un tope para que no convenga desaparecer días enteros.
+  /// un tope para que no convenga desaparecer días enteros. Rinde según la raíz
+  /// de la altura: una torre de 500 no puede romper la economía.
   int towerYield(int stones, double hours) {
     final s = balance.stack;
     final h = hours.clamp(0, s.d('maxHoursStored'));
-    return (stones * s.d('pebblesPerHourPerStone') * h).floor();
+    return (towerRate(stones) * h).floor();
   }
+
+  /// Piedritas por hora de una torre de [stones] piedras.
+  double towerRate(int stones) => balance.stack.d('pebblesPerHour') * sqrt(stones);
 }
