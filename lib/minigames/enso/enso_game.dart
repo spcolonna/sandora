@@ -13,6 +13,7 @@ import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
+import 'enso_ink.dart';
 import 'enso_scorer.dart';
 
 /// Ensō (Sala de caligrafía): un círculo de un solo trazo con el pincel. El
@@ -95,7 +96,10 @@ class EnsoGame extends FlameGame with DragCallbacks {
     _result = r;
     final pct = (r.total * 100).round();
     final record = pct > Progress.instance.best('enso');
-    Progress.instance.setBest('enso', pct);
+    if (Progress.instance.setBest('enso', pct)) {
+      // El mejor ensō queda colgado en el pabellón del jardín.
+      Progress.instance.setEnsoInk(SavedInk.fromStroke([for (final p in _stroke) p.at], _widths).toFlat());
+    }
     final stars = starsFor(r.total, b.list('stars'));
     final c = _stroke.map((p) => p.at).reduce((a, p) => a + p) / _stroke.length.toDouble();
     if (stars > 0) celebrate(world, Vector2(c.dx, c.dy), Grade.values[stars - 1]);
@@ -139,32 +143,7 @@ class EnsoGame extends FlameGame with DragCallbacks {
     );
   }
 
-  /// La tinta: discos superpuestos con el ancho de cada punto; hacia el final
-  /// del trazo el pincel se seca (más claro y con huecos).
-  void _ink(Canvas canvas) {
-    if (_stroke.length < 2) return;
-    final n = _stroke.length;
-    for (var i = 1; i < n; i++) {
-      final a = _stroke[i - 1].at, c = _stroke[i].at;
-      // Curva de Catmull-Rom entre los puntos: el trazo sale redondo aunque
-      // el dedo mande pocos puntos.
-      final p0 = _stroke[max(0, i - 2)].at, p3 = _stroke[min(n - 1, i + 1)].at;
-      final dry = (i / n - 0.75).clamp(0.0, 0.25) * 4; // 0 → 1 en el último cuarto
-      final steps = max(1, ((c - a).distance / 2).ceil());
-      for (var k = 0; k < steps; k++) {
-        final p = _catmull(p0, a, c, p3, k / steps);
-        final w = (_widths[i - 1] + (_widths[i] - _widths[i - 1]) * k / steps) * (1 - 0.35 * dry);
-        // El pincel seco deja huecos.
-        if (dry > 0 && ((i * 7 + k * 13) % 10) / 10 < dry * 0.45) continue;
-        canvas.drawCircle(p, w / 2, Paint()..color = Palette.ink.withValues(alpha: 0.85 - 0.35 * dry));
-      }
-    }
-  }
-
-  static Offset _catmull(Offset p0, Offset p1, Offset p2, Offset p3, double t) {
-    final t2 = t * t, t3 = t2 * t;
-    return (p1 * 2 + (p2 - p0) * t + (p0 * 2 - p1 * 5 + p2 * 4 - p3) * t2 + (p1 * 3 - p0 - p2 * 3 + p3) * t3) * 0.5;
-  }
+  void _ink(Canvas canvas) => paintEnsoInk(canvas, [for (final p in _stroke) p.at], _widths);
 
   void _text(Canvas canvas, String s, Offset center, double fontSize) {
     final tp = TextPainter(

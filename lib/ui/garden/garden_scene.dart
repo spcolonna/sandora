@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
+import '../../minigames/enso/enso_ink.dart';
 import '../../minigames/sand/sand_painter.dart';
 import '../../minigames/sand/sand_shapes.dart';
 import '../../minigames/stack/stack_rules.dart';
 import '../../minigames/stack/stone_painter.dart';
 import '../theme/palette.dart';
 import 'garden_east.dart';
+import 'scene_art.dart';
 
 /// Lugares del jardín que se tocan: cada minijuego, el Mercado, el tablón y
 /// el cojín de meditación. Los del patio están en la primera vista; los del
@@ -183,6 +185,12 @@ class GardenPainter extends CustomPainter {
   /// Cuánto se ve el arcoíris (0 a 1), detrás de las lomas.
   final double rainbow;
 
+  /// Objetos de la racha de meditación (`bowl`, `cushion`, `lantern`).
+  final List<String> streakObjects;
+
+  /// El mejor ensō del jugador, colgado en el pabellón.
+  final SavedInk? ensoInk;
+
   GardenPainter({
     required this.layout,
     required this.tower,
@@ -197,6 +205,8 @@ class GardenPainter extends CustomPainter {
     this.snowy = false,
     this.wet = 0,
     this.rainbow = 0,
+    this.streakObjects = const [],
+    this.ensoInk,
   });
 
   Size get size => layout.size;
@@ -215,6 +225,18 @@ class GardenPainter extends CustomPainter {
           colors: sky,
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height * 0.45)),
     );
+    // El cielo pintado es de día: se funde con el degradado según la luz, el
+    // atardecer y las nubes, y de noche queda solo el degradado.
+    final skyArt = SceneArt.instance['bg_base_sky'];
+    final skyAlpha = daylight * (1 - 0.6 * warmth) * (1 - 0.85 * overcast);
+    if (skyArt != null && skyAlpha > 0.01) {
+      drawArt(
+        canvas,
+        skyArt,
+        Rect.fromLTWH(0, 0, size.width, size.height * 0.48),
+        paint: Paint()..color = Colors.white.withValues(alpha: skyAlpha.clamp(0.0, 1.0)),
+      );
+    }
     _paintSunOrMoon(canvas);
     if (rainbow > 0) _paintRainbow(canvas, size);
     // La tierra se dibuja en una capa aparte para oscurecerla de noche sin
@@ -246,7 +268,7 @@ class GardenPainter extends CustomPainter {
       paintShishi(canvas, at[Place.shishi]!);
       paintMossRocks(canvas, at[Place.moss]!, moss);
       paintLeafPath(canvas, at[Place.leaves]!);
-      paintCalligraphyHall(canvas, at[Place.enso]!);
+      paintCalligraphyHall(canvas, at[Place.enso]!, ink: ensoInk);
       paintBellTower(canvas, at[Place.bell]!);
     }
     final dark = 1 - daylight;
@@ -297,8 +319,15 @@ class GardenPainter extends CustomPainter {
     canvas.restore();
   }
 
+  /// Lomas lejanas con niebla (`bg_base_far`): las cimas quedan a un tercio
+  /// de la pantalla y el suelo tapa el resto.
   void _paintHills(Canvas canvas) {
     final w = size.width, h = size.height;
+    final art = SceneArt.instance['bg_base_far'];
+    if (art != null) {
+      drawArt(canvas, art, Rect.fromLTWH(0, h * 0.31, w, w * art.height / art.width));
+      return;
+    }
     final far = Path()..moveTo(0, h * 0.4);
     for (var x = 0.0; x <= w; x += 8) {
       far.lineTo(x, h * (0.36 + 0.035 * sin(x / 41 + 1) + 0.015 * sin(x / 11)));
@@ -692,15 +721,39 @@ class GardenPainter extends CustomPainter {
       Paint()..color = Palette.stoneLight,
     );
     if (meditationOpen) {
+      // El cojín de la racha es un zafu de brocado rojo con ribete dorado.
+      final zafu = streakObjects.contains('cushion');
       final cushion = seat - Offset(0, h * 0.035);
       canvas.drawOval(
         Rect.fromCenter(center: cushion, width: w * 0.24, height: h * 0.08),
-        Paint()..color = const Color(0xFF4F5A86),
+        Paint()..color = zafu ? const Color(0xFF9E3F38) : const Color(0xFF4F5A86),
       );
+      if (zafu) {
+        canvas.drawOval(
+          Rect.fromCenter(center: cushion, width: w * 0.24, height: h * 0.08),
+          Paint()
+            ..color = Palette.lantern
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.2,
+        );
+      }
       canvas.drawOval(
         Rect.fromCenter(center: cushion - Offset(0, h * 0.012), width: w * 0.16, height: h * 0.04),
-        Paint()..color = const Color(0xFF6A76A3),
+        Paint()..color = zafu ? const Color(0xFFBF5A4C) : const Color(0xFF6A76A3),
       );
+    }
+    if (streakObjects.contains('bowl')) _paintSingingBowl(canvas, Offset(seat.dx + w * 0.17, d.bottom - h * 0.035), w);
+    final lantern = _paperLantern;
+    if (lantern != null) {
+      final hook = Offset(lantern.dx, d.top + h * 0.34);
+      canvas.drawLine(
+        hook,
+        lantern - Offset(0, w * 0.05),
+        Paint()
+          ..color = Palette.ink
+          ..strokeWidth = 1,
+      );
+      _paintPaperLantern(canvas, lantern, w * 0.05, 0);
     }
     // Farol de piedra (tōrō).
     final lamp = layout.lanterns[1];
@@ -724,6 +777,59 @@ class GardenPainter extends CustomPainter {
     canvas.drawPath(cap, Paint()..color = Palette.stoneDark);
   }
 
+  /// Cuenco tibetano de bronce sobre un almohadón, apoyado en [base].
+  void _paintSingingBowl(Canvas canvas, Offset base, double w) {
+    final s = w * 0.07;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromCenter(center: base, width: s * 2.2, height: s * 0.7), Radius.circular(s * 0.3)),
+      Paint()..color = const Color(0xFF9E3F38),
+    );
+    final bowl = Path()
+      ..moveTo(base.dx - s, base.dy - s * 1.1)
+      ..quadraticBezierTo(base.dx - s, base.dy - s * 0.1, base.dx, base.dy - s * 0.1)
+      ..quadraticBezierTo(base.dx + s, base.dy - s * 0.1, base.dx + s, base.dy - s * 1.1)
+      ..close();
+    canvas.drawPath(bowl, Paint()..color = const Color(0xFFA9803F));
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(base.dx, base.dy - s * 1.1), width: s * 2, height: s * 0.45),
+      Paint()..color = const Color(0xFF6E5228),
+    );
+    canvas.drawLine(
+      Offset(base.dx - s * 0.55, base.dy - s * 0.75),
+      Offset(base.dx - s * 0.15, base.dy - s * 0.4),
+      Paint()
+        ..color = const Color(0xFFE0BE78)
+        ..strokeWidth = 1.2
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  /// Centro del farol de papel de la racha, colgado de la rama del cerezo.
+  Offset? get _paperLantern {
+    final d = layout.places[Place.meditation];
+    if (d == null || !streakObjects.contains('lantern')) return null;
+    return Offset(d.left + d.width * 0.86, d.top + d.height * 0.34 + d.width * 0.12);
+  }
+
+  /// Farol de papel de tamaño [s]; [lit] (0 a 1) lo enciende.
+  void _paintPaperLantern(Canvas canvas, Offset c, double s, double lit) {
+    final body = Rect.fromCenter(center: c, width: s * 1.6, height: s * 2);
+    canvas.drawOval(body, Paint()..color = Color.lerp(const Color(0xFFE9D7B0), const Color(0xFFFFD98A), lit)!);
+    final rib = Paint()
+      ..color = Palette.ink.withValues(alpha: 0.25)
+      ..strokeWidth = 0.8;
+    for (final k in [-0.5, 0.0, 0.5]) {
+      canvas.drawLine(
+        Offset(body.left + s * 0.2, c.dy + k * s * 0.8),
+        Offset(body.right - s * 0.2, c.dy + k * s * 0.8),
+        rib,
+      );
+    }
+    final cap = Paint()..color = Palette.ink.withValues(alpha: 0.85);
+    canvas.drawRect(Rect.fromCenter(center: Offset(c.dx, body.top), width: s * 0.9, height: s * 0.3), cap);
+    canvas.drawRect(Rect.fromCenter(center: Offset(c.dx, body.bottom), width: s * 0.9, height: s * 0.3), cap);
+  }
+
   /// Faroles encendidos: aparecen al atardecer y brillan toda la noche.
   void _paintLanternLight(Canvas canvas) {
     final glow = ((1 - daylight) * 1.2).clamp(0.0, 1.0);
@@ -743,6 +849,26 @@ class GardenPainter extends CustomPainter {
       );
       canvas.drawCircle(c, 3.5, Paint()..color = const Color(0xFFFFE2A8).withValues(alpha: glow));
     }
+    // El farol de la racha se enciende encima de la penumbra.
+    final paper = _paperLantern;
+    if (paper != null) {
+      final r = size.width * 0.08;
+      canvas.drawCircle(
+        paper,
+        r,
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
+              Palette.lantern.withValues(alpha: 0.45 * glow),
+              Palette.lantern.withValues(alpha: 0),
+            ],
+          ).createShader(Rect.fromCircle(center: paper, radius: r)),
+      );
+      final s = layout.places[Place.meditation]!.width * 0.05;
+      canvas.saveLayer(null, Paint()..color = Colors.white.withValues(alpha: glow));
+      _paintPaperLantern(canvas, paper, s, 1);
+      canvas.restore();
+    }
   }
 
   @override
@@ -761,5 +887,7 @@ class GardenPainter extends CustomPainter {
       old.overcast != overcast ||
       old.snowy != snowy ||
       (old.wet - wet).abs() > 0.01 ||
-      (old.rainbow - rainbow).abs() > 0.01;
+      (old.rainbow - rainbow).abs() > 0.01 ||
+      old.streakObjects.length != streakObjects.length ||
+      old.ensoInk != ensoInk;
 }

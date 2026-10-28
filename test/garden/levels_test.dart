@@ -150,5 +150,38 @@ void main() {
       expect(p.meditationMinutesLeft(now: start.add(const Duration(minutes: 31))), 10);
       expect(p.meditationStreak, 1);
     });
+
+    test('racha: cuenco a los 7 días, cojín a los 14, farol a los 21 y nada más', () async {
+      final p = Progress.instance;
+      final first = DateTime(2026, 10, 1, 8);
+      await p.load(balance, now: first);
+      final got = <String?>[];
+      for (var d = 0; d < 28; d++) {
+        final day = first.add(Duration(days: d));
+        p.startMeditation(3, now: day);
+        got.add(p.finishMeditation(now: day.add(const Duration(minutes: 3))).object);
+      }
+      expect(p.meditationStreak, 28);
+      expect(got.whereType<String>(), ['bowl', 'cushion', 'lantern']);
+      expect(got[6], 'bowl');
+      expect(got[13], 'cushion');
+      expect(got[20], 'lantern');
+      await p.load(balance, now: first.add(const Duration(days: 28)));
+      expect(p.streakObjects, ['bowl', 'cushion', 'lantern'], reason: 'se guardan');
+    });
+
+    test('racha: dos sesiones el mismo día no adelantan el objeto', () async {
+      final p = Progress.instance;
+      final first = DateTime(2026, 10, 1, 8);
+      await p.load(balance, now: first);
+      for (var d = 0; d < 7; d++) {
+        final day = first.add(Duration(days: d));
+        for (final h in [0, 2]) {
+          p.startMeditation(3, now: day.add(Duration(hours: h)));
+          p.finishMeditation(now: day.add(Duration(hours: h, minutes: 3)));
+        }
+      }
+      expect(p.streakObjects, ['bowl']);
+    });
   });
 }

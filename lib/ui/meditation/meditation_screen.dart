@@ -33,7 +33,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
   bool _intervalBell = false;
   Timer? _tick;
   int _bellsRung = 0;
-  ({MeditationReward reward, int? newLevel, int lotus})? _result;
+  ({MeditationReward reward, int? newLevel, int lotus, String? object})? _result;
 
   @override
   void initState() {
@@ -290,6 +290,14 @@ class _MeditationScreenState extends State<MeditationScreen> {
             if (p.meditationStreak > 0) ...[
               const SizedBox(height: 10),
               Text(trN('meditation.streak', p.meditationStreak), style: text.bodyMedium),
+            ],
+            if (_result!.object != null) ...[
+              const SizedBox(height: 14),
+              Text(
+                tr('meditation.object.${_result!.object}'),
+                style: text.titleMedium?.copyWith(color: Palette.lantern),
+                textAlign: TextAlign.center,
+              ),
             ],
             if (_result!.newLevel != null) ...[
               const SizedBox(height: 16),

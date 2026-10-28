@@ -1650,5 +1650,26 @@
   "pt": "Comprar lótus",
   "ja": "蓮を買う",
   "zh": "购买莲花"
+ },
+ "meditation.object.bowl": {
+  "es": "Por tu racha ganaste un cuenco tibetano. Ya está junto al cerezo.",
+  "en": "Your streak earned you a singing bowl. It's waiting by the cherry tree.",
+  "pt": "Sua sequência te deu uma tigela tibetana. Ela já está junto à cerejeira.",
+  "ja": "連続記録のごほうびに、シンギングボウルを手に入れました。桜の木のそばに置いてあります。",
+  "zh": "连续冥想为你赢得一只颂钵，已放在樱花树旁。"
+ },
+ "meditation.object.cushion": {
+  "es": "Por tu racha ganaste un cojín de brocado. Ya está junto al cerezo.",
+  "en": "Your streak earned you a brocade cushion. It's waiting by the cherry tree.",
+  "pt": "Sua sequência te deu uma almofada de brocado. Ela já está junto à cerejeira.",
+  "ja": "連続記録のごほうびに、錦の座布を手に入れました。桜の木のそばに置いてあります。",
+  "zh": "连续冥想为你赢得一个锦缎坐垫，已放在樱花树旁。"
+ },
+ "meditation.object.lantern": {
+  "es": "Por tu racha ganaste un farol de luz. Ya cuelga del cerezo.",
+  "en": "Your streak earned you a lantern of light. It now hangs from the cherry tree.",
+  "pt": "Sua sequência te deu uma lanterna de luz. Ela já está pendurada na cerejeira.",
+  "ja": "連続記録のごほうびに、光の提灯を手に入れました。桜の枝に下がっています。",
+  "zh": "连续冥想为你赢得一盏光之灯笼，已挂在樱花树上。"
  }
 }

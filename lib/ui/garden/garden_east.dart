@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../minigames/enso/enso_ink.dart';
 import '../theme/palette.dart';
 import 'scene_art.dart';
 
@@ -208,9 +209,20 @@ void paintLeafPath(Canvas canvas, Rect r) {
   }
 }
 
-/// Pabellón de caligrafía, con el ensō colgado.
-void paintCalligraphyHall(Canvas canvas, Rect r) {
-  drawArtIn(canvas, SceneArt.instance['obj_callig_hall'], r);
+/// Pabellón de caligrafía, con el ensō colgado: el mejor del jugador ([ink])
+/// o, hasta que haga uno, el que trae el dibujo.
+void paintCalligraphyHall(Canvas canvas, Rect r, {SavedInk? ink}) {
+  final dst = drawArtIn(canvas, SceneArt.instance['obj_callig_hall'], r);
+  if (dst == null || ink == null) return;
+  // Papel del rollo y centro del ensō en `obj_callig_hall` (fracciones).
+  final paper = Rect.fromLTRB(
+    dst.left + dst.width * 0.441,
+    dst.top + dst.height * 0.531,
+    dst.left + dst.width * 0.558,
+    dst.top + dst.height * 0.685,
+  );
+  canvas.drawRect(paper, Paint()..color = const Color(0xFFE2C4A0));
+  ink.paint(canvas, Offset(dst.left + dst.width * 0.5, dst.top + dst.height * 0.608), dst.width * 0.046);
 }
 
 /// Campanario con la campana de bronce y el tronco colgados de la viga.

@@ -7,6 +7,7 @@ import '../../garden/progress.dart';
 import '../../garden/weather.dart';
 import '../../garden/weather_service.dart';
 import '../../i18n/i18n.dart';
+import '../../minigames/enso/enso_ink.dart';
 import '../fx/calm.dart';
 import '../fx/sfx.dart';
 import '../theme/palette.dart';
@@ -68,6 +69,18 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
     });
   }
 
+  List<double>? _inkFlat;
+  SavedInk? _ink;
+
+  /// El ensō guardado, decodificado una sola vez por trazo.
+  SavedInk? _ensoInk(List<double>? flat) {
+    if (!identical(flat, _inkFlat)) {
+      _inkFlat = flat;
+      _ink = SavedInk.fromFlat(flat);
+    }
+    return _ink;
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
@@ -112,6 +125,8 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
                     snowy: weather == Weather.snow,
                     wet: wet,
                     rainbow: rainbow,
+                    streakObjects: p.streakObjects,
+                    ensoInk: _ensoInk(p.ensoInk),
                   ),
                 ),
               ),

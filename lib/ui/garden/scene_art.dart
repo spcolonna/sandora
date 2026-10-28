@@ -8,20 +8,23 @@ class SceneArt {
   SceneArt._();
   static final instance = SceneArt._();
 
-  static const _names = [
-    'obj_callig_hall',
-    'obj_temple_belltower',
-    'obj_temple_bell',
-    'obj_temple_log',
-    'bg_enso_paper',
-  ];
+  /// Carpeta de `assets/images/` de cada imagen.
+  static const _names = {
+    'obj_callig_hall': 'temple',
+    'obj_temple_belltower': 'temple',
+    'obj_temple_bell': 'temple',
+    'obj_temple_log': 'temple',
+    'bg_enso_paper': 'temple',
+    'bg_base_sky': 'bg',
+    'bg_base_far': 'bg',
+  };
 
   final _images = <String, ui.Image>{};
 
   Future<void> load() async {
-    for (final name in _names) {
+    for (final MapEntry(key: name, value: folder) in _names.entries) {
       try {
-        final data = await rootBundle.load('assets/images/temple/$name.webp');
+        final data = await rootBundle.load('assets/images/$folder/$name.webp');
         final frame = await (await ui.instantiateImageCodec(data.buffer.asUint8List())).getNextFrame();
         _images[name] = frame.image;
       } catch (_) {

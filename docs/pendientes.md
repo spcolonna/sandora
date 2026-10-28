@@ -18,13 +18,15 @@
 - [ ] Integrar el arte del Lote 1 (`docs/prompts.md`) cuando esté.
 - [x] Meditación: notificación local con la campana final (`lib/garden/reminders.dart`), por si la app queda en
       segundo plano.
-- [ ] Meditación: objetos de racha cada 7 días (cuenco, cojín, farol) cuando exista el sistema de objetos.
+- [x] Meditación: objetos de racha cada 7 días (`meditation.streakObjects` del balance): cuenco tibetano, cojín de
+      brocado y farol de papel que de noche se enciende, junto al cerezo. Son de la cuenta. Dibujados con código hasta
+      tener arte.
 - [ ] Integrar `store_feature` (Bloque 9, solo para la tienda). Ya están el logo, el fondo del título
       (`title_bg`) y el cartel del jardín (`ui_garden_sign`).
 - [x] Ampliaciones: los patios agrandan el jardín; el Estanque abre el Estanque de lotos, la Sala de caligrafía el
       Ensō y el Templo la Campana (`unlocks.zones` en el balance).
 - [ ] Zonas que siguen "Próximamente": Casa de té (Matcha), Bosque de bambú (Flauta) y Río (Linternas).
-- [ ] Ensō: colgar el mejor ensō en el jardín (GDD); hoy el pabellón muestra uno fijo.
+- [x] Ensō: el mejor trazo se guarda (`enso.ink`) y se cuelga en el rollo del pabellón, en lugar del que trae el dibujo.
 
 ## Próximo: menú y jardín vivo
 - [x] **Entrada al jardín:** puertas shoji que se corren con un destello (`lib/ui/garden/garden_gate.dart`).

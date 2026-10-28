@@ -239,4 +239,7 @@ const pt = <String, String>{
   'gardens.level': 'A partir do nível {n}',
   'gardens.full': 'Você já tem todos os jardins possíveis',
   'shop.buyLotus': 'Comprar lótus',
+  'meditation.object.bowl': 'Sua sequência te deu uma tigela tibetana. Ela já está junto à cerejeira.',
+  'meditation.object.cushion': 'Sua sequência te deu uma almofada de brocado. Ela já está junto à cerejeira.',
+  'meditation.object.lantern': 'Sua sequência te deu uma lanterna de luz. Ela já está pendurada na cerejeira.',
 };

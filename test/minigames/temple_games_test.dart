@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sandora/minigames/bell/bell_rules.dart';
 import 'package:sandora/minigames/common/grade.dart';
+import 'package:sandora/minigames/enso/enso_ink.dart';
 import 'package:sandora/minigames/enso/enso_scorer.dart';
 
 import '../helpers.dart';
@@ -13,6 +14,21 @@ void main() {
   group('Ensō', () {
     final b = balance.section('enso');
     const width = 400.0;
+
+    test('el trazo guardado se normaliza, se recorta y vuelve igual', () {
+      final pts = [for (var i = 0; i < 300; i++) Offset(200 + 120 * cos(i / 50), 300 + 120 * sin(i / 50))];
+      final ink = SavedInk.fromStroke(pts, List.filled(300, 12.0));
+      expect(ink.points.length, lessThanOrEqualTo(97));
+      expect(ink.points.last, isNot(ink.points.first));
+      for (final q in ink.points) {
+        expect(q.distance, closeTo(1, 0.05), reason: 'medido en radios');
+      }
+      expect(ink.widths.first, closeTo(0.1, 0.01));
+      final back = SavedInk.fromFlat(ink.toFlat())!;
+      expect(back.points.length, ink.points.length);
+      expect(back.points[5].dx, closeTo(ink.points[5].dx, 0.001));
+      expect(SavedInk.fromFlat([1, 2]), isNull);
+    });
 
     /// Un trazo circular de [turns] vueltas, con [wobble] de desvío del radio
     /// y velocidad pareja (o a tirones con [jerky]).

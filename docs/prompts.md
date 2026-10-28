@@ -61,41 +61,15 @@ COMPOSITION: Each plant is separated from the others with generous empty paper a
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; labels; grid lines; frame or border; cast shadows on the paper; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-## Bloque 1 — Fondos del jardín y del alero (5) ⬜
+## Bloque 1 — Fondos del jardín y del alero (3) ⬜
 
-Archivos, en orden: `bg_base_sky.png`, `bg_base_far.png`, `bg_base_ground.png`, `bg_base_foliage.png`, `bg_rain_roof.png`. Carpeta: `store/art/bg/`.
+Archivos, en orden: `bg_base_ground.png`, `bg_base_foliage.png`, `bg_rain_roof.png`. Carpeta: `store/art/bg/`.
 Capas con parallax: el cielo es opaco y las otras tres tienen partes transparentes para apilarlas. El día y la noche los hace un shader, así que todas van **de día**. Adjuntá `store/art/style/style_keyart.webp`.
 
 ```
-Generate exactly 5 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
+Generate exactly 3 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
 
-Image 1 — bg_base_sky:
-Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), fully opaque, with NO transparency.
-
-PURPOSE: This is the farthest background layer (the sky) of the garden screen in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). Other layers are drawn on top of it.
-
-SUBJECT: A soft early-morning sky: a gentle vertical gradient from pale blue-gray at the top (#BFD8DC) to warm cream near the bottom (#F4E7CF), with a few long, thin, soft clouds. No sun disk.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The bottom third can stay plain: hills will cover it. The game shows this on tall phone screens (9:16), so the left and right 8% of the image may be cropped: keep everything important inside the central 84% of the width.
-
-DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; birds; mountains, hills, trees or any ground; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-
-Image 2 — bg_base_far:
-Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a far background layer of the garden screen in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): distant hills seen through morning mist. It is drawn on top of a separate sky layer.
-
-SUBJECT: A soft range of rounded misty hills with a few tiny pine silhouettes on the ridges, fading into mist. Muted blue-green, low contrast.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The hills fill only the lower half of the image; their top edge is an irregular soft line around the middle of the canvas. Everything ABOVE the hills is fully transparent. The game shows this on tall phone screens (9:16), so the left and right 8% of the image may be cropped: keep everything important inside the central 84% of the width.
-
-DO NOT INCLUDE: any sky color or clouds; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; buildings; people; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-
-Image 3 — bg_base_ground:
+Image 1 — bg_base_ground:
 Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
 
 PURPOSE: This is the ground layer of the garden screen in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). Objects, the stone tower and the sand drawing are placed on top of it by the game.
@@ -108,7 +82,7 @@ COMPOSITION: The ground fills only the lower 55% of the image; above the back mo
 
 DO NOT INCLUDE: rake lines or patterns in the sand; rocks, lanterns, plants or objects on the sand; sky; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 
-Image 4 — bg_base_foliage:
+Image 2 — bg_base_foliage:
 Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
 
 PURPOSE: This is the nearest decorative layer of the garden screen in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): it frames the scene from the sides and moves faster than the rest (parallax).
@@ -121,7 +95,7 @@ COMPOSITION: The foliage covers ONLY the top-left corner (about 25% of the width
 
 DO NOT INCLUDE: anything in the center of the image; ground; sky; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; flowers; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 
-Image 5 — bg_rain_roof:
+Image 3 — bg_rain_roof:
 Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), fully opaque, with NO transparency.
 
 PURPOSE: This is the background of the "rain in the jars" minigame in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game draws the jars, the raindrops and the meditating person on top.
@@ -931,7 +905,7 @@ DO NOT INCLUDE: lanterns, trees, bamboo or objects; sky; any text, letters, numb
 
 ---
 
-# Ya incluidas (18)
+# Ya incluidas (20)
 
 | Imagen | Archivo en el juego | Uso |
 |---|---|---|
@@ -953,3 +927,5 @@ DO NOT INCLUDE: lanterns, trees, bamboo or objects; sky; any text, letters, numb
 | `obj_temple_bell` | `assets/images/temple/obj_temple_bell.webp` | Campana: en el campanario y en el juego de la Campana, donde tiembla y se entibia al sonar (`bell_game.dart`). |
 | `obj_temple_log` | `assets/images/temple/obj_temple_log.webp` | Tronco (shumoku), punta gastada a la derecha; el código dibuja las sogas (`bell_game.dart`). |
 | `bg_enso_paper` | `assets/images/temple/bg_enso_paper.webp` | Papel washi del Ensō, recortado para llenar la pantalla; el sello rojo lo dibuja el código (`enso_game.dart`). |
+| `bg_base_sky` | `assets/images/bg/bg_base_sky.webp` | Cielo del jardín, estirado a la mitad de arriba de la pantalla; se funde con el degradado del día y de noche no se ve (`garden_scene.dart`). |
+| `bg_base_far` | `assets/images/bg/bg_base_far.webp` | Lomas con niebla, recortadas desde las cimas; las cimas quedan al 31 % de la altura y el suelo tapa el resto, en las dos vistas del jardín. |

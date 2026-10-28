@@ -237,4 +237,7 @@ const zh = <String, String>{
   'gardens.level': '{n}级起开放',
   'gardens.full': '你已经拥有所有可用的花园',
   'shop.buyLotus': '购买莲花',
+  'meditation.object.bowl': '连续冥想为你赢得一只颂钵，已放在樱花树旁。',
+  'meditation.object.cushion': '连续冥想为你赢得一个锦缎坐垫，已放在樱花树旁。',
+  'meditation.object.lantern': '连续冥想为你赢得一盏光之灯笼，已挂在樱花树上。',
 };

@@ -579,6 +579,10 @@ INCLUDED = {
                        'el código dibuja las sogas (`bell_game.dart`).'),
     'bg_enso_paper': ('assets/images/temple/bg_enso_paper.webp', 'Papel washi del Ensō, recortado para llenar la '
                       'pantalla; el sello rojo lo dibuja el código (`enso_game.dart`).'),
+    'bg_base_sky': ('assets/images/bg/bg_base_sky.webp', 'Cielo del jardín, estirado a la mitad de arriba de la '
+                    'pantalla; se funde con el degradado del día y de noche no se ve (`garden_scene.dart`).'),
+    'bg_base_far': ('assets/images/bg/bg_base_far.webp', 'Lomas con niebla, recortadas desde las cimas; las cimas '
+                    'quedan al 31 % de la altura y el suelo tapa el resto, en las dos vistas del jardín.'),
 }
 
 

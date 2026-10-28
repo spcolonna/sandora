@@ -97,11 +97,13 @@
     ]
   },
   "meditation": {
-    "_comment": "rewards: sesión completa de esa duración. perMinute: sesión cortada o duración a medida, sin bonus. Pasado dailyCapMinutes en el día no paga.",
+    "_comment": "rewards: sesión completa de esa duración. perMinute: sesión cortada o duración a medida, sin bonus. Pasado dailyCapMinutes en el día no paga. Cada streakObjectEvery días de racha se gana el siguiente de streakObjects (queda en el jardín, junto al cerezo).",
     "unlockLevel": 5,
     "durations": [3, 5, 10, 15, 20],
     "dailyCapMinutes": 20,
     "streakMinMinutes": 3,
+    "streakObjectEvery": 7,
+    "streakObjects": ["bowl", "cushion", "lantern"],
     "intervalBellMinutes": 5,
     "breathIn": 4,
     "breathOut": 6,

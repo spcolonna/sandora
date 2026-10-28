@@ -72,6 +72,7 @@ flutter:
     - assets/images/ui/
     - assets/images/icons/
     - assets/images/temple/
+    - assets/images/bg/
 
   fonts:
     # Solo para el "GAMES" de la presentación de Oraki: la misma letra que en

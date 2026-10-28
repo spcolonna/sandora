@@ -237,4 +237,7 @@ const ja = <String, String>{
   'gardens.level': 'レベル{n}から',
   'gardens.full': '持てる庭はすべてそろっています',
   'shop.buyLotus': '蓮を買う',
+  'meditation.object.bowl': '連続記録のごほうびに、シンギングボウルを手に入れました。桜の木のそばに置いてあります。',
+  'meditation.object.cushion': '連続記録のごほうびに、錦の座布を手に入れました。桜の木のそばに置いてあります。',
+  'meditation.object.lantern': '連続記録のごほうびに、光の提灯を手に入れました。桜の枝に下がっています。',
 };

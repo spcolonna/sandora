@@ -239,4 +239,7 @@ const en = <String, String>{
   'gardens.level': 'From level {n}',
   'gardens.full': 'You already have every garden you can',
   'shop.buyLotus': 'Buy lotus',
+  'meditation.object.bowl': 'Your streak earned you a singing bowl. It\'s waiting by the cherry tree.',
+  'meditation.object.cushion': 'Your streak earned you a brocade cushion. It\'s waiting by the cherry tree.',
+  'meditation.object.lantern': 'Your streak earned you a lantern of light. It now hangs from the cherry tree.',
 };

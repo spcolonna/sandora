@@ -239,4 +239,7 @@ const es = <String, String>{
   'gardens.level': 'Desde el nivel {n}',
   'gardens.full': 'Ya tenés todos los jardines posibles',
   'shop.buyLotus': 'Comprar lotos',
+  'meditation.object.bowl': 'Por tu racha ganaste un cuenco tibetano. Ya está junto al cerezo.',
+  'meditation.object.cushion': 'Por tu racha ganaste un cojín de brocado. Ya está junto al cerezo.',
+  'meditation.object.lantern': 'Por tu racha ganaste un farol de luz. Ya cuelga del cerezo.',
 };

@@ -75,6 +75,10 @@ class Progress extends ChangeNotifier {
   int? _meditationLastDay, _meditationGraceDay;
   int _meditationDay = 0, _meditationMinutesToday = 0;
 
+  /// Objetos ganados con la racha de meditación, en el orden en que llegan
+  /// (cuenco, cojín, farol). Son de la cuenta: se ven en todos los jardines.
+  List<String> streakObjects = [];
+
   String _playsDay = '';
   Map<String, int> _plays = {};
 
@@ -257,6 +261,9 @@ class Progress extends ChangeNotifier {
     _meditationGraceDay = _prefs.getInt('meditation.graceDay');
     _meditationDay = _prefs.getInt('meditation.day') ?? 0;
     _meditationMinutesToday = _prefs.getInt('meditation.minutesToday') ?? 0;
+    streakObjects = _prefs.getStringList('meditation.objects') ?? [];
+    final ink = _prefs.getString('enso.ink');
+    ensoInk = ink == null ? null : [for (final v in jsonDecode(ink) as List) (v as num).toDouble()];
     daysPlayed = _prefs.getInt('days.played') ?? 0;
     _lastDay = _prefs.getInt('days.last') ?? -1;
     unlocksSeen = (_prefs.getStringList('unlocks.seen') ?? []).toSet();
@@ -507,9 +514,9 @@ class Progress extends ChangeNotifier {
   }
 
   /// Termina la sesión (completa o cortada) y paga con el reloj real.
-  ({MeditationReward reward, int? newLevel, int lotus}) finishMeditation({DateTime? now}) {
+  ({MeditationReward reward, int? newLevel, int lotus, String? object}) finishMeditation({DateTime? now}) {
     now ??= DateTime.now();
-    if (meditationStartedAt == null) return (reward: MeditationReward.none, newLevel: null, lotus: 0);
+    if (meditationStartedAt == null) return (reward: MeditationReward.none, newLevel: null, lotus: 0, object: null);
     final minutes = meditationElapsed(now: now).inMinutes;
     final today = _dayIndex(now);
     if (today != _meditationDay) {
@@ -522,6 +529,7 @@ class Progress extends ChangeNotifier {
     essences[Essence.light] = essences[Essence.light]! + reward.light;
     serenity = (serenity + reward.serenity).clamp(0, economy.balance.serenity.i('max'));
     var streakBonus = 0;
+    String? object;
     if (minutes >= economy.balance.meditation.i('streakMinMinutes')) {
       final next = meditationRules.nextStreak(
         today: today,
@@ -532,6 +540,7 @@ class Progress extends ChangeNotifier {
       if (next.streak != meditationStreak && next.streak % shop.lotusStreakEvery == 0) {
         streakBonus = shop.lotusStreakBonus;
       }
+      if (next.streak != meditationStreak) object = _streakObject(next.streak);
       meditationStreak = next.streak;
       _meditationGraceDay = next.graceDay;
       _meditationLastDay = today;
@@ -551,7 +560,19 @@ class Progress extends ChangeNotifier {
     _saveWallet();
     _saveSerenity(now);
     notifyListeners();
-    return (reward: reward, newLevel: newLevel, lotus: lotusGain);
+    return (reward: reward, newLevel: newLevel, lotus: lotusGain, object: object);
+  }
+
+  /// Cada `streakObjectEvery` días de racha se gana el siguiente objeto de
+  /// `streakObjects` que todavía no se tiene. Devuelve cuál, o null.
+  String? _streakObject(int streak) {
+    final m = economy.balance.meditation;
+    final all = m.strings('streakObjects');
+    if (streak % m.i('streakObjectEvery') != 0 || streakObjects.length >= all.length) return null;
+    final object = all[streakObjects.length];
+    streakObjects = [...streakObjects, object];
+    _prefs.setStringList('meditation.objects', streakObjects);
+    return object;
   }
 
   /// Registra una partida terminada de [game] y paga la recompensa.
@@ -643,6 +664,15 @@ class Progress extends ChangeNotifier {
     if (score <= best(game)) return false;
     _prefs.setInt('best.$game', score);
     return true;
+  }
+
+  /// El mejor ensō (`SavedInk.toFlat`), para colgarlo en el pabellón.
+  List<double>? ensoInk;
+
+  void setEnsoInk(List<double> flat) {
+    ensoInk = flat;
+    _prefs.setString('enso.ink', jsonEncode(flat));
+    notifyListeners();
   }
 
   void _saveWallet() {
