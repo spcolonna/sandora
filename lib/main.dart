@@ -8,6 +8,7 @@ import 'i18n/i18n.dart';
 import 'settings.dart';
 import 'ui/brand_intro.dart';
 import 'ui/fx/sfx.dart';
+import 'ui/garden/garden_gate.dart';
 import 'ui/garden_screen.dart';
 import 'ui/title_intro.dart';
 import 'ui/theme/palette.dart';
@@ -38,8 +39,9 @@ class SandoraApp extends StatelessWidget {
         locale: Locale(currentLanguage),
         supportedLocales: [for (final l in supportedLanguages) Locale(l)],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        // Estudio (continúa la pantalla de carga nativa) → título → jardín.
-        home: const BrandIntro(next: TitleIntro(next: GardenScreen())),
+        // Estudio (continúa la pantalla de carga nativa) → título → puertas
+        // que se abren al jardín.
+        home: const BrandIntro(next: TitleIntro(next: GardenGate(child: GardenScreen()))),
       ),
     );
   }

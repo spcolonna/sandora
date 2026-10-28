@@ -48,34 +48,6 @@
   "ja": "静けさ",
   "zh": "宁静"
  },
- "garden.tower.empty": {
-  "es": "Todavía no hay torre",
-  "en": "No tower yet",
-  "pt": "Ainda não há torre",
-  "ja": "まだ石の塔はありません",
-  "zh": "还没有石塔"
- },
- "garden.tower.stones.one": {
-  "es": "Torre de {n} piedra",
-  "en": "Tower of {n} stone",
-  "pt": "Torre de {n} pedra",
-  "ja": "{n}個の石の塔",
-  "zh": "{n}块石头的塔"
- },
- "garden.tower.stones.other": {
-  "es": "Torre de {n} piedras",
-  "en": "Tower of {n} stones",
-  "pt": "Torre de {n} pedras",
-  "ja": "{n}個の石の塔",
-  "zh": "{n}块石头的塔"
- },
- "garden.tower.collect": {
-  "es": "Juntar {n}",
-  "en": "Collect {n}",
-  "pt": "Coletar {n}",
-  "ja": "{n}個集める",
-  "zh": "收集 {n}"
- },
  "garden.sand.empty": {
   "es": "La arena espera tu dibujo",
   "en": "The sand awaits your drawing",
@@ -425,13 +397,6 @@
   "pt": "Ampliar o jardim",
   "ja": "庭を広げる",
   "zh": "扩建庭院"
- },
- "exp.button": {
-  "es": "Ampliar",
-  "en": "Expand",
-  "pt": "Ampliar",
-  "ja": "広げる",
-  "zh": "扩建"
  },
  "exp.buy": {
   "es": "Ampliar",
@@ -825,13 +790,6 @@
   "ja": "市場",
   "zh": "市集"
  },
- "shop.button": {
-  "es": "Mercado",
-  "en": "Market",
-  "pt": "Mercado",
-  "ja": "市場",
-  "zh": "市集"
- },
  "shop.desc": {
   "es": "Cambiá lo que te sobra por lo que te falta.",
   "en": "Trade what you have spare for what you need.",
@@ -880,5 +838,159 @@
   "pt": "Trocar",
   "ja": "交換",
   "zh": "交换"
+ },
+ "board.title": {
+  "es": "Tablón",
+  "en": "Notice board",
+  "pt": "Mural",
+  "ja": "掲示板",
+  "zh": "告示板"
+ },
+ "board.desc": {
+  "es": "Tus mejores marcas en el jardín.",
+  "en": "Your best marks in the garden.",
+  "pt": "Suas melhores marcas no jardim.",
+  "ja": "庭でのあなたの最高記録。",
+  "zh": "你在庭院中的最佳记录。"
+ },
+ "board.stones.one": {
+  "es": "{n} piedra",
+  "en": "{n} stone",
+  "pt": "{n} pedra",
+  "ja": "{n}個",
+  "zh": "{n}块"
+ },
+ "board.stones.other": {
+  "es": "{n} piedras",
+  "en": "{n} stones",
+  "pt": "{n} pedras",
+  "ja": "{n}個",
+  "zh": "{n}块"
+ },
+ "board.points": {
+  "es": "{n} puntos",
+  "en": "{n} points",
+  "pt": "{n} pontos",
+  "ja": "{n}点",
+  "zh": "{n}分"
+ },
+ "board.figures.one": {
+  "es": "{n} figura",
+  "en": "{n} drawing",
+  "pt": "{n} desenho",
+  "ja": "{n}枚",
+  "zh": "{n}幅"
+ },
+ "board.figures.other": {
+  "es": "{n} figuras",
+  "en": "{n} drawings",
+  "pt": "{n} desenhos",
+  "ja": "{n}枚",
+  "zh": "{n}幅"
+ },
+ "board.days.one": {
+  "es": "{n} día seguido",
+  "en": "{n} day in a row",
+  "pt": "{n} dia seguido",
+  "ja": "{n}日連続",
+  "zh": "连续{n}天"
+ },
+ "board.days.other": {
+  "es": "{n} días seguidos",
+  "en": "{n} days in a row",
+  "pt": "{n} dias seguidos",
+  "ja": "{n}日連続",
+  "zh": "连续{n}天"
+ },
+ "board.soon": {
+  "es": "Pronto vas a poder comparar tu jardín con otros.",
+  "en": "Soon you will be able to compare your garden with others.",
+  "pt": "Em breve você poderá comparar seu jardim com outros.",
+  "ja": "もうすぐ他の庭と比べられるようになります。",
+  "zh": "很快就能和其他庭院比较了。"
+ },
+ "moment.dawn": {
+  "es": "Amanecer",
+  "en": "Dawn",
+  "pt": "Amanhecer",
+  "ja": "夜明け",
+  "zh": "黎明"
+ },
+ "moment.day": {
+  "es": "Día",
+  "en": "Day",
+  "pt": "Dia",
+  "ja": "昼",
+  "zh": "白天"
+ },
+ "moment.dusk": {
+  "es": "Atardecer",
+  "en": "Dusk",
+  "pt": "Entardecer",
+  "ja": "夕暮れ",
+  "zh": "黄昏"
+ },
+ "moment.night": {
+  "es": "Noche",
+  "en": "Night",
+  "pt": "Noite",
+  "ja": "夜",
+  "zh": "夜晚"
+ },
+ "moment.dawn.hint": {
+  "es": "Al amanecer aparece rocío en el jardín.",
+  "en": "At dawn, dew appears in the garden.",
+  "pt": "Ao amanhecer, aparece orvalho no jardim.",
+  "ja": "夜明けには庭に露が現れます。",
+  "zh": "黎明时庭院里会出现露水。"
+ },
+ "moment.day.hint": {
+  "es": "Al amanecer hay rocío y de noche, luciérnagas. Volvé a verlas.",
+  "en": "There is dew at dawn and fireflies at night. Come back to see them.",
+  "pt": "Há orvalho ao amanhecer e vaga-lumes à noite. Volte para vê-los.",
+  "ja": "夜明けには露、夜には蛍。また見に来てください。",
+  "zh": "黎明有露水，夜晚有萤火虫。记得回来看看。"
+ },
+ "moment.dusk.hint": {
+  "es": "Se encienden los faroles. De noche llegan las luciérnagas.",
+  "en": "The lanterns are lit. Fireflies arrive at night.",
+  "pt": "As lanternas se acendem. À noite chegam os vaga-lumes.",
+  "ja": "灯籠に灯がともります。夜には蛍がやって来ます。",
+  "zh": "灯笼亮了。夜里萤火虫会来。"
+ },
+ "moment.night.hint": {
+  "es": "De noche llegan las luciérnagas.",
+  "en": "Fireflies arrive at night.",
+  "pt": "À noite chegam os vaga-lumes.",
+  "ja": "夜には蛍がやって来ます。",
+  "zh": "夜里萤火虫会来。"
+ },
+ "gift.dew": {
+  "es": "Rocío",
+  "en": "Dew",
+  "pt": "Orvalho",
+  "ja": "露",
+  "zh": "露水"
+ },
+ "gift.firefly": {
+  "es": "Luciérnagas",
+  "en": "Fireflies",
+  "pt": "Vaga-lumes",
+  "ja": "蛍",
+  "zh": "萤火虫"
+ },
+ "gift.dew.hint": {
+  "es": "Tocá las gotas de rocío para juntar Agua.",
+  "en": "Tap the dewdrops to collect Water.",
+  "pt": "Toque nas gotas de orvalho para juntar Água.",
+  "ja": "露のしずくに触れて水を集めましょう。",
+  "zh": "轻触露珠来收集水。"
+ },
+ "gift.firefly.hint": {
+  "es": "Tocá las luciérnagas para juntar Luz.",
+  "en": "Tap the fireflies to collect Light.",
+  "pt": "Toque nos vaga-lumes para juntar Luz.",
+  "ja": "蛍に触れて光を集めましょう。",
+  "zh": "轻触萤火虫来收集光。"
  }
 }

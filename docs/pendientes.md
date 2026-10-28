@@ -22,13 +22,15 @@
 - [ ] Ampliaciones: hoy solo los patios hacen algo; las zonas quedan "Próximamente" (`ready: false` en el balance).
 
 ## Próximo: menú y jardín vivo
-- [ ] **Entrada al jardín:** dos puertas que se abren con un brillo que encandila al pasar, en lugar de un menú de
-      pestañas. Desde el jardín, tocar cada zona lleva a su minijuego; el Mercado y el ranking también son lugares
-      del jardín (un puesto, un tablón), no botones sueltos. Todo con el mismo lenguaje visual.
-- [ ] **Día y noche** según la hora del dispositivo: el jardín se ve de día o de noche y hay eventos propios de cada
-      momento.
+- [x] **Entrada al jardín:** puertas shoji que se corren con un destello (`lib/ui/garden/garden_gate.dart`).
+- [x] **Jardín como menú:** cada lugar se toca (arenero, torre, vasijas, cojín, puesto del Mercado, tablón).
+      Dibujado con código hasta tener el arte del Lote 1; las posiciones están en `GardenLayout`.
+- [x] **Día y noche** por la hora del dispositivo (`DayCycle`, sección `dayCycle` del balance): amanecer, día,
+      atardecer y noche, faroles de noche. Regalos: rocío al amanecer (Agua) y luciérnagas de noche (Luz), 3 por día.
+      Para probar otra hora: `flutter run --dart-define=SANDORA_HOUR=22`.
+- [ ] **Ranking online:** el tablón muestra los récords propios y avisa que el ranking llega pronto (necesita backend).
+- [ ] Más eventos del día (atardecer, día) y más lugares cuando se sumen minijuegos.
 - [ ] **Clima:** si se puede, el mismo clima que muestra el celular; si no, uno por defecto.
-- [ ] Hoy el Mercado se abre con un botón en el jardín; pasa a ser un lugar del jardín con el menú nuevo.
 
 ## Etapa avanzada
 - [ ] **Vender lotos** (compra dentro de la app): ya son la moneda escasa del Mercado.

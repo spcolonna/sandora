@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../balance/balance.dart';
+import 'day_cycle.dart';
 import 'economy.dart';
 import 'levels.dart';
 import 'meditation_rules.dart';
@@ -25,6 +26,7 @@ class Progress extends ChangeNotifier {
   late LevelRules levels;
   late MeditationRules meditationRules;
   late ShopRules shop;
+  late DayCycle dayCycle;
 
   int pebbles = 0;
   final essences = {for (final e in Essence.values) e: 0};
@@ -37,6 +39,10 @@ class Progress extends ChangeNotifier {
   /// Trueques del Mercado hechos hoy, por oferta (para el límite diario).
   int _shopDay = 0;
   Map<String, int> _shopBought = {};
+
+  /// Regalos del momento del día juntados hoy (día del jardín), por id.
+  int _giftDay = 0;
+  Map<String, int> _giftsTaken = {};
 
   List<TowerStone> tower = [];
   int bestTower = 0;
@@ -72,6 +78,7 @@ class Progress extends ChangeNotifier {
     levels = LevelRules(balance);
     meditationRules = MeditationRules(balance);
     shop = ShopRules(balance);
+    dayCycle = DayCycle(balance);
     _prefs = await SharedPreferences.getInstance();
     now ??= DateTime.now();
     pebbles = _prefs.getInt('pebbles') ?? 0;
@@ -105,6 +112,10 @@ class Progress extends ChangeNotifier {
     _lotusDay = _prefs.getInt('lotus.day') ?? -1;
     _shopDay = _prefs.getInt('shop.day') ?? 0;
     _shopBought = (jsonDecode(_prefs.getString('shop.bought') ?? '{}') as Map).map(
+      (k, v) => MapEntry(k as String, v as int),
+    );
+    _giftDay = _prefs.getInt('gift.day') ?? 0;
+    _giftsTaken = (jsonDecode(_prefs.getString('gift.taken') ?? '{}') as Map).map(
       (k, v) => MapEntry(k as String, v as int),
     );
     final medAt = _prefs.getInt('meditation.startedAt');
@@ -237,6 +248,33 @@ class Progress extends ChangeNotifier {
     _shopBought[o.id] = (_shopBought[o.id] ?? 0) + 1;
     _prefs.setInt('shop.day', _shopDay);
     _prefs.setString('shop.bought', jsonEncode(_shopBought));
+    _saveWallet();
+    notifyListeners();
+    return true;
+  }
+
+  /// Cuántos [g] quedan por juntar ahora: 0 si no es su momento del día.
+  int giftsLeft(DayGift g, {DateTime? now}) {
+    now ??= gardenNow();
+    if (dayCycle.phaseAt(now) != g.phase) return 0;
+    final used = dayCycle.gardenDay(now) == _giftDay ? (_giftsTaken[g.id] ?? 0) : 0;
+    return (g.daily - used).clamp(0, g.daily);
+  }
+
+  bool takeGift(DayGift g, {DateTime? now}) {
+    now ??= gardenNow();
+    if (giftsLeft(g, now: now) == 0) return false;
+    final today = dayCycle.gardenDay(now);
+    if (today != _giftDay) {
+      _giftDay = today;
+      _giftsTaken = {};
+    }
+    for (final e in g.give.entries) {
+      _addTo(e.key, e.value);
+    }
+    _giftsTaken[g.id] = (_giftsTaken[g.id] ?? 0) + 1;
+    _prefs.setInt('gift.day', _giftDay);
+    _prefs.setString('gift.taken', jsonEncode(_giftsTaken));
     _saveWallet();
     notifyListeners();
     return true;

@@ -36,6 +36,16 @@
     { "id": "bamboo", "kind": "zone", "level": 16, "cost": { "pebbles": 1000, "wood": 40 }, "ready": false },
     { "id": "river", "kind": "zone", "level": 18, "cost": { "pebbles": 1100, "water": 40 }, "ready": false }
   ],
+  "dayCycle": {
+    "dawn": 5.5,
+    "day": 8,
+    "dusk": 18,
+    "night": 20.5,
+    "gifts": [
+      { "id": "dew", "phase": "dawn", "give": { "water": 2 }, "daily": 3 },
+      { "id": "firefly", "phase": "night", "give": { "light": 1 }, "daily": 3 }
+    ]
+  },
   "shop": {
     "_comment": "Mercado: trueques para conseguir lo que los minijuegos no dan (hoy, Madera). daily: veces por día (sin daily, sin límite). Lotos: moneda escasa por constancia (ofrenda del día, niveles, racha de meditación); a futuro se podrán vender.",
     "lotus": { "daily": 1, "perLevel": 1, "streakEvery": 7, "streakBonus": 2 },
