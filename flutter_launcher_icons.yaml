@@ -1,0 +1,12 @@
+# Íconos de la app. El original (1024×1024, sin transparencia) vive en
+# `store/icon/` (no se sube); regenerar con `dart run flutter_launcher_icons`.
+flutter_launcher_icons:
+  image_path: store/icon/app_icon.png
+  ios: true
+  remove_alpha_ios: true
+  android: true
+  min_sdk_android: 21
+  # Ícono adaptable de Android: la piedra al frente sobre arena lisa. El
+  # recorte deja ver el centro, así que los anillos de afuera se pierden.
+  adaptive_icon_background: "#E8DCC2"
+  adaptive_icon_foreground: store/icon/app_icon.png

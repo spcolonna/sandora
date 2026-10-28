@@ -7,8 +7,9 @@
       y MIEM, clases 9 y 41, y reservar el nombre en App Store Connect y Play Console.
 - [x] Bundle id `com.oraki.sandora` (iOS y Android) y paquete Dart `sandora`. Solo la carpeta sigue como `ZenGarden`.
 - [x] **Repo remoto:** `https://github.com/spcolonna/sandora` (pusheado el 2026-10-28). Siempre como spcolonna, nunca con la cuenta de Ironhide.
-- [ ] Ícono, textos de tienda por idioma, política de privacidad. (El splash de Oraki Games ya está, igual que en
-      Hexiege: `flutter_native_splash.yaml` + `lib/ui/brand_intro.dart`.)
+- [x] Ícono de la app (`flutter_launcher_icons.yaml`, original en `store/icon/`). El splash de Oraki Games ya está,
+      igual que en Hexiege: `flutter_native_splash.yaml` + `lib/ui/brand_intro.dart`.
+- [ ] Textos de tienda por idioma, política de privacidad.
 
 ## Prototipo (fase 1)
 - [ ] Medir rendimiento en un Android de gama media real.

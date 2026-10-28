@@ -596,27 +596,6 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-## Bloque 7 — Ícono de la app (1) ⬜
-
-Archivos, en orden: `app_icon.png`. Carpeta: `store/icon/`.
-Archivo: `store/icon/app_icon.png` (lo usa `flutter_launcher_icons`). 1024×1024, **sin transparencia ni esquinas redondeadas**: iOS y Android las recortan solos. Adjuntá `store/art/style/style_keyart.webp` y el símbolo del logo (`assets/images/brand/logo_symbol.webp`), para que el ícono y el logo de Sandora se parezcan.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), fully opaque, with NO transparency. NO rounded corners.
-
-PURPOSE: This is the app icon of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown on phone home screens at about 60×60 pixels next to many other apps, and iOS and Android crop it into a rounded square or a circle.
-
-SUBJECT: The same symbol as the attached logo: one single smooth gray river stone resting on pale raked sand, with three concentric raked rings around it. Soft morning light from the upper left.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The stone is centered, bold and simple, the rings filling about 70% of the canvas. The raked sand fills the whole square edge to edge as the background. Nothing important within 10% of the edges.
-
-DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; the game name; a frame or border; rounded corners; transparency; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
 ## Bloque 8 — Interfaz base (6) ⬜
 
 Archivos, en orden: `ui_button.png`, `ui_panel.png`, `ui_score_frame.png`, `ui_serenity_bar.png`, `ui_result.png`, `ui_pause.png`. Carpeta: `store/art/ui/`.
@@ -1087,7 +1066,7 @@ DO NOT INCLUDE: ink strokes or circles; characters or writing; any text, letters
 
 ---
 
-# Ya incluidas (8)
+# Ya incluidas (9)
 
 | Imagen | Archivo en el juego | Uso |
 |---|---|---|
@@ -1096,6 +1075,7 @@ DO NOT INCLUDE: ink strokes or circles; characters or writing; any text, letters
 | `style_keyart` | `store/art/style/style_keyart.webp` | Referencia de estilo: no va en el juego (`store/` no se sube al repo). Adjuntala en cada bloque siguiente. |
 | `title_bg` | `assets/images/title/title_bg.webp` | Fondo de la pantalla de título (`lib/ui/title_intro.dart`), con el logo sobre el cielo. |
 | `ui_garden_sign` | `assets/images/ui/ui_garden_sign.webp` | Cartel del jardín, recortado (`lib/ui/widgets/garden_sign.dart`). Se usa de ancho fijo con el nombre sobre la tabla, sin nine-slice. |
+| `app_icon` | `store/icon/app_icon.png` | Ícono de la app (no se sube: `store/`). Se regenera con `dart run flutter_launcher_icons` (`flutter_launcher_icons.yaml`); en Android, adaptable sobre arena lisa. |
 | `icon_pebble` | `assets/images/icons/icon_pebble.webp` | Piedritas, recortado a 160 px (`lib/ui/widgets/currency.dart`). |
 | `icon_essence_water` | `assets/images/icons/icon_essence_water.webp` | Agua, recortado a 160 px (`currency.dart`). |
 | `icon_essence_sand` | `assets/images/icons/icon_essence_sand.webp` | Arena, recortado a 160 px (`currency.dart`). |

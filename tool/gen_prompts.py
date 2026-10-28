@@ -559,6 +559,8 @@ INCLUDED = {
                  'el logo sobre el cielo.'),
     'ui_garden_sign': ('assets/images/ui/ui_garden_sign.webp', 'Cartel del jardín, recortado (`lib/ui/widgets/'
                        'garden_sign.dart`). Se usa de ancho fijo con el nombre sobre la tabla, sin nine-slice.'),
+    'app_icon': ('store/icon/app_icon.png', 'Ícono de la app (no se sube: `store/`). Se regenera con `dart run '
+                 'flutter_launcher_icons` (`flutter_launcher_icons.yaml`); en Android, adaptable sobre arena lisa.'),
     'icon_pebble': ('assets/images/icons/icon_pebble.webp', 'Piedritas, recortado a 160 px (`lib/ui/widgets/currency.dart`).'),
     'icon_essence_water': ('assets/images/icons/icon_essence_water.webp', 'Agua, recortado a 160 px (`currency.dart`).'),
     'icon_essence_sand': ('assets/images/icons/icon_essence_sand.webp', 'Arena, recortado a 160 px (`currency.dart`).'),
