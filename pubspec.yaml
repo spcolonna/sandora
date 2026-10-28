@@ -64,6 +64,9 @@ flutter:
     - assets/audio/
     - assets/brand/
     - assets/images/brand/
+    - assets/images/title/
+    - assets/images/ui/
+    - assets/images/icons/
 
   fonts:
     # Solo para el "GAMES" de la presentación de Oraki: la misma letra que en

@@ -4,8 +4,8 @@ import '../../garden/economy.dart';
 import '../../i18n/i18n.dart';
 import '../theme/palette.dart';
 
-/// Monto de una moneda con su ícono. Los íconos son placeholders dibujados
-/// hasta tener `icon_pebble` e `icon_essence_*` (Lote 1).
+/// Monto de una moneda con su ícono. Las monedas que todavía no tienen
+/// `icon_*` (Bloque 6) usan un placeholder dibujado.
 class CurrencyChip extends StatelessWidget {
   final Widget icon;
   final String text;
@@ -14,7 +14,7 @@ class CurrencyChip extends StatelessWidget {
   const CurrencyChip._(this.icon, this.text, this.tooltip);
 
   factory CurrencyChip.pebbles(int n, {String prefix = ''}) =>
-      CurrencyChip._(const _Dot(Palette.stone), '$prefix$n', tr('currency.pebbles'));
+      CurrencyChip._(const _Art('icon_pebble'), '$prefix$n', tr('currency.pebbles'));
 
   factory CurrencyChip.lotus(int n, {String prefix = ''}) =>
       CurrencyChip._(const _Dot(Palette.lotus, petal: true), '$prefix$n', tr('currency.lotus'));
@@ -26,8 +26,14 @@ class CurrencyChip extends StatelessWidget {
     _ => CurrencyChip.essence(Essence.values.byName(key), n, prefix: prefix),
   };
 
-  factory CurrencyChip.essence(Essence e, int n, {String prefix = ''}) =>
-      CurrencyChip._(_Dot(essenceColor(e), diamond: true), '$prefix$n', tr('essence.${e.name}'));
+  factory CurrencyChip.essence(Essence e, int n, {String prefix = ''}) => CurrencyChip._(
+    switch (e) {
+      Essence.water || Essence.sand => _Art('icon_essence_${e.name}'),
+      _ => _Dot(essenceColor(e), diamond: true),
+    },
+    '$prefix$n',
+    tr('essence.${e.name}'),
+  );
 
   static Color essenceColor(Essence e) => switch (e) {
     Essence.water => Palette.water,
@@ -50,6 +56,15 @@ class CurrencyChip extends StatelessWidget {
       ),
     );
   }
+}
+
+class _Art extends StatelessWidget {
+  final String name;
+  const _Art(this.name);
+
+  @override
+  Widget build(BuildContext context) =>
+      Image.asset('assets/images/icons/$name.webp', width: 22, height: 22, filterQuality: FilterQuality.medium);
 }
 
 class _Dot extends StatelessWidget {

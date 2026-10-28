@@ -17,8 +17,8 @@
 - [ ] Integrar el arte del Lote 1 (`docs/prompts.md`) cuando esté.
 - [ ] Meditación: notificación local con la campana final (`flutter_local_notifications`) y objetos de racha cada 7 días
       (cuenco, cojín, farol) cuando exista el sistema de objetos.
-- [ ] Integrar el resto del Bloque 9 (`title_bg`, `store_feature`, `ui_garden_sign`). El logo ya está (símbolo y
-      nombre, en la pantalla de título); el cartel del jardín se dibuja con código.
+- [ ] Integrar `store_feature` (Bloque 9, solo para la tienda). Ya están el logo, el fondo del título
+      (`title_bg`) y el cartel del jardín (`ui_garden_sign`).
 - [ ] Ampliaciones: hoy solo los patios hacen algo; las zonas quedan "Próximamente" (`ready: false` en el balance).
 
 ## Próximo: menú y jardín vivo

@@ -94,7 +94,7 @@ BLOCKS = [
     dict(
         id='0', title='Guía de estilo', folder='store/art/style/',
         intro=('Van primero: fijan el estilo de todo lo demás. Guardalas en `store/art/style/` y **adjuntá '
-               '`style_keyart.png` como referencia en cada bloque siguiente** (arrastrala a la conversación antes '
+               '`store/art/style/style_keyart.webp` como referencia en cada bloque siguiente** (arrastrala a la conversación antes '
                'de pegar el prompt). Si el estilo no te convence, se cambia el párrafo STYLE en '
                '`tool/gen_prompts.py` y se regenera este archivo.'),
         images=[
@@ -135,7 +135,7 @@ BLOCKS = [
     dict(
         id='1', title='Fondos del jardín y del alero', folder='store/art/bg/',
         intro=('Capas con parallax: el cielo es opaco y las otras tres tienen partes transparentes para apilarlas. '
-               'El día y la noche los hace un shader, así que todas van **de día**. Adjuntá `style_keyart.png`.'),
+               'El día y la noche los hace un shader, así que todas van **de día**. Adjuntá `store/art/style/style_keyart.webp`.'),
         images=[
             img('bg_base_sky', PORTRAIT_OPAQUE,
                 f'This is the farthest background layer (the sky) of the garden screen in {GAME}. Other layers are '
@@ -187,7 +187,7 @@ BLOCKS = [
     dict(
         id='2', title='Piedras para apilar', folder='store/art/stack/',
         intro=('Seis piedras distintas para el minijuego de apilado. La física usa su propio polígono, así que '
-               'tienen que ser chatas, más anchas que altas y con base plana. Adjuntá `style_keyart.png`.'),
+               'tienen que ser chatas, más anchas que altas y con base plana. Adjuntá `store/art/style/style_keyart.webp`.'),
         images=[obj(f'obj_stack_stone_{i:02d}', s, 'about 90 to 160 pixels wide') for i, s in enumerate([
             'A flat, smooth oval river stone in cool medium gray, seen from the side, about three times wider than '
             'tall, with a gently flat bottom and a softly domed top.',
@@ -204,7 +204,7 @@ BLOCKS = [
         ], start=1)]),
     dict(
         id='3', title='Objetos del jardín (catálogo inicial)', folder='store/art/garden/',
-        intro='Diez objetos que se compran con Piedritas. Adjuntá `style_keyart.png` y `style_plants.png`.',
+        intro='Diez objetos que se compran con Piedritas. Adjuntá `store/art/style/style_keyart.webp` y `style_plants.png`.',
         images=[
             obj('obj_base_lantern', 'A traditional Japanese stone lantern (tōrō, kasuga style): a hexagonal stone '
                 'cap, a small light chamber with a soft warm amber glow inside, a slim post and a round base. '
@@ -232,7 +232,7 @@ BLOCKS = [
     dict(
         id='4', title='Lluvia en vasijas y arenero', folder='store/art/rain_sand/',
         intro=('Vasijas, gotas, rastrillo y textura de arena. El mapa de alturas de la arena (`tex_sand_height`) '
-               'no va acá: lo genera el código. Adjuntá `style_keyart.png`.'),
+               'no va acá: lo genera el código. Adjuntá `store/art/style/style_keyart.webp`.'),
         images=[
             *[obj(f'obj_rain_vessel_{i:02d}', s, 'about 80 to 110 pixels wide') for i, s in enumerate([
                 'A small round clay jar with a wide open mouth, unglazed terracotta, seen from the front and a '
@@ -288,7 +288,7 @@ BLOCKS = [
     dict(
         id='5', title='Personajes (referencia para Rive)', folder='store/art/characters/',
         intro=('Una pose limpia de cada personaje. Sirven de placeholder en el prototipo y de modelo para animarlos '
-               'después en Rive. Adjuntá `style_keyart.png`. El gato todavía no tiene nombre (pregunta abierta del '
+               'después en Rive. Adjuntá `store/art/style/style_keyart.webp`. El gato todavía no tiene nombre (pregunta abierta del '
                'GDD).'),
         images=[
             img('char_meditator', PORTRAIT_ALPHA + ALPHA_FALLBACK,
@@ -323,7 +323,7 @@ BLOCKS = [
         ]),
     dict(
         id='6', title='Íconos de monedas y estrella', folder='store/art/icons/',
-        intro='Se ven a 32–48 px: tienen que leerse al instante. Adjuntá `style_keyart.png`.',
+        intro='Se ven a 32–48 px: tienen que leerse al instante. Adjuntá `store/art/style/style_keyart.webp`.',
         images=[
             icon('icon_pebble', 'A single smooth, round, slightly flattened river pebble in soft gray with a white '
                  'speckle and a bright highlight: the soft currency of the game.'),
@@ -343,7 +343,7 @@ BLOCKS = [
     dict(
         id='7', title='Ícono de la app', folder='store/icon/',
         intro=('Archivo: `store/icon/app_icon.png` (lo usa `flutter_launcher_icons`). 1024×1024, **sin transparencia '
-               'ni esquinas redondeadas**: iOS y Android las recortan solos. Adjuntá `style_keyart.png` y el símbolo del '
+               'ni esquinas redondeadas**: iOS y Android las recortan solos. Adjuntá `store/art/style/style_keyart.webp` y el símbolo del '
                'logo (`assets/images/brand/logo_symbol.webp`), para que el ícono y el logo de Sandora se '
                'parezcan.'),
         images=[
@@ -359,7 +359,7 @@ BLOCKS = [
     dict(
         id='8', title='Interfaz base', folder='store/art/ui/',
         intro=('Piezas que el juego estira (nine-slice) y sobre las que escribe su propio texto. Adjuntá '
-               '`style_keyart.png`.'),
+               '`store/art/style/style_keyart.webp`.'),
         images=[
             ui('ui_button', 'A wide rounded rectangular button made of smooth light wood (#C9A27A) with a thin '
                'darker wooden rim and a soft highlight along the top edge, slightly raised.',
@@ -393,7 +393,7 @@ BLOCKS = [
         intro=('Piezas de la marca. El logo (símbolo y nombre) ya está incluido; el juego los pone encima de '
                '`title_bg` y `store_feature`, así que esas imágenes van sin texto. El nombre del jardín de cada '
                'jugador lo escribe el juego sobre `ui_garden_sign`, así que esa pieza va vacía. Adjuntá '
-               '`style_keyart.png`.'),
+               '`store/art/style/style_keyart.webp`.'),
         images=[
             img('title_bg', PORTRAIT_OPAQUE,
                 f'This is the background of the title screen of {GAME}. The game draws its logo on the upper part '
@@ -432,6 +432,15 @@ INCLUDED = {
                     'Pantalla de título (`lib/ui/title_intro.dart`); referencia para el ícono.'),
     'logo_wordmark': ('assets/images/brand/logo_wordmark.webp', 'Nombre "Sandora". Pantalla de título. La versión clara para '
                       'fondos oscuros se saca con código cuando haga falta.'),
+    'style_keyart': ('store/art/style/style_keyart.webp', 'Referencia de estilo: no va en el juego (`store/` no se '
+                     'sube al repo). Adjuntala en cada bloque siguiente.'),
+    'title_bg': ('assets/images/title/title_bg.webp', 'Fondo de la pantalla de título (`lib/ui/title_intro.dart`), con '
+                 'el logo sobre el cielo.'),
+    'ui_garden_sign': ('assets/images/ui/ui_garden_sign.webp', 'Cartel del jardín, recortado (`lib/ui/widgets/'
+                       'garden_sign.dart`). Se usa de ancho fijo con el nombre sobre la tabla, sin nine-slice.'),
+    'icon_pebble': ('assets/images/icons/icon_pebble.webp', 'Piedritas, recortado a 160 px (`lib/ui/widgets/currency.dart`).'),
+    'icon_essence_water': ('assets/images/icons/icon_essence_water.webp', 'Agua, recortado a 160 px (`currency.dart`).'),
+    'icon_essence_sand': ('assets/images/icons/icon_essence_sand.webp', 'Arena, recortado a 160 px (`currency.dart`).'),
 }
 
 
@@ -487,7 +496,7 @@ de estilo (Lote 0) y el arte del MVP (Lote 1 del GDD). **Generado por `tool/gen_
 - Si una sale mal, regenerala sola: pegá `Create ONE single image. Start immediately, without asking questions.` y
   debajo el texto de esa imagen (desde su línea `Create a ...` hasta su `DO NOT INCLUDE`).
 - **Orden:** primero el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
-  `style_keyart.png` como referencia.
+  `store/art/style/style_keyart.webp` como referencia.
 
 **Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_placeholder_audio.py`; los finales
 conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de la arena y las animaciones Rive

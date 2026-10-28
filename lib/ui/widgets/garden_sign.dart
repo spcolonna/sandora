@@ -12,10 +12,23 @@ import '../theme/palette.dart';
 /// Cuántas sugerencias de nombre hay en i18n (`garden.suggest.N`).
 const _suggestions = 8;
 
+const _art = 'assets/images/ui/ui_garden_sign.webp';
+
 /// Cartel de madera colgado en el jardín con su nombre. Tocarlo permite
-/// cambiarlo. Se dibuja con código hasta tener `ui_garden_sign` (Bloque 9).
+/// cambiarlo.
 class GardenSign extends StatelessWidget {
   const GardenSign({super.key});
+
+  static const _width = 170.0;
+  // Proporción de `ui_garden_sign` (recortado) y zona libre de la tabla,
+  // debajo de los agujeros de las cuerdas.
+  static const _aspect = 593 / 308;
+  static const _text = EdgeInsets.fromLTRB(
+    _width * 0.13,
+    _width / _aspect * 0.55,
+    _width * 0.13,
+    _width / _aspect * 0.1,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -26,75 +39,47 @@ class GardenSign extends StatelessWidget {
     final name = Progress.instance.gardenName;
     return GestureDetector(
       onTap: () => showGardenNameSheet(context),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Barra de bambú y dos cuerdas.
-          SizedBox(width: 120, height: 14, child: CustomPaint(painter: _RopesPainter())),
-          AnimatedSwitcher(
-            duration: Calm.appear,
-            child: Container(
-              key: ValueKey(name),
-              constraints: const BoxConstraints(minWidth: 120, maxWidth: 220),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFD3AE86), Color(0xFFB98D63)],
-                ),
-                border: Border.all(color: Palette.wood, width: 1.5),
-                boxShadow: [
-                  BoxShadow(color: Palette.ink.withValues(alpha: 0.18), blurRadius: 6, offset: const Offset(0, 3)),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (name == null) ...[
-                    const Icon(Icons.edit_rounded, size: 14, color: Palette.ink),
-                    const SizedBox(width: 6),
-                  ],
-                  Flexible(
-                    child: Text(
-                      name ?? tr('garden.unnamed'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Palette.ink,
-                        fontWeight: name == null ? FontWeight.w500 : FontWeight.w700,
-                        fontSize: name == null ? 12 : 14,
-                        letterSpacing: 0.3,
+      child: SizedBox(
+        width: _width,
+        height: _width / _aspect,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(_art, fit: BoxFit.fill, filterQuality: FilterQuality.medium),
+            Padding(
+              padding: _text,
+              child: AnimatedSwitcher(
+                duration: Calm.appear,
+                child: FittedBox(
+                  key: ValueKey(name),
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (name == null) ...[
+                        const Icon(Icons.edit_rounded, size: 14, color: Palette.ink),
+                        const SizedBox(width: 6),
+                      ],
+                      Text(
+                        name ?? tr('garden.unnamed'),
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: Palette.ink,
+                          fontWeight: name == null ? FontWeight.w500 : FontWeight.w700,
+                          fontSize: name == null ? 13 : 16,
+                          letterSpacing: 0.3,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-}
-
-class _RopesPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rope = Paint()
-      ..color = Palette.wood.withValues(alpha: 0.8)
-      ..strokeWidth = 1.4;
-    canvas.drawLine(Offset(size.width * 0.25, 3), Offset(size.width * 0.25, size.height), rope);
-    canvas.drawLine(Offset(size.width * 0.75, 3), Offset(size.width * 0.75, size.height), rope);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(size.width * 0.12, 0, size.width * 0.76, 4), const Radius.circular(2)),
-      Paint()..color = Palette.moss,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_RopesPainter old) => false;
 }
 
 /// Hoja para elegir o cambiar el nombre del jardín, con una sugerencia ya

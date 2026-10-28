@@ -16,7 +16,7 @@ de estilo (Lote 0) y el arte del MVP (Lote 1 del GDD). **Generado por `tool/gen_
 - Si una sale mal, regenerala sola: pegá `Create ONE single image. Start immediately, without asking questions.` y
   debajo el texto de esa imagen (desde su línea `Create a ...` hasta su `DO NOT INCLUDE`).
 - **Orden:** primero el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
-  `style_keyart.png` como referencia.
+  `store/art/style/style_keyart.webp` como referencia.
 
 **Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_placeholder_audio.py`; los finales
 conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de la arena y las animaciones Rive
@@ -26,28 +26,15 @@ conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de l
 
 # Para generar ahora
 
-## Bloque 0 — Guía de estilo (3) ⬜
+## Bloque 0 — Guía de estilo (2) ⬜
 
-Archivos, en orden: `style_keyart.png`, `style_stones.png`, `style_plants.png`. Carpeta: `store/art/style/`.
-Van primero: fijan el estilo de todo lo demás. Guardalas en `store/art/style/` y **adjuntá `style_keyart.png` como referencia en cada bloque siguiente** (arrastrala a la conversación antes de pegar el prompt). Si el estilo no te convence, se cambia el párrafo STYLE en `tool/gen_prompts.py` y se regenera este archivo.
+Archivos, en orden: `style_stones.png`, `style_plants.png`. Carpeta: `store/art/style/`.
+Van primero: fijan el estilo de todo lo demás. Guardalas en `store/art/style/` y **adjuntá `store/art/style/style_keyart.webp` como referencia en cada bloque siguiente** (arrastrala a la conversación antes de pegar el prompt). Si el estilo no te convence, se cambia el párrafo STYLE en `tool/gen_prompts.py` y se regenera este archivo.
 
 ```
-Generate exactly 3 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
+Generate exactly 2 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
 
-Image 1 — style_keyart:
-Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), fully opaque, with NO transparency.
-
-PURPOSE: This is the key art and style reference for a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). Every later asset will be painted to match it.
-
-SUBJECT: A small, intimate zen garden seen from a gentle three-quarter view from above, in the soft light of early morning. In the foreground, a bed of pale raked sand with a few concentric groove circles around a mossy rock. On the right, a small stack of five flat river stones balanced on a low stone pedestal. On the left, a stone lantern (tōrō) and a young pine shaped like a cloud. In the middle ground, a tiny arched wooden bridge over a narrow stream, and a clump of bamboo. In the background, the eave of a wooden roof with three clay jars under it, and soft misty hills. A plump ginger-and-white cat sleeps on the bridge. Calm, cozy, inviting: a place you want to take care of.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: Rich but uncluttered scene with clear depth: foreground, middle ground and background read as separate layers. Plenty of calm empty sand. The game shows this on tall phone screens (9:16), so the left and right 8% of the image may be cropped: keep everything important inside the central 84% of the width.
-
-DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-
-Image 2 — style_stones:
+Image 1 — style_stones:
 Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), fully opaque, with NO transparency.
 
 PURPOSE: This is a material reference sheet for the stones in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). Artists will copy how stone looks from it.
@@ -60,7 +47,7 @@ COMPOSITION: Each stone is separated from the others with generous empty paper a
 
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; labels; grid lines; frame or border; cast shadows on the paper; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 
-Image 3 — style_plants:
+Image 2 — style_plants:
 Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), fully opaque, with NO transparency.
 
 PURPOSE: This is a material reference sheet for the plants in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). Artists will copy how foliage looks from it.
@@ -77,7 +64,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 ## Bloque 1 — Fondos del jardín y del alero (5) ⬜
 
 Archivos, en orden: `bg_base_sky.png`, `bg_base_far.png`, `bg_base_ground.png`, `bg_base_foliage.png`, `bg_rain_roof.png`. Carpeta: `store/art/bg/`.
-Capas con parallax: el cielo es opaco y las otras tres tienen partes transparentes para apilarlas. El día y la noche los hace un shader, así que todas van **de día**. Adjuntá `style_keyart.png`.
+Capas con parallax: el cielo es opaco y las otras tres tienen partes transparentes para apilarlas. El día y la noche los hace un shader, así que todas van **de día**. Adjuntá `store/art/style/style_keyart.webp`.
 
 ```
 Generate exactly 5 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
@@ -151,7 +138,7 @@ DO NOT INCLUDE: jars, pots or vessels; raindrops in the foreground; people; any 
 ## Bloque 2 — Piedras para apilar (6) ⬜
 
 Archivos, en orden: `obj_stack_stone_01.png`, `obj_stack_stone_02.png`, `obj_stack_stone_03.png`, `obj_stack_stone_04.png`, `obj_stack_stone_05.png`, `obj_stack_stone_06.png`. Carpeta: `store/art/stack/`.
-Seis piedras distintas para el minijuego de apilado. La física usa su propio polígono, así que tienen que ser chatas, más anchas que altas y con base plana. Adjuntá `style_keyart.png`.
+Seis piedras distintas para el minijuego de apilado. La física usa su propio polígono, así que tienen que ser chatas, más anchas que altas y con base plana. Adjuntá `store/art/style/style_keyart.webp`.
 
 ```
 Generate exactly 6 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
@@ -238,7 +225,7 @@ DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame o
 ## Bloque 3 — Objetos del jardín (catálogo inicial) (10) ⬜
 
 Archivos, en orden: `obj_base_lantern.png`, `obj_base_bridge.png`, `obj_base_pine.png`, `obj_base_bamboo.png`, `obj_base_rock_01.png`, `obj_base_rock_02.png`, `obj_base_rock_03.png`, `obj_base_rock_04.png`, `obj_base_plant_01.png`, `obj_base_plant_02.png`. Carpeta: `store/art/garden/`.
-Diez objetos que se compran con Piedritas. Adjuntá `style_keyart.png` y `style_plants.png`.
+Diez objetos que se compran con Piedritas. Adjuntá `store/art/style/style_keyart.webp` y `style_plants.png`.
 
 ```
 Generate exactly 10 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
@@ -377,7 +364,7 @@ DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame o
 ## Bloque 4 — Lluvia en vasijas y arenero (9) ⬜
 
 Archivos, en orden: `obj_rain_vessel_01.png`, `obj_rain_vessel_02.png`, `obj_rain_vessel_03.png`, `obj_rain_vessel_04.png`, `obj_rain_vessel_05.png`, `fx_rain_drop.png`, `fx_rain_splash.png`, `spr_sand_rake_01.png`, `tex_sand_base.png`. Carpeta: `store/art/rain_sand/`.
-Vasijas, gotas, rastrillo y textura de arena. El mapa de alturas de la arena (`tex_sand_height`) no va acá: lo genera el código. Adjuntá `style_keyart.png`.
+Vasijas, gotas, rastrillo y textura de arena. El mapa de alturas de la arena (`tex_sand_height`) no va acá: lo genera el código. Adjuntá `store/art/style/style_keyart.webp`.
 
 ```
 Generate exactly 9 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
@@ -503,7 +490,7 @@ DO NOT INCLUDE: rake lines, footprints, stones, leaves or any object; shadows or
 ## Bloque 5 — Personajes (referencia para Rive) (3) ⬜
 
 Archivos, en orden: `char_meditator.png`, `char_cat.png`, `char_monk.png`. Carpeta: `store/art/characters/`.
-Una pose limpia de cada personaje. Sirven de placeholder en el prototipo y de modelo para animarlos después en Rive. Adjuntá `style_keyart.png`. El gato todavía no tiene nombre (pregunta abierta del GDD).
+Una pose limpia de cada personaje. Sirven de placeholder en el prototipo y de modelo para animarlos después en Rive. Adjuntá `store/art/style/style_keyart.webp`. El gato todavía no tiene nombre (pregunta abierta del GDD).
 
 ```
 Generate exactly 3 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
@@ -548,54 +535,15 @@ COMPOSITION: Full body, three-quarter view facing right, centered, filling about
 DO NOT INCLUDE: any background, ground or cast shadow; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other characters; weapons; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-## Bloque 6 — Íconos de monedas y estrella (7) ⬜
+## Bloque 6 — Íconos de monedas y estrella (4) ⬜
 
-Archivos, en orden: `icon_pebble.png`, `icon_essence_water.png`, `icon_essence_sand.png`, `icon_essence_wood.png`, `icon_essence_light.png`, `icon_jade.png`, `icon_star.png`. Carpeta: `store/art/icons/`.
-Se ven a 32–48 px: tienen que leerse al instante. Adjuntá `style_keyart.png`.
+Archivos, en orden: `icon_essence_wood.png`, `icon_essence_light.png`, `icon_jade.png`, `icon_star.png`. Carpeta: `store/art/icons/`.
+Se ven a 32–48 px: tienen que leerse al instante. Adjuntá `store/art/style/style_keyart.webp`.
 
 ```
-Generate exactly 7 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
+Generate exactly 4 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
 
-Image 1 — icon_pebble:
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a currency or interface icon in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown very small (about 32 to 48 pixels) next to a number, so it must read instantly at that size.
-
-SUBJECT: A single smooth, round, slightly flattened river pebble in soft gray with a white speckle and a bright highlight: the soft currency of the game.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 80% of the canvas. Very bold and simple shape, strong value contrast between the lit side and the shadow side, a soft light rim around the edge so it stays readable on both light and dark backgrounds. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-
-Image 2 — icon_essence_water:
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a currency or interface icon in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown very small (about 32 to 48 pixels) next to a number, so it must read instantly at that size.
-
-SUBJECT: A single plump water droplet in clear teal (#5C9EA8), glowing softly from inside, with a tiny ripple ring at its base.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 80% of the canvas. Very bold and simple shape, strong value contrast between the lit side and the shadow side, a soft light rim around the edge so it stays readable on both light and dark backgrounds. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-
-Image 3 — icon_essence_sand:
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a currency or interface icon in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown very small (about 32 to 48 pixels) next to a number, so it must read instantly at that size.
-
-SUBJECT: A tiny round mound of warm golden sand (#D9C08E) with three curved rake grooves across it, glowing softly.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 80% of the canvas. Very bold and simple shape, strong value contrast between the lit side and the shadow side, a soft light rim around the edge so it stays readable on both light and dark backgrounds. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-
-Image 4 — icon_essence_wood:
+Image 1 — icon_essence_wood:
 Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
 
 PURPOSE: This is a currency or interface icon in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown very small (about 32 to 48 pixels) next to a number, so it must read instantly at that size.
@@ -608,7 +556,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 
-Image 5 — icon_essence_light:
+Image 2 — icon_essence_light:
 Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
 
 PURPOSE: This is a currency or interface icon in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown very small (about 32 to 48 pixels) next to a number, so it must read instantly at that size.
@@ -621,7 +569,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 
-Image 6 — icon_jade:
+Image 3 — icon_jade:
 Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
 
 PURPOSE: This is a currency or interface icon in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown very small (about 32 to 48 pixels) next to a number, so it must read instantly at that size.
@@ -634,7 +582,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 
-Image 7 — icon_star:
+Image 4 — icon_star:
 Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
 
 PURPOSE: This is a currency or interface icon in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown very small (about 32 to 48 pixels) next to a number, so it must read instantly at that size.
@@ -651,7 +599,7 @@ DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any
 ## Bloque 7 — Ícono de la app (1) ⬜
 
 Archivos, en orden: `app_icon.png`. Carpeta: `store/icon/`.
-Archivo: `store/icon/app_icon.png` (lo usa `flutter_launcher_icons`). 1024×1024, **sin transparencia ni esquinas redondeadas**: iOS y Android las recortan solos. Adjuntá `style_keyart.png` y el símbolo del logo (`assets/images/brand/logo_symbol.webp`), para que el ícono y el logo de Sandora se parezcan.
+Archivo: `store/icon/app_icon.png` (lo usa `flutter_launcher_icons`). 1024×1024, **sin transparencia ni esquinas redondeadas**: iOS y Android las recortan solos. Adjuntá `store/art/style/style_keyart.webp` y el símbolo del logo (`assets/images/brand/logo_symbol.webp`), para que el ícono y el logo de Sandora se parezcan.
 
 ```
 Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
@@ -672,7 +620,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 ## Bloque 8 — Interfaz base (6) ⬜
 
 Archivos, en orden: `ui_button.png`, `ui_panel.png`, `ui_score_frame.png`, `ui_serenity_bar.png`, `ui_result.png`, `ui_pause.png`. Carpeta: `store/art/ui/`.
-Piezas que el juego estira (nine-slice) y sobre las que escribe su propio texto. Adjuntá `style_keyart.png`.
+Piezas que el juego estira (nine-slice) y sobre las que escribe su propio texto. Adjuntá `store/art/style/style_keyart.webp`.
 
 ```
 Generate exactly 6 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
@@ -756,28 +704,14 @@ COMPOSITION: The button is centered and fills about 80% of the canvas. The pause
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-## Bloque 9 — Marca Sandora (3) ⬜
+## Bloque 9 — Marca Sandora (1) ⬜
 
-Archivos, en orden: `title_bg.png`, `store_feature.png`, `ui_garden_sign.png`. Carpeta: `store/art/brand/`.
-Piezas de la marca. El logo (símbolo y nombre) ya está incluido; el juego los pone encima de `title_bg` y `store_feature`, así que esas imágenes van sin texto. El nombre del jardín de cada jugador lo escribe el juego sobre `ui_garden_sign`, así que esa pieza va vacía. Adjuntá `style_keyart.png`.
+Archivos, en orden: `store_feature.png`. Carpeta: `store/art/brand/`.
+Piezas de la marca. El logo (símbolo y nombre) ya está incluido; el juego los pone encima de `title_bg` y `store_feature`, así que esas imágenes van sin texto. El nombre del jardín de cada jugador lo escribe el juego sobre `ui_garden_sign`, así que esa pieza va vacía. Adjuntá `store/art/style/style_keyart.webp`.
 
 ```
-Generate exactly 3 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
 
-Image 1 — title_bg:
-Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), fully opaque, with NO transparency.
-
-PURPOSE: This is the background of the title screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game draws its logo on the upper part and a "Play" button on the lower part, so both areas must be calm and empty.
-
-SUBJECT: The same small zen garden as the key art, seen from a little further away at dawn, wrapped in soft morning mist. Raked sand, the stone lantern, the cloud-shaped pine and the small stack of stones in the lower middle. A pale peach and cream sky fills the upper third, with one or two soft clouds and nothing else. A few cherry petals drift slowly in the air.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The upper 35% of the image is mostly open sky, quiet and evenly lit, where the logo will be placed. The lowest 20% is plain raked sand where a button will be placed. The game shows this on tall phone screens (9:16), so the left and right 8% of the image may be cropped: keep everything important inside the central 84% of the width.
-
-DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; the game name or any logo; people; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-
-Image 2 — store_feature:
 Create a LANDSCAPE image with a 3:2 aspect ratio (1536×1024, not square, not portrait), fully opaque, with NO transparency.
 
 PURPOSE: This is the wide banner for the Google Play store page of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is cropped to a wide 1024×500 strip from the middle of the image, and the logo is added on top of the left half later.
@@ -789,26 +723,19 @@ STYLE: Soft hand-painted gouache illustration with light watercolor washes, like
 COMPOSITION: Landscape composition. All important elements in the right half, away from the edges. The left half stays calm and nearly empty. The top 17% and bottom 17% of the image will be cropped away: keep everything important in the middle band.
 
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; the game name or any logo; people; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-
-Image 3 — ui_garden_sign:
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is an interface element in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game stretches it with nine-slice scaling and writes its own text on top, so the image must be clean, symmetrical and empty in the middle.
-
-SUBJECT: A small hanging wooden sign at the entrance of a zen garden: a horizontal plank of warm light wood (#C9A27A) with softly rounded corners, hanging by two short ropes from a thin bamboo bar, with a tiny sprig of moss on one corner. The player's garden name will be written on it by the game.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The sign is centered, about 80% of the canvas width and 35% of its height including the bamboo bar and ropes, perfectly symmetrical. The plank face is plain wood with no pattern so a name fits on it. Everything around it is transparent.
-
-DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
 ---
 
-# Ya incluidas (2)
+# Ya incluidas (8)
 
 | Imagen | Archivo en el juego | Uso |
 |---|---|---|
 | `logo_symbol` | `assets/images/brand/logo_symbol.webp` | Símbolo del logo (piedra sobre arena rastrillada). Pantalla de título (`lib/ui/title_intro.dart`); referencia para el ícono. |
 | `logo_wordmark` | `assets/images/brand/logo_wordmark.webp` | Nombre "Sandora". Pantalla de título. La versión clara para fondos oscuros se saca con código cuando haga falta. |
+| `style_keyart` | `store/art/style/style_keyart.webp` | Referencia de estilo: no va en el juego (`store/` no se sube al repo). Adjuntala en cada bloque siguiente. |
+| `title_bg` | `assets/images/title/title_bg.webp` | Fondo de la pantalla de título (`lib/ui/title_intro.dart`), con el logo sobre el cielo. |
+| `ui_garden_sign` | `assets/images/ui/ui_garden_sign.webp` | Cartel del jardín, recortado (`lib/ui/widgets/garden_sign.dart`). Se usa de ancho fijo con el nombre sobre la tabla, sin nine-slice. |
+| `icon_pebble` | `assets/images/icons/icon_pebble.webp` | Piedritas, recortado a 160 px (`lib/ui/widgets/currency.dart`). |
+| `icon_essence_water` | `assets/images/icons/icon_essence_water.webp` | Agua, recortado a 160 px (`currency.dart`). |
+| `icon_essence_sand` | `assets/images/icons/icon_essence_sand.webp` | Arena, recortado a 160 px (`currency.dart`). |
