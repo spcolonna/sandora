@@ -6,7 +6,7 @@
       en Ucrania (otra clase, pero empresa grande) y se parece a "Pandora" (música, clase 9). Buscar en USPTO, EUIPO
       y MIEM, clases 9 y 41, y reservar el nombre en App Store Connect y Play Console.
 - [x] Bundle id `com.oraki.sandora` (iOS y Android) y paquete Dart `sandora`. Solo la carpeta sigue como `ZenGarden`.
-- [ ] **Repo remoto:** crear `spcolonna/sandora` (privado) y pushear. Siempre como spcolonna, nunca con la cuenta de Ironhide.
+- [x] **Repo remoto:** `https://github.com/spcolonna/sandora` (pusheado el 2026-10-28). Siempre como spcolonna, nunca con la cuenta de Ironhide.
 - [ ] Ícono, textos de tienda por idioma, política de privacidad. (El splash de Oraki Games ya está, igual que en
       Hexiege: `flutter_native_splash.yaml` + `lib/ui/brand_intro.dart`.)
 
