@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../balance/balance.dart';
 import '../minigames/sand/sand_shapes.dart';
+import 'daily_goals.dart';
 import 'day_cycle.dart';
 import 'economy.dart';
 import 'levels.dart';
@@ -31,6 +32,7 @@ class Progress extends ChangeNotifier {
   late MeditationRules meditationRules;
   late ShopRules shop;
   late DayCycle dayCycle;
+  late DailyGoals dailyGoals;
 
   int pebbles = 0;
   final essences = {for (final e in Essence.values) e: 0};
@@ -47,6 +49,20 @@ class Progress extends ChangeNotifier {
   /// Regalos del momento del día juntados hoy (día del jardín), por id.
   int _giftDay = 0;
   Map<String, int> _giftsTaken = {};
+
+  /// Metas del día (día del jardín): cuánto se juntó de cada [DailyKind], qué
+  /// juegos se jugaron (para la variedad) y qué metas ya se pagaron.
+  int _goalsDay = -1;
+  Map<String, int> _goalCounts = {};
+  Set<String> _goalGames = {};
+  Set<String> _goalsPaid = {};
+
+  /// Metas cumplidas en la última partida, para festejarlas en el resultado.
+  List<GoalDef> lastRunGoals = [];
+
+  /// Metas cumplidas fuera de una partida (meditar, el Mercado, un regalo):
+  /// el jardín las anuncia con [takePendingGoals].
+  final _pendingGoals = <GoalDef>[];
 
   List<TowerStone> tower = [];
   int bestTower = 0;
@@ -192,6 +208,7 @@ class Progress extends ChangeNotifier {
     meditationRules = MeditationRules(balance);
     shop = ShopRules(balance);
     dayCycle = DayCycle(balance);
+    dailyGoals = DailyGoals(balance);
     _unlockDays = balance.section('unlocks').nums('days');
     final unlocks = balance.section('unlocks');
     _zoneOf = unlocks.has('zones') ? unlocks.sub('zones').stringMap() : {};
@@ -253,6 +270,12 @@ class Progress extends ChangeNotifier {
     _giftsTaken = (jsonDecode(_prefs.getString('gift.taken') ?? '{}') as Map).map(
       (k, v) => MapEntry(k as String, v as int),
     );
+    _goalsDay = _prefs.getInt('goals.day') ?? -1;
+    _goalCounts = (jsonDecode(_prefs.getString('goals.counts') ?? '{}') as Map).map(
+      (k, v) => MapEntry(k as String, v as int),
+    );
+    _goalGames = (_prefs.getStringList('goals.games') ?? []).toSet();
+    _goalsPaid = (_prefs.getStringList('goals.paid') ?? []).toSet();
     final medAt = _prefs.getInt('meditation.startedAt');
     meditationStartedAt = medAt == null ? null : DateTime.fromMillisecondsSinceEpoch(medAt);
     meditationChosen = _prefs.getInt('meditation.chosen') ?? 0;
@@ -464,6 +487,7 @@ class Progress extends ChangeNotifier {
     _shopBought[o.id] = (_shopBought[o.id] ?? 0) + 1;
     _prefs.setInt('shop.day', _shopDay);
     _prefs.setString('shop.bought', jsonEncode(_shopBought));
+    _pendingGoals.addAll(_goalEvent(now, {DailyKind.trade: 1}));
     _saveWallet();
     notifyListeners();
     return true;
@@ -492,6 +516,7 @@ class Progress extends ChangeNotifier {
     _giftsTaken[g.id] = (_giftsTaken[g.id] ?? 0) + 1;
     _prefs.setInt('gift.day', _giftDay);
     _prefs.setString('gift.taken', jsonEncode(_giftsTaken));
+    _pendingGoals.addAll(_goalEvent(now, {DailyKind.gift: 1}));
     _saveWallet();
     notifyListeners();
     return true;
@@ -567,6 +592,7 @@ class Progress extends ChangeNotifier {
     _prefs.remove('meditation.startedAt');
     _prefs.setInt('meditation.day', _meditationDay);
     _prefs.setInt('meditation.minutesToday', _meditationMinutesToday);
+    if (reward.minutes > 0) _pendingGoals.addAll(_goalEvent(now, {DailyKind.meditate: 1}));
     _saveWallet();
     _saveSerenity(now);
     notifyListeners();
@@ -585,8 +611,9 @@ class Progress extends ChangeNotifier {
     return object;
   }
 
-  /// Registra una partida terminada de [game] y paga la recompensa.
-  Reward finishRun(String game, int stars, {DateTime? now}) {
+  /// Registra una partida terminada de [game] y paga la recompensa. Las metas
+  /// del día que se cumplieron quedan en [lastRunGoals].
+  Reward finishRun(String game, int stars, {bool record = false, DateTime? now}) {
     now ??= DateTime.now();
     advanceGuide(1);
     final day = '${now.year}-${now.month}-${now.day}';
@@ -604,6 +631,12 @@ class Progress extends ChangeNotifier {
     final before = level;
     final newLevel = _addCalm(gained);
     final lotusGain = _earnLotus(now, levelsUp: newLevel == null ? 0 : newLevel - before);
+    lastRunGoals = _goalEvent(now, {
+      DailyKind.plays: 1,
+      DailyKind.stars: stars,
+      if (stars >= 3) DailyKind.three: 1,
+      if (record) DailyKind.record: 1,
+    }, game: game);
     _prefs.setString('playsDay', _playsDay);
     _prefs.setString('plays', jsonEncode(_plays));
     _saveWallet();
@@ -683,6 +716,65 @@ class Progress extends ChangeNotifier {
     ensoInk = flat;
     _prefs.setString('enso.ink', jsonEncode(flat));
     notifyListeners();
+  }
+
+  /// Las metas de hoy, en orden.
+  List<GoalDef> goalsToday({DateTime? now}) => dailyGoals.forDay(dayCycle.gardenDay(now ?? DateTime.now()));
+
+  bool _goalsFresh(DateTime now) => dayCycle.gardenDay(now) == _goalsDay;
+
+  /// Cuánto se avanzó en [g] hoy, hasta su objetivo.
+  int goalProgress(GoalDef g, {DateTime? now}) {
+    if (!_goalsFresh(now ?? DateTime.now())) return 0;
+    final n = g.kind == DailyKind.variety ? _goalGames.length : (_goalCounts[g.kind.name] ?? 0);
+    return n.clamp(0, g.target);
+  }
+
+  bool goalDone(GoalDef g, {DateTime? now}) => _goalsFresh(now ?? DateTime.now()) && _goalsPaid.contains(g.id);
+
+  /// Metas de hoy ya cumplidas.
+  int goalsDone({DateTime? now}) => goalsToday(now: now).where((g) => goalDone(g, now: now)).length;
+
+  /// Las metas cumplidas fuera de una partida que todavía no se anunciaron.
+  List<GoalDef> takePendingGoals() {
+    final done = [..._pendingGoals];
+    _pendingGoals.clear();
+    return done;
+  }
+
+  /// Suma [add] a las metas del día, paga las que se cumplieron (y el regalo
+  /// de todas juntas) y las devuelve. No avisa: lo hace quien la llama.
+  List<GoalDef> _goalEvent(DateTime now, Map<DailyKind, int> add, {String? game}) {
+    final today = dayCycle.gardenDay(now);
+    if (today != _goalsDay) {
+      _goalsDay = today;
+      _goalCounts = {};
+      _goalGames = {};
+      _goalsPaid = {};
+    }
+    for (final e in add.entries) {
+      _goalCounts[e.key.name] = (_goalCounts[e.key.name] ?? 0) + e.value;
+    }
+    if (game != null) _goalGames.add(game);
+    final goals = dailyGoals.forDay(today);
+    final done = <GoalDef>[];
+    for (final g in [...goals, dailyGoals.bonus]) {
+      if (_goalsPaid.contains(g.id)) continue;
+      final reached = g == dailyGoals.bonus
+          ? goals.every((g) => _goalsPaid.contains(g.id))
+          : goalProgress(g, now: now) >= g.target;
+      if (!reached) continue;
+      _goalsPaid.add(g.id);
+      for (final c in g.give.entries) {
+        _addTo(c.key, c.value);
+      }
+      done.add(g);
+    }
+    _prefs.setInt('goals.day', _goalsDay);
+    _prefs.setString('goals.counts', jsonEncode(_goalCounts));
+    _prefs.setStringList('goals.games', _goalGames.toList());
+    _prefs.setStringList('goals.paid', _goalsPaid.toList());
+    return done;
   }
 
   void _saveWallet() {

@@ -1860,5 +1860,96 @@
   "pt": "Recomeçar",
   "ja": "最初から",
   "zh": "重新开始"
+ },
+ "daily.title": {
+  "es": "Metas del día",
+  "en": "Today's goals",
+  "pt": "Metas do dia",
+  "ja": "今日の目標",
+  "zh": "今日目标"
+ },
+ "daily.hint": {
+  "es": "Sin apuro: mañana salen otras.",
+  "en": "No rush: new ones tomorrow.",
+  "pt": "Sem pressa: amanhã tem outras.",
+  "ja": "あせらずに。明日はまた新しい目標です。",
+  "zh": "不必着急，明天会有新的目标。"
+ },
+ "daily.done": {
+  "es": "Meta cumplida",
+  "en": "Goal complete",
+  "pt": "Meta cumprida",
+  "ja": "目標達成",
+  "zh": "目标完成"
+ },
+ "daily.allDone": {
+  "es": "¡Metas del día cumplidas!",
+  "en": "All of today's goals done!",
+  "pt": "Metas do dia cumpridas!",
+  "ja": "今日の目標をすべて達成！",
+  "zh": "今日目标全部完成！"
+ },
+ "daily.all": {
+  "es": "Cumplí todas las metas",
+  "en": "Complete every goal",
+  "pt": "Cumpra todas as metas",
+  "ja": "すべての目標を達成",
+  "zh": "完成所有目标"
+ },
+ "daily.plays": {
+  "es": "Jugá {n} partidas",
+  "en": "Play {n} rounds",
+  "pt": "Jogue {n} partidas",
+  "ja": "{n}回プレイする",
+  "zh": "玩{n}局"
+ },
+ "daily.stars": {
+  "es": "Juntá {n} estrellas",
+  "en": "Collect {n} stars",
+  "pt": "Junte {n} estrelas",
+  "ja": "星を{n}個あつめる",
+  "zh": "收集{n}颗星"
+ },
+ "daily.three": {
+  "es": "Conseguí 3 estrellas en una partida",
+  "en": "Get 3 stars in one round",
+  "pt": "Consiga 3 estrelas numa partida",
+  "ja": "1回で星3つをとる",
+  "zh": "一局获得3颗星"
+ },
+ "daily.variety": {
+  "es": "Jugá {n} juegos distintos",
+  "en": "Play {n} different games",
+  "pt": "Jogue {n} jogos diferentes",
+  "ja": "{n}種類のゲームをあそぶ",
+  "zh": "玩{n}种不同的游戏"
+ },
+ "daily.record": {
+  "es": "Superá un récord",
+  "en": "Beat a personal best",
+  "pt": "Supere um recorde",
+  "ja": "自己ベストを更新する",
+  "zh": "刷新一次个人最佳"
+ },
+ "daily.meditate": {
+  "es": "Meditá un rato",
+  "en": "Meditate for a while",
+  "pt": "Medite um pouco",
+  "ja": "しばらく瞑想する",
+  "zh": "冥想一会儿"
+ },
+ "daily.gift": {
+  "es": "Juntá un regalo del jardín",
+  "en": "Collect a garden gift",
+  "pt": "Pegue um presente do jardim",
+  "ja": "庭の贈り物をひとつ受け取る",
+  "zh": "收下一份庭院礼物"
+ },
+ "daily.trade": {
+  "es": "Hacé un trueque en el Mercado",
+  "en": "Make a trade at the Market",
+  "pt": "Faça uma troca no Mercado",
+  "ja": "市場で物々交換をする",
+  "zh": "在集市交换一次"
  }
 }

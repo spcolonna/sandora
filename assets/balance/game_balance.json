@@ -342,5 +342,20 @@
     "lotus": 10,
     "minLevel": 8,
     "max": 4
+  },
+  "dailyGoals": {
+    "_comment": "Metas del día: cada día del jardín salen count metas del pool (siempre una que se cumple jugando, de tipos distintos). Cada una paga give al cumplirse; todas juntas dan bonus. kind: plays, stars, three, variety, record, meditate, gift, trade.",
+    "count": 3,
+    "bonus": { "lotus": 1, "pebbles": 30 },
+    "pool": [
+      { "id": "plays", "kind": "plays", "target": 3, "give": { "pebbles": 25 } },
+      { "id": "stars", "kind": "stars", "target": 6, "give": { "pebbles": 30 } },
+      { "id": "three", "kind": "three", "target": 1, "give": { "pebbles": 25 } },
+      { "id": "variety", "kind": "variety", "target": 2, "give": { "pebbles": 20 } },
+      { "id": "record", "kind": "record", "target": 1, "give": { "pebbles": 30 } },
+      { "id": "meditate", "kind": "meditate", "target": 1, "give": { "light": 3 } },
+      { "id": "gift", "kind": "gift", "target": 1, "give": { "water": 3 } },
+      { "id": "trade", "kind": "trade", "target": 1, "give": { "sand": 3 } }
+    ]
   }
 }

@@ -18,6 +18,7 @@ import 'fx/sfx.dart';
 import 'garden/garden_scene.dart';
 import 'garden/garden_view.dart';
 import 'shop_sheet.dart';
+import 'widgets/daily_goals.dart';
 import 'widgets/garden_sign.dart';
 import 'meditation/meditation_screen.dart';
 import 'settings_sheet.dart';
@@ -44,6 +45,10 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Las metas del día cumplidas fuera de una partida se anuncian enseguida
+    // (también la de una meditación que terminó con la app cerrada).
+    Progress.instance.addListener(_announceGoals);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _announceGoals());
     // Hoy ya se entró: los recordatorios arrancan mañana.
     Reminders.instance.reschedule();
     // La torre junta Piedritas y la luz del día y el clima cambian en tiempo
@@ -81,6 +86,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    Progress.instance.removeListener(_announceGoals);
     _tick?.cancel();
     _pages.dispose();
     super.dispose();
@@ -110,6 +116,14 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
         SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
         _toast(trN('garden.opensIn', p.unlockDay(m.id) - p.playDay));
     }
+  }
+
+  void _announceGoals() {
+    final done = Progress.instance.takePendingGoals();
+    if (done.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) GoalToast.show(context, done);
+    });
   }
 
   void _toast(String text) {
@@ -305,6 +319,7 @@ class _Header extends StatelessWidget {
             ),
           ),
           const NextGoal(),
+          const DailyGoalsLine(),
           const SizedBox(height: 6),
           Row(
             children: [

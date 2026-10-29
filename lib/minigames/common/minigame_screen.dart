@@ -64,7 +64,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
 
   void _finish(RunOutcome outcome) {
     if (!mounted || _outcome != null) return;
-    final reward = Progress.instance.finishRun(widget.id, outcome.stars);
+    final reward = Progress.instance.finishRun(widget.id, outcome.stars, record: outcome.record);
     if (reward.newLevel != null) {
       SoundBoard.instance.play(Sfx.bell, volume: 0.7);
       Haptics.perfect();
@@ -142,6 +142,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
               outcome: _outcome!,
               reward: _reward!,
               calmBefore: _calmBefore,
+              goals: Progress.instance.lastRunGoals,
               onAgain: () {
                 SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
                 setState(_start);

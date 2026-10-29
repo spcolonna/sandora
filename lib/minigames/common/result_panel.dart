@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../garden/daily_goals.dart';
 import '../../garden/economy.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
@@ -9,6 +10,7 @@ import '../../ui/fx/calm.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/theme/palette.dart';
 import '../../ui/widgets/currency.dart';
+import '../../ui/widgets/daily_goals.dart';
 import '../../ui/widgets/level_up.dart';
 import '../../ui/widgets/next_goal.dart';
 import '../catalog.dart';
@@ -24,6 +26,9 @@ class ResultPanel extends StatefulWidget {
 
   /// La Calma antes de la partida, para llenar la barra desde ahí.
   final int calmBefore;
+
+  /// Metas del día que se cumplieron con esta partida.
+  final List<GoalDef> goals;
   final VoidCallback onAgain, onGarden;
 
   const ResultPanel({
@@ -32,6 +37,7 @@ class ResultPanel extends StatefulWidget {
     required this.outcome,
     required this.reward,
     required this.calmBefore,
+    this.goals = const [],
     required this.onAgain,
     required this.onGarden,
   });
@@ -46,6 +52,9 @@ class _ResultPanelState extends State<ResultPanel> {
 
   int get _afterStars => _starAt + _starEvery * 3 + 150;
 
+  /// Cuándo aparece cada meta cumplida, después de la barra de nivel.
+  int _goalAt(int i) => _afterStars + 1500 + 350 * i;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +68,12 @@ class _ResultPanelState extends State<ResultPanel> {
     if (widget.outcome.record) {
       _at(_afterStars, () {
         SoundBoard.instance.play(Sfx.great, volume: 0.5);
+        Haptics.medium();
+      });
+    }
+    for (var i = 0; i < widget.goals.length; i++) {
+      _at(_goalAt(i), () {
+        SoundBoard.instance.play(Sfx.rainNote, variant: 5, volume: 0.45);
         Haptics.medium();
       });
     }
@@ -160,6 +175,12 @@ class _ResultPanelState extends State<ResultPanel> {
                         child: _LevelGain(before: widget.calmBefore, gained: reward.calm, delay: after(700)),
                       ),
                       if (reward.newLevel != null) ...[const SizedBox(height: 12), LevelUpBanner(reward.newLevel!)],
+                      for (final (i, g) in widget.goals.indexed)
+                        CalmAppear(
+                          delay: Duration(milliseconds: _goalAt(i)),
+                          fromScale: 0.9,
+                          child: GoalDoneRow(g),
+                        ),
                       const SizedBox(height: 8),
                       CalmAppear(delay: after(900), child: const NextGoal(tappable: false)),
                       if (reward.tired) ...[
