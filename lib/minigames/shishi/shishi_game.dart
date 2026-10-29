@@ -36,6 +36,7 @@ class ShishiGame extends FlameGame with TapCallbacks {
 
   final _rng = Random();
   int _round = 0, _points = 0, _perfects = 0;
+  final _streak = Streak();
   double _fill = 0;
   double _flow = 0, _phase = 0;
   double _drip = 0; // agua que queda en el caño al soltar
@@ -194,8 +195,9 @@ class ShishiGame extends FlameGame with TapCallbacks {
     if (grade != null) {
       _points += grade.points;
       if (grade == Grade.perfect) _perfects++;
-      celebrate(world, Vector2(c.dx, c.dy - 40), grade);
+      celebrate(world, Vector2(c.dx, c.dy - 40), grade, streak: _streak.hit(grade));
     } else if (_fill > 1) {
+      _streak.miss();
       Haptics.light();
       for (var i = 0; i < 16; i++) {
         _drops.add((c, Offset((_rng.nextDouble() - 0.5) * 260, -60 - _rng.nextDouble() * 220), 1.2));

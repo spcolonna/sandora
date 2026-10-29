@@ -20,6 +20,9 @@ const introGestures = {
   'bonsai': IntroGesture.swipe,
   'enso': IntroGesture.trace,
   'bell': IntroGesture.pull,
+  'matcha': IntroGesture.swipe,
+  'flute': IntroGesture.hold,
+  'lanterns': IntroGesture.tap,
 };
 
 /// Tarjeta que se ve la primera vez que se abre un minijuego: nombre, qué hay
@@ -27,37 +30,53 @@ const introGestures = {
 class IntroCard extends StatelessWidget {
   final String id;
   final VoidCallback onStart;
-  const IntroCard({super.key, required this.id, required this.onStart});
+
+  /// Volver al jardín sin jugar.
+  final VoidCallback onBack;
+  const IntroCard({super.key, required this.id, required this.onStart, required this.onBack});
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return ColoredBox(
       color: Palette.sand,
-      child: Center(
-        child: CalmAppear(
-          rise: 18,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 28),
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-            decoration: BoxDecoration(color: Palette.paper, borderRadius: BorderRadius.circular(24)),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(tr('mg.$id.name'), style: text.headlineSmall),
-                const SizedBox(height: 16),
-                SizedBox(width: 180, height: 120, child: _GestureDemo(introGestures[id] ?? IntroGesture.tap)),
-                const SizedBox(height: 16),
-                Text(tr('mg.$id.desc'), style: text.titleMedium, textAlign: TextAlign.center),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(onPressed: onStart, child: Text(tr('intro.start'))),
+      child: Stack(
+        children: [
+          Center(
+            child: CalmAppear(
+              rise: 18,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 28),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                decoration: BoxDecoration(color: Palette.paper, borderRadius: BorderRadius.circular(24)),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(tr('mg.$id.name'), style: text.headlineSmall),
+                    const SizedBox(height: 16),
+                    SizedBox(width: 180, height: 120, child: _GestureDemo(introGestures[id] ?? IntroGesture.tap)),
+                    const SizedBox(height: 16),
+                    Text(tr('mg.$id.desc'), style: text.titleMedium, textAlign: TextAlign.center),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(onPressed: onStart, child: Text(tr('intro.start'))),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 8,
+            left: 12,
+            child: IconButton.filledTonal(
+              onPressed: onBack,
+              tooltip: tr('result.garden'),
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+          ),
+        ],
       ),
     );
   }

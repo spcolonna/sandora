@@ -11,11 +11,12 @@ import '../../minigames/stack/stack_rules.dart';
 import '../../minigames/stack/stone_painter.dart';
 import '../theme/palette.dart';
 import 'garden_east.dart';
+import 'garden_forest.dart';
 import 'scene_art.dart';
 
 /// Lugares del jardín que se tocan: cada minijuego, el Mercado, el tablón y
 /// el cojín de meditación. Los del patio están en la primera vista; los del
-/// estanque, en la segunda (a la derecha).
+/// estanque, en la segunda, y los del bosque, en la tercera.
 enum Place {
   market,
   board,
@@ -29,10 +30,17 @@ enum Place {
   moss,
   bonsai,
   enso,
-  bell;
+  bell,
+  matcha,
+  flute,
+  lanterns;
 
-  /// 0 el patio, 1 el estanque.
-  int get side => index >= Place.pond.index ? 1 : 0;
+  /// 0 el patio, 1 el estanque, 2 el bosque.
+  int get side => index >= Place.matcha.index
+      ? 2
+      : index >= Place.pond.index
+      ? 1
+      : 0;
 }
 
 /// Dónde está cada cosa del jardín. La usan el dibujo y las zonas tocables,
@@ -52,11 +60,12 @@ class GardenLayout {
 
   GardenLayout._(this.size, this.ground, this.places, this.labels, this.lanterns);
 
-  /// 0 el patio, 1 el estanque.
+  /// 0 el patio, 1 el estanque, 2 el bosque.
   int get side => places.keys.first.side;
 
   factory GardenLayout(Size size, int patio, {int side = 0}) {
     if (side == 1) return GardenLayout._east(size);
+    if (side == 2) return GardenLayout._forest(size);
     final w = size.width, h = size.height;
     const inset = [0.1, 0.04, 0.0], top = [0.6, 0.56, 0.52];
     final k = patio.clamp(0, 2);
@@ -135,6 +144,27 @@ class GardenLayout {
         Place.leaves: Offset(leaves.center.dx, leaves.bottom - gh * 0.02),
       },
       [Offset(bonsai.left - w * 0.06, bonsai.bottom - bonsai.height * 0.3)],
+    );
+  }
+
+  /// La vista del bosque: el bambú, la casa de té y el río.
+  factory GardenLayout._forest(Size size) {
+    final w = size.width, h = size.height;
+    final ground = Rect.fromLTRB(0, h * 0.56, w, h);
+    final gh = ground.height;
+    final flute = Rect.fromLTRB(w * 0.03, h * 0.14, w * 0.44, ground.top + gh * 0.24);
+    final matcha = Rect.fromLTRB(w * 0.5, h * 0.3, w * 0.97, ground.top + gh * 0.24);
+    final lanterns = Rect.fromLTRB(0, ground.top + gh * 0.34, w, h - gh * 0.02);
+    return GardenLayout._(
+      size,
+      ground,
+      {Place.matcha: matcha, Place.flute: flute, Place.lanterns: lanterns},
+      {
+        Place.matcha: matcha.bottomCenter,
+        Place.flute: flute.bottomCenter,
+        Place.lanterns: Offset(lanterns.center.dx, lanterns.bottom - gh * 0.04),
+      },
+      [Offset(matcha.left + matcha.width * 0.1, matcha.top + matcha.height * 0.52)],
     );
   }
 }
@@ -262,7 +292,7 @@ class GardenPainter extends CustomPainter {
       _paintMarket(canvas, at[Place.market]!);
       _paintBoard(canvas, at[Place.board]!);
       _paintMeditation(canvas, at[Place.meditation]!);
-    } else {
+    } else if (layout.side == 1) {
       paintBonsai(canvas, at[Place.bonsai]!);
       paintPond(canvas, at[Place.pond]!);
       paintShishi(canvas, at[Place.shishi]!);
@@ -270,6 +300,10 @@ class GardenPainter extends CustomPainter {
       paintLeafPath(canvas, at[Place.leaves]!);
       paintCalligraphyHall(canvas, at[Place.enso]!, ink: ensoInk);
       paintBellTower(canvas, at[Place.bell]!);
+    } else {
+      paintBambooGrove(canvas, at[Place.flute]!);
+      paintRiver(canvas, at[Place.lanterns]!);
+      paintTeahouse(canvas, at[Place.matcha]!, layout.lanterns[0]);
     }
     final dark = 1 - daylight;
     canvas.drawRect(
@@ -364,7 +398,7 @@ class GardenPainter extends CustomPainter {
         canvas.drawLine(o, o + Offset(d, -6 - rng.nextDouble() * 3), tuft);
       }
     }
-    if (layout.side == 1) return;
+    if (layout.side != 0) return;
     final g = layout.ground;
     canvas.save();
     canvas.clipRect(g);

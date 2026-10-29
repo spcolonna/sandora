@@ -544,6 +544,40 @@ BLOCKS = [
                 'Even and calm everywhere, especially the center, so the black ink reads clearly. ' + CROP_NOTE,
                 f'ink strokes or circles; characters or writing; {NO_TEXT}; frame or border; {NO_STYLE}.'),
         ]),
+    dict(
+        id='14', title='Bosque: Casa de té (Matcha), Bambú (Flauta) y Río (Linternas)', folder='store/art/forest/',
+        intro=('La tercera vista del jardín y las piezas de sus minijuegos. El código dibuja la espuma del té, las '
+               'ráfagas de viento y la corriente, así que cada pieza va sola y recortada. Adjuntá '
+               '`store/art/style/style_keyart.webp`.'),
+        images=[
+            obj('obj_tea_house', 'A tiny Japanese tea house (chashitsu): a low wooden platform, paper shoji walls with '
+                'a thin wooden grid, a dark indigo noren curtain over the small entrance and a heavy dark thatched '
+                'roof with softly curved eaves. Seen from the front and a little from above.', 'about 260 pixels tall'),
+            obj('obj_bamboo_grove', 'A tight grove of eight tall green bamboo culms of different heights and shades, '
+                'with visible nodes and light fans of thin leaves near the tops, growing from a small mossy mound. '
+                'Seen from the front.', 'about 320 pixels tall'),
+            obj('obj_tea_bowl', 'A single Japanese matcha bowl (chawan) seen straight from ABOVE: a thick, slightly '
+                'irregular rim of dark brown glazed clay with a lighter drip, and the inside EMPTY, showing the pale '
+                'bottom of the bowl.', 'about 300 pixels wide', '; tea, foam, whisk or spoon'),
+            obj('obj_tea_whisk', 'A single bamboo tea whisk (chasen) seen straight from ABOVE: a pale bamboo center '
+                'with many thin curved tines opening in a circle around it.', 'about 120 pixels wide',
+                '; bowl or tea'),
+            obj('obj_bamboo_flute', 'A single Japanese bamboo flute (shakuhachi-like) standing exactly upright: pale '
+                'golden bamboo with three darker nodes and FOUR round finger holes evenly spaced along the middle.',
+                'about 420 pixels tall', '; hands or strings'),
+            obj('obj_river_lantern', 'A single small floating paper lantern (tōrō nagashi) seen from above at a '
+                'slight angle: a square wooden base and a glowing warm paper cube on top.', 'about 80 pixels tall',
+                '; water'),
+            img('bg_river', PORTRAIT_OPAQUE,
+                f'This is the background of the river lanterns minigame in {GAME}. The code draws the stones, the '
+                'lantern, the dock and the current on top of it.',
+                'A calm river seen straight from above, flowing from top to bottom and filling the middle 84% of the '
+                'width, with narrow sandy and grassy banks on both sides and a few soft ripples.',
+                'The water is even and calm everywhere, without rocks or objects, so the pieces on top read clearly. '
+                + CROP_NOTE,
+                f'stones in the water; boats, lanterns or docks; {NO_TEXT}; people or animals; frame or border; '
+                f'{NO_STYLE}.'),
+        ]),
 ]
 
 

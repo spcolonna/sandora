@@ -56,6 +56,7 @@ class BonsaiGame extends FlameGame with DragCallbacks {
   late double _left = b.d('seconds');
   double _spawn = 0.6;
   int _wildCut = 0, _goodCut = 0;
+  final _streak = Streak();
   bool _over = false;
   Offset? _last;
   final _trail = <(Offset, double)>[];
@@ -149,9 +150,11 @@ class BonsaiGame extends FlameGame with DragCallbacks {
         _wildCut++;
         // Cortar a tiempo (antes de que se salga) vale más.
         final early = _inside(br.tip);
-        celebrate(world, Vector2(br.tip.dx, br.tip.dy), early ? Grade.great : Grade.good, sound: false);
+        final g = early ? Grade.great : Grade.good;
+        celebrate(world, Vector2(br.tip.dx, br.tip.dy), g, sound: false, streak: _streak.hit(g));
       } else {
         _goodCut++;
+        _streak.miss();
         Haptics.medium();
       }
     }

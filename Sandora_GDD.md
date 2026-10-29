@@ -320,7 +320,7 @@ Cada ampliación abre una zona nueva con 1 o 2 minijuegos propios, objetos exclu
 
 **Qué busca:** crear una melodía propia sin saber música.
 
-**Gameplay:** el viento pasa por una caña de bambú con 4 huecos. El jugador tapa y destapa huecos cuando pasan las ráfagas marcadas. Las melodías usan escala pentatónica, así que suenan bien aunque haya errores.
+**Gameplay:** el viento pasa por una caña de bambú con 4 huecos. Cada ráfaga llega por la fila de un hueco y el jugador lo mantiene tapado mientras pasa. Las melodías usan escala pentatónica, así que suenan bien aunque haya errores.
 
 **Puntaje:** notas acertadas y fluidez.
 
@@ -328,7 +328,7 @@ Cada ampliación abre una zona nueva con 1 o 2 minijuegos propios, objetos exclu
 
 **Qué busca:** un puzzle de física suave, visualmente el más lindo.
 
-**Gameplay:** linternas de papel bajan por el río. El jugador coloca de 2 a 4 piedras en la corriente antes de soltarlas para desviarlas hasta la orilla correcta. Si una se apaga, se reintenta sin castigo.
+**Gameplay:** linternas de papel bajan por el río. El jugador coloca hasta 4 piedras en la corriente antes de soltarlas para desviarlas hasta su muelle. El agua rodea cada piedra: rozarla desvía la linterna y chocarla de frente la apaga. Si se apaga o pasa de largo, se reintenta con las piedras como estaban.
 
 **Puntaje:** linternas que llegan encendidas y piedras usadas (menos es mejor).
 

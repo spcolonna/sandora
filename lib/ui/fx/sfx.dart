@@ -19,6 +19,7 @@ enum Sfx {
   great('sfx_ui_great', 1),
   perfect('sfx_ui_perfect', 1),
   catMeow('sfx_cat_meow', 1),
+  fluteNote('sfx_flute_note', 4),
   bell('sfx_meditation_bell', 1);
 
   final String file;

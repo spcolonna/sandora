@@ -33,6 +33,9 @@ void main() {
       'bonsai': Essence.wood,
       'enso': Essence.sand,
       'bell': Essence.light,
+      'matcha': Essence.wood,
+      'flute': Essence.wood,
+      'lanterns': Essence.water,
     };
     for (final e in rule.entries) {
       expect(eco.essenceOf(e.key), e.value, reason: e.key);

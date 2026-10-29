@@ -184,4 +184,19 @@ void main() {
       expect(p.streakObjects, ['bowl']);
     });
   });
+
+  test('la próxima meta: comprar, juntar o subir de nivel', () {
+    final first = levels.expansions.where((e) => e.ready).reduce((a, b) => a.level <= b.level ? a : b);
+    // Antes de llegar a nada, la meta es el próximo nivel con algo nuevo.
+    final start = levels.nextGoal(0, {}, (_) => true)!;
+    expect(start.kind, GoalKind.reach);
+    expect(start.level, greaterThan(1));
+    // Con el nivel justo: se puede comprar o falta juntar, según el bolsillo.
+    final calm = levels.calmToReach(first.level);
+    expect(levels.nextGoal(calm, {}, (_) => true)!.kind, GoalKind.buy);
+    expect(levels.nextGoal(calm, {}, (_) => false)!.kind, GoalKind.gather);
+    // Con todo comprado no queda meta.
+    final all = {for (final e in levels.expansions) e.id};
+    expect(levels.nextGoal(levels.calmToReach(60), all, (_) => true), isNull);
+  });
 }

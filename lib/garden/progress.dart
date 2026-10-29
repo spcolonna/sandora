@@ -372,6 +372,16 @@ class Progress extends ChangeNotifier {
   /// Ampliaciones que ya se pueden comprar (para avisar en el jardín).
   bool get expansionAvailable => levels.expansions.any(canBuy);
 
+  /// Lo próximo para conseguir, para mostrarlo siempre arriba del jardín.
+  Goal? get nextGoal => levels.nextGoal(calm, expansions, canAfford);
+
+  /// Cuánto falta de cada moneda ('pebbles' o una esencia) para pagar [e].
+  Map<String, int> missingFor(Expansion e) => {
+    if (pebbles < e.pebbles) 'pebbles': e.pebbles - pebbles,
+    for (final c in e.essences.entries)
+      if (essences[c.key]! < c.value) c.key.name: c.value - essences[c.key]!,
+  };
+
   bool buyExpansion(Expansion e) {
     if (!canBuy(e)) return false;
     pebbles -= e.pebbles;

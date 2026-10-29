@@ -59,6 +59,9 @@ class LeavesGame extends FlameGame with DragCallbacks {
   final _leaves = <Leaf>[];
   late double _left = b.d('seconds');
   int _strokes = 0;
+  late final _milestones = StarMilestones(b.list('stars'));
+  int _heard = 0;
+  double _heardAt = 0;
   bool _over = false;
   Offset? _last;
   final _trail = <(Offset, double)>[];
@@ -184,15 +187,18 @@ class LeavesGame extends FlameGame with DragCallbacks {
     }
   }
 
+  double get _score {
+    final share = _leaves.where(_inPile).length / _leaves.length;
+    // Pocos gestos suman un poco (barrer con calma).
+    final calm = (1 - (_strokes - b.i('calmStrokes')) / 40).clamp(0.0, 1.0);
+    return share * 0.85 + calm * 0.15 * share;
+  }
+
   void _end() {
     _over = true;
     _windAt = null;
     SoundBoard.instance.stopLoop(Ambience.wind);
-    final inPile = _leaves.where(_inPile).length;
-    final share = inPile / _leaves.length;
-    // Pocos gestos suman un poco (barrer con calma).
-    final calm = (1 - (_strokes - b.i('calmStrokes')) / 40).clamp(0.0, 1.0);
-    final score = share * 0.85 + calm * 0.15 * share;
+    final score = _score;
     final points = (score * 1000).round();
     final record = points > Progress.instance.best('leaves');
     Progress.instance.setBest('leaves', points);
@@ -203,7 +209,7 @@ class LeavesGame extends FlameGame with DragCallbacks {
         RunOutcome(
           score: points,
           stars: stars,
-          headline: tr('leaves.result', {'n': inPile, 'total': _leaves.length}),
+          headline: tr('leaves.result', {'n': _leaves.where(_inPile).length, 'total': _leaves.length}),
           record: record,
         ),
       );
@@ -212,9 +218,19 @@ class LeavesGame extends FlameGame with DragCallbacks {
 
   void _publish() {
     final e = _windAt == null ? -1 : _t - _windAt!;
+    final inPile = _leaves.where(_inPile).length;
+    if (!_over) {
+      // Cada hoja que entra al montón suena, más aguda cuanto más lleno.
+      if (inPile > _heard && _t - _heardAt > 0.12) {
+        _heardAt = _t;
+        SoundBoard.instance.play(Sfx.rainNote, variant: (inPile * 5 / _leaves.length).ceil().clamp(1, 5), volume: 0.16);
+      }
+      _heard = inPile;
+      _milestones.update(_score, world, Vector2(_pile.dx, _pile.dy - _pileR - 20));
+    }
     hud.value = LeavesHud(
       seconds: max(0, _left),
-      inPile: _leaves.where(_inPile).length,
+      inPile: inPile,
       total: _leaves.length,
       windWarning: e >= 0 && e < b.d('windWarning') + b.d('windDuration'),
     );

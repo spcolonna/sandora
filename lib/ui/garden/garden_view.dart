@@ -9,11 +9,13 @@ import '../../garden/weather_service.dart';
 import '../../i18n/i18n.dart';
 import '../../minigames/enso/enso_ink.dart';
 import '../fx/calm.dart';
+import '../fx/reward_flight.dart';
 import '../fx/sfx.dart';
 import '../theme/palette.dart';
 import '../widgets/currency.dart';
 import '../widgets/garden_sign.dart';
 import 'garden_scene.dart';
+import 'garden_touch.dart';
 
 /// El jardín es el menú: cada lugar se toca para entrar (minijuegos, Mercado,
 /// tablón, meditación). Cambia con la hora del dispositivo y el clima y, según
@@ -62,6 +64,12 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
     _gone.add('${g.id}$index');
     SoundBoard.instance.play(Sfx.good, volume: 0.4);
     Haptics.light();
+    final box = context.findRenderObject() as RenderBox?;
+    if (box != null) {
+      for (final e in g.give.entries) {
+        RewardFlight.fly(context, from: box.localToGlobal(at), currency: e.key, amount: e.value);
+      }
+    }
     final pop = _Pop(_popId++, g, at);
     setState(() => _pops.add(pop));
     Future.delayed(const Duration(milliseconds: 1500), () {
@@ -143,6 +151,10 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
                   ),
                 ),
               ),
+            ),
+            // Fuera de los lugares, el jardín responde al toque.
+            Positioned.fill(
+              child: GardenTouch(groundTop: layout.ground.top, daylight: daylight, weather: weather, wet: wet > 0.3),
             ),
             for (final e in layout.places.entries)
               Positioned.fromRect(
@@ -330,7 +342,10 @@ class _Label extends StatelessWidget {
     Place.moss ||
     Place.bonsai ||
     Place.enso ||
-    Place.bell => tr('mg.${p.name}.name'),
+    Place.bell ||
+    Place.matcha ||
+    Place.flute ||
+    Place.lanterns => tr('mg.${p.name}.name'),
   };
 
   @override
@@ -420,10 +435,11 @@ class _TowerCollect extends StatelessWidget {
               ? const SizedBox.shrink()
               : GestureDetector(
                   key: const ValueKey('collect'),
-                  onTap: () {
-                    p.collectTower();
+                  onTapUp: (d) {
+                    final gain = p.collectTower();
                     SoundBoard.instance.play(Sfx.stackPlace, volume: 0.6);
                     Haptics.medium();
+                    RewardFlight.fly(context, from: d.globalPosition, currency: 'pebbles', amount: gain);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

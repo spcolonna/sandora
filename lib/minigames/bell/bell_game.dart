@@ -36,6 +36,7 @@ class BellGame extends FlameGame with DragCallbacks {
   double _released = 0;
   double _lastForce = 0, _lastHit = -100;
   Grade? _lastGrade;
+  final _streak = Streak();
 
   double get _ring => rules.ringAfter(_lastForce, _t - _lastHit);
   int get _strike => _scores.length;
@@ -109,7 +110,10 @@ class BellGame extends FlameGame with DragCallbacks {
     _lastGrade = rules.grade(score);
     SoundBoard.instance.play(Sfx.bell, volume: 0.3 + 0.6 * _released);
     Haptics.medium();
-    if (_lastGrade != null) celebrate(world, Vector2(_bell.dx, _bell.dy), _lastGrade!, sound: false);
+    final streak = _streak.hit(_lastGrade);
+    if (_lastGrade != null) {
+      celebrate(world, Vector2(_bell.dx, _bell.dy), _lastGrade!, sound: false, streak: streak);
+    }
     if (_strike >= rules.strikes) _end();
   }
 

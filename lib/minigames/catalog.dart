@@ -8,7 +8,10 @@ import 'bell/bell_game.dart';
 import 'bonsai/bonsai_game.dart';
 import 'common/minigame_screen.dart';
 import 'enso/enso_game.dart';
+import 'flute/flute_game.dart';
+import 'lanterns/lanterns_game.dart';
 import 'leaves/leaves_game.dart';
+import 'matcha/matcha_game.dart';
 import 'moss/moss_game.dart';
 import 'pond/pond_game.dart';
 import 'rain/rain_game.dart';
@@ -97,6 +100,24 @@ final minigames = [
     Icons.notifications_rounded,
     unit: RecordUnit.percent,
     () => const MinigameScreen(id: 'bell', build: BellGame.new),
+  ),
+  MinigameInfo(
+    'matcha',
+    Icons.emoji_food_beverage_rounded,
+    unit: RecordUnit.percent,
+    () => const MinigameScreen(id: 'matcha', build: MatchaGame.new),
+  ),
+  MinigameInfo(
+    'flute',
+    Icons.music_note_rounded,
+    unit: RecordUnit.percent,
+    () => const MinigameScreen(id: 'flute', build: FluteGame.new),
+  ),
+  MinigameInfo(
+    'lanterns',
+    Icons.light_rounded,
+    unit: RecordUnit.percent,
+    () => const MinigameScreen(id: 'lanterns', build: LanternsGame.new),
   ),
 ];
 

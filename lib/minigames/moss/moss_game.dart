@@ -96,6 +96,7 @@ class MossGame extends FlameGame with DragCallbacks {
 
   /// Para no recalcular la cobertura en cada cuadro.
   double _covered = 0;
+  late final _milestones = StarMilestones(b.list('stars'));
   bool _onSand = false;
 
   static const _cols = 48;
@@ -204,13 +205,17 @@ class MossGame extends FlameGame with DragCallbacks {
       _growT = 0;
       _field.grow(_rng, b.d('growChance'));
       _covered = _field.covered;
+      // Cada estrella se festeja cuando se gana, no recién al final.
+      _milestones.update(_score, world, Vector2(size.x / 2, size.y * 0.3));
     }
     if (_left <= 0 || _covered >= 0.98) _end();
   }
 
+  double get _score => (_field.covered - _field.stained * b.d('stainWeight')).clamp(0.0, 1.0);
+
   void _end() {
     _over = true;
-    final score = (_field.covered - _field.stained * b.d('stainWeight')).clamp(0.0, 1.0);
+    final score = _score;
     final pct = (score * 100).round();
     final record = pct > Progress.instance.best('moss');
     Progress.instance.setBest('moss', pct);

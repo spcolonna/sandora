@@ -40,6 +40,21 @@ class Expansion {
   }
 }
 
+enum GoalKind {
+  /// Se puede comprar ya.
+  buy,
+
+  /// El nivel alcanza, faltan Piedritas o esencias.
+  gather,
+
+  /// Hay que subir de nivel.
+  reach,
+}
+
+/// Lo próximo que se puede conseguir en el jardín: una ampliación o la
+/// meditación ('meditation'), y el nivel que pide.
+typedef Goal = ({GoalKind kind, String id, int level});
+
 /// Nivel del jardín a partir de la Calma acumulada. Dart puro.
 class LevelRules {
   final Balance balance;
@@ -85,4 +100,25 @@ class LevelRules {
     for (final e in expansions)
       if (e.level == level) e.id,
   ];
+
+  /// La meta que conviene mostrar: primero lo que ya se puede comprar, después
+  /// lo que el nivel alcanza pero falta juntar, y si no, lo que abre el
+  /// próximo nivel con algo nuevo.
+  Goal? nextGoal(int calm, Set<String> owned, bool Function(Expansion) affordable) {
+    final level = levelFor(calm);
+    final open = [
+      for (final e in expansions)
+        if (e.ready && !owned.contains(e.id) && e.level <= level) e,
+    ];
+    final ready = open.where(affordable).firstOrNull;
+    if (ready != null) return (kind: GoalKind.buy, id: ready.id, level: ready.level);
+    if (open.isNotEmpty) return (kind: GoalKind.gather, id: open.first.id, level: open.first.level);
+    final ahead = <(String, int)>[
+      if (meditationLevel > level) ('meditation', meditationLevel),
+      for (final e in expansions)
+        if (e.ready && !owned.contains(e.id) && e.level > level) (e.id, e.level),
+    ]..sort((a, b) => a.$2.compareTo(b.$2));
+    if (ahead.isEmpty) return null;
+    return (kind: GoalKind.reach, id: ahead.first.$1, level: ahead.first.$2);
+  }
 }

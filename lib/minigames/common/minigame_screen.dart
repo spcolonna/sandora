@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import '../../garden/economy.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
-import '../../ui/fx/calm.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/theme/palette.dart';
-import '../../ui/widgets/currency.dart';
-import '../../ui/widgets/level_up.dart';
 import 'intro_card.dart';
+import 'result_panel.dart';
 
 /// Cómo terminó una partida. Nunca hay game over duro: siempre hay puntaje,
 /// estrellas o una altura alcanzada (GDD, pilar 6).
@@ -44,6 +42,9 @@ class _MinigameScreenState extends State<MinigameScreen> {
   Reward? _reward;
   int _round = 0;
 
+  /// La Calma al empezar la partida, para que el resultado llene la barra desde ahí.
+  int _calmBefore = 0;
+
   /// La primera vez, antes de jugar, la tarjeta de cómo se juega.
   late bool _intro = !Progress.instance.introSeen.contains(widget.id);
 
@@ -57,6 +58,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
     _outcome = null;
     _reward = null;
     _round++;
+    _calmBefore = Progress.instance.calm;
     _game = widget.build(_finish);
   }
 
@@ -76,22 +78,29 @@ class _MinigameScreenState extends State<MinigameScreen> {
   Future<void> _pause() async {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
     _game.pauseEngine();
-    final quit = await showDialog<bool>(
+    final choice = await showDialog<_PauseChoice>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Palette.paper,
         title: Text(tr('pause.title')),
+        actionsOverflowButtonSpacing: 8,
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(tr('pause.quit'))),
-          FilledButton(onPressed: () => Navigator.pop(context, false), child: Text(tr('pause.resume'))),
+          TextButton(onPressed: () => Navigator.pop(context, _PauseChoice.quit), child: Text(tr('pause.quit'))),
+          TextButton(onPressed: () => Navigator.pop(context, _PauseChoice.restart), child: Text(tr('pause.restart'))),
+          FilledButton(onPressed: () => Navigator.pop(context, _PauseChoice.resume), child: Text(tr('pause.resume'))),
         ],
       ),
     );
     if (!mounted) return;
-    if (quit == true) {
-      Navigator.pop(context);
-    } else {
-      _game.resumeEngine();
+    switch (choice) {
+      case _PauseChoice.quit:
+        Navigator.pop(context);
+      case _PauseChoice.restart:
+        // Lo jugado se descarta sin pagar: empezar de nuevo es inmediato.
+        SoundBoard.instance.stopAllLoops(fade: const Duration(milliseconds: 200));
+        setState(_start);
+      case _PauseChoice.resume || null:
+        _game.resumeEngine();
     }
   }
 
@@ -111,7 +120,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
   Widget build(BuildContext context) {
     if (_intro) {
       return Scaffold(
-        body: IntroCard(id: widget.id, onStart: _closeIntro),
+        body: IntroCard(id: widget.id, onStart: _closeIntro, onBack: () => Navigator.pop(context)),
       );
     }
     return Scaffold(
@@ -128,11 +137,15 @@ class _MinigameScreenState extends State<MinigameScreen> {
               child: IconButton.filledTonal(onPressed: _pause, icon: const Icon(Icons.pause_rounded)),
             ),
           if (_outcome != null)
-            _ResultPanel(
-              title: tr('mg.${widget.id}.name'),
+            ResultPanel(
+              id: widget.id,
               outcome: _outcome!,
               reward: _reward!,
-              onAgain: () => setState(_start),
+              calmBefore: _calmBefore,
+              onAgain: () {
+                SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+                setState(_start);
+              },
               onGarden: () => Navigator.pop(context),
             ),
         ],
@@ -141,109 +154,4 @@ class _MinigameScreenState extends State<MinigameScreen> {
   }
 }
 
-class _ResultPanel extends StatelessWidget {
-  final String title;
-  final RunOutcome outcome;
-  final Reward reward;
-  final VoidCallback onAgain, onGarden;
-
-  const _ResultPanel({
-    required this.title,
-    required this.outcome,
-    required this.reward,
-    required this.onAgain,
-    required this.onGarden,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    return Positioned.fill(
-      // El velo se oscurece de a poco y el panel sube con un fundido.
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 600),
-        builder: (context, t, child) => ColoredBox(
-          color: Palette.ink.withValues(alpha: 0.35 * t),
-          child: child,
-        ),
-        child: Center(
-          child: CalmAppear(
-            delay: const Duration(milliseconds: 150),
-            rise: 18,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-              decoration: BoxDecoration(color: Palette.paper, borderRadius: BorderRadius.circular(24)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(title, style: text.titleMedium),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Las estrellas se encienden de a una, como faroles.
-                      for (var i = 0; i < 3; i++)
-                        CalmAppear(
-                          delay: Duration(milliseconds: 550 + 280 * i),
-                          fromScale: 0.8,
-                          rise: 0,
-                          child: Opacity(
-                            opacity: i < outcome.stars ? 1 : 0.22,
-                            child: Image.asset(
-                              'assets/images/icons/icon_star.webp',
-                              width: 46,
-                              height: 46,
-                              filterQuality: FilterQuality.medium,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(outcome.headline, style: text.headlineSmall, textAlign: TextAlign.center),
-                  if (outcome.record) ...[
-                    const SizedBox(height: 4),
-                    Text(tr('result.record'), style: text.titleSmall?.copyWith(color: Palette.wood)),
-                  ],
-                  const SizedBox(height: 16),
-                  Text(tr('result.rewards'), style: text.labelLarge),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 16,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      CurrencyChip.pebbles(reward.pebbles, prefix: '+'),
-                      if (reward.essenceAmount > 0)
-                        CurrencyChip.essence(reward.essence, reward.essenceAmount, prefix: '+'),
-                      if (reward.lotus > 0) CurrencyChip.lotus(reward.lotus, prefix: '+'),
-                      CalmChip(reward.calm),
-                    ],
-                  ),
-                  if (reward.newLevel != null) ...[const SizedBox(height: 12), LevelUpBanner(reward.newLevel!)],
-                  if (reward.tired) ...[
-                    const SizedBox(height: 8),
-                    Text(tr('result.tired'), style: text.bodySmall, textAlign: TextAlign.center),
-                  ],
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(onPressed: onGarden, child: Text(tr('result.garden'))),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: FilledButton(onPressed: onAgain, child: Text(tr('result.again'))),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+enum _PauseChoice { resume, restart, quit }

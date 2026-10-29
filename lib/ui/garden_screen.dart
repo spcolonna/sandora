@@ -13,6 +13,7 @@ import '../minigames/catalog.dart';
 import 'board_sheet.dart';
 import 'expansions_sheet.dart';
 import 'fx/calm.dart';
+import 'fx/reward_flight.dart';
 import 'fx/sfx.dart';
 import 'garden/garden_scene.dart';
 import 'garden/garden_view.dart';
@@ -22,6 +23,7 @@ import 'meditation/meditation_screen.dart';
 import 'settings_sheet.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
+import 'widgets/next_goal.dart';
 
 /// Pantalla principal: el jardín, que también es el menú (se toca cada lugar
 /// para entrar), con las monedas y el nivel arriba.
@@ -156,8 +158,23 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
   Future<void> _open(MinigameInfo m) async {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
     _quiet();
+    final p = Progress.instance;
+    final keys = ['pebbles', for (final e in Essence.values) e.name, 'lotus'];
+    final before = {for (final k in keys) k: p.walletOf(k)};
     await Navigator.of(context).push(calmRoute<void>(m.screen()));
-    if (mounted) _gardenSound();
+    if (!mounted) return;
+    _gardenSound();
+    // Lo ganado en las partidas vuela a sus contadores al volver.
+    final from = MediaQuery.sizeOf(context).center(const Offset(0, 60));
+    var wait = 380;
+    for (final k in keys) {
+      final gain = p.walletOf(k) - before[k]!;
+      if (gain <= 0) continue;
+      Future.delayed(Duration(milliseconds: wait), () {
+        if (mounted) RewardFlight.fly(context, from: from, currency: k, amount: gain);
+      });
+      wait += 200;
+    }
     // Después de la primera partida (no al abrir la app) se ofrecen los avisos.
     if (Progress.instance.guideStep >= 1) Reminders.instance.askOnce();
   }
@@ -186,13 +203,13 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                       Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(24),
-                          // El patio y, deslizando, el estanque.
+                          // El patio y, deslizando, el estanque y el bosque.
                           child: PageView(
                             controller: _pages,
                             physics: const _QuickPagePhysics(),
                             onPageChanged: (i) => setState(() => _page = i),
                             children: [
-                              for (final side in [0, 1])
+                              for (final side in [0, 1, 2])
                                 GardenView(
                                   side: side,
                                   now: gardenNow(),
@@ -247,15 +264,16 @@ class _Header extends StatelessWidget {
         children: [
           Row(
             children: [
-              CurrencyChip.pebbles(p.pebbles),
+              RewardTarget(currency: 'pebbles', child: CurrencyChip.pebbles(p.pebbles)),
               const SizedBox(width: 14),
               Expanded(
                 child: Wrap(
                   spacing: 12,
                   runSpacing: 4,
                   children: [
-                    for (final e in Essence.values) CurrencyChip.essence(e, p.essences[e]!),
-                    CurrencyChip.lotus(p.lotus),
+                    for (final e in Essence.values)
+                      RewardTarget(currency: e.name, child: CurrencyChip.essence(e, p.essences[e]!)),
+                    RewardTarget(currency: 'lotus', child: CurrencyChip.lotus(p.lotus)),
                   ],
                 ),
               ),
@@ -281,17 +299,18 @@ class _Header extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(child: _Bar(p.levels.progress(p.calm), Palette.lantern)),
+                Expanded(child: CalmBar(p.levels.progress(p.calm), Palette.lantern)),
                 const SizedBox(width: 12),
               ],
             ),
           ),
+          const NextGoal(),
           const SizedBox(height: 6),
           Row(
             children: [
               Text(tr('garden.serenity'), style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(width: 10),
-              Expanded(child: _Bar(serenity, Palette.moss)),
+              Expanded(child: CalmBar(serenity, Palette.moss)),
               const SizedBox(width: 12),
             ],
           ),
@@ -301,32 +320,10 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _Bar extends StatelessWidget {
-  final double value;
-  final Color color;
-  const _Bar(this.value, this.color);
-
-  @override
-  Widget build(BuildContext context) {
-    // Se llena despacio hasta el valor nuevo (Calma ganada, Serenidad).
-    return TweenAnimationBuilder<double>(
-      tween: Tween(end: value),
-      duration: const Duration(milliseconds: 1400),
-      curve: Curves.easeInOutCubic,
-      builder: (context, v, _) => ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: LinearProgressIndicator(
-          value: v,
-          minHeight: 10,
-          color: color,
-          backgroundColor: Palette.sandShadow.withValues(alpha: 0.4),
-        ),
-      ),
-    );
-  }
-}
-
-/// Dos puntos debajo del jardín: el patio y el estanque.
+/// Lo próximo para conseguir, siempre a la vista debajo del nivel: qué se
+/// puede abrir ya, qué falta juntar o cuánta Calma falta para el próximo
+/// nivel con algo nuevo. Se toca para ver las ampliaciones.
+/// Puntos debajo del jardín: el patio, el estanque y el bosque.
 class _SideDots extends StatelessWidget {
   final int page;
   final void Function(int) onTap;
@@ -339,7 +336,7 @@ class _SideDots extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          for (final (i, key) in [(0, 'garden.patio'), (1, 'garden.pond')])
+          for (final (i, key) in [(0, 'garden.patio'), (1, 'garden.pond'), (2, 'garden.forest')])
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => onTap(i),

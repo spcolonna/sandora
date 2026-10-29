@@ -25,7 +25,16 @@
       (`title_bg`) y el cartel del jardín (`ui_garden_sign`).
 - [x] Ampliaciones: los patios agrandan el jardín; el Estanque abre el Estanque de lotos, la Sala de caligrafía el
       Ensō y el Templo la Campana (`unlocks.zones` en el balance).
-- [ ] Zonas que siguen "Próximamente": Casa de té (Matcha), Bosque de bambú (Flauta) y Río (Linternas).
+- [x] **Vista del bosque** (tercera página del jardín): Casa de té (Matcha, Madera), Bosque de bambú (Flauta, Madera)
+      y Río (Linternas, Agua). Ya no queda ninguna zona "Próximamente". Dibujados con código hasta tener el arte del
+      Bloque 14. Probar: `--dart-define=SANDORA_GAME=matcha` (flute, lanterns).
+  - Matcha: batir en zigzag al ritmo de la cuenta; tres tramos de 6 s con ritmos distintos; la espuma crece con cada
+    batida a tiempo.
+  - Flauta: las ráfagas llegan por la fila de uno de los 4 huecos; hay que mantenerlo tapado mientras pasan. Notas
+    sintetizadas (re pentatónica, `sfx_flute_note_01–04`); reemplazar por grabaciones reales.
+  - Linternas: hasta 4 piedras por linterna (tocar pone o saca, arrastrar mueve) y se toca la linterna para
+    soltarla. La corriente es determinista; un test comprueba que cada linterna se puede llevar al muelle.
+- [ ] Matcha: el té servido debería recibir visitas que dejan regalos (GDD).
 - [x] Ensō: el mejor trazo se guarda (`enso.ink`) y se cuelga en el rollo del pabellón, en lugar del que trae el dibujo.
 
 ## Próximo: menú y jardín vivo

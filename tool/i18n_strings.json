@@ -1671,5 +1671,194 @@
   "pt": "Sua sequência te deu uma lanterna de luz. Ela já está pendurada na cerejeira.",
   "ja": "連続記録のごほうびに、光の提灯を手に入れました。桜の枝に下がっています。",
   "zh": "连续冥想为你赢得一盏光之灯笼，已挂在樱花树上。"
+ },
+ "garden.forest": {
+  "es": "Bosque",
+  "en": "Forest",
+  "pt": "Bosque",
+  "ja": "森",
+  "zh": "森林"
+ },
+ "mg.matcha.name": {
+  "es": "Matcha",
+  "en": "Matcha",
+  "pt": "Matcha",
+  "ja": "抹茶",
+  "zh": "抹茶"
+ },
+ "mg.matcha.desc": {
+  "es": "Batí en zigzag al ritmo de la cuenta dorada. Con cada batida a tiempo crece la espuma",
+  "en": "Whisk side to side in time with the golden bead. Every stroke on the beat grows the foam",
+  "pt": "Bata em zigue-zague no ritmo da conta dourada. A cada batida no tempo a espuma cresce",
+  "ja": "金色の玉のリズムに合わせて左右に点てましょう。拍に合うたびに泡が育ちます",
+  "zh": "跟着金色小珠的节奏左右击拂。每次合拍，泡沫就多一些"
+ },
+ "matcha.hint": {
+  "es": "Deslizá el dedo de lado a lado sobre el cuenco",
+  "en": "Swipe side to side over the bowl",
+  "pt": "Deslize o dedo de um lado para o outro sobre a tigela",
+  "ja": "茶碗の上で指を左右に動かしましょう",
+  "zh": "在茶碗上左右滑动手指"
+ },
+ "matcha.foam": {
+  "es": "Espuma {n}%",
+  "en": "Foam {n}%",
+  "pt": "Espuma {n}%",
+  "ja": "泡 {n}%",
+  "zh": "泡沫 {n}%"
+ },
+ "matcha.faster": {
+  "es": "Un poco más rápido",
+  "en": "A little faster",
+  "pt": "Um pouco mais rápido",
+  "ja": "少し速く",
+  "zh": "稍微快一点"
+ },
+ "matcha.slower": {
+  "es": "Un poco más lento",
+  "en": "A little slower",
+  "pt": "Um pouco mais devagar",
+  "ja": "少しゆっくり",
+  "zh": "稍微慢一点"
+ },
+ "matcha.result": {
+  "es": "Espuma del matcha: {n}%",
+  "en": "Matcha foam: {n}%",
+  "pt": "Espuma do matcha: {n}%",
+  "ja": "抹茶の泡：{n}%",
+  "zh": "抹茶泡沫：{n}%"
+ },
+ "mg.flute.name": {
+  "es": "Flauta de bambú",
+  "en": "Bamboo flute",
+  "pt": "Flauta de bambu",
+  "ja": "竹笛",
+  "zh": "竹笛"
+ },
+ "mg.flute.desc": {
+  "es": "Cuando una ráfaga pasa por la flauta, mantené tapado su hueco. Cualquier nota suena bien",
+  "en": "When a gust passes through the flute, hold its hole closed. Every note sounds right",
+  "pt": "Quando uma rajada passar pela flauta, mantenha o furo tampado. Toda nota soa bem",
+  "ja": "風が笛を通る間、その穴を押さえ続けましょう。どの音もきれいに響きます",
+  "zh": "风吹过笛子时，按住对应的孔。每个音都很好听"
+ },
+ "flute.hint": {
+  "es": "Mantené el dedo en la fila del hueco mientras pasa el viento",
+  "en": "Hold your finger on the hole's row while the wind passes",
+  "pt": "Mantenha o dedo na fileira do furo enquanto o vento passa",
+  "ja": "風が通る間、その穴の列を押さえ続けましょう",
+  "zh": "风经过时，手指按住那个孔所在的一行"
+ },
+ "flute.progress": {
+  "es": "Ráfagas {n} de {total}",
+  "en": "Gusts {n} of {total}",
+  "pt": "Rajadas {n} de {total}",
+  "ja": "風 {n}/{total}",
+  "zh": "风 {n}/{total}"
+ },
+ "flute.result": {
+  "es": "Melodía del bambú: {n}%",
+  "en": "Bamboo melody: {n}%",
+  "pt": "Melodia do bambu: {n}%",
+  "ja": "竹の調べ：{n}%",
+  "zh": "竹之旋律：{n}%"
+ },
+ "mg.lanterns.name": {
+  "es": "Linternas del río",
+  "en": "River lanterns",
+  "pt": "Lanternas do rio",
+  "ja": "灯籠流し",
+  "zh": "河灯"
+ },
+ "mg.lanterns.desc": {
+  "es": "Poné piedras en la corriente y soltá la linterna: las piedras la desvían hasta su muelle",
+  "en": "Place stones in the current and release the lantern: the stones steer it to its dock",
+  "pt": "Coloque pedras na correnteza e solte a lanterna: as pedras a desviam até o cais",
+  "ja": "流れに石を置いて灯籠を放しましょう。石が灯籠を桟橋へ導きます",
+  "zh": "在水流中放几块石头，再放出河灯：石头会把它引到码头"
+ },
+ "lanterns.hint": {
+  "es": "Tocá el río para poner una piedra y tocá la linterna para soltarla",
+  "en": "Tap the river to place a stone, then tap the lantern to release it",
+  "pt": "Toque o rio para pôr uma pedra e toque a lanterna para soltá-la",
+  "ja": "川をタップして石を置き、灯籠をタップして流しましょう",
+  "zh": "点河面放石头，再点河灯把它放出"
+ },
+ "lanterns.progress": {
+  "es": "Linterna {n} de {total} · piedras {stones}/{max}",
+  "en": "Lantern {n} of {total} · stones {stones}/{max}",
+  "pt": "Lanterna {n} de {total} · pedras {stones}/{max}",
+  "ja": "灯籠 {n}/{total}・石 {stones}/{max}",
+  "zh": "河灯 {n}/{total} · 石头 {stones}/{max}"
+ },
+ "lanterns.full": {
+  "es": "No entran más piedras: mové o sacá alguna",
+  "en": "No more stones fit: move or remove one",
+  "pt": "Não cabem mais pedras: mova ou tire alguma",
+  "ja": "これ以上は置けません。石を動かすか取りましょう",
+  "zh": "放不下更多石头了：移动或拿走一块"
+ },
+ "lanterns.missed": {
+  "es": "Pasó de largo. Mové las piedras y probá otra vez",
+  "en": "It drifted past. Move the stones and try again",
+  "pt": "Passou direto. Mova as pedras e tente de novo",
+  "ja": "通り過ぎました。石を動かしてもう一度",
+  "zh": "漂过头了。挪一挪石头再试一次"
+ },
+ "lanterns.out": {
+  "es": "Chocó con una piedra y se apagó. Probá de nuevo",
+  "en": "It bumped a stone and went out. Try again",
+  "pt": "Bateu numa pedra e apagou. Tente de novo",
+  "ja": "石にぶつかって消えました。もう一度どうぞ",
+  "zh": "撞到石头熄灭了。再试一次"
+ },
+ "lanterns.gone": {
+  "es": "Esta siguió río abajo. Va la siguiente",
+  "en": "This one floated on downstream. Here comes the next",
+  "pt": "Esta seguiu rio abaixo. Lá vem a próxima",
+  "ja": "この灯籠は川下へ流れていきました。次へ",
+  "zh": "这盏顺流而下了。下一盏来了"
+ },
+ "lanterns.result": {
+  "es": "Linternas en su muelle: {n}%",
+  "en": "Lanterns docked: {n}%",
+  "pt": "Lanternas no cais: {n}%",
+  "ja": "桟橋に着いた灯籠：{n}%",
+  "zh": "河灯靠岸：{n}%"
+ },
+ "goal.buy": {
+  "es": "Ya podés abrir: {name}",
+  "en": "Ready to open: {name}",
+  "pt": "Já dá para abrir: {name}",
+  "ja": "開けます：{name}",
+  "zh": "可以开启：{name}"
+ },
+ "goal.gather": {
+  "es": "{name} · falta",
+  "en": "{name} · still need",
+  "pt": "{name} · falta",
+  "ja": "{name}・あと",
+  "zh": "{name} · 还差"
+ },
+ "goal.reach": {
+  "es": "Nivel {n}: {name} · faltan {calm} de Calma",
+  "en": "Level {n}: {name} · {calm} Calm to go",
+  "pt": "Nível {n}: {name} · faltam {calm} de Calma",
+  "ja": "レベル{n}：{name}・穏やかさあと{calm}",
+  "zh": "等级 {n}：{name} · 还差 {calm} 平和"
+ },
+ "result.best": {
+  "es": "Tu récord: {v}",
+  "en": "Your best: {v}",
+  "pt": "Seu recorde: {v}",
+  "ja": "自己ベスト：{v}",
+  "zh": "个人最佳：{v}"
+ },
+ "pause.restart": {
+  "es": "Empezar de nuevo",
+  "en": "Restart",
+  "pt": "Recomeçar",
+  "ja": "最初から",
+  "zh": "重新开始"
  }
 }

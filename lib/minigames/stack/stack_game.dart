@@ -70,6 +70,7 @@ class StackGame extends FlameGame with TapCallbacks {
   static const _pedestalWidth = 3.4;
 
   final _rng = Random();
+  final _streak = Streak();
   final _tower = <_Placed>[];
   final _bag = <StoneShape>[];
   final _debris = <_Loose>[];
@@ -248,7 +249,7 @@ class StackGame extends FlameGame with TapCallbacks {
     final grade = stoneGrade(dx, belowW, b);
     if (grade == Grade.perfect) _perfects++;
     final p = _toScreen(_tower.last.x, _tower.last.top);
-    celebrate(world, Vector2(p.dx, p.dy), grade);
+    celebrate(world, Vector2(p.dx, p.dy), grade, streak: _streak.hit(grade));
     _maybeWind();
     _next();
   }
@@ -271,6 +272,7 @@ class StackGame extends FlameGame with TapCallbacks {
 
   /// Se caen [count] piedras de arriba (contando [extra], la que se soltó).
   void _collapse(int count, double dir, {_Loose? extra}) {
+    _streak.miss();
     var fromTower = count - (extra == null ? 0 : 1);
     fromTower = min(fromTower, _height);
     final fallen = _tower.sublist(_height - fromTower);
