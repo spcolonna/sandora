@@ -24,6 +24,7 @@ class Reminders {
   bool _ready = false;
 
   static const _meditationId = 1;
+  static const _teaId = 2;
   static const _dailyFirstId = 100;
 
   /// Para probar: `--dart-define=SANDORA_REMINDER_MIN=1` manda el primer
@@ -81,7 +82,10 @@ class Reminders {
       await _plugin.cancel(id: _dailyFirstId + i);
     }
     final s = AppSettings.instance;
-    if (!s.reminders || !asked) return;
+    if (!s.reminders || !asked) {
+      await _plugin.cancel(id: _teaId);
+      return;
+    }
     final p = Progress.instance;
     final now = DateTime.now();
     final plan = rules.plan(
@@ -113,6 +117,21 @@ class Reminders {
       title: tr('meditation.title'),
       body: tr('reminder.meditationDone'),
       notificationDetails: _details(channel: 'meditation', name: tr('meditation.title'), bell: true),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+  }
+
+  /// Avisa cuando la visita llega al té servido (si los avisos están
+  /// encendidos). Servir otro té el mismo día no cambia la hora.
+  Future<void> teaServed(DateTime arrives, String visitor) async {
+    if (!_ready || !asked || !AppSettings.instance.reminders) return;
+    if (!arrives.isAfter(DateTime.now())) return;
+    await _plugin.zonedSchedule(
+      id: _teaId,
+      scheduledDate: tz.TZDateTime.from(arrives, tz.local),
+      title: Progress.instance.gardenName ?? tr('reminder.title'),
+      body: tr('reminder.tea.$visitor'),
+      notificationDetails: _details(channel: 'garden', name: tr('reminder.channel')),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }

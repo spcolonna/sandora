@@ -11,11 +11,12 @@ void main() {
   final goals = DailyGoals(balance);
   final cycle = DayCycle(balance);
 
-  /// El primer mediodía, desde el 27/10/2026, cuyas metas cumplen [test].
+  /// El primer mediodía, desde el 27/10/2026, cuyas metas (de alguien que
+  /// todavía no medita) cumplen [test].
   DateTime dayWhere(bool Function(List<GoalDef>) test) {
     for (var i = 0; i < 400; i++) {
       final t = DateTime(2026, 10, 27, 12).add(Duration(days: i));
-      if (test(goals.forDay(cycle.gardenDay(t)))) return t;
+      if (test(goals.forDay(cycle.gardenDay(t), canMeditate: false))) return t;
     }
     throw StateError('ningún día cumple');
   }
@@ -27,6 +28,10 @@ void main() {
       expect(today.map((g) => g.kind).toSet(), hasLength(goals.count));
       expect(today.any((g) => g.kind.fromRun), isTrue);
       expect(goals.forDay(day).map((g) => g.id), today.map((g) => g.id));
+    }
+    // Sin la meditación destrabada no sale la meta de meditar.
+    for (var day = 0; day < 300; day++) {
+      expect(goals.forDay(day, canMeditate: false).map((g) => g.kind), isNot(contains(DailyKind.meditate)));
     }
     // No son siempre las mismas.
     expect({for (var d = 0; d < 30; d++) goals.forDay(d).map((g) => g.id).join()}.length, greaterThan(5));

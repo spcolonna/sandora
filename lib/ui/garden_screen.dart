@@ -21,6 +21,7 @@ import 'shop_sheet.dart';
 import 'widgets/daily_goals.dart';
 import 'widgets/garden_sign.dart';
 import 'meditation/meditation_screen.dart';
+import 'album_sheet.dart';
 import 'settings_sheet.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
@@ -291,6 +292,19 @@ class _Header extends StatelessWidget {
                   ],
                 ),
               ),
+              // El álbum, con un punto cuando hay algo nuevo.
+              IconButton(
+                tooltip: tr('album.title'),
+                onPressed: () {
+                  SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+                  showAlbumSheet(context);
+                },
+                icon: Badge(
+                  isLabelVisible: p.albumNew,
+                  backgroundColor: Palette.lantern,
+                  child: const Icon(Icons.collections_bookmark_rounded),
+                ),
+              ),
               IconButton(onPressed: onSettings, icon: const Icon(Icons.settings_rounded)),
             ],
           ),
@@ -377,6 +391,11 @@ class _SideDots extends StatelessWidget {
                         color: Palette.ink.withValues(alpha: page == i ? 0.85 : 0.5),
                       ),
                     ),
+                    // En el bosque, una visita dejó su ofrenda en la casa de té.
+                    if (i == 2 && page != 2 && Progress.instance.teaState() == TeaState.visit) ...[
+                      const SizedBox(width: 4),
+                      const Icon(Icons.redeem_rounded, size: 14, color: Palette.lantern),
+                    ],
                   ],
                 ),
               ),

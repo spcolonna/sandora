@@ -72,12 +72,14 @@ class DailyGoals {
   }
 
   /// Las metas del día [day]: una que se cumple jugando y el resto de tipos
-  /// distintos, elegidas con el día como semilla.
-  List<GoalDef> forDay(int day) {
+  /// distintos, elegidas con el día como semilla. Sin [canMeditate] no sale
+  /// la de meditar (todavía no se puede cumplir).
+  List<GoalDef> forDay(int day, {bool canMeditate = true}) {
     final rng = Random(day * 7919 + 17);
     final runs = pool.where((g) => g.kind.fromRun).toList()..shuffle(rng);
     final picked = [runs.first];
-    final rest = pool.where((g) => g != runs.first).toList()..shuffle(rng);
+    final rest = pool.where((g) => g != runs.first && (canMeditate || g.kind != DailyKind.meditate)).toList()
+      ..shuffle(rng);
     for (final g in rest) {
       if (picked.length >= count) break;
       if (picked.every((p) => p.kind != g.kind)) picked.add(g);

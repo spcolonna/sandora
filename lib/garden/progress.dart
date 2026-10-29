@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,7 @@ import 'economy.dart';
 import 'levels.dart';
 import 'meditation_rules.dart';
 import 'shop.dart';
+import 'tea_visits.dart';
 import 'weather.dart';
 
 /// Una piedra de la torre guardada en el jardín (unidades del mundo del
@@ -33,6 +35,7 @@ class Progress extends ChangeNotifier {
   late ShopRules shop;
   late DayCycle dayCycle;
   late DailyGoals dailyGoals;
+  late TeaVisits teaVisits;
 
   int pebbles = 0;
   final essences = {for (final e in Essence.values) e: 0};
@@ -50,12 +53,26 @@ class Progress extends ChangeNotifier {
   int _giftDay = 0;
   Map<String, int> _giftsTaken = {};
 
+  /// El té servido (día del jardín, estrellas y a qué hora) y el último día
+  /// en que se juntó la ofrenda de la visita.
+  int _teaDay = -1, _teaStars = 0, _teaAt = 0, _teaTakenDay = -1;
+
+  /// Lo descubierto para el álbum (`shape.<figura>`, `gift.<regalo>`,
+  /// `visitor.<visita>`) y cuánto había la última vez que se miró.
+  Set<String> found = {};
+  int _albumSeen = 0;
+
+  /// Si la última partida de matcha dejó el té servido para una visita.
+  bool lastRunTea = false;
+
   /// Metas del día (día del jardín): cuánto se juntó de cada [DailyKind], qué
   /// juegos se jugaron (para la variedad) y qué metas ya se pagaron.
   int _goalsDay = -1;
   Map<String, int> _goalCounts = {};
   Set<String> _goalGames = {};
   Set<String> _goalsPaid = {};
+  int _goalListDay = -1;
+  List<String> _goalList = [];
 
   /// Metas cumplidas en la última partida, para festejarlas en el resultado.
   List<GoalDef> lastRunGoals = [];
@@ -209,6 +226,7 @@ class Progress extends ChangeNotifier {
     shop = ShopRules(balance);
     dayCycle = DayCycle(balance);
     dailyGoals = DailyGoals(balance);
+    teaVisits = TeaVisits(balance);
     _unlockDays = balance.section('unlocks').nums('days');
     final unlocks = balance.section('unlocks');
     _zoneOf = unlocks.has('zones') ? unlocks.sub('zones').stringMap() : {};
@@ -271,11 +289,26 @@ class Progress extends ChangeNotifier {
       (k, v) => MapEntry(k as String, v as int),
     );
     _goalsDay = _prefs.getInt('goals.day') ?? -1;
+    _teaDay = _prefs.getInt('tea.day') ?? -1;
+    found = (_prefs.getStringList('album.found') ?? []).toSet();
+    _albumSeen = _prefs.getInt('album.seen') ?? 0;
+    // Lo que ya se había hecho antes de que existiera el álbum: la primera
+    // figura siempre es el círculo, la última figura y los regalos de hoy.
+    if (!_prefs.containsKey('album.found')) {
+      if (sandFigures > 0) found.add('shape.${SandShape.circle.name}');
+      if (sandLastShape case final s?) found.add('shape.${s.name}');
+      if (_giftDay == dayCycle.gardenDay(now)) found.addAll(_giftsTaken.keys.map((g) => 'gift.$g'));
+    }
+    _teaStars = _prefs.getInt('tea.stars') ?? 0;
+    _teaAt = _prefs.getInt('tea.at') ?? 0;
+    _teaTakenDay = _prefs.getInt('tea.taken') ?? -1;
     _goalCounts = (jsonDecode(_prefs.getString('goals.counts') ?? '{}') as Map).map(
       (k, v) => MapEntry(k as String, v as int),
     );
     _goalGames = (_prefs.getStringList('goals.games') ?? []).toSet();
     _goalsPaid = (_prefs.getStringList('goals.paid') ?? []).toSet();
+    _goalListDay = _prefs.getInt('goals.listDay') ?? -1;
+    _goalList = _prefs.getStringList('goals.list') ?? [];
     final medAt = _prefs.getInt('meditation.startedAt');
     meditationStartedAt = medAt == null ? null : DateTime.fromMillisecondsSinceEpoch(medAt);
     meditationChosen = _prefs.getInt('meditation.chosen') ?? 0;
@@ -471,7 +504,7 @@ class Progress extends ChangeNotifier {
   bool canTrade(ShopOffer o, {DateTime? now}) => shopLeft(o, now: now) != 0 && canPayOffer(o);
 
   bool trade(ShopOffer o, {DateTime? now}) {
-    now ??= DateTime.now();
+    now ??= gardenNow();
     if (!canTrade(o, now: now)) return false;
     final today = _dayIndex(now);
     if (today != _shopDay) {
@@ -514,12 +547,100 @@ class Progress extends ChangeNotifier {
       _addTo(e.key, e.value);
     }
     _giftsTaken[g.id] = (_giftsTaken[g.id] ?? 0) + 1;
+    _discover('gift.${g.id}');
     _prefs.setInt('gift.day', _giftDay);
     _prefs.setString('gift.taken', jsonEncode(_giftsTaken));
     _pendingGoals.addAll(_goalEvent(now, {DailyKind.gift: 1}));
     _saveWallet();
     notifyListeners();
     return true;
+  }
+
+  /// Deja servido un té de [stars] estrellas, si alcanza y hoy todavía no
+  /// hubo visita. Servir otro el mismo día mejora el té pero no adelanta la
+  /// visita.
+  bool _serveTea(int stars, DateTime now) {
+    // El té es del día en que llega la visita (servido justo antes del
+    // amanecer, la visita es del día nuevo).
+    final today = dayCycle.gardenDay(now.add(teaVisits.arrive));
+    if (stars < teaVisits.minStars || _teaTakenDay == today) return false;
+    if (_teaDay == today && teaArrivesIn(now: now) == Duration.zero) {
+      // La visita ya vino y su ofrenda espera: el té mejora, pero no se sirve otro.
+      _teaStars = max(_teaStars, stars);
+      _prefs.setInt('tea.stars', _teaStars);
+      return false;
+    }
+    if (_teaDay != today) {
+      _teaDay = today;
+      _teaStars = 0;
+      _teaAt = now.millisecondsSinceEpoch;
+    }
+    _teaStars = max(_teaStars, stars);
+    _prefs.setInt('tea.day', _teaDay);
+    _prefs.setInt('tea.stars', _teaStars);
+    _prefs.setInt('tea.at', _teaAt);
+    return true;
+  }
+
+  /// Cómo está la casa de té ahora.
+  TeaState teaState({DateTime? now}) {
+    now ??= gardenNow();
+    final today = dayCycle.gardenDay(now);
+    if (_teaTakenDay == today) return TeaState.visited;
+    // Servido y esperando, aunque la visita caiga después del amanecer.
+    if (now.isBefore(teaArrivesAt) && _teaDay == dayCycle.gardenDay(teaArrivesAt)) return TeaState.served;
+    return _teaDay == today && !now.isBefore(teaArrivesAt) ? TeaState.visit : TeaState.empty;
+  }
+
+  /// A qué hora llega la visita al té servido hoy.
+  DateTime get teaArrivesAt => DateTime.fromMillisecondsSinceEpoch(_teaAt).add(teaVisits.arrive);
+
+  /// Cuánto falta para que llegue la visita al té servido.
+  Duration teaArrivesIn({DateTime? now}) {
+    now ??= gardenNow();
+    final left = teaArrivesAt.difference(now);
+    return left.isNegative ? Duration.zero : left;
+  }
+
+  /// Quien visita hoy la casa de té.
+  Visitor teaVisitor({DateTime? now}) => teaVisits.visitorFor(dayCycle.gardenDay(now ?? gardenNow()));
+
+  /// La ofrenda que deja hoy la visita, según el té servido.
+  Map<String, int> teaGift({DateTime? now}) => teaVisitor(now: now).gift(max(_teaStars, 1));
+
+  /// Junta la ofrenda de la visita; null si todavía no vino nadie.
+  Map<String, int>? takeVisit({DateTime? now}) {
+    now ??= gardenNow();
+    if (teaState(now: now) != TeaState.visit) return null;
+    final gift = teaGift(now: now);
+    _discover('visitor.${teaVisitor(now: now).id}');
+    for (final e in gift.entries) {
+      _addTo(e.key, e.value);
+    }
+    _teaTakenDay = dayCycle.gardenDay(now);
+    _prefs.setInt('tea.taken', _teaTakenDay);
+    _pendingGoals.addAll(_goalEvent(now, {DailyKind.gift: 1}));
+    _saveWallet();
+    notifyListeners();
+    return gift;
+  }
+
+  /// Suma algo al álbum (sin avisar: quien llama ya avisa).
+  void _discover(String id) {
+    if (found.add(id)) _prefs.setStringList('album.found', found.toList());
+  }
+
+  /// Cuántas cosas hay en el álbum: lo descubierto y los objetos de la racha.
+  int get albumCount => found.length + streakObjects.length;
+
+  /// Si hay algo nuevo en el álbum desde la última vez que se abrió.
+  bool get albumNew => albumCount > _albumSeen;
+
+  void markAlbumSeen() {
+    if (_albumSeen == albumCount) return;
+    _albumSeen = albumCount;
+    _prefs.setInt('album.seen', _albumSeen);
+    notifyListeners();
   }
 
   static int _dayIndex(DateTime t) => DateTime.utc(t.year, t.month, t.day).millisecondsSinceEpoch ~/ 86400000;
@@ -614,7 +735,7 @@ class Progress extends ChangeNotifier {
   /// Registra una partida terminada de [game] y paga la recompensa. Las metas
   /// del día que se cumplieron quedan en [lastRunGoals].
   Reward finishRun(String game, int stars, {bool record = false, DateTime? now}) {
-    now ??= DateTime.now();
+    now ??= gardenNow();
     advanceGuide(1);
     final day = '${now.year}-${now.month}-${now.day}';
     if (day != _playsDay) {
@@ -637,6 +758,7 @@ class Progress extends ChangeNotifier {
       if (stars >= 3) DailyKind.three: 1,
       if (record) DailyKind.record: 1,
     }, game: game);
+    lastRunTea = game == 'matcha' && _serveTea(stars, now);
     _prefs.setString('playsDay', _playsDay);
     _prefs.setString('plays', jsonEncode(_plays));
     _saveWallet();
@@ -685,7 +807,10 @@ class Progress extends ChangeNotifier {
     sandDrawing = points;
     sandFigures++;
     sandLastShape = shape;
-    if (shape != null) _prefs.setInt('sandLastShape', shape.index);
+    if (shape != null) {
+      _prefs.setInt('sandLastShape', shape.index);
+      _discover('shape.${shape.name}');
+    }
     _prefs.setString('sandDrawing', jsonEncode(points.map((v) => double.parse(v.toStringAsFixed(4))).toList()));
     _prefs.setInt('sandFigures', sandFigures);
     notifyListeners();
@@ -719,18 +844,30 @@ class Progress extends ChangeNotifier {
   }
 
   /// Las metas de hoy, en orden.
-  List<GoalDef> goalsToday({DateTime? now}) => dailyGoals.forDay(dayCycle.gardenDay(now ?? DateTime.now()));
+  ///
+  /// Se eligen la primera vez que se miran en el día y quedan fijas, aunque
+  /// en el día se destrabe la meditación.
+  List<GoalDef> goalsToday({DateTime? now}) {
+    final today = dayCycle.gardenDay(now ?? gardenNow());
+    if (_goalListDay != today) {
+      _goalListDay = today;
+      _goalList = [for (final g in dailyGoals.forDay(today, canMeditate: meditationUnlocked)) g.id];
+      _prefs.setInt('goals.listDay', today);
+      _prefs.setStringList('goals.list', _goalList);
+    }
+    return [for (final id in _goalList) ?dailyGoals.pool.where((g) => g.id == id).firstOrNull];
+  }
 
   bool _goalsFresh(DateTime now) => dayCycle.gardenDay(now) == _goalsDay;
 
   /// Cuánto se avanzó en [g] hoy, hasta su objetivo.
   int goalProgress(GoalDef g, {DateTime? now}) {
-    if (!_goalsFresh(now ?? DateTime.now())) return 0;
+    if (!_goalsFresh(now ?? gardenNow())) return 0;
     final n = g.kind == DailyKind.variety ? _goalGames.length : (_goalCounts[g.kind.name] ?? 0);
     return n.clamp(0, g.target);
   }
 
-  bool goalDone(GoalDef g, {DateTime? now}) => _goalsFresh(now ?? DateTime.now()) && _goalsPaid.contains(g.id);
+  bool goalDone(GoalDef g, {DateTime? now}) => _goalsFresh(now ?? gardenNow()) && _goalsPaid.contains(g.id);
 
   /// Metas de hoy ya cumplidas.
   int goalsDone({DateTime? now}) => goalsToday(now: now).where((g) => goalDone(g, now: now)).length;
@@ -756,7 +893,7 @@ class Progress extends ChangeNotifier {
       _goalCounts[e.key.name] = (_goalCounts[e.key.name] ?? 0) + e.value;
     }
     if (game != null) _goalGames.add(game);
-    final goals = dailyGoals.forDay(today);
+    final goals = goalsToday(now: now);
     final done = <GoalDef>[];
     for (final g in [...goals, dailyGoals.bonus]) {
       if (_goalsPaid.contains(g.id)) continue;
@@ -790,3 +927,7 @@ class Progress extends ChangeNotifier {
     _prefs.setInt('serenityAt', now.millisecondsSinceEpoch);
   }
 }
+
+/// La casa de té: sin té, con el té servido esperando, con la visita que ya
+/// dejó su ofrenda, o con la ofrenda ya juntada hoy.
+enum TeaState { empty, served, visit, visited }

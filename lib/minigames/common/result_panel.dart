@@ -29,6 +29,9 @@ class ResultPanel extends StatefulWidget {
 
   /// Metas del día que se cumplieron con esta partida.
   final List<GoalDef> goals;
+
+  /// Si el matcha quedó servido en la casa de té, esperando una visita.
+  final bool teaServed;
   final VoidCallback onAgain, onGarden;
 
   const ResultPanel({
@@ -38,6 +41,7 @@ class ResultPanel extends StatefulWidget {
     required this.reward,
     required this.calmBefore,
     this.goals = const [],
+    this.teaServed = false,
     required this.onAgain,
     required this.onGarden,
   });
@@ -180,6 +184,26 @@ class _ResultPanelState extends State<ResultPanel> {
                           delay: Duration(milliseconds: _goalAt(i)),
                           fromScale: 0.9,
                           child: GoalDoneRow(g),
+                        ),
+                      if (widget.teaServed)
+                        CalmAppear(
+                          delay: after(700),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.emoji_food_beverage_rounded, size: 18, color: Palette.moss),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    tr('tea.result'),
+                                    style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       const SizedBox(height: 8),
                       CalmAppear(delay: after(900), child: const NextGoal(tappable: false)),

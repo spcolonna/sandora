@@ -9,7 +9,8 @@
 - [x] **Repo remoto:** `https://github.com/spcolonna/sandora` (pusheado el 2026-10-28). Siempre como spcolonna, nunca con la cuenta de Ironhide.
 - [x] Ícono de la app (`flutter_launcher_icons.yaml`, original en `store/icon/`). El splash de Oraki Games ya está,
       igual que en Hexiege: `flutter_native_splash.yaml` + `lib/ui/brand_intro.dart`.
-- [ ] Textos de tienda por idioma, política de privacidad.
+- [x] Textos de tienda en 5 idiomas y declaraciones de privacidad (`docs/store-listing.md`), política de privacidad
+      bilingüe lista para publicar (`docs/privacy/index.html`). Falta: el contacto y publicar la página.
 
 ## Prototipo (fase 1)
 - [ ] Medir rendimiento en un Android de gama media real.
@@ -34,7 +35,7 @@
     sintetizadas (re pentatónica, `sfx_flute_note_01–04`); reemplazar por grabaciones reales.
   - Linternas: hasta 4 piedras por linterna (tocar pone o saca, arrastrar mueve) y se toca la linterna para
     soltarla. La corriente es determinista; un test comprueba que cada linterna se puede llevar al muelle.
-- [ ] Matcha: el té servido debería recibir visitas que dejan regalos (GDD).
+- [x] Matcha: el té servido recibe visitas que dejan regalos (balance `teaVisits`).
 - [x] Ensō: el mejor trazo se guarda (`enso.ink`) y se cuelga en el rollo del pabellón, en lugar del que trae el dibujo.
 
 ## Próximo: menú y jardín vivo

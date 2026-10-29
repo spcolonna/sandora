@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../garden/economy.dart';
 import '../../garden/progress.dart';
+import '../../garden/reminders.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/theme/palette.dart';
@@ -65,6 +66,8 @@ class _MinigameScreenState extends State<MinigameScreen> {
   void _finish(RunOutcome outcome) {
     if (!mounted || _outcome != null) return;
     final reward = Progress.instance.finishRun(widget.id, outcome.stars, record: outcome.record);
+    final p = Progress.instance;
+    if (p.lastRunTea) Reminders.instance.teaServed(p.teaArrivesAt, p.teaVisitor().id);
     if (reward.newLevel != null) {
       SoundBoard.instance.play(Sfx.bell, volume: 0.7);
       Haptics.perfect();
@@ -143,6 +146,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
               reward: _reward!,
               calmBefore: _calmBefore,
               goals: Progress.instance.lastRunGoals,
+              teaServed: Progress.instance.lastRunTea,
               onAgain: () {
                 SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
                 setState(_start);

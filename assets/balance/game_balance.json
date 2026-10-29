@@ -357,5 +357,16 @@
       { "id": "gift", "kind": "gift", "target": 1, "give": { "water": 3 } },
       { "id": "trade", "kind": "trade", "target": 1, "give": { "sand": 3 } }
     ]
+  },
+  "teaVisits": {
+    "minStars": 1,
+    "arriveMinutes": 15,
+    "visitors": [
+      { "id": "monk", "give": { "light": 2 } },
+      { "id": "traveler", "give": { "pebbles": 15 } },
+      { "id": "potter", "give": { "sand": 2 } },
+      { "id": "gardener", "give": { "wood": 2 } },
+      { "id": "fisher", "give": { "water": 2 } }
+    ]
   }
 }

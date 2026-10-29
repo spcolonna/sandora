@@ -1951,5 +1951,229 @@
   "pt": "Faça uma troca no Mercado",
   "ja": "市場で物々交換をする",
   "zh": "在集市交换一次"
+ },
+ "tea.result": {
+  "es": "El té quedó servido en la casa de té. Alguien va a pasar a tomarlo.",
+  "en": "Your tea is served at the tea house. Someone will stop by for it.",
+  "pt": "O chá ficou servido na casa de chá. Alguém vai passar para tomá-lo.",
+  "ja": "茶室にお茶を用意しました。誰かが立ち寄ってくれるでしょう。",
+  "zh": "茶已在茶室备好。会有人来品尝。"
+ },
+ "tea.served": {
+  "es": "Té servido",
+  "en": "Tea served",
+  "pt": "Chá servido",
+  "ja": "用意したお茶",
+  "zh": "备好的茶"
+ },
+ "tea.gift": {
+  "es": "Ofrenda de la visita",
+  "en": "A visitor's offering",
+  "pt": "Oferenda da visita",
+  "ja": "客人のおくりもの",
+  "zh": "访客的礼物"
+ },
+ "tea.waiting": {
+  "es": "El té espera una visita. Falta poco: unos {n} min.",
+  "en": "The tea awaits a visitor. Not long now: about {n} min.",
+  "pt": "O chá espera uma visita. Falta pouco: uns {n} min.",
+  "ja": "お茶が客人を待っています。あと{n}分ほど。",
+  "zh": "茶在等待访客。快了：约{n}分钟。"
+ },
+ "tea.visit.monk": {
+  "es": "Un monje de paso tomó tu té y dejó un poco de luz.",
+  "en": "A passing monk drank your tea and left a little light.",
+  "pt": "Um monge de passagem tomou seu chá e deixou um pouco de luz.",
+  "ja": "通りがかりの僧がお茶を飲み、光を少し残していきました。",
+  "zh": "路过的僧人喝了你的茶，留下了一点光。"
+ },
+ "tea.visit.traveler": {
+  "es": "Una viajera descansó con tu té y dejó unas piedritas.",
+  "en": "A traveler rested with your tea and left some pebbles.",
+  "pt": "Uma viajante descansou com seu chá e deixou umas pedrinhas.",
+  "ja": "旅人がお茶でひと休みし、小石を置いていきました。",
+  "zh": "一位旅人喝茶歇脚，留下了些小石子。"
+ },
+ "tea.visit.potter": {
+  "es": "El alfarero elogió el cuenco y dejó arena fina.",
+  "en": "The potter praised the bowl and left fine sand.",
+  "pt": "O oleiro elogiou a tigela e deixou areia fina.",
+  "ja": "陶工が茶碗をほめ、細かな砂を置いていきました。",
+  "zh": "陶匠称赞了茶碗，留下了细沙。"
+ },
+ "tea.visit.gardener": {
+  "es": "La jardinera del bosque tomó tu té y dejó madera.",
+  "en": "The forest gardener drank your tea and left some wood.",
+  "pt": "A jardineira do bosque tomou seu chá e deixou madeira.",
+  "ja": "森の庭師がお茶を飲み、木を置いていきました。",
+  "zh": "森林园丁喝了你的茶，留下了木头。"
+ },
+ "tea.visit.fisher": {
+  "es": "Un pescador del río tomó tu té y dejó agua clara.",
+  "en": "A river fisher drank your tea and left clear water.",
+  "pt": "Um pescador do rio tomou seu chá e deixou água limpa.",
+  "ja": "川の漁師がお茶を飲み、澄んだ水を置いていきました。",
+  "zh": "河边的渔夫喝了你的茶，留下了清水。"
+ },
+ "reminder.tea.monk": {
+  "es": "Un monje pasó por tu casa de té y te dejó algo.",
+  "en": "A monk stopped by your tea house and left you something.",
+  "pt": "Um monge passou pela sua casa de chá e deixou algo.",
+  "ja": "僧が茶室に立ち寄り、何かを残していきました。",
+  "zh": "一位僧人来过你的茶室，留下了东西。"
+ },
+ "reminder.tea.traveler": {
+  "es": "Una viajera pasó por tu casa de té y te dejó algo.",
+  "en": "A traveler stopped by your tea house and left you something.",
+  "pt": "Uma viajante passou pela sua casa de chá e deixou algo.",
+  "ja": "旅人が茶室に立ち寄り、何かを残していきました。",
+  "zh": "一位旅人来过你的茶室，留下了东西。"
+ },
+ "reminder.tea.potter": {
+  "es": "El alfarero pasó por tu casa de té y te dejó algo.",
+  "en": "The potter stopped by your tea house and left you something.",
+  "pt": "O oleiro passou pela sua casa de chá e deixou algo.",
+  "ja": "陶工が茶室に立ち寄り、何かを残していきました。",
+  "zh": "陶匠来过你的茶室，留下了东西。"
+ },
+ "reminder.tea.gardener": {
+  "es": "La jardinera del bosque pasó por tu casa de té y te dejó algo.",
+  "en": "The forest gardener stopped by your tea house and left you something.",
+  "pt": "A jardineira do bosque passou pela sua casa de chá e deixou algo.",
+  "ja": "森の庭師が茶室に立ち寄り、何かを残していきました。",
+  "zh": "森林园丁来过你的茶室，留下了东西。"
+ },
+ "reminder.tea.fisher": {
+  "es": "Un pescador del río pasó por tu casa de té y te dejó algo.",
+  "en": "A river fisher stopped by your tea house and left you something.",
+  "pt": "Um pescador do rio passou pela sua casa de chá e deixou algo.",
+  "ja": "川の漁師が茶室に立ち寄り、何かを残していきました。",
+  "zh": "河边的渔夫来过你的茶室，留下了东西。"
+ },
+ "album.title": {
+  "es": "Álbum",
+  "en": "Album",
+  "pt": "Álbum",
+  "ja": "アルバム",
+  "zh": "图鉴"
+ },
+ "album.count": {
+  "es": "Descubriste {n} de {t}",
+  "en": "You've found {n} of {t}",
+  "pt": "Você descobriu {n} de {t}",
+  "ja": "{t}個中{n}個を発見",
+  "zh": "已发现 {n}/{t}"
+ },
+ "album.shapes": {
+  "es": "Figuras en la arena",
+  "en": "Sand figures",
+  "pt": "Figuras na areia",
+  "ja": "砂の模様",
+  "zh": "沙画图案"
+ },
+ "album.gifts": {
+  "es": "Regalos del jardín",
+  "en": "Garden gifts",
+  "pt": "Presentes do jardim",
+  "ja": "庭のおくりもの",
+  "zh": "庭园礼物"
+ },
+ "album.visitors": {
+  "es": "Visitas a la casa de té",
+  "en": "Tea house visitors",
+  "pt": "Visitas à casa de chá",
+  "ja": "茶室の客人",
+  "zh": "茶室访客"
+ },
+ "album.objects": {
+  "es": "Objetos de la racha",
+  "en": "Streak objects",
+  "pt": "Objetos da sequência",
+  "ja": "連続記録の品",
+  "zh": "连续冥想物品"
+ },
+ "album.locked": {
+  "es": "Todavía no",
+  "en": "Not yet",
+  "pt": "Ainda não",
+  "ja": "まだです",
+  "zh": "尚未获得"
+ },
+ "album.how.shape": {
+  "es": "Dibujala en el arenero",
+  "en": "Trace it in the sandbox",
+  "pt": "Desenhe-a na caixa de areia",
+  "ja": "砂場でなぞってみよう",
+  "zh": "在沙盘中描绘它"
+ },
+ "album.how.visitor": {
+  "es": "Serví un matcha y esperá su visita",
+  "en": "Serve a matcha and wait for their visit",
+  "pt": "Sirva um matcha e espere a visita",
+  "ja": "抹茶を点てて訪れを待とう",
+  "zh": "点一碗抹茶，等待来访"
+ },
+ "album.how.object": {
+  "es": "Meditá {n} días seguidos",
+  "en": "Meditate {n} days in a row",
+  "pt": "Medite {n} dias seguidos",
+  "ja": "{n}日続けて瞑想しよう",
+  "zh": "连续冥想 {n} 天"
+ },
+ "album.visitor.monk": {
+  "es": "Monje",
+  "en": "Monk",
+  "pt": "Monge",
+  "ja": "僧",
+  "zh": "僧人"
+ },
+ "album.visitor.traveler": {
+  "es": "Viajera",
+  "en": "Traveler",
+  "pt": "Viajante",
+  "ja": "旅人",
+  "zh": "旅人"
+ },
+ "album.visitor.potter": {
+  "es": "Alfarero",
+  "en": "Potter",
+  "pt": "Oleiro",
+  "ja": "陶工",
+  "zh": "陶匠"
+ },
+ "album.visitor.gardener": {
+  "es": "Jardinera",
+  "en": "Gardener",
+  "pt": "Jardineira",
+  "ja": "庭師",
+  "zh": "园丁"
+ },
+ "album.visitor.fisher": {
+  "es": "Pescador",
+  "en": "Fisher",
+  "pt": "Pescador",
+  "ja": "漁師",
+  "zh": "渔夫"
+ },
+ "album.object.bowl": {
+  "es": "Cuenco tibetano",
+  "en": "Singing bowl",
+  "pt": "Tigela tibetana",
+  "ja": "シンギングボウル",
+  "zh": "颂钵"
+ },
+ "album.object.cushion": {
+  "es": "Zafu",
+  "en": "Zafu",
+  "pt": "Zafu",
+  "ja": "座布",
+  "zh": "蒲团"
+ },
+ "album.object.lantern": {
+  "es": "Farol de papel",
+  "en": "Paper lantern",
+  "pt": "Lanterna de papel",
+  "ja": "提灯",
+  "zh": "纸灯笼"
  }
 }
