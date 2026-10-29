@@ -110,7 +110,10 @@
       70–80 % de las piedritas. Ahora: costos de ampliaciones ×2,5 en piedritas y ×3 en esencias, torre 0,5/h, tope de
       Calma por nivel 700, sin lotos por nivel y jardín nuevo a 25 lotos. Regular: todas las zonas hacia el día 46.
 - [ ] Recalibrar con la prueba de 10 personas (reparto de estrellas por perfil y caída de la torre son supuestos).
-- [ ] Al final del juego sobran piedritas y esencias: falta un sumidero (decoración colocable).
+- [x] Sumidero del final: **modo Decorar**, 16 decoraciones que se compran y se ponen libres en las tres vistas
+      (cada copia ×1,35). En la simulación, Regular termina con ~450 piedritas en vez de ~10.000 y gasta ~10.000 en
+      decoraciones, sin atrasar las ampliaciones.
+- [ ] Arte de las decoraciones: bloques 3 y 15 de `docs/prompts.md` (hoy se pintan con código).
 
 ## Diseño (inconsistencias del GDD)
 - [x] El Apilado duraba "sin límite" contra el pilar 3 ("menos de 90 s"): ahora es una bolsa de 12 piedras.

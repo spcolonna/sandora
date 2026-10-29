@@ -90,6 +90,10 @@ class SimResult {
   final Map<String, int> plays = {};
 
   int lotusSpent = 0;
+
+  /// Decoraciones compradas (día de la primera y total) y Piedritas gastadas en ellas.
+  int? firstDecorDay;
+  int decorBought = 0, decorPebbles = 0;
   late Map<String, int> end;
   late int level;
 
@@ -175,6 +179,27 @@ Future<SimResult> simulate(Balance balance, Profile profile, {int days = 60, int
     }
   }
 
+  /// Con lo que sobra después de guardar para la próxima ampliación, compra
+  /// la decoración más barata que alcance, de a una por sesión.
+  void decorate(int day) {
+    final e = target();
+    final keep = <String, int>{
+      if (e != null) ...{'pebbles': e.pebbles, for (final c in e.essences.entries) c.key.name: c.value},
+    };
+    final options = [
+      for (final d in p.decorRules.items)
+        if (p.canBuyDecor(d) && p.decorCost(d).entries.every((c) => p.walletOf(c.key) - c.value >= (keep[c.key] ?? 0)))
+          d,
+    ]..sort((a, b) => p.decorCost(a)['pebbles']!.compareTo(p.decorCost(b)['pebbles']!));
+    if (options.isEmpty) return;
+    final d = options.first;
+    final cost = p.decorCost(d)['pebbles']!;
+    if (!p.buyDecor(d)) return;
+    r.firstDecorDay ??= day + 1;
+    r.decorBought++;
+    r.decorPebbles += cost;
+  }
+
   for (var day = 0; day < days; day++) {
     if (day > 0 && rng.nextDouble() < profile.skip) continue;
     for (final (si, hour) in profile.sessions.indexed) {
@@ -238,6 +263,7 @@ Future<SimResult> simulate(Balance balance, Profile profile, {int days = 60, int
       for (final e in p.levels.expansions) {
         if (p.buyExpansion(e)) r.boughtDay[e.id] = day + 1;
       }
+      decorate(day);
       for (var l = lastLevel + 1; l <= p.level; l++) {
         r.levelDay[l] = day + 1;
       }
@@ -290,6 +316,12 @@ String report(Balance balance, List<List<SimResult>> runs) {
     '${'jardín nuevo'.padRight(16)}${[for (final rs in runs) cell(median(rs.map((r) => r.gardenDay))).padLeft(10)].join()}',
   );
   b.writeln(
+    '${'1ª decoración'.padRight(16)}${[for (final rs in runs) cell(median(rs.map((r) => r.firstDecorDay))).padLeft(10)].join()}',
+  );
+  b.writeln(
+    '${'decoraciones'.padRight(16)}${[for (final rs in runs) cell(median(rs.map((r) => r.decorBought))).padLeft(10)].join()}',
+  );
+  b.writeln(
     '${'nivel final'.padRight(16)}${[for (final rs in runs) cell(median(rs.map((r) => r.level))).padLeft(10)].join()}',
   );
 
@@ -304,7 +336,10 @@ String report(Balance balance, List<List<SimResult>> runs) {
       ];
       if (parts.isNotEmpty) b.writeln('    ${e.key.padRight(11)} ${parts.join(', ')}');
     }
-    b.writeln('  Al final: ${[for (final k in wallet) '$k ${r.end[k]}'].join(', ')}; lotos gastados ${r.lotusSpent}');
+    b.writeln(
+      '  Al final: ${[for (final k in wallet) '$k ${r.end[k]}'].join(', ')}; lotos gastados ${r.lotusSpent}; '
+      'en decoraciones ${r.decorPebbles} piedritas',
+    );
     if (r.blockedBy.isNotEmpty) {
       b.writeln('  Días con el nivel pero sin la plata:');
       for (final e in r.blockedBy.entries) {

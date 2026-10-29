@@ -2175,5 +2175,187 @@
   "pt": "Lanterna de papel",
   "ja": "提灯",
   "zh": "纸灯笼"
+ },
+ "decor.title": {
+  "es": "Decorar",
+  "en": "Decorate",
+  "pt": "Decorar",
+  "ja": "飾りつけ",
+  "zh": "装饰"
+ },
+ "decor.hint": {
+  "es": "Tocá algo de abajo para ponerlo y arrastralo a su lugar",
+  "en": "Tap something below to place it, then drag it into position",
+  "pt": "Toque em algo abaixo para colocar e arraste até o lugar",
+  "ja": "下のものをタップして置き、ドラッグして動かそう",
+  "zh": "点击下方物品放置，再拖到合适的位置"
+ },
+ "decor.done": {
+  "es": "Listo",
+  "en": "Done",
+  "pt": "Pronto",
+  "ja": "完了",
+  "zh": "完成"
+ },
+ "decor.store": {
+  "es": "Guardar",
+  "en": "Put away",
+  "pt": "Guardar",
+  "ja": "しまう",
+  "zh": "收起"
+ },
+ "decor.place": {
+  "es": "Poner",
+  "en": "Place",
+  "pt": "Colocar",
+  "ja": "置く",
+  "zh": "放置"
+ },
+ "decor.full": {
+  "es": "Esta vista ya está llena: guardá algo para hacer lugar",
+  "en": "This view is full: put something away to make room",
+  "pt": "Esta vista está cheia: guarde algo para abrir espaço",
+  "ja": "ここはいっぱいです。何かしまって場所をあけよう",
+  "zh": "这里已经满了：收起一些物品腾出空间"
+ },
+ "decor.needLevel": {
+  "es": "Se abre en el nivel {n}",
+  "en": "Unlocks at level {n}",
+  "pt": "Libera no nível {n}",
+  "ja": "レベル{n}で解放",
+  "zh": "等级 {n} 解锁"
+ },
+ "decor.needMore": {
+  "es": "Todavía no alcanza: jugá un poco más",
+  "en": "Not enough yet: play a little more",
+  "pt": "Ainda não dá: jogue mais um pouco",
+  "ja": "まだ足りません。もう少し遊ぼう",
+  "zh": "还不够：再玩一会儿吧"
+ },
+ "decor.step": {
+  "es": "Piedra de paso",
+  "en": "Stepping stone",
+  "pt": "Pedra de passo",
+  "ja": "飛び石",
+  "zh": "踏脚石"
+ },
+ "decor.rocks": {
+  "es": "Tres piedras",
+  "en": "Three stones",
+  "pt": "Três pedras",
+  "ja": "三つ石",
+  "zh": "三石"
+ },
+ "decor.moss": {
+  "es": "Musgo y helechos",
+  "en": "Moss and ferns",
+  "pt": "Musgo e samambaias",
+  "ja": "苔とシダ",
+  "zh": "苔藓与蕨"
+ },
+ "decor.boulder": {
+  "es": "Roca con musgo",
+  "en": "Mossy boulder",
+  "pt": "Rocha com musgo",
+  "ja": "苔むした岩",
+  "zh": "青苔巨石"
+ },
+ "decor.azalea": {
+  "es": "Azalea",
+  "en": "Azalea",
+  "pt": "Azaleia",
+  "ja": "ツツジ",
+  "zh": "杜鹃"
+ },
+ "decor.peak": {
+  "es": "Roca montaña",
+  "en": "Mountain rock",
+  "pt": "Rocha montanha",
+  "ja": "山石",
+  "zh": "山形石"
+ },
+ "decor.bamboo": {
+  "es": "Bambú",
+  "en": "Bamboo",
+  "pt": "Bambu",
+  "ja": "竹",
+  "zh": "竹子"
+ },
+ "decor.lantern": {
+  "es": "Farol de piedra",
+  "en": "Stone lantern",
+  "pt": "Lanterna de pedra",
+  "ja": "石灯籠",
+  "zh": "石灯笼"
+ },
+ "decor.basin": {
+  "es": "Fuente de piedra",
+  "en": "Stone basin",
+  "pt": "Bacia de pedra",
+  "ja": "つくばい",
+  "zh": "石水钵"
+ },
+ "decor.bench": {
+  "es": "Banco",
+  "en": "Bench",
+  "pt": "Banco",
+  "ja": "ベンチ",
+  "zh": "长凳"
+ },
+ "decor.jizo": {
+  "es": "Jizō",
+  "en": "Jizō",
+  "pt": "Jizō",
+  "ja": "お地蔵さま",
+  "zh": "地藏"
+ },
+ "decor.pine": {
+  "es": "Pino",
+  "en": "Pine",
+  "pt": "Pinheiro",
+  "ja": "松",
+  "zh": "松树"
+ },
+ "decor.bridge": {
+  "es": "Puente",
+  "en": "Bridge",
+  "pt": "Ponte",
+  "ja": "橋",
+  "zh": "小桥"
+ },
+ "decor.pagoda": {
+  "es": "Pagoda de piedra",
+  "en": "Stone pagoda",
+  "pt": "Pagode de pedra",
+  "ja": "石塔",
+  "zh": "石塔"
+ },
+ "decor.maple": {
+  "es": "Arce rojo",
+  "en": "Red maple",
+  "pt": "Bordo vermelho",
+  "ja": "もみじ",
+  "zh": "红枫"
+ },
+ "decor.sakura": {
+  "es": "Cerezo",
+  "en": "Cherry tree",
+  "pt": "Cerejeira",
+  "ja": "桜",
+  "zh": "樱花树"
+ },
+ "album.decor": {
+  "es": "Decoraciones",
+  "en": "Decorations",
+  "pt": "Decorações",
+  "ja": "飾り",
+  "zh": "装饰"
+ },
+ "album.how.decor": {
+  "es": "Se compra en Decorar desde el nivel {n}",
+  "en": "Buy it in Decorate from level {n}",
+  "pt": "Compre em Decorar a partir do nível {n}",
+  "ja": "レベル{n}から飾りつけで買える",
+  "zh": "等级 {n} 起可在装饰中购买"
  }
 }

@@ -216,30 +216,33 @@ BLOCKS = [
             'from the side, about three times wider than tall, with a flat bottom.',
         ], start=1)]),
     dict(
-        id='3', title='Objetos del jardín (catálogo inicial)', folder='store/art/garden/',
-        intro='Diez objetos que se compran con Piedritas. Adjuntá `store/art/style/style_keyart.webp` y `style_plants.png`.',
+        id='3', title='Decoraciones del jardín (1 de 2)', folder='store/art/decor/',
+        intro=('Diez de las decoraciones que se compran en el modo Decorar y se ponen libres en las tres vistas. '
+               'Hoy se pintan con código (`lib/ui/garden/garden_decor.dart`); cada una se integra como '
+               '`assets/images/decor/obj_decor_<id>.webp` y la carga sola `scene_art.dart`. El juego dibuja la '
+               'sombra. Adjuntá `store/art/style/style_keyart.webp` y `style_plants.png`.'),
         images=[
-            obj('obj_base_lantern', 'A traditional Japanese stone lantern (tōrō, kasuga style): a hexagonal stone '
+            obj('obj_decor_lantern', 'A traditional Japanese stone lantern (tōrō, kasuga style): a hexagonal stone '
                 'cap, a small light chamber with a soft warm amber glow inside, a slim post and a round base. '
                 'Weathered gray stone with a little moss on the cap.'),
-            obj('obj_base_bridge', 'A small arched wooden footbridge with low railings, painted in a soft faded '
+            obj('obj_decor_bridge', 'A small arched wooden footbridge with low railings, painted in a soft faded '
                 'vermilion with dark wood planks, seen from the side and a little from above.', 'about 200 pixels '
                 'wide'),
-            obj('obj_base_pine', 'A young Japanese black pine pruned in the niwaki cloud style: a gracefully curving '
+            obj('obj_decor_pine', 'A young Japanese black pine pruned in the niwaki cloud style: a gracefully curving '
                 'dark trunk with four rounded pads of deep green needles.'),
-            obj('obj_base_bamboo', 'A small clump of five green bamboo stalks of different heights with a few '
+            obj('obj_decor_bamboo', 'A small clump of five green bamboo stalks of different heights with a few '
                 'leaves at the top, growing from a low mound of earth.'),
-            obj('obj_base_rock_01', 'A tall upright garden rock in cool gray, rough and angular, a little like a '
+            obj('obj_decor_peak', 'A tall upright garden rock in cool gray, rough and angular, a little like a '
                 'small mountain peak, with some moss at its base.'),
-            obj('obj_base_rock_02', 'A low, wide, rounded garden boulder in warm gray with soft patches of bright '
+            obj('obj_decor_boulder', 'A low, wide, rounded garden boulder in warm gray with soft patches of bright '
                 'moss on top.'),
-            obj('obj_base_rock_03', 'A group of three small rounded garden rocks of different sizes resting '
+            obj('obj_decor_rocks', 'A group of three small rounded garden rocks of different sizes resting '
                 'together, in slightly different grays.'),
-            obj('obj_base_rock_04', 'A flat, dark stepping stone, almost round, seen from above at a steep angle, '
+            obj('obj_decor_step', 'A flat, dark stepping stone, almost round, seen from above at a steep angle, '
                 'with tiny moss along one edge.', 'about 80 pixels wide'),
-            obj('obj_base_plant_01', 'A soft round mound of bright green moss with two small ferns growing from '
+            obj('obj_decor_moss', 'A soft round mound of bright green moss with two small ferns growing from '
                 'it.'),
-            obj('obj_base_plant_02', 'A small rounded azalea bush trimmed into a soft dome, dark green leaves with a '
+            obj('obj_decor_azalea', 'A small rounded azalea bush trimmed into a soft dome, dark green leaves with a '
                 'scattering of soft pink flowers.'),
         ]),
     dict(
@@ -577,6 +580,30 @@ BLOCKS = [
                 + CROP_NOTE,
                 f'stones in the water; boats, lanterns or docks; {NO_TEXT}; people or animals; frame or border; '
                 f'{NO_STYLE}.'),
+        ]),
+    dict(
+        id='15', title='Decoraciones del jardín (2 de 2)', folder='store/art/decor/',
+        intro=('Las seis decoraciones de nivel alto del modo Decorar. Igual que el Bloque 3: van a '
+               '`assets/images/decor/obj_decor_<id>.webp` y reemplazan la versión pintada con código. Adjuntá '
+               '`store/art/style/style_keyart.webp` y `style_plants.png`.'),
+        images=[
+            obj('obj_decor_basin', 'A low Japanese stone water basin (tsukubai): a rough rounded gray stone with a '
+                'shallow bowl of still, clear water carved in its top, and a thin bamboo spout above one side '
+                'letting a tiny trickle fall in.', 'about 100 pixels wide'),
+            obj('obj_decor_bench', 'A simple low Japanese garden bench made of warm brown wooden planks on two '
+                'thick dark wooden legs, slightly weathered, seen from the front and a little from the side.',
+                'about 140 pixels wide'),
+            obj('obj_decor_jizo', 'A small, round and friendly Jizō stone statue: a smooth gray stone figure with a '
+                'bald round head, closed eyes and a gentle smile, wearing a faded red cloth bib, standing on a low '
+                'square stone base.', 'about 110 pixels tall'),
+            obj('obj_decor_pagoda', 'A slender stone pagoda (sekitō) with five stacked tiers: each tier a small '
+                'square stone block under a wide, slightly curved stone roof, getting smaller towards the top, '
+                'with a thin finial. Weathered gray stone with a little moss on the lower roofs.',
+                'about 200 pixels tall'),
+            obj('obj_decor_maple', 'A small Japanese maple tree (momiji) in autumn: a dark, gracefully forked '
+                'trunk and a soft, layered rounded canopy of red and orange leaves.', 'about 180 pixels tall'),
+            obj('obj_decor_sakura', 'A small cherry tree in full bloom: a dark, gently twisting trunk and a soft, '
+                'rounded canopy of pale pink blossoms with a few petals falling.', 'about 190 pixels tall'),
         ]),
 ]
 

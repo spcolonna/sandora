@@ -5,6 +5,7 @@ import '../i18n/i18n.dart';
 import '../minigames/sand/sand_shapes.dart';
 import 'fx/calm.dart';
 import 'fx/sfx.dart';
+import 'garden/garden_decor.dart';
 import 'garden/garden_view.dart';
 import 'theme/palette.dart';
 
@@ -212,6 +213,18 @@ List<(String, List<_Item>)> _sections(Progress p) {
             name: tr('album.object.$o'),
             how: tr('album.how.object', {'n': every * (i + 1)}),
             art: Icon(_objectIcon(o), size: 30, color: Palette.wood),
+          ),
+      ],
+    ),
+    (
+      tr('album.decor'),
+      [
+        for (final d in p.decorRules.items)
+          _Item(
+            owned: p.found.contains('decor.${d.id}'),
+            name: tr('decor.${d.id}'),
+            how: tr('album.how.decor', {'n': d.level}),
+            art: CustomPaint(painter: DecorPainter(d.id, d.aspect)),
           ),
       ],
     ),

@@ -98,7 +98,7 @@ Hay cuatro monedas: dos se ganan jugando, una por constancia y una se compra. Ni
 ### Qué se compra con tokens
 
 - **Reparar:** devolver piedras caídas, limpiar hojas, quitar maleza. Barato, para que nunca frustre.
-- **Objetos:** faroles, puentes, plantas, piedras decorativas. Cada objeto tiene una rareza, que afecta la originalidad del jardín.
+- **Objetos (modo Decorar):** faroles, puentes, plantas, piedras decorativas. El botón de la flor (desde el nivel 3) abre el modo Decorar: abajo, una bandeja con el catálogo; un toque compra y pone el objeto en la vista actual, y después se arrastra a donde uno quiera sobre el suelo de cualquiera de las tres vistas. Tocar uno lo elige y deja guardarlo en la caja. Son 16 objetos que se abren por nivel (del 3 al 17) y cuestan Piedritas y una esencia; cada copia más en el mismo jardín cuesta ×1,35, así que es el sumidero del final del juego. Cada jardín tiene los suyos (hasta 12 por vista) y se ven en el álbum. Balance en `game_balance.json` (`decor`). Más adelante, cada objeto tendrá una rareza que afecta la originalidad del jardín.
 - **Mejoras de minijuego:** un rastrillo mejor que deja trazos más finos, vasijas con mejor sonido, una base más ancha para apilar. Dan comodidad y estética, no puntos de ranking.
 - **Ampliaciones:** agrandar el patio o abrir una zona nueva del jardín (ver Nivel del jardín y Minijuegos de ampliación). Cada una pide un nivel mínimo; cada zona trae minijuegos, objetos y su propia esencia.
 
@@ -518,7 +518,7 @@ Paleta por estación, una imagen clave del jardín, hoja de referencia de piedra
 | `bg_base_sky`, `bg_base_far`, `bg_base_ground`, `bg_base_foliage` | 4 | Capas con parallax; día/noche por shader |
 | `tex_sand_base`, `tex_sand_height` | 2 | Arena y mapa de alturas para los surcos |
 | `obj_stack_stone_01` a `_06` | 6 | Piedras de apilado de distintas formas |
-| `obj_base_*` (farol, puente, pino, bambú chico, 4 piedras decorativas, 2 plantas) | 10 | Catálogo inicial del jardín |
+| `obj_decor_*` (farol, puente, pino, bambú, 4 piedras, musgo, azalea, fuente, banco, jizō, pagoda, arce y cerezo) | 16 | Decoraciones del modo Decorar (bloques 3 y 15 de `docs/prompts.md`) |
 | `spr_sand_rake_01` | 1 | Rastrillo que recorre el trazo |
 | `bg_rain_roof` | 1 | Alero con vigas |
 | `obj_rain_vessel_01` a `_05` | 5 | Vasijas de distintos tamaños |

@@ -17,6 +17,23 @@ class SceneArt {
     'bg_enso_paper': 'temple',
     'bg_base_sky': 'bg',
     'bg_base_far': 'bg',
+    // Decoraciones (`garden_decor.dart`): mientras falte alguna, se pinta con código.
+    'obj_decor_step': 'decor',
+    'obj_decor_rocks': 'decor',
+    'obj_decor_moss': 'decor',
+    'obj_decor_boulder': 'decor',
+    'obj_decor_azalea': 'decor',
+    'obj_decor_peak': 'decor',
+    'obj_decor_bamboo': 'decor',
+    'obj_decor_lantern': 'decor',
+    'obj_decor_basin': 'decor',
+    'obj_decor_bench': 'decor',
+    'obj_decor_jizo': 'decor',
+    'obj_decor_pine': 'decor',
+    'obj_decor_bridge': 'decor',
+    'obj_decor_pagoda': 'decor',
+    'obj_decor_maple': 'decor',
+    'obj_decor_sakura': 'decor',
   };
 
   final _images = <String, ui.Image>{};

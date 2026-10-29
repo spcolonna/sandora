@@ -8,6 +8,7 @@ import '../balance/balance.dart';
 import '../minigames/sand/sand_shapes.dart';
 import 'daily_goals.dart';
 import 'day_cycle.dart';
+import 'decor.dart';
 import 'economy.dart';
 import 'levels.dart';
 import 'meditation_rules.dart';
@@ -36,6 +37,7 @@ class Progress extends ChangeNotifier {
   late DayCycle dayCycle;
   late DailyGoals dailyGoals;
   late TeaVisits teaVisits;
+  late DecorRules decorRules;
 
   int pebbles = 0;
   final essences = {for (final e in Essence.values) e: 0};
@@ -101,6 +103,9 @@ class Progress extends ChangeNotifier {
   int calm = 0;
   Set<String> expansions = {};
 
+  /// Decoraciones de este jardín: puestas en alguna vista o en la caja.
+  List<PlacedDecor> decor = [];
+
   /// Sesión de meditación en curso (reloj real), o null.
   DateTime? meditationStartedAt;
   int meditationChosen = 0;
@@ -152,6 +157,7 @@ class Progress extends ChangeNotifier {
     'expansions',
     'serenity',
     'serenityAt',
+    'decor',
   ];
 
   /// Fotos de cada jardín (la del actual puede estar vieja: manda lo vivo).
@@ -227,6 +233,7 @@ class Progress extends ChangeNotifier {
     dayCycle = DayCycle(balance);
     dailyGoals = DailyGoals(balance);
     teaVisits = TeaVisits(balance);
+    decorRules = DecorRules(balance);
     _unlockDays = balance.section('unlocks').nums('days');
     final unlocks = balance.section('unlocks');
     _zoneOf = unlocks.has('zones') ? unlocks.sub('zones').stringMap() : {};
@@ -278,6 +285,10 @@ class Progress extends ChangeNotifier {
     // Quien ya jugaba antes de la guía no la ve.
     guideStep = _prefs.getInt('guide.step') ?? (calm > 0 ? 2 : 0);
     expansions = (_prefs.getStringList('expansions') ?? []).toSet();
+    decor = [
+      for (final d in jsonDecode(_prefs.getString('decor') ?? '[]') as List)
+        if (decorRules.byId((d as List)[0] as String) != null) PlacedDecor.fromJson(d),
+    ];
     lotus = _prefs.getInt('lotus') ?? 0;
     _lotusDay = _prefs.getInt('lotus.day') ?? -1;
     _shopDay = _prefs.getInt('shop.day') ?? 0;
@@ -450,6 +461,73 @@ class Progress extends ChangeNotifier {
     notifyListeners();
     return true;
   }
+
+  /// Si ya se puede decorar (el botón aparece desde ese nivel).
+  bool get decorUnlocked => level >= decorRules.minLevel;
+
+  /// Hay algo para hacer en el modo Decorar: una decoración en la caja o una
+  /// que todavía no se tiene y ya se puede comprar.
+  bool get decorNew =>
+      decor.any((d) => !d.placed) || decorRules.items.any((d) => decorCount(d.id) == 0 && canBuyDecor(d));
+
+  /// Cuántas copias de [id] hay en este jardín y cuántas en la caja.
+  int decorCount(String id) => decor.where((d) => d.id == id).length;
+  int decorStored(String id) => decor.where((d) => d.id == id && !d.placed).length;
+
+  /// Cuántas decoraciones hay puestas en la vista [side].
+  int decorOn(int side) => decor.where((d) => d.side == side).length;
+
+  Map<String, int> decorCost(DecorItem d) => decorRules.cost(d, decorCount(d.id));
+
+  bool canAffordDecor(DecorItem d) => decorCost(d).entries.every((c) => walletOf(c.key) >= c.value);
+
+  bool canBuyDecor(DecorItem d) => level >= d.level && canAffordDecor(d);
+
+  /// Compra una copia de [d]: queda en la caja, lista para ponerla.
+  bool buyDecor(DecorItem d) {
+    if (!canBuyDecor(d)) return false;
+    for (final c in decorCost(d).entries) {
+      _addTo(c.key, -c.value);
+    }
+    decor.add(PlacedDecor(d.id));
+    _discover('decor.${d.id}');
+    _saveDecor();
+    _saveWallet();
+    notifyListeners();
+    return true;
+  }
+
+  /// Saca de la caja una copia de [id] y la pone en la vista [side]. Devuelve
+  /// su índice, o null si no hay en la caja o la vista está llena.
+  int? placeDecor(String id, int side, double x, double y) {
+    final i = decor.indexWhere((d) => d.id == id && !d.placed);
+    if (i < 0 || decorOn(side) >= decorRules.perSide) return null;
+    decor[i]
+      ..side = side
+      ..x = x
+      ..y = y;
+    _saveDecor();
+    notifyListeners();
+    return i;
+  }
+
+  /// Mueve la decoración [i] (ya puesta) a ([x], [y]).
+  void moveDecor(int i, double x, double y) {
+    decor[i]
+      ..x = x
+      ..y = y;
+    _saveDecor();
+    notifyListeners();
+  }
+
+  /// Vuelve a guardar en la caja la decoración [i].
+  void storeDecor(int i) {
+    decor[i].side = null;
+    _saveDecor();
+    notifyListeners();
+  }
+
+  void _saveDecor() => _prefs.setString('decor', jsonEncode([for (final d in decor) d.toJson()]));
 
   /// Lotos ganados ahora: la ofrenda del día (la primera partida o meditación
   /// del día), uno por cada nivel subido y [bonus]. Se guardan con la billetera.

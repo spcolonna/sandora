@@ -12,6 +12,7 @@ import '../../minigames/stack/stone_painter.dart';
 import '../theme/palette.dart';
 import 'garden_east.dart';
 import 'garden_forest.dart';
+import 'garden_decor.dart';
 import 'scene_art.dart';
 
 /// Lugares del jardín que se tocan: cada minijuego, el Mercado, el tablón y
@@ -221,6 +222,9 @@ class GardenPainter extends CustomPainter {
   /// El mejor ensō del jugador, colgado en el pabellón.
   final SavedInk? ensoInk;
 
+  /// Decoraciones puestas en esta vista y dónde va cada una.
+  final List<(String, Rect)> decor;
+
   GardenPainter({
     required this.layout,
     required this.tower,
@@ -237,6 +241,7 @@ class GardenPainter extends CustomPainter {
     this.rainbow = 0,
     this.streakObjects = const [],
     this.ensoInk,
+    this.decor = const [],
   });
 
   Size get size => layout.size;
@@ -305,6 +310,7 @@ class GardenPainter extends CustomPainter {
       paintRiver(canvas, at[Place.lanterns]!);
       paintTeahouse(canvas, at[Place.matcha]!, layout.lanterns[0]);
     }
+    paintDecorations(canvas, decor);
     final dark = 1 - daylight;
     canvas.drawRect(
       all,
@@ -923,5 +929,14 @@ class GardenPainter extends CustomPainter {
       (old.wet - wet).abs() > 0.01 ||
       (old.rainbow - rainbow).abs() > 0.01 ||
       old.streakObjects.length != streakObjects.length ||
-      old.ensoInk != ensoInk;
+      old.ensoInk != ensoInk ||
+      !_sameDecor(old.decor, decor);
+}
+
+bool _sameDecor(List<(String, Rect)> a, List<(String, Rect)> b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }

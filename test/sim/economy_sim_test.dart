@@ -31,5 +31,6 @@ void main() {
     }
     final devoted = runs.last.first;
     expect(devoted.boughtDay.length, balance.expansions.length);
+    expect(devoted.decorBought, greaterThan(0), reason: 'las Piedritas que sobran van a decoraciones');
   });
 }

@@ -14,6 +14,7 @@ import '../fx/sfx.dart';
 import '../theme/palette.dart';
 import '../widgets/currency.dart';
 import '../widgets/garden_sign.dart';
+import 'garden_decor.dart';
 import 'garden_scene.dart';
 import 'garden_touch.dart';
 import 'tea_visit.dart';
@@ -36,7 +37,21 @@ class GardenView extends StatefulWidget {
   /// 0 el patio, 1 el estanque, 2 el bosque.
   final int side;
 
-  const GardenView({super.key, required this.onPlace, required this.now, required this.weather, this.side = 0});
+  /// Modo Decorar: los lugares no se tocan; las decoraciones se arrastran.
+  final bool decorating;
+
+  /// La decoración recién puesta desde la bandeja, para destacarla.
+  final int? fresh;
+
+  const GardenView({
+    super.key,
+    required this.onPlace,
+    required this.now,
+    required this.weather,
+    this.side = 0,
+    this.decorating = false,
+    this.fresh,
+  });
 
   @override
   State<GardenView> createState() => _GardenViewState();
@@ -53,6 +68,18 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
   var _popId = 0;
 
   double get _t => _life.value * 120;
+
+  /// En el modo Decorar: la decoración elegida y, mientras se arrastra, dónde
+  /// está su pie.
+  int? _picked, _dragging;
+  Offset? _dragAt;
+
+  @override
+  void didUpdateWidget(GardenView old) {
+    super.didUpdateWidget(old);
+    if (!widget.decorating) _picked = _dragging = null;
+    if (widget.fresh != old.fresh && widget.fresh != null) _picked = widget.fresh;
+  }
 
   @override
   void dispose() {
@@ -119,6 +146,23 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
     return LayoutBuilder(
       builder: (context, box) {
         final layout = GardenLayout(box.biggest, p.patioSize, side: widget.side);
+        final size = layout.size;
+        final decorating = widget.decorating;
+        if ((_picked ?? -1) >= p.decor.length) _picked = _dragging = null;
+        final decor = [
+          for (final (i, d) in p.decor.indexed)
+            if (d.side == widget.side)
+              if (p.decorRules.byId(d.id) case final item?)
+                (
+                  i,
+                  d.id,
+                  decorRect(
+                    item,
+                    clampFoot(i == _dragging ? _dragAt! : Offset(d.x * size.width, d.y * size.height), layout),
+                    layout,
+                  ),
+                ),
+        ];
         return Stack(
           children: [
             Positioned.fill(
@@ -140,6 +184,10 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
                     rainbow: rainbow,
                     streakObjects: p.streakObjects,
                     ensoInk: _ensoInk(p.ensoInk),
+                    decor: [
+                      for (final (i, id, r) in decor)
+                        if (i != _dragging) (id, r),
+                    ],
                   ),
                 ),
               ),
@@ -157,47 +205,51 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
                 ),
               ),
             ),
+            if (decorating) ..._decorHandles(p, layout, decor),
             // Fuera de los lugares, el jardín responde al toque.
-            Positioned.fill(
-              child: GardenTouch(groundTop: layout.ground.top, daylight: daylight, weather: weather, wet: wet > 0.3),
-            ),
-            for (final e in layout.places.entries)
-              Positioned.fromRect(
-                rect: e.value,
-                child: _PlaceArea(onTap: () => widget.onPlace(e.key)),
+            if (!decorating)
+              Positioned.fill(
+                child: GardenTouch(groundTop: layout.ground.top, daylight: daylight, weather: weather, wet: wet > 0.3),
               ),
-            for (final e in layout.labels.entries)
-              _Label(at: e.value, place: e.key, onTap: () => widget.onPlace(e.key)),
-            if (widget.side == 0) _TowerCollect(above: layout.places[Place.stack]!),
-            if (widget.side == 0)
-              for (final g in cycle.giftsAt(now, weather, afterRain: afterRain))
-                for (final i in [
-                  for (var i = 0; i < g.daily; i++)
-                    if (!_gone.contains('${g.id}$i')) i,
-                ].take(p.giftsLeft(g, weather: weather, afterRain: afterRain, now: now)))
-                  _GiftSpot(
-                    key: ValueKey('${g.id}$i'),
-                    gift: g,
-                    index: i,
-                    layout: layout,
-                    life: _life,
-                    seconds: () => _t,
-                    onTake: (at) => _take(g, i, at),
-                  ),
-            for (final pop in _pops) _PopUp(key: ValueKey(pop.id), pop: pop),
-            if (widget.side == 2) TeaSpot(layout: layout, now: now, life: _life, seconds: () => _t),
-            // Primera partida guiada: primero un lugar para jugar, después el Mercado.
-            if (widget.side == 0 && p.gardenNameOffered && p.guideStep == 0)
-              _GuideHint(key: const ValueKey('guide0'), around: layout.places[Place.sand]!, text: tr('guide.play')),
-            if (widget.side == 0 && p.guideStep == 1)
-              _GuideHint(
-                key: const ValueKey('guide1'),
-                around: layout.places[Place.market]!,
-                text: tr('guide.market'),
-                below: true,
-                onTap: () => p.advanceGuide(2),
-              ),
-            const Positioned(left: 12, top: 4, child: GardenSign()),
+            if (!decorating) ...[
+              for (final e in layout.places.entries)
+                Positioned.fromRect(
+                  rect: e.value,
+                  child: _PlaceArea(onTap: () => widget.onPlace(e.key)),
+                ),
+              for (final e in layout.labels.entries)
+                _Label(at: e.value, place: e.key, onTap: () => widget.onPlace(e.key)),
+              if (widget.side == 0) _TowerCollect(above: layout.places[Place.stack]!),
+              if (widget.side == 0)
+                for (final g in cycle.giftsAt(now, weather, afterRain: afterRain))
+                  for (final i in [
+                    for (var i = 0; i < g.daily; i++)
+                      if (!_gone.contains('${g.id}$i')) i,
+                  ].take(p.giftsLeft(g, weather: weather, afterRain: afterRain, now: now)))
+                    _GiftSpot(
+                      key: ValueKey('${g.id}$i'),
+                      gift: g,
+                      index: i,
+                      layout: layout,
+                      life: _life,
+                      seconds: () => _t,
+                      onTake: (at) => _take(g, i, at),
+                    ),
+              for (final pop in _pops) _PopUp(key: ValueKey(pop.id), pop: pop),
+              if (widget.side == 2) TeaSpot(layout: layout, now: now, life: _life, seconds: () => _t),
+              // Primera partida guiada: primero un lugar para jugar, después el Mercado.
+              if (widget.side == 0 && p.gardenNameOffered && p.guideStep == 0)
+                _GuideHint(key: const ValueKey('guide0'), around: layout.places[Place.sand]!, text: tr('guide.play')),
+              if (widget.side == 0 && p.guideStep == 1)
+                _GuideHint(
+                  key: const ValueKey('guide1'),
+                  around: layout.places[Place.market]!,
+                  text: tr('guide.market'),
+                  below: true,
+                  onTap: () => p.advanceGuide(2),
+                ),
+              const Positioned(left: 12, top: 4, child: GardenSign()),
+            ],
             Positioned(
               right: 10,
               top: 10,
@@ -208,6 +260,119 @@ class _GardenViewState extends State<GardenView> with SingleTickerProviderStateM
       },
     );
   }
+
+  /// Lo que se toca en el modo Decorar: el suelo marcado, cada decoración (se
+  /// elige con un toque y se arrastra) y, sobre la elegida, el botón para
+  /// guardarla en la caja.
+  List<Widget> _decorHandles(Progress p, GardenLayout layout, List<(int, String, Rect)> decor) {
+    final size = layout.size;
+    final picked = [
+      for (final d in decor)
+        if (d.$1 == _picked) d,
+    ].firstOrNull;
+    return [
+      Positioned.fromRect(
+        rect: Rect.fromLTRB(
+          size.width * 0.03,
+          layout.ground.top + layout.ground.height * 0.02,
+          size.width * 0.97,
+          size.height - 4,
+        ),
+        child: IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Palette.paper.withValues(alpha: 0.7), width: 1.5),
+              color: Palette.paper.withValues(alpha: 0.08),
+            ),
+          ),
+        ),
+      ),
+      // De atrás hacia adelante, así se agarra la de adelante.
+      for (final (i, id, r) in [...decor]..sort((a, b) => a.$3.bottom.compareTo(b.$3.bottom)))
+        Positioned.fromRect(
+          key: ValueKey('decor$i'),
+          rect: r.inflate(10),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              SoundBoard.instance.play(Sfx.uiTap, volume: 0.35);
+              setState(() => _picked = _picked == i ? null : i);
+            },
+            onPanStart: (_) {
+              final d = p.decor[i];
+              Haptics.light();
+              setState(() {
+                _picked = _dragging = i;
+                _dragAt = clampFoot(Offset(d.x * size.width, d.y * size.height), layout);
+              });
+            },
+            onPanUpdate: (e) => setState(() => _dragAt = clampFoot(_dragAt! + e.delta, layout)),
+            onPanEnd: (_) => _drop(p, i, size),
+            onPanCancel: () => _drop(p, i, size),
+            child: Stack(
+              children: [
+                if (i == _picked)
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Palette.lantern.withValues(alpha: 0.14),
+                        border: Border.all(color: Palette.lantern, width: 2),
+                      ),
+                    ),
+                  ),
+                if (i == _dragging) Positioned.fill(child: CustomPaint(painter: _LiftedDecor(id))),
+              ],
+            ),
+          ),
+        ),
+      if (picked != null && _dragging == null)
+        Positioned(
+          left: (picked.$3.center.dx - 80).clamp(4.0, size.width - 164),
+          top: (picked.$3.top - 46).clamp(4.0, size.height - 40),
+          width: 160,
+          child: FilledButton.tonalIcon(
+            style: FilledButton.styleFrom(
+              backgroundColor: Palette.paper,
+              foregroundColor: Palette.ink,
+              visualDensity: VisualDensity.compact,
+            ),
+            onPressed: () {
+              SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+              p.storeDecor(picked.$1);
+              setState(() => _picked = null);
+            },
+            icon: const Icon(Icons.inventory_2_rounded, size: 18),
+            label: Text(tr('decor.store')),
+          ),
+        ),
+    ];
+  }
+
+  void _drop(Progress p, int i, Size size) {
+    final at = _dragAt;
+    if (_dragging != i || at == null) return;
+    SoundBoard.instance.play(Sfx.stackPlace, volume: 0.45);
+    p.moveDecor(i, at.dx / size.width, at.dy / size.height);
+    setState(() => _dragging = null);
+  }
+}
+
+/// La decoración que se está arrastrando, un poco levantada (dentro de su
+/// zona tocable, que tiene 10 de margen).
+class _LiftedDecor extends CustomPainter {
+  final String id;
+  _LiftedDecor(this.id);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = (Offset.zero & size).deflate(10);
+    paintDecor(canvas, id, r.shift(Offset(0, -r.height * 0.06)));
+  }
+
+  @override
+  bool shouldRepaint(_LiftedDecor old) => old.id != id;
 }
 
 /// Un brillo que late alrededor de un lugar y una burbuja que dice qué hacer.

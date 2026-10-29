@@ -11,6 +11,7 @@ import '../garden/weather_service.dart';
 import '../i18n/i18n.dart';
 import '../minigames/catalog.dart';
 import 'board_sheet.dart';
+import 'decor_tray.dart';
 import 'expansions_sheet.dart';
 import 'fx/calm.dart';
 import 'fx/reward_flight.dart';
@@ -39,6 +40,18 @@ class GardenScreen extends StatefulWidget {
 class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver {
   final _pages = PageController();
   int _page = 0;
+
+  /// Modo Decorar, y la decoración recién puesta desde la bandeja.
+  bool _decorating = false;
+  int? _fresh;
+
+  void _setDecorating(bool on) {
+    SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+    setState(() {
+      _decorating = on;
+      _fresh = null;
+    });
+  }
 
   Timer? _tick;
 
@@ -209,7 +222,12 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
           listenable: Listenable.merge([p, WeatherService.instance]),
           builder: (context, _) => Column(
             children: [
-              _Header(onSettings: () => showSettingsSheet(context)),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: _decorating
+                    ? _DecorBar(onDone: () => _setDecorating(false))
+                    : _Header(onSettings: () => showSettingsSheet(context), onDecor: () => _setDecorating(true)),
+              ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
@@ -221,7 +239,8 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                           // El patio y, deslizando, el estanque y el bosque.
                           child: PageView(
                             controller: _pages,
-                            physics: const _QuickPagePhysics(),
+                            // Decorando, se arrastran las decoraciones: las vistas se cambian con los puntos.
+                            physics: _decorating ? const NeverScrollableScrollPhysics() : const _QuickPagePhysics(),
                             onPageChanged: (i) => setState(() => _page = i),
                             children: [
                               for (final side in [0, 1, 2])
@@ -230,6 +249,8 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                                   now: gardenNow(),
                                   weather: WeatherService.instance.at(gardenNow()),
                                   onPlace: _enter,
+                                  decorating: _decorating,
+                                  fresh: side == _page ? _fresh : null,
                                 ),
                             ],
                           ),
@@ -238,6 +259,13 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                       _SideDots(
                         page: _page,
                         onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
+                      ),
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Calm.curve,
+                        child: _decorating
+                            ? DecorTray(side: _page, onPlaced: (i) => setState(() => _fresh = i))
+                            : const SizedBox(width: double.infinity),
                       ),
                     ],
                   ),
@@ -265,9 +293,49 @@ class _QuickPagePhysics extends PageScrollPhysics {
   SpringDescription get spring => SpringDescription.withDampingRatio(mass: 0.5, stiffness: 420, ratio: 1.1);
 }
 
+/// Arriba, mientras se decora: qué se puede hacer y el botón para terminar.
+class _DecorBar extends StatelessWidget {
+  final VoidCallback onDone;
+  const _DecorBar({required this.onDone});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Progress.instance;
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tr('decor.title'), style: text.titleMedium),
+                Text(tr('decor.hint'), style: text.bodySmall?.copyWith(color: Palette.ink.withValues(alpha: 0.65))),
+                const SizedBox(height: 6),
+                // Lo que se tiene, para saber qué alcanza.
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  children: [
+                    CurrencyChip.pebbles(p.pebbles),
+                    for (final e in Essence.values) CurrencyChip.essence(e, p.essences[e]!),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton(onPressed: onDone, child: Text(tr('decor.done'))),
+        ],
+      ),
+    );
+  }
+}
+
 class _Header extends StatelessWidget {
-  final VoidCallback onSettings;
-  const _Header({required this.onSettings});
+  final VoidCallback onSettings, onDecor;
+  const _Header({required this.onSettings, required this.onDecor});
 
   @override
   Widget build(BuildContext context) {
@@ -292,6 +360,17 @@ class _Header extends StatelessWidget {
                   ],
                 ),
               ),
+              // Decorar, con un punto cuando hay algo nuevo para comprar o en la caja.
+              if (p.decorUnlocked)
+                IconButton(
+                  tooltip: tr('decor.title'),
+                  onPressed: onDecor,
+                  icon: Badge(
+                    isLabelVisible: p.decorNew,
+                    backgroundColor: Palette.lantern,
+                    child: const Icon(Icons.local_florist_rounded),
+                  ),
+                ),
               // El álbum, con un punto cuando hay algo nuevo.
               IconButton(
                 tooltip: tr('album.title'),
