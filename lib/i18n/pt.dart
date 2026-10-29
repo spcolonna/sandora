@@ -115,7 +115,7 @@ const pt = <String, String>{
   'shop.title': 'Mercado',
   'shop.desc': 'Troque o que sobra pelo que falta.',
   'shop.lotusHint':
-      'Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao subir de nível e a cada semana de sequência meditando.',
+      'Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao cumprir as três metas do dia e a cada semana de sequência meditando.',
   'shop.trades': 'Trocas do dia',
   'shop.withLotus': 'Com lótus',
   'shop.left': 'Restam {n} hoje',

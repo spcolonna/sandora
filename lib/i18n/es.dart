@@ -115,7 +115,7 @@ const es = <String, String>{
   'shop.title': 'Mercado',
   'shop.desc': 'Cambiá lo que te sobra por lo que te falta.',
   'shop.lotusHint':
-      'Los lotos se ganan con la ofrenda del día (tu primera partida o meditación), al subir de nivel y con cada semana de racha meditando.',
+      'Los lotos se ganan con la ofrenda del día (tu primera partida o meditación), al cumplir las tres metas del día y con cada semana de racha meditando.',
   'shop.trades': 'Trueques del día',
   'shop.withLotus': 'Con lotos',
   'shop.left': 'Quedan {n} hoy',

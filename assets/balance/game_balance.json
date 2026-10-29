@@ -34,17 +34,17 @@
     "xpPerStar": 10,
     "first": 60,
     "growth": 1.4,
-    "maxStep": 500
+    "maxStep": 700
   },
   "expansions": [
-    { "id": "patio1", "kind": "patio", "level": 3, "cost": { "pebbles": 120, "sand": 10 } },
-    { "id": "pond", "kind": "zone", "level": 7, "cost": { "pebbles": 500, "water": 30, "light": 10 } },
-    { "id": "patio2", "kind": "patio", "level": 9, "cost": { "pebbles": 400, "sand": 30, "water": 15 } },
-    { "id": "calligraphy", "kind": "zone", "level": 10, "cost": { "pebbles": 700, "sand": 40 } },
-    { "id": "teahouse", "kind": "zone", "level": 12, "cost": { "pebbles": 800, "wood": 40 } },
-    { "id": "temple", "kind": "zone", "level": 14, "cost": { "pebbles": 900, "light": 40 } },
-    { "id": "bamboo", "kind": "zone", "level": 16, "cost": { "pebbles": 1000, "wood": 40 } },
-    { "id": "river", "kind": "zone", "level": 18, "cost": { "pebbles": 1100, "water": 40 } }
+    { "id": "patio1", "kind": "patio", "level": 3, "cost": {"pebbles": 300, "sand": 30} },
+    { "id": "pond", "kind": "zone", "level": 7, "cost": {"pebbles": 1250, "water": 90, "light": 30} },
+    { "id": "patio2", "kind": "patio", "level": 9, "cost": {"pebbles": 1000, "sand": 60, "water": 45} },
+    { "id": "calligraphy", "kind": "zone", "level": 10, "cost": {"pebbles": 1750, "sand": 70} },
+    { "id": "teahouse", "kind": "zone", "level": 12, "cost": {"pebbles": 2000, "wood": 120} },
+    { "id": "temple", "kind": "zone", "level": 14, "cost": {"pebbles": 2250, "light": 120} },
+    { "id": "bamboo", "kind": "zone", "level": 16, "cost": {"pebbles": 2500, "wood": 120} },
+    { "id": "river", "kind": "zone", "level": 18, "cost": {"pebbles": 2750, "water": 120} }
   ],
   "unlocks": {
     "_comment": "Día de juego (días distintos en que se abrió el jardín) en que se abre cada minijuego; los que no están, desde el día 1. Un minijuego con el id de una zona (pond) se abre al comprarla.",
@@ -78,8 +78,8 @@
     "windChance": 0.3
   },
   "shop": {
-    "_comment": "Mercado: trueques para conseguir lo que los minijuegos no dan (hoy, Madera). daily: veces por día (sin daily, sin límite). Lotos: moneda escasa por constancia (ofrenda del día, niveles, racha de meditación); a futuro se podrán vender.",
-    "lotus": { "daily": 1, "perLevel": 1, "streakEvery": 7, "streakBonus": 2 },
+    "_comment": "Mercado: trueques para conseguir lo que los minijuegos no dan (hoy, Madera). daily: veces por día (sin daily, sin límite). Lotos: moneda escasa por constancia (ofrenda del día, las tres metas del día, racha de meditación; perLevel en 0 desde el rebalance v3); a futuro se podrán vender.",
+    "lotus": { "daily": 1, "perLevel": 0, "streakEvery": 7, "streakBonus": 2 },
     "_packs": "Venta de lotos (compra dentro de la app). Apagada hasta crear los productos consumibles con estos ids en App Store Connect y Play Console.",
     "lotusPacks": {
       "enabled": false,
@@ -152,7 +152,7 @@
     "swayMeters": 0.35,
     "perfectBonus": 1,
     "starNet": [4, 7, 10],
-    "pebblesPerHour": 2,
+    "pebblesPerHour": 0.5,
     "maxHoursStored": 12,
     "windFromHeight": 6,
     "windChancePerStone": 0.2,
@@ -339,7 +339,7 @@
   },
   "gardens": {
     "_comment": "Más de un jardín: cada uno cuesta lotus lotos y pide minLevel; hasta max jardines. Cada jardín tiene su torre, arena, nombre, ampliaciones y serenidad; monedas, nivel y récords son de la cuenta.",
-    "lotus": 10,
+    "lotus": 25,
     "minLevel": 8,
     "max": 4
   },

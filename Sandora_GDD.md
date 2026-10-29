@@ -53,22 +53,22 @@ El nivel del jardín muestra cuánto jugó la persona en total y decide **qué t
 
 - Cada partida de un minijuego da **Calma** (experiencia): 10 por jugar más 10 por estrella, es decir de 10 a 40. El Modo meditación también da Calma.
 - La Calma no se gasta ni baja: el nivel nunca retrocede.
-- Curva inicial: el nivel 2 pide 60 de Calma y cada nivel siguiente pide 40 % más que el anterior, con un tope de 500 por nivel. Con 2 o 3 sesiones por día, el nivel 3 llega el primer día, el 5 entre el día 3 y el 4, y el 7 hacia el día 6.
+- Curva inicial: el nivel 2 pide 60 de Calma y cada nivel siguiente pide 40 % más que el anterior, con un tope de 700 por nivel. Con 2 sesiones por día, el nivel 3 llega el primer día, el 5 hacia el día 3, el 7 hacia el día 6 y el 18 hacia el día 46 (simulado: `SANDORA_SIM=1 flutter test test/sim`).
 - **El nivel habilita, los tokens pagan.** Llegar al nivel de una ampliación no la abre sola: la muestra como disponible y el jugador la compra con Piedritas y esencias. Así el nivel premia la constancia y los tokens siguen teniendo un destino.
 - Subir de nivel tiene su propia celebración (la más grande del juego, por encima de "perfecto"): el jardín se ilumina, aparece "Nivel N" y se muestra lo que se destrabó.
 - Los valores viven en `game_balance.json` (`level.xpPerRun`, `level.xpPerStar`, `level.first`, `level.growth`, `level.maxStep`, `expansions`).
 
 | Nivel | Se destraba | Costo |
 | --- | --- | --- |
-| 3 | **Patio I:** el jardín inicial crece; más lugar para objetos | 120 Piedritas, 10 Arena |
+| 3 | **Patio I:** el jardín inicial crece; más lugar para objetos | 300 Piedritas, 30 Arena |
 | 5 | **Modo meditación** (ver más abajo) | — |
-| 7 | **Estanque** (primera zona nueva: Koi y Luciérnagas) | 500 Piedritas, 30 Agua, 10 Luz |
-| 9 | **Patio II:** el jardín ocupa todo el terreno | 400 Piedritas, 30 Arena, 15 Agua |
-| 10 | Sala de caligrafía | 700 Piedritas, 40 Arena |
-| 12 | Casa de té | 800 Piedritas, 40 Madera |
-| 14 | Templo | 900 Piedritas, 40 Luz |
-| 16 | Bosque de bambú | 1000 Piedritas, 40 Madera |
-| 18 | Río | 1100 Piedritas, 40 Agua |
+| 7 | **Estanque** (primera zona nueva: Koi y Luciérnagas) | 1250 Piedritas, 90 Agua, 30 Luz |
+| 9 | **Patio II:** el jardín ocupa todo el terreno | 1000 Piedritas, 60 Arena, 45 Agua |
+| 10 | Sala de caligrafía | 1750 Piedritas, 70 Arena |
+| 12 | Casa de té | 2000 Piedritas, 120 Madera |
+| 14 | Templo | 2250 Piedritas, 120 Luz |
+| 16 | Bosque de bambú | 2500 Piedritas, 120 Madera |
+| 18 | Río | 2750 Piedritas, 120 Agua |
 
 Las zonas de temporada (Cerezo, Invierno) no dependen del nivel: se abren con el evento. Costos y niveles son iniciales: se ajustan con datos del soft launch.
 
@@ -92,7 +92,7 @@ Hay cuatro monedas: dos se ganan jugando, una por constancia y una se compra. Ni
 | --- | --- | --- |
 | **Piedritas** (blanda) | Jugando cualquier minijuego; más con mejor puntaje | Reparar, comprar objetos comunes, mantener el jardín |
 | **Esencias** (por material: Agua, Arena, Madera, Luz) | Cada minijuego da la esencia de su material (ver Regla de las esencias); el Modo meditación da Luz | Desbloquear objetos y mejoras de esa zona; obliga a variar de minijuego |
-| **Lotos** (escasa) | La ofrenda del día (la primera partida o meditación), cada nivel nuevo y cada semana de racha meditando | Trueques del Mercado sin límite diario. A futuro, también se venden |
+| **Lotos** (escasa) | La ofrenda del día (la primera partida o meditación), las tres metas del día cumplidas y cada semana de racha meditando | Trueques del Mercado sin límite diario. A futuro, también se venden |
 | **Jade** (premium) | Compra; pequeñas cantidades por logros y concursos | Cosméticos premium, pase de estación, acelerar crecimiento |
 
 ### Qué se compra con tokens

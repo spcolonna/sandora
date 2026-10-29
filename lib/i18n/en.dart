@@ -115,7 +115,7 @@ const en = <String, String>{
   'shop.title': 'Market',
   'shop.desc': 'Trade what you have spare for what you need.',
   'shop.lotusHint':
-      'Earn lotus with your daily offering (your first game or meditation), each new level and every week of meditation streak.',
+      'Earn lotus with your daily offering (your first game or meditation), by completing all three daily goals and every week of meditation streak.',
   'shop.trades': 'Today\'s trades',
   'shop.withLotus': 'With lotus',
   'shop.left': '{n} left today',

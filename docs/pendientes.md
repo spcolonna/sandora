@@ -98,9 +98,19 @@
 - [ ] **Vender lotos:** el código está (`lib/garden/lotus_store.dart`, `in_app_purchase`) pero apagado. Para
       prenderlo: crear los consumibles `com.oraki.sandora.lotus5`, `lotus12` y `lotus30` en App Store Connect y Play
       Console con sus precios y poner `shop.lotusPacks.enabled: true`. Falta validar recibos en un servidor si hace falta.
-- [x] **Más de un jardín:** tocando el cartel se ven los jardines; uno nuevo cuesta 10 lotos desde el nivel 8 (hasta
+- [x] **Más de un jardín:** tocando el cartel se ven los jardines; uno nuevo cuesta 25 lotos desde el nivel 8 (hasta
       4, sección `gardens`). Cada uno tiene torre, arena, nombre, ampliaciones y serenidad; monedas, nivel y récords son
       de la cuenta.
+
+## Balance (2026-10-29)
+- [x] **Simulador de economía** (`test/sim/`): juega 60–90 días con el `Progress` y el balance reales para tres perfiles
+      (Casual, Regular, Dedicado). Informe: `SANDORA_SIM=1 flutter test test/sim`; otro balance:
+      `SANDORA_SIM_BALANCE=<archivo>`.
+- [x] Rebalance v3: antes nada se ahorraba (cada ampliación se compraba el día que llegaba el nivel) y la torre daba el
+      70–80 % de las piedritas. Ahora: costos de ampliaciones ×2,5 en piedritas y ×3 en esencias, torre 0,5/h, tope de
+      Calma por nivel 700, sin lotos por nivel y jardín nuevo a 25 lotos. Regular: todas las zonas hacia el día 46.
+- [ ] Recalibrar con la prueba de 10 personas (reparto de estrellas por perfil y caída de la torre son supuestos).
+- [ ] Al final del juego sobran piedritas y esencias: falta un sumidero (decoración colocable).
 
 ## Diseño (inconsistencias del GDD)
 - [x] El Apilado duraba "sin límite" contra el pilar 3 ("menos de 90 s"): ahora es una bolsa de 12 piedras.

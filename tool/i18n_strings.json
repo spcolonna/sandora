@@ -791,11 +791,11 @@
   "zh": "用多余的换取需要的。"
  },
  "shop.lotusHint": {
-  "es": "Los lotos se ganan con la ofrenda del día (tu primera partida o meditación), al subir de nivel y con cada semana de racha meditando.",
-  "en": "Earn lotus with your daily offering (your first game or meditation), each new level and every week of meditation streak.",
-  "pt": "Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao subir de nível e a cada semana de sequência meditando.",
-  "ja": "蓮は毎日の奉納（その日最初のプレイか瞑想）、レベルアップ、瞑想の連続1週間ごとにもらえます。",
-  "zh": "每日供奉（当天第一局或第一次冥想）、升级以及每连续冥想一周都能获得莲花。"
+  "es": "Los lotos se ganan con la ofrenda del día (tu primera partida o meditación), al cumplir las tres metas del día y con cada semana de racha meditando.",
+  "en": "Earn lotus with your daily offering (your first game or meditation), by completing all three daily goals and every week of meditation streak.",
+  "pt": "Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao cumprir as três metas do dia e a cada semana de sequência meditando.",
+  "ja": "蓮は毎日の奉納（その日最初のプレイか瞑想）、その日の3つの目標の達成、瞑想の連続1週間ごとにもらえます。",
+  "zh": "每日供奉（当天第一局或第一次冥想）、完成当天全部三个目标以及每连续冥想一周都能获得莲花。"
  },
  "shop.trades": {
   "es": "Trueques del día",

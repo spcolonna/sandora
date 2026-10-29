@@ -114,7 +114,7 @@ const zh = <String, String>{
   'currency.lotus': '莲花',
   'shop.title': '市集',
   'shop.desc': '用多余的换取需要的。',
-  'shop.lotusHint': '每日供奉（当天第一局或第一次冥想）、升级以及每连续冥想一周都能获得莲花。',
+  'shop.lotusHint': '每日供奉（当天第一局或第一次冥想）、完成当天全部三个目标以及每连续冥想一周都能获得莲花。',
   'shop.trades': '今日交换',
   'shop.withLotus': '用莲花',
   'shop.left': '今天还剩{n}次',

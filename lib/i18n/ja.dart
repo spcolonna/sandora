@@ -114,7 +114,7 @@ const ja = <String, String>{
   'currency.lotus': '蓮',
   'shop.title': '市場',
   'shop.desc': '余ったものを足りないものと交換しよう。',
-  'shop.lotusHint': '蓮は毎日の奉納（その日最初のプレイか瞑想）、レベルアップ、瞑想の連続1週間ごとにもらえます。',
+  'shop.lotusHint': '蓮は毎日の奉納（その日最初のプレイか瞑想）、その日の3つの目標の達成、瞑想の連続1週間ごとにもらえます。',
   'shop.trades': '今日の交換',
   'shop.withLotus': '蓮で交換',
   'shop.left': '今日あと{n}回',
