@@ -644,6 +644,61 @@ INCLUDED = {
                     'pantalla; se funde con el degradado del día y de noche no se ve (`garden_scene.dart`).'),
     'bg_base_far': ('assets/images/bg/bg_base_far.webp', 'Lomas con niebla, recortadas desde las cimas; las cimas '
                     'quedan al 31 % de la altura y el suelo tapa el resto, en las dos vistas del jardín.'),
+    'bg_base_ground': ('assets/images/bg/bg_base_ground.webp', 'Patio (arena con borde de piedras), recortado y '
+                       'estirado al terreno cuidado, que crece con las ampliaciones (`garden_scene.dart`).'),
+    'bg_base_foliage': ('assets/images/bg/bg_base_foliage.webp', 'Arce arriba a la izquierda y bambú abajo a la '
+                        'derecha, al 70 % del ancho, en las tres vistas (`garden_scene.dart`).'),
+    'bg_rain_roof': ('assets/images/rain/bg_rain_roof.webp', 'Fondo de la Lluvia: el alero arriba y, abajo, el piso '
+                     'de la galería espejado hasta el meditador (`rain_game.dart`).'),
+    'obj_rain_vessel_01': ('assets/images/rain/obj_rain_vessel_01.webp', 'Vasija 1 de la Lluvia, 360 px; la boca va '
+                           'donde caen las gotas. También en el patio (`rain_game.dart`, `garden_scene.dart`).'),
+    'obj_rain_vessel_02': ('assets/images/rain/obj_rain_vessel_02.webp', 'Vasija 2 de la Lluvia, 360 px; la boca va '
+                           'donde caen las gotas. También en el patio (`rain_game.dart`, `garden_scene.dart`).'),
+    'obj_rain_vessel_03': ('assets/images/rain/obj_rain_vessel_03.webp', 'Vasija 3 de la Lluvia, 360 px; la boca va '
+                           'donde caen las gotas. También en el patio (`rain_game.dart`, `garden_scene.dart`).'),
+    'obj_rain_vessel_04': ('assets/images/rain/obj_rain_vessel_04.webp', 'Vasija 4 de la Lluvia, 360 px; la boca va '
+                           'donde caen las gotas. También en el patio (`rain_game.dart`, `garden_scene.dart`).'),
+    'obj_rain_vessel_05': ('assets/images/rain/obj_rain_vessel_05.webp', 'Vasija 5 de la Lluvia, 360 px; la boca va '
+                           'donde caen las gotas. También en el patio (`rain_game.dart`, `garden_scene.dart`).'),
+    'fx_rain_drop': ('assets/images/rain/fx_rain_drop.webp', 'Gota que cae a su vasija, 128 px de alto (`rain_game.dart`).'),
+    'fx_rain_splash': ('assets/images/rain/fx_rain_splash.webp', 'Corona de agua al acertar, crece y se apaga '
+                       '(`rain_game.dart`).'),
+    'obj_stack_stone_01': ('assets/images/stack/obj_stack_stone_01.webp', 'Piedra tipo río, estirada a la silueta '
+                           'de la física y espejada según la piedra (`stone_painter.dart`).'),
+    'obj_stack_stone_02': ('assets/images/stack/obj_stack_stone_02.webp', 'Piedra tipo peñasco, estirada a la silueta '
+                           'de la física y espejada según la piedra (`stone_painter.dart`).'),
+    'obj_stack_stone_03': ('assets/images/stack/obj_stack_stone_03.webp', 'Piedra tipo canto rodado, estirada a la silueta '
+                           'de la física y espejada según la piedra (`stone_painter.dart`).'),
+    'obj_stack_stone_04': ('assets/images/stack/obj_stack_stone_04.webp', 'Piedra tipo laja, estirada a la silueta '
+                           'de la física y espejada según la piedra (`stone_painter.dart`).'),
+    'obj_stack_stone_05': ('assets/images/stack/obj_stack_stone_05.webp', 'Piedra tipo huevo, estirada a la silueta '
+                           'de la física y espejada según la piedra (`stone_painter.dart`).'),
+    'obj_stack_stone_06': ('assets/images/stack/obj_stack_stone_06.webp', 'Piedra tipo cuña, estirada a la silueta '
+                           'de la física y espejada según la piedra (`stone_painter.dart`).'),
+    'spr_sand_rake_01': ('assets/images/sand/spr_sand_rake_01.webp', 'Rastrillo del Arenero, con los dientes en el '
+                         'trazo (`sand_painter.dart`).'),
+    'tex_sand_base': ('assets/images/sand/tex_sand_base.webp', 'Arena, hecha continua y bajada a 512 px; baldosas de 256 '
+                      'puntos en el Arenero y en el patio (`sand_painter.dart`).'),
+    'obj_decor_lantern': ('assets/images/decor/obj_decor_lantern.webp', 'Farol del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_bridge': ('assets/images/decor/obj_decor_bridge.webp', 'Puente del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_pine': ('assets/images/decor/obj_decor_pine.webp', 'Pino del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_bamboo': ('assets/images/decor/obj_decor_bamboo.webp', 'Bambú del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_peak': ('assets/images/decor/obj_decor_peak.webp', 'Roca alta del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_boulder': ('assets/images/decor/obj_decor_boulder.webp', 'Peñasco con musgo del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_rocks': ('assets/images/decor/obj_decor_rocks.webp', 'Tres rocas del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_step': ('assets/images/decor/obj_decor_step.webp', 'Piedra de paso del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_moss': ('assets/images/decor/obj_decor_moss.webp', 'Musgo con helechos del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_azalea': ('assets/images/decor/obj_decor_azalea.webp', 'Azalea del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
 }
 
 

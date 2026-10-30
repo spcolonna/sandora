@@ -340,4 +340,7 @@ const es = <String, String>{
   'decor.sakura': 'Cerezo',
   'album.decor': 'Decoraciones',
   'album.how.decor': 'Se compra en Decorar desde el nivel {n}',
+  'shop.deal': 'Oferta del día',
+  'shop.dealBuy': 'Comprar',
+  'shop.dealTaken': 'Está en tu caja: ponela desde Decorar. Mañana hay otra.',
 };

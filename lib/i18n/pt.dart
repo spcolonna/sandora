@@ -340,4 +340,7 @@ const pt = <String, String>{
   'decor.sakura': 'Cerejeira',
   'album.decor': 'Decorações',
   'album.how.decor': 'Compre em Decorar a partir do nível {n}',
+  'shop.deal': 'Oferta do dia',
+  'shop.dealBuy': 'Comprar',
+  'shop.dealTaken': 'Está na sua caixa: coloque-a em Decorar. Amanhã tem outra.',
 };

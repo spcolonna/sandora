@@ -1,16 +1,31 @@
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui';
 
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import 'sand_shapes.dart';
 
-/// Dibujo de la arena con código mientras no esté `tex_sand_base` (Lote 1).
-/// Lo usan el minijuego y el jardín.
-
-/// Arena con granitos claros y oscuros, grabada una vez en un Picture.
+/// Arena del minijuego y del jardín: `tex_sand_base` repetida, o granitos
+/// pintados con código si falta la imagen. Grabada una vez en un Picture.
 Picture sandTexture(Size size, {int seed = 3}) {
   final rec = PictureRecorder();
   final c = Canvas(rec);
+  final tex = SceneArt.instance['tex_sand_base'];
+  if (tex != null) {
+    // Cada baldosa mide 256 puntos; [seed] corre el dibujo para que dos
+    // areneros no empiecen igual.
+    final k = 256 / tex.width;
+    final shift = (seed * 97 % 256).toDouble();
+    final m = Float64List.fromList([k, 0, 0, 0, 0, k, 0, 0, 0, 0, 1, 0, -shift, -shift * 0.6, 0, 1]);
+    c.drawRect(
+      Offset.zero & size,
+      Paint()
+        ..shader = ImageShader(tex, TileMode.repeated, TileMode.repeated, m)
+        ..filterQuality = FilterQuality.medium,
+    );
+    return rec.endRecording();
+  }
   c.drawRect(Offset.zero & size, Paint()..color = Palette.sand);
   final rng = Random(seed);
   final dark = Paint()..color = Palette.sandShadow.withValues(alpha: 0.35);
@@ -91,12 +106,27 @@ Path pathOf(List<P> pts, Rect r) {
   return head;
 }
 
-/// Rastrillo placeholder (hasta `spr_sand_rake_01`): travesaño con dientes,
-/// perpendicular al avance, y un mango hacia atrás.
+/// Rastrillo: travesaño con dientes, perpendicular al avance, y un mango
+/// hacia atrás. Usa `spr_sand_rake_01` (dientes a la derecha) si está.
 void drawRake(Canvas canvas, Offset at, double angle) {
   canvas.save();
   canvas.translate(at.dx, at.dy);
   canvas.rotate(angle);
+  final img = SceneArt.instance['spr_sand_rake_01'];
+  if (img != null) {
+    const w = 112.0;
+    final h = w * img.height / img.width;
+    // Sombra suave y el rastrillo con la punta de los dientes en el trazo.
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(-w + 14, -h * 0.4 + 4, w, h * 0.8), const Radius.circular(8)),
+      Paint()
+        ..color = Palette.sandShadow.withValues(alpha: 0.25)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+    );
+    drawArt(canvas, img, Rect.fromLTWH(-w + 10, -h / 2, w, h));
+    canvas.restore();
+    return;
+  }
   final wood = Paint()..color = Palette.wood;
   canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-6, -26, 10, 52), const Radius.circular(3)), wood);
   for (var k = -2; k <= 2; k++) {

@@ -338,4 +338,7 @@ const ja = <String, String>{
   'decor.sakura': '桜',
   'album.decor': '飾り',
   'album.how.decor': 'レベル{n}から飾りつけで買える',
+  'shop.deal': '本日のおすすめ',
+  'shop.dealBuy': '買う',
+  'shop.dealTaken': '箱に入りました。「飾る」から置けます。明日はまた別のものが。',
 };

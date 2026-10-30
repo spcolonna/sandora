@@ -1,7 +1,11 @@
 import 'dart:math';
 import 'dart:ui';
 
+import '../../ui/garden/scene_art.dart';
 import 'stack_rules.dart';
+
+/// Arte de cada tipo de piedra (`obj_stack_stone_NN`), en el orden de [StoneKind].
+const _art = [1, 4, 3, 5, 2, 6];
 
 /// Colores de cada tono: base, sombra y motas.
 const _tones = [
@@ -15,9 +19,28 @@ const _tones = [
 /// Pinta una piedra centrada en el origen, en metros. Las motas, la veta y el
 /// musgo salen de su `seed`, así cada piedra es siempre la misma.
 void paintStone(Canvas canvas, StoneShape s, {double opacity = 1}) {
-  final (base, dark, light) = _tones[s.tone % _tones.length];
   final a = opacity.clamp(0.0, 1.0);
   final path = s.path;
+  final img = SceneArt.instance['obj_stack_stone_0${_art[s.kind.index]}'];
+  if (img != null) {
+    // El arte se estira a la silueta de la física. La cuña se da vuelta hacia
+    // donde se inclina; las demás, según la piedra, para que no se repitan.
+    final top = s.outline.where((o) => o.dy < -s.height * 0.2);
+    final lean = top.fold(0.0, (t, o) => t + o.dx);
+    final flip = s.kind == StoneKind.wedge ? lean > 0 : s.seed.isOdd;
+    final b = path.getBounds();
+    canvas.save();
+    if (flip) canvas.scale(-1, 1);
+    drawArt(
+      canvas,
+      img,
+      flip ? Rect.fromLTRB(-b.right, b.top, -b.left, b.bottom) : b,
+      paint: Paint()..color = Color.fromRGBO(255, 255, 255, a),
+    );
+    canvas.restore();
+    return;
+  }
+  final (base, dark, light) = _tones[s.tone % _tones.length];
   canvas.drawPath(path, Paint()..color = base.withValues(alpha: a));
   canvas.save();
   canvas.clipPath(path);

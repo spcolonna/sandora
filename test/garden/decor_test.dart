@@ -108,4 +108,36 @@ void main() {
     expect(p.decor.single.id, d.id);
     expect(p.decor.single.side, 0);
   });
+
+  test('oferta del día: fija en el día, con descuento, una sola vez y cambia mañana', () async {
+    final p = await rich(level: 6);
+    final day1 = DateTime.now();
+    final d = p.dealToday(now: day1)!;
+    expect(d.level, lessThanOrEqualTo(6));
+    expect(p.dealCost(d)['pebbles']!, lessThan(p.decorCost(d)['pebbles']!));
+    expect(p.dealNew, isTrue);
+    p.markDealSeen();
+    expect(p.dealNew, isFalse);
+    p.calm = p.levels.calmToReach(20);
+    expect(p.dealToday(now: day1)!.id, d.id, reason: 'subir de nivel no la cambia');
+    final before = p.pebbles;
+    final price = p.dealCost(d)['pebbles']!;
+    expect(p.buyDeal(now: day1), isTrue);
+    expect(p.pebbles, before - price);
+    expect(p.decorStored(d.id), 1);
+    expect(p.buyDeal(now: day1), isFalse, reason: 'una sola vez');
+    await p.load(balance);
+    p.calm = p.levels.calmToReach(20); // la Calma del test no se guardó
+    expect(p.dealTaken(now: day1), isTrue);
+    final ids = {for (var i = 1; i <= 10; i++) p.dealToday(now: day1.add(Duration(days: i)))!.id};
+    expect(p.dealTaken(now: day1.add(const Duration(days: 11))), isFalse);
+    expect(ids.length, greaterThan(1), reason: 'cambia de un día a otro');
+  });
+
+  test('sin el nivel de decorar no hay oferta', () async {
+    final p = await rich(level: 1);
+    expect(p.dealToday(), isNull);
+    expect(p.dealNew, isFalse);
+    expect(p.buyDeal(), isFalse);
+  });
 }

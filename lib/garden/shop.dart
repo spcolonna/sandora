@@ -46,10 +46,14 @@ class ShopRules {
   /// Cada cuántos días de racha de meditación se dan [lotusStreakBonus] lotos.
   final int lotusStreakEvery, lotusStreakBonus;
 
+  /// Descuento de la oferta del día (0.4 = 40 % menos).
+  final double dealDiscount;
+
   ShopRules(Balance balance)
     : offers = [for (final o in balance.section('shop').sections('offers')) ShopOffer.from(o)],
       lotusDaily = balance.section('shop').sub('lotus').i('daily'),
       lotusPerLevel = balance.section('shop').sub('lotus').i('perLevel'),
       lotusStreakEvery = balance.section('shop').sub('lotus').i('streakEvery'),
-      lotusStreakBonus = balance.section('shop').sub('lotus').i('streakBonus');
+      lotusStreakBonus = balance.section('shop').sub('lotus').i('streakBonus'),
+      dealDiscount = balance.section('shop').sub('deal').d('discount');
 }

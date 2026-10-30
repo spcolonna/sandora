@@ -89,6 +89,8 @@
         { "id": "com.oraki.sandora.lotus30", "lotus": 30 }
       ]
     },
+    "_deal": "Oferta del día: una decoración ya desbloqueada, distinta cada día, con descuento y una sola vez. Queda en la caja del jardín actual.",
+    "deal": { "discount": 0.4 },
     "offers": [
       { "id": "wood_pebbles", "give": { "wood": 5 }, "cost": { "pebbles": 90 }, "daily": 3 },
       { "id": "wood_sand", "give": { "wood": 4 }, "cost": { "sand": 12 }, "daily": 2 },
@@ -349,19 +351,19 @@
     "growth": 1.35,
     "perSide": 12,
     "items": [
-      {"id": "step", "level": 3, "cost": {"pebbles": 60, "sand": 5}, "size": 0.12, "aspect": 0.45},
-      {"id": "rocks", "level": 3, "cost": {"pebbles": 90, "sand": 8}, "size": 0.15, "aspect": 0.6},
-      {"id": "moss", "level": 4, "cost": {"pebbles": 120, "wood": 10}, "size": 0.15, "aspect": 0.7},
-      {"id": "boulder", "level": 4, "cost": {"pebbles": 150, "sand": 12}, "size": 0.18, "aspect": 0.65},
-      {"id": "azalea", "level": 5, "cost": {"pebbles": 180, "wood": 15}, "size": 0.16, "aspect": 0.8},
-      {"id": "peak", "level": 6, "cost": {"pebbles": 220, "sand": 18}, "size": 0.12, "aspect": 1.5},
-      {"id": "bamboo", "level": 6, "cost": {"pebbles": 250, "wood": 20}, "size": 0.14, "aspect": 2.2},
+      {"id": "step", "level": 3, "cost": {"pebbles": 60, "sand": 5}, "size": 0.12, "aspect": 0.82},
+      {"id": "rocks", "level": 3, "cost": {"pebbles": 90, "sand": 8}, "size": 0.15, "aspect": 0.9},
+      {"id": "moss", "level": 4, "cost": {"pebbles": 120, "wood": 10}, "size": 0.15, "aspect": 0.9},
+      {"id": "boulder", "level": 4, "cost": {"pebbles": 150, "sand": 12}, "size": 0.18, "aspect": 0.76},
+      {"id": "azalea", "level": 5, "cost": {"pebbles": 180, "wood": 15}, "size": 0.16, "aspect": 0.76},
+      {"id": "peak", "level": 6, "cost": {"pebbles": 220, "sand": 18}, "size": 0.12, "aspect": 1.36},
+      {"id": "bamboo", "level": 6, "cost": {"pebbles": 250, "wood": 20}, "size": 0.14, "aspect": 1.33},
       {"id": "lantern", "level": 7, "cost": {"pebbles": 320, "light": 20}, "size": 0.11, "aspect": 1.9},
       {"id": "basin", "level": 8, "cost": {"pebbles": 360, "water": 25}, "size": 0.15, "aspect": 0.8},
       {"id": "bench", "level": 9, "cost": {"pebbles": 400, "wood": 30}, "size": 0.22, "aspect": 0.5},
       {"id": "jizo", "level": 10, "cost": {"pebbles": 450, "light": 25}, "size": 0.08, "aspect": 1.7},
-      {"id": "pine", "level": 11, "cost": {"pebbles": 550, "wood": 40}, "size": 0.24, "aspect": 1.1},
-      {"id": "bridge", "level": 12, "cost": {"pebbles": 650, "wood": 40, "water": 20}, "size": 0.35, "aspect": 0.45},
+      {"id": "pine", "level": 11, "cost": {"pebbles": 550, "wood": 40}, "size": 0.24, "aspect": 1.0},
+      {"id": "bridge", "level": 12, "cost": {"pebbles": 650, "wood": 40, "water": 20}, "size": 0.35, "aspect": 0.69},
       {"id": "pagoda", "level": 14, "cost": {"pebbles": 750, "light": 40, "sand": 20}, "size": 0.12, "aspect": 2.4},
       {"id": "maple", "level": 15, "cost": {"pebbles": 850, "wood": 50}, "size": 0.27, "aspect": 1.1},
       {"id": "sakura", "level": 17, "cost": {"pebbles": 1000, "wood": 50, "light": 25}, "size": 0.3, "aspect": 1.1}

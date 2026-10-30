@@ -311,6 +311,7 @@ class GardenPainter extends CustomPainter {
       paintTeahouse(canvas, at[Place.matcha]!, layout.lanterns[0]);
     }
     paintDecorations(canvas, decor);
+    _paintFoliage(canvas, size);
     final dark = 1 - daylight;
     canvas.drawRect(
       all,
@@ -406,11 +407,36 @@ class GardenPainter extends CustomPainter {
     }
     if (layout.side != 0) return;
     final g = layout.ground;
+    // El patio pintado (arena con borde de piedras) se estira al terreno
+    // cuidado, que crece con las ampliaciones.
+    final art = SceneArt.instance['bg_base_ground'];
+    if (art != null) {
+      drawArt(canvas, art, g);
+      return;
+    }
     canvas.save();
     canvas.clipRect(g);
     canvas.translate(g.left, g.top);
     canvas.drawPicture(sandTexture(g.size, seed: 11));
     canvas.restore();
+  }
+
+  /// Hojas de arce arriba a la izquierda y bambú abajo a la derecha, que
+  /// enmarcan la vista. Cada mitad del arte se apoya en su borde.
+  void _paintFoliage(Canvas canvas, Size size) {
+    final art = SceneArt.instance['bg_base_foliage'];
+    if (art == null) return;
+    // A 70 % del ancho, para que no tape los lugares de las esquinas.
+    final w = size.width * 0.7, half = art.height / 2;
+    final h = w * half / art.width;
+    final paint = Paint()..filterQuality = FilterQuality.medium;
+    canvas.drawImageRect(art, Rect.fromLTWH(0, 0, art.width.toDouble(), half), Rect.fromLTWH(0, 0, w, h), paint);
+    canvas.drawImageRect(
+      art,
+      Rect.fromLTWH(0, half, art.width.toDouble(), half),
+      Rect.fromLTWH(size.width - w, size.height - h, w, h),
+      paint,
+    );
   }
 
   /// Arco suave detrás de las nubes, con los colores apenas marcados.
@@ -583,6 +609,11 @@ class GardenPainter extends CustomPainter {
         Rect.fromCenter(center: Offset(cx, bottom), width: jw * 1.1, height: jh * 0.22),
         Paint()..color = Palette.ink.withValues(alpha: 0.12),
       );
+      // Las mismas vasijas pintadas del minijuego, si están.
+      final art = SceneArt.instance['obj_rain_vessel_0${i + 1}'];
+      if (drawArtIn(canvas, art, Rect.fromLTRB(cx - jw * 0.6, bottom - jh * 1.25, cx + jw * 0.6, bottom)) != null) {
+        continue;
+      }
       final path = Path()
         ..moveTo(body.left + jw * 0.16, body.top + jh * 0.08)
         ..quadraticBezierTo(body.left - jw * 0.06, body.top + jh * 0.55, body.left + jw * 0.24, body.bottom)

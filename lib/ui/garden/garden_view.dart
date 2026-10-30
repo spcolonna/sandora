@@ -558,6 +558,15 @@ class _Label extends StatelessWidget {
                   text,
                   style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Palette.ink),
                 ),
+                // Oferta del día sin mirar.
+                if (place == Place.market && p.dealNew) ...[
+                  const SizedBox(width: 5),
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(color: Palette.lantern, shape: BoxShape.circle),
+                  ),
+                ],
                 if (place == Place.meditation && p.meditationStreak > 0 && !locked) ...[
                   const SizedBox(width: 6),
                   Text('· ${p.meditationStreak}', style: const TextStyle(fontSize: 12, color: Palette.stoneDark)),

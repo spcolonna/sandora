@@ -111,6 +111,8 @@ Ningún minijuego da todas las esencias (la Madera sale de Hojas, Musgo y Bonsá
 
 Diversificar las monedas permite ajustar qué es escaso sin tocar los minijuegos. Ofertas y límites viven en `game_balance.json` (`shop`).
 
+**Oferta del día** (desde que se puede decorar): una decoración ya desbloqueada, distinta cada día, con 40 % de descuento y una sola vez. Va a la caja del jardín actual. Un punto en el cartel del Mercado avisa hasta que se mira.
+
 ### Reglas de balance
 
 - Todos los valores de costos, recompensas y tiempos viven en `game_balance.json`, para ajustar sin recompilar.

@@ -50,6 +50,9 @@ class Progress extends ChangeNotifier {
   /// Trueques del Mercado hechos hoy, por oferta (para el límite diario).
   int _shopDay = 0;
   Map<String, int> _shopBought = {};
+  int _dealDay = -1, _dealSeen = -1;
+  String? _dealId;
+  bool _dealTaken = false;
 
   /// Regalos del momento del día juntados hoy (día del jardín), por id.
   int _giftDay = 0;
@@ -295,6 +298,10 @@ class Progress extends ChangeNotifier {
     _shopBought = (jsonDecode(_prefs.getString('shop.bought') ?? '{}') as Map).map(
       (k, v) => MapEntry(k as String, v as int),
     );
+    _dealDay = _prefs.getInt('deal.day') ?? -1;
+    _dealId = _prefs.getString('deal.id');
+    _dealTaken = _prefs.getBool('deal.taken') ?? false;
+    _dealSeen = _prefs.getInt('deal.seen') ?? -1;
     _giftDay = _prefs.getInt('gift.day') ?? 0;
     _giftsTaken = (jsonDecode(_prefs.getString('gift.taken') ?? '{}') as Map).map(
       (k, v) => MapEntry(k as String, v as int),
@@ -495,6 +502,73 @@ class Progress extends ChangeNotifier {
     _saveWallet();
     notifyListeners();
     return true;
+  }
+
+  /// La oferta del día del Mercado: una decoración ya desbloqueada, con
+  /// descuento y una sola vez. Se elige al mirarla por primera vez en el día y
+  /// queda fija aunque se suba de nivel.
+  DecorItem? dealToday({DateTime? now}) {
+    if (!decorUnlocked) return null;
+    final today = dayCycle.gardenDay(now ?? gardenNow());
+    if (_dealDay != today || decorRules.byId(_dealId ?? '') == null) {
+      final pool = decorRules.items.where((d) => d.level <= level).toList();
+      _dealDay = today;
+      _dealId = pool[Random(today * 104729 + 3).nextInt(pool.length)].id;
+      _dealTaken = false;
+      _prefs.setInt('deal.day', _dealDay);
+      _prefs.setString('deal.id', _dealId!);
+      _prefs.setBool('deal.taken', false);
+    }
+    return decorRules.byId(_dealId!);
+  }
+
+  /// Si la oferta de hoy ya se compró.
+  bool dealTaken({DateTime? now}) => dealToday(now: now) != null && _dealTaken;
+
+  /// Precio de la oferta: el de la próxima copia, con el descuento.
+  Map<String, int> dealCost(DecorItem d) {
+    final k = 1 - shop.dealDiscount;
+    return {
+      for (final c in decorCost(d).entries)
+        c.key: c.key == 'pebbles' ? ((c.value * k) / 5).round() * 5 : max(1, (c.value * k).round()),
+    };
+  }
+
+  bool canBuyDeal({DateTime? now}) {
+    final d = dealToday(now: now);
+    return d != null && !_dealTaken && dealCost(d).entries.every((c) => walletOf(c.key) >= c.value);
+  }
+
+  /// Compra la oferta del día: queda en la caja del jardín actual.
+  bool buyDeal({DateTime? now}) {
+    now ??= gardenNow();
+    if (!canBuyDeal(now: now)) return false;
+    final d = dealToday(now: now)!;
+    for (final c in dealCost(d).entries) {
+      _addTo(c.key, -c.value);
+    }
+    decor.add(PlacedDecor(d.id));
+    _discover('decor.${d.id}');
+    _dealTaken = true;
+    _prefs.setBool('deal.taken', true);
+    _pendingGoals.addAll(_goalEvent(now, {DailyKind.trade: 1}));
+    _saveDecor();
+    _saveWallet();
+    notifyListeners();
+    return true;
+  }
+
+  /// Hay una oferta nueva que todavía no se miró hoy (punto en el Mercado).
+  bool get dealNew {
+    if (dealToday() == null || _dealTaken) return false;
+    return _dealSeen != _dealDay;
+  }
+
+  void markDealSeen() {
+    if (dealToday() == null || _dealSeen == _dealDay) return;
+    _dealSeen = _dealDay;
+    _prefs.setInt('deal.seen', _dealSeen);
+    notifyListeners();
   }
 
   /// Saca de la caja una copia de [id] y la pone en la vista [side]. Devuelve

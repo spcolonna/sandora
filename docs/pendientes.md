@@ -113,6 +113,7 @@
 - [x] Sumidero del final: **modo Decorar**, 16 decoraciones que se compran y se ponen libres en las tres vistas
       (cada copia ×1,35). En la simulación, Regular termina con ~450 piedritas en vez de ~10.000 y gasta ~10.000 en
       decoraciones, sin atrasar las ampliaciones.
+- [x] Oferta del día en el Mercado: una decoración con 40 % menos, una vez por día (`shop.deal`).
 - [ ] Arte de las decoraciones: bloques 3 y 15 de `docs/prompts.md` (hoy se pintan con código).
 
 ## Diseño (inconsistencias del GDD)

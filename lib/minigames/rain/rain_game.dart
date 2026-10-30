@@ -11,6 +11,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -175,6 +176,28 @@ class RainGame extends FlameGame with TapCallbacks {
   }
 
   void _splash(Vector2 at, Grade g) {
+    final crown = SceneArt.instance['fx_rain_splash'];
+    if (crown != null) {
+      // La corona de agua sale del borde, crece y se apaga.
+      world.add(
+        ParticleSystemComponent(
+          position: at,
+          particle: ComputedParticle(
+            lifespan: 0.45,
+            renderer: (canvas, p) {
+              final w = vesselR * (1.1 + 0.2 * g.index) * (0.7 + 0.5 * p.progress);
+              final h = w * crown.height / crown.width;
+              drawArt(
+                canvas,
+                crown,
+                Rect.fromLTWH(-w / 2, -h * 0.85, w, h),
+                paint: Paint()..color = Color.fromRGBO(255, 255, 255, 0.9 * (1 - p.progress)),
+              );
+            },
+          ),
+        ),
+      );
+    }
     world.add(
       ParticleSystemComponent(
         position: at,
@@ -216,6 +239,45 @@ class RainGame extends FlameGame with TapCallbacks {
   }
 
   void _drawBackdrop(Canvas canvas) {
+    final roof = SceneArt.instance['bg_rain_roof'];
+    if (roof != null) {
+      // Arriba, el alero pintado; abajo, el piso de la galería espejado y más
+      // grande (más cerca), hasta el meditador.
+      final screen = Rect.fromLTWH(0, 0, size.x, size.y);
+      drawArtCover(canvas, roof, screen);
+      final k = size.y / roof.height;
+      final srcW = size.x / k;
+      final floor = Rect.fromLTWH((roof.width - srcW) / 2, roof.height * 0.76, srcW, roof.height * 0.24);
+      // Franjas del piso a su tamaño, una espejada y otra no, sin costuras.
+      final stripH = floor.height * k;
+      for (var j = 0; size.y + j * stripH < size.y * 2; j++) {
+        final top = size.y + j * stripH;
+        canvas.save();
+        if (j.isEven) {
+          canvas.translate(0, top + stripH);
+          canvas.scale(1, -1);
+        } else {
+          canvas.translate(0, top);
+        }
+        canvas.drawImageRect(
+          roof,
+          floor,
+          Rect.fromLTWH(0, 0, size.x, stripH),
+          Paint()..filterQuality = FilterQuality.medium,
+        );
+        canvas.restore();
+      }
+      canvas.drawRect(
+        Rect.fromLTWH(0, size.y, size.x, size.y),
+        Paint()
+          ..shader = Gradient.linear(Offset(0, size.y), Offset(0, size.y * 2), [
+            const Color(0x00000000),
+            const Color(0x66000000),
+          ]),
+      );
+      _drawRainLines(canvas, size.y * 0.74);
+      return;
+    }
     final rect = Rect.fromLTWH(0, 0, size.x, size.y * 2);
     canvas.drawRect(
       rect,
@@ -227,16 +289,22 @@ class RainGame extends FlameGame with TapCallbacks {
           [0, 0.5, 1],
         ),
     );
+    _drawRainLines(canvas, size.y * 2);
+  }
+
+  /// Lluvia de fondo, hasta [bottom].
+  void _drawRainLines(Canvas canvas, double bottom) {
     final p = Paint()
       ..color = const Color(0x55E6F3F5)
       ..strokeWidth = 1.2;
     final slant = -1.5 + _windNow * 9;
     for (final d in _bgDrops) {
-      canvas.drawLine(Offset(d.x, d.y), Offset(d.x - slant, d.y + 14), p);
+      if (d.y < bottom) canvas.drawLine(Offset(d.x, d.y), Offset(d.x - slant, d.y + 14), p);
     }
   }
 
   void _drawEave(Canvas canvas) {
+    if (SceneArt.instance['bg_rain_roof'] != null) return;
     final y = eaveY;
     final wood = Paint()..color = const Color(0xFF4A3426);
     canvas.drawRect(Rect.fromLTWH(0, 0, size.x, y - 14), Paint()..color = const Color(0xFF3B4146));
@@ -253,6 +321,23 @@ class RainGame extends FlameGame with TapCallbacks {
   void _drawVessel(Canvas canvas, int i) {
     final x = vesselX(i);
     final r = vesselR * (1 + 0.045 * sin((_wobble[i] ?? 0) * pi * 2) * (_wobble[i] ?? 0));
+    final level = judge.level(i);
+    final img = SceneArt.instance['obj_rain_vessel_0${i % 5 + 1}'];
+    if (img != null) {
+      // Ancho (en radios), altura de la boca y ancho del agua, como fracción
+      // de la imagen: la boca queda justo en el borde donde caen las gotas.
+      const fit = [(2.4, 0.17, 0.5), (2.3, 0.17, 0.55), (2.6, 0.26, 0.65), (2.0, 0.15, 0.4), (2.6, 0.25, 0.72)];
+      final (k, mouthY, mouthW) = fit[i % 5];
+      final w = r * k, h = w * img.height / img.width;
+      drawArt(canvas, img, Rect.fromLTWH(x - w / 2, rimY - h * mouthY, w, h));
+      // El agua brilla más a medida que se llena.
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(x, rimY), width: w * mouthW * 0.85, height: w * mouthW * 0.24),
+        Paint()..color = const Color(0xFFCDEBF0).withValues(alpha: 0.5 * level),
+      );
+      if (judge.overflowing[i]) _drawSpill(canvas, x, w * mouthW / 2, h * (1 - mouthY));
+      return;
+    }
     final body = Path()
       ..moveTo(x - r * 0.75, rimY)
       ..quadraticBezierTo(x - r * 1.35, rimY + r * 0.9, x - r * 0.6, rimY + r * 1.6)
@@ -266,30 +351,34 @@ class RainGame extends FlameGame with TapCallbacks {
       Paint()..color = Color.lerp(hue, Palette.ink, 0.55)!,
     );
     // El agua sube con los aciertos; rebalsando, desborda por los costados.
-    final level = judge.level(i);
     final water = Color.lerp(const Color(0xFF2C4650), const Color(0xFF5C9EA8), level)!;
     canvas.drawOval(
       Rect.fromCenter(center: Offset(x, rimY + 2 - 3 * level), width: r * 1.3, height: r * 0.28),
       Paint()..color = water,
     );
-    if (judge.overflowing[i]) {
-      final drip = Paint()..color = const Color(0xFF8FC6D0).withValues(alpha: 0.85);
-      for (final side in [-1.0, 1.0]) {
-        for (var k = 0; k < 3; k++) {
-          final fallK = ((_t * 0.9 + k / 3 + (side > 0 ? 0.5 : 0)) % 1);
-          final dx = x + side * (r * 0.8 + r * 0.45 * sin(fallK * pi * 0.6));
-          canvas.drawCircle(Offset(dx, rimY + r * 1.5 * fallK), 2.6 * (1 - fallK * 0.5), drip);
-        }
+    if (judge.overflowing[i]) _drawSpill(canvas, x, r * 0.8, r * 1.6);
+  }
+
+  /// Agua que desborda por los dos lados de la boca ([half] desde el centro)
+  /// y cae [depth] hasta el piso, donde hace un charco.
+  void _drawSpill(Canvas canvas, double x, double half, double depth) {
+    final drip = Paint()..color = const Color(0xFF8FC6D0).withValues(alpha: 0.85);
+    for (final side in [-1.0, 1.0]) {
+      for (var k = 0; k < 3; k++) {
+        final fallK = ((_t * 0.9 + k / 3 + (side > 0 ? 0.5 : 0)) % 1);
+        final dx = x + side * (half + half * 0.55 * sin(fallK * pi * 0.6));
+        canvas.drawCircle(Offset(dx, rimY + depth * 0.94 * fallK), 2.6 * (1 - fallK * 0.5), drip);
       }
-      canvas.drawOval(
-        Rect.fromCenter(center: Offset(x, rimY + r * 1.65), width: r * 2.2, height: r * 0.3),
-        Paint()..color = const Color(0xFF8FC6D0).withValues(alpha: 0.35),
-      );
     }
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(x, rimY + depth), width: half * 2.8, height: half * 0.4),
+      Paint()..color = const Color(0xFF8FC6D0).withValues(alpha: 0.35),
+    );
   }
 
   void _drawNotes(Canvas canvas) {
     final drop = Paint()..color = const Color(0xFFE6F3F5);
+    final dropArt = SceneArt.instance['fx_rain_drop'];
     for (final n in notes) {
       if (n.judged) continue;
       final spawn = n.time - fall;
@@ -299,15 +388,18 @@ class RainGame extends FlameGame with TapCallbacks {
       final x = vesselX(n.vessel) - n.wind * colW * b.d('windDrift') * pow(1 - p.clamp(0.0, 1.0), 1.4);
       // Caída con aceleración suave, como gravedad.
       final y = eaveY + (rimY - eaveY) * (0.35 * p + 0.65 * p * p);
-      if (n.wind == 0) {
-        canvas.drawOval(Rect.fromCenter(center: Offset(x, y), width: 9, height: 15), drop);
+      canvas.save();
+      canvas.translate(x, y);
+      if (n.wind != 0) canvas.rotate(-n.wind * 0.35 * (1 - p).clamp(0.2, 1.0));
+      if (dropArt != null) {
+        // La gota pintada tiene la estela arriba: la panza queda en (x, y).
+        const w = 11.0;
+        final h = w * dropArt.height / dropArt.width;
+        drawArt(canvas, dropArt, Rect.fromLTWH(-w / 2, 8 - h, w, h));
       } else {
-        canvas.save();
-        canvas.translate(x, y);
-        canvas.rotate(-n.wind * 0.35 * (1 - p).clamp(0.2, 1.0));
         canvas.drawOval(Rect.fromCenter(center: Offset.zero, width: 9, height: 15), drop);
-        canvas.restore();
       }
+      canvas.restore();
       // Anillo que se cierra justo sobre la vasija en el momento del acierto.
       final ringR = vesselR * (0.8 + 2.2 * (1 - p).clamp(0, 1));
       canvas.drawCircle(
@@ -325,7 +417,15 @@ class RainGame extends FlameGame with TapCallbacks {
     final cx = size.x / 2;
     final base = size.y * 1.78;
     final ink = Paint()..color = const Color(0xFF2B2F33);
-    canvas.drawRect(Rect.fromLTWH(0, base, size.x, size.y * 0.3), Paint()..color = const Color(0xFF4A3426));
+    if (SceneArt.instance['bg_rain_roof'] != null) {
+      // Sobre el piso de la galería: solo un almohadón.
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(cx, base), width: 190, height: 34),
+        Paint()..color = const Color(0xFF3A4660),
+      );
+    } else {
+      canvas.drawRect(Rect.fromLTWH(0, base, size.x, size.y * 0.3), Paint()..color = const Color(0xFF4A3426));
+    }
     final body = Path()
       ..moveTo(cx - 70, base)
       ..quadraticBezierTo(cx - 60, base - 70, cx - 22, base - 110)

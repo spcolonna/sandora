@@ -340,4 +340,7 @@ const en = <String, String>{
   'decor.sakura': 'Cherry tree',
   'album.decor': 'Decorations',
   'album.how.decor': 'Buy it in Decorate from level {n}',
+  'shop.deal': 'Deal of the day',
+  'shop.dealBuy': 'Buy',
+  'shop.dealTaken': 'It\'s in your box: place it from Decorate. A new one tomorrow.',
 };

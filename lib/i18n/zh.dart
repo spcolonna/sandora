@@ -338,4 +338,7 @@ const zh = <String, String>{
   'decor.sakura': '樱花树',
   'album.decor': '装饰',
   'album.how.decor': '等级 {n} 起可在装饰中购买',
+  'shop.deal': '今日特惠',
+  'shop.dealBuy': '购买',
+  'shop.dealTaken': '已放入你的箱子：从“装饰”中摆放。明天还有新的。',
 };
