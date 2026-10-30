@@ -19,18 +19,34 @@ abstract final class RewardFlight {
   static ValueNotifier<int> arrivalsOf(String currency) => _arrivals.putIfAbsent(currency, () => ValueNotifier(0));
 
   /// Hace volar [amount] de [currency] desde [from] (coordenadas globales).
+  /// Si su contador no está a la vista (la billetera cerrada), va a la
+  /// billetera ('wallet').
   static void fly(BuildContext context, {required Offset from, required String currency, required int amount}) {
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
-    final target = keyFor(currency).currentContext?.findRenderObject() as RenderBox?;
-    if (overlay == null || target == null || !target.attached) {
+    var to = currency;
+    RenderBox? target;
+    for (final k in [currency, 'wallet']) {
+      final box = keyFor(k).currentContext?.findRenderObject() as RenderBox?;
+      if (box != null && box.attached) {
+        (to, target) = (k, box);
+        break;
+      }
+    }
+    if (overlay == null || target == null) {
       arrivalsOf(currency).value++;
       return;
     }
-    final to = target.localToGlobal(target.size.centerLeft(const Offset(11, 0)));
+    final at = target.localToGlobal(target.size.centerLeft(const Offset(11, 0)));
     late final OverlayEntry entry;
     entry = OverlayEntry(
-      builder: (_) =>
-          _Flight(from: from, to: to, currency: currency, count: amount.clamp(1, 6), onDone: () => entry.remove()),
+      builder: (_) => _Flight(
+        from: from,
+        to: at,
+        currency: currency,
+        target: to,
+        count: amount.clamp(1, 6),
+        onDone: () => entry.remove(),
+      ),
     );
     overlay.insert(entry);
   }
@@ -38,13 +54,16 @@ abstract final class RewardFlight {
 
 class _Flight extends StatefulWidget {
   final Offset from, to;
-  final String currency;
+
+  /// Qué vuela y a qué contador llega (el suyo o la billetera).
+  final String currency, target;
   final int count;
   final VoidCallback onDone;
   const _Flight({
     required this.from,
     required this.to,
     required this.currency,
+    required this.target,
     required this.count,
     required this.onDone,
   });
@@ -77,7 +96,7 @@ class _FlightState extends State<_Flight> with SingleTickerProviderStateMixin {
       _landed++;
       SoundBoard.instance.play(Sfx.rainNote, variant: min(_landed, 5), volume: 0.18);
       Haptics.light();
-      RewardFlight.arrivalsOf(widget.currency).value++;
+      RewardFlight.arrivalsOf(widget.target).value++;
     }
   }
 

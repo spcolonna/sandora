@@ -102,7 +102,167 @@ def tile(name, subject):
         f'any background, water, frame, tile border or square; {NO_TEXT}; extra objects; {NO_STYLE}.')
 
 
+# El patio pintado (pantalla principal): realista, en perspectiva, como la
+# referencia `store/art/style/style_courtyard_ref.webp`. Las capas comparten el
+# mismo lienzo 2:3 y se apilan una sobre otra; la cámara las mueve a distinto
+# ritmo al acercarse y moverse por el jardín (parallax).
+COURT_REF = 'store/art/style/style_courtyard_ref.webp'
+
+COURT_STYLE = ('Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of '
+               'the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep '
+               'green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the '
+               'distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast '
+               'shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.')
+
+COURT_CAMERA = ('Camera: exactly the same as the reference image: standing in the open doorway of the house at eye '
+                'level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), '
+                'one-point perspective with the vanishing point near the gate in the back wall.')
+
+COURT_CANVAS = ('Shared canvas: this is one layer of a scene that the game builds by stacking several layers of the same '
+                '1024×1536 canvas exactly on top of each other. Paint ONLY what this layer describes, in exactly the '
+                'position described (in percent of the canvas height from the top), and leave everything else fully '
+                'transparent. Reference lines shared by all layers: the top of the back wall at 40%, the base of the '
+                'back wall (where the gravel starts) at 50%, the bottom edge of the canvas is the gravel right in front '
+                'of the viewer. The game shows the central 70% of the width first and lets the player pan to the sides, '
+                'so the sides must be complete too.')
+
+
+def court_layer(name, opaque, purpose, subject, region, exclude):
+    """Capa del patio pintado, del lienzo compartido."""
+    return img(name, PORTRAIT_OPAQUE if opaque else PORTRAIT_ALPHA + ALPHA_FALLBACK,
+               f'{purpose} It is part of the main screen of {GAME}: the player sees it every time they open the app, '
+               'so it must look beautiful and alive.',
+               subject, f'{COURT_CAMERA} {COURT_CANVAS} {region}',
+               f'{exclude}; {NO_TEXT}; people or animals; frame, border or door frame; {NO_STYLE}.',
+               style=COURT_STYLE)
+
+
+def court_obj(name, subject, size_hint):
+    """Objeto suelto del patio pintado, en la perspectiva de la referencia."""
+    return img(
+        name, SQUARE_ALPHA + ALPHA_FALLBACK,
+        f'This is an object that stands in the painted courtyard on the main screen of {GAME}. The game places it on '
+        f'the painted gravel and shows it fairly large ({size_hint}), so the image must contain ONLY the object, and '
+        'it must match the attached courtyard reference perfectly in perspective, light and brushwork.',
+        subject,
+        f'{COURT_CAMERA} The object is seen from that camera (slightly from above), centered, filling about 85% of '
+        'the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it '
+        'toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four '
+        'corners stay empty and transparent.',
+        f'any background, gravel bed, wall, sky or scenery behind the object; {NO_TEXT}; other objects; people or '
+        f'animals; {NO_STYLE}.',
+        style=COURT_STYLE)
+
+
 BLOCKS = [
+    dict(
+        id='A', title='Patio pintado: capas (lo más importante)', folder='store/art/court/',
+        intro=('**Primero que todo:** la pantalla principal. Son las capas del patio en perspectiva, como la imagen de '
+               'referencia, que se apilan en el mismo lienzo; la cámara las mueve a distinto ritmo al acercarte y '
+               'moverte por el jardín, y eso da la profundidad. **Adjuntá `' + COURT_REF + '` en la conversación** '
+               'antes de pegar el prompt (es tu imagen de referencia, ya copiada ahí). Mientras no estén, el juego usa '
+               'esa misma imagen recortada (`bg_court_ref`).'),
+        images=[
+            court_layer(
+                'bg_court_sky', True,
+                'This is the farthest layer of the painted courtyard: the sky.',
+                'A soft, luminous morning sky: pale blue at the top fading to warm cream near the horizon, with a few '
+                'soft, wispy, sunlit clouds. Calm and airy.',
+                'The sky fills the whole canvas (it is the only opaque layer). The lower half can stay plain and pale: '
+                'mountains and the wall will cover it.',
+                'mountains, hills, trees, ground, buildings, sun disk or birds'),
+            court_layer(
+                'bg_court_far', False,
+                'This is a far layer of the painted courtyard: the distant mountains and forest beyond the wall.',
+                'Layered ranges of soft rounded mountains fading into morning mist, the nearest ridges covered in '
+                'dense green forest with a few conifers, valleys filled with light haze. Exactly like the distance in '
+                'the reference image.',
+                'The mountains occupy only the band from 22% to 52% of the canvas height (their lower part will be '
+                'hidden behind the wall). Everything above the ridgelines is fully transparent.',
+                'sky color or clouds above the ridges; the wall; buildings'),
+            court_layer(
+                'bg_court_wall', False,
+                'This is the back wall layer of the painted courtyard.',
+                'A long traditional earthen courtyard wall (tsuiji-bei) of warm, weathered cream plaster with a dark '
+                'gray tiled coping on top, running across the whole width. Right of center, a sturdy wooden gate with '
+                'its own small tiled roof and a small hanging lantern beside it. Behind and along the top of the wall, '
+                'the soft crowns of a few garden trees and shrubs. At the foot of the wall, a narrow strip of moss, '
+                'ferns and low shrubs.',
+                'The wall runs from 40% (top of the coping) to 50% (its base) of the canvas height; the tree crowns '
+                'behind it may rise up to 30%. Everything above the tree crowns and below 51% is fully transparent.',
+                'mountains, sky, the gravel courtyard'),
+            court_layer(
+                'bg_court_ground', False,
+                'This is the main ground layer of the painted courtyard, where the games of the garden happen.',
+                'The courtyard floor: a large field of pale, finely raked gravel with flowing concentric ripple '
+                'patterns, bordered by soft mounds of deep green moss and a few small rocks along the edges. A path of '
+                'large flat stepping stones starts at the bottom center and leads into the courtyard. Leave these spots '
+                'EMPTY so the game can place objects on them: a round mossy island on the left at 60% height (a stone '
+                'tower goes there), a wide open raked area in the center from 55% to 80% (the sand garden), a flat '
+                'empty gravel area on the right side near the wall at 50% to 60% (a wooden meditation deck goes '
+                'there), an empty mossy corner at the lower right at 75% to 88% (clay jars go there), and an empty '
+                'spot at the foot of the wall on the left of the gate (a notice board goes there).',
+                'The ground fills from 50% of the canvas height down to the bottom edge, across the full width. '
+                'Everything above 50% is fully transparent.',
+                'the wall, sky or mountains; lanterns, stone towers, wooden decks, jars, boards or other objects on the '
+                'gravel; big trees'),
+            court_layer(
+                'bg_court_side_left', False,
+                'This is the left framing layer of the painted courtyard, close to the viewer.',
+                'A tall, lush clump of green bamboo rising along the left edge from the bottom to the top of the '
+                'canvas, leaves catching the light. At its foot, a stone water basin (tsukubai) filled by a bamboo '
+                'spout, with moss and a few rocks around it.',
+                'Only the left 30% of the width is painted (the bamboo leaves may reach a little further near the top); '
+                'everything else is fully transparent. The basin sits at about 52% to 58% of the canvas height.',
+                'anything in the center or on the right; ground beyond the moss under the basin; sky'),
+            court_layer(
+                'bg_court_side_right', False,
+                'This is the right framing layer of the painted courtyard, close to the viewer.',
+                'A slender, graceful deciduous tree with a light, airy canopy rising along the right edge, a few '
+                'potted plants at its foot near the wall, and a low leafy shrub with ferns at the very bottom right.',
+                'Only the right 25% of the width is painted (the tree canopy may reach a little further near the top); '
+                'everything else is fully transparent.',
+                'anything in the center or on the left; the wall; sky; wooden deck'),
+            court_obj('obj_court_deck', 'A low square wooden meditation platform (engawa-style deck) of warm aged '
+                      'planks on short wooden legs, with a large flat linen meditation cushion (zabuton) in the middle, '
+                      'two small clay tea bowls on the deck and two potted plants at the back corner.',
+                      'about a third of the screen width'),
+            court_obj('obj_court_tower_base', 'A round, soft mound of deep green moss with a low, wide, flat granite '
+                      'slab on top, like a pedestal. Nothing on the slab: the game stacks stones on it.',
+                      'about a quarter of the screen width'),
+            court_obj('obj_court_jars', 'Three large weathered clay rain jars of different heights and earthy glazes '
+                      '(rust, deep teal, sand) standing together on flat stones, with moss at their feet and a little '
+                      'water shining in the openings.', 'about a quarter of the screen width'),
+            court_obj('obj_court_board', 'A Japanese wooden notice board for garden records: two dark wooden posts, a '
+                      'small curved dark tile roof on top, and a warm wooden panel with three or four pinned sheets of '
+                      'washi paper showing only faint ink brush marks (no readable writing). Seen slightly from the '
+                      'left, as it stands at the foot of the wall.', 'about a fifth of the screen width'),
+        ]),
+    dict(
+        id='B', title='Patio pintado: detalles y la entrada', folder='store/art/court/',
+        intro=('Segundo en importancia: lo que da vida al patio y la vista desde la puerta al entrar. **Adjuntá `'
+               + COURT_REF + '`.**'),
+        images=[
+            court_obj('obj_court_lantern_tall', 'A tall granite garden lantern (kasuga tōrō) with a warm glowing '
+                      'light window, a little moss on its roof.', 'about a fifth of the screen width'),
+            court_obj('obj_court_lantern_small', 'A small, squat granite garden lantern (yukimi tōrō) on a mossy rock, '
+                      'with a softly glowing light window.', 'about an eighth of the screen width'),
+            court_obj('obj_court_rock', 'A large upright rough granite rock on a round mound of moss with two small '
+                      'companion stones, the centerpiece of a raked gravel garden.', 'about a fifth of the screen '
+                      'width'),
+            court_obj('obj_court_rake', 'A wooden bamboo garden rake (for raking gravel) leaning at an angle, as if '
+                      'resting against something, its teeth touching the ground.', 'about a sixth of the screen width'),
+            img('fg_court_doorway', PORTRAIT_ALPHA + ALPHA_FALLBACK,
+                f'This is the view from inside the house when the player opens the garden doors in {GAME}: the '
+                'wooden door frame and threshold are drawn on top of the courtyard, which shows through the opening.',
+                'The inside of a traditional Japanese house: dark aged wooden door posts on both sides, a wide wooden '
+                'threshold beam and a few polished wooden floor planks at the bottom, catching warm light coming from '
+                'the garden. The opening between the posts is EMPTY.',
+                f'{COURT_CAMERA} The posts occupy the left 9% and the right 9% of the width, the threshold and floor the '
+                'bottom 14%. Everything inside the opening (the whole center) is fully transparent.',
+                f'the garden, sky or anything seen through the opening; sliding paper panels covering the opening; '
+                f'{NO_TEXT}; people; {NO_STYLE}.', style=COURT_STYLE),
+        ]),
     dict(
         id='0', title='Guía de estilo', folder='store/art/style/',
         intro=('Van primero: fijan el estilo de todo lo demás. Guardalas en `store/art/style/` y **adjuntá '
@@ -610,6 +770,9 @@ BLOCKS = [
 
 # Imágenes ya integradas al juego: no se vuelven a pedir. Nombre -> (dónde está, para qué se usa).
 INCLUDED = {
+    'style_courtyard_ref': ('store/art/style/style_courtyard_ref.webp', 'Tu referencia del patio (no se sube). '
+                            'Recortada sin el marco de la puerta es `assets/images/court/bg_court_ref.webp`, el patio '
+                            'provisorio de la pantalla principal (`GardenLayout.court`) hasta tener las capas.'),
     'logo_symbol': ('assets/images/brand/logo_symbol.webp', 'Símbolo del logo (piedra sobre arena rastrillada). '
                     'Pantalla de título (`lib/ui/title_intro.dart`); referencia para el ícono.'),
     'logo_wordmark': ('assets/images/brand/logo_wordmark.webp', 'Nombre "Sandora". Pantalla de título. La versión clara para '
@@ -753,7 +916,7 @@ de estilo (Lote 0) y el arte del MVP (Lote 1 del GDD). **Generado por `tool/gen_
   sumarlo a `INCLUDED` en este script. Así sale de los bloques y queda en "Ya incluidas", al final.
 - Si una sale mal, regenerala sola: pegá `Create ONE single image. Start immediately, without asking questions.` y
   debajo el texto de esa imagen (desde su línea `Create a ...` hasta su `DO NOT INCLUDE`).
-- **Orden:** primero el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
+- **Orden:** primero los Bloques A y B (el patio pintado de la pantalla principal, con su referencia adjunta). Después el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
   `store/art/style/style_keyart.webp` como referencia.
 
 **Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_placeholder_audio.py`; los finales

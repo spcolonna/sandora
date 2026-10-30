@@ -15,7 +15,7 @@ de estilo (Lote 0) y el arte del MVP (Lote 1 del GDD). **Generado por `tool/gen_
   sumarlo a `INCLUDED` en este script. Así sale de los bloques y queda en "Ya incluidas", al final.
 - Si una sale mal, regenerala sola: pegá `Create ONE single image. Start immediately, without asking questions.` y
   debajo el texto de esa imagen (desde su línea `Create a ...` hasta su `DO NOT INCLUDE`).
-- **Orden:** primero el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
+- **Orden:** primero los Bloques A y B (el patio pintado de la pantalla principal, con su referencia adjunta). Después el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
   `store/art/style/style_keyart.webp` como referencia.
 
 **Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_placeholder_audio.py`; los finales
@@ -25,6 +25,219 @@ conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de l
 ---
 
 # Para generar ahora
+
+## Bloque A — Patio pintado: capas (lo más importante) (10) ⬜
+
+Archivos, en orden: `bg_court_sky.png`, `bg_court_far.png`, `bg_court_wall.png`, `bg_court_ground.png`, `bg_court_side_left.png`, `bg_court_side_right.png`, `obj_court_deck.png`, `obj_court_tower_base.png`, `obj_court_jars.png`, `obj_court_board.png`. Carpeta: `store/art/court/`.
+**Primero que todo:** la pantalla principal. Son las capas del patio en perspectiva, como la imagen de referencia, que se apilan en el mismo lienzo; la cámara las mueve a distinto ritmo al acercarte y moverte por el jardín, y eso da la profundidad. **Adjuntá `store/art/style/style_courtyard_ref.webp` en la conversación** antes de pegar el prompt (es tu imagen de referencia, ya copiada ahí). Mientras no estén, el juego usa esa misma imagen recortada (`bg_court_ref`).
+
+```
+Generate exactly 10 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
+
+Image 1 — bg_court_sky:
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), fully opaque, with NO transparency.
+
+PURPOSE: This is the farthest layer of the painted courtyard: the sky. It is part of the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player sees it every time they open the app, so it must look beautiful and alive.
+
+SUBJECT: A soft, luminous morning sky: pale blue at the top fading to warm cream near the horizon, with a few soft, wispy, sunlit clouds. Calm and airy.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. Shared canvas: this is one layer of a scene that the game builds by stacking several layers of the same 1024×1536 canvas exactly on top of each other. Paint ONLY what this layer describes, in exactly the position described (in percent of the canvas height from the top), and leave everything else fully transparent. Reference lines shared by all layers: the top of the back wall at 40%, the base of the back wall (where the gravel starts) at 50%, the bottom edge of the canvas is the gravel right in front of the viewer. The game shows the central 70% of the width first and lets the player pan to the sides, so the sides must be complete too. The sky fills the whole canvas (it is the only opaque layer). The lower half can stay plain and pale: mountains and the wall will cover it.
+
+DO NOT INCLUDE: mountains, hills, trees, ground, buildings, sun disk or birds; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame, border or door frame; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 2 — bg_court_far:
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a far layer of the painted courtyard: the distant mountains and forest beyond the wall. It is part of the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player sees it every time they open the app, so it must look beautiful and alive.
+
+SUBJECT: Layered ranges of soft rounded mountains fading into morning mist, the nearest ridges covered in dense green forest with a few conifers, valleys filled with light haze. Exactly like the distance in the reference image.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. Shared canvas: this is one layer of a scene that the game builds by stacking several layers of the same 1024×1536 canvas exactly on top of each other. Paint ONLY what this layer describes, in exactly the position described (in percent of the canvas height from the top), and leave everything else fully transparent. Reference lines shared by all layers: the top of the back wall at 40%, the base of the back wall (where the gravel starts) at 50%, the bottom edge of the canvas is the gravel right in front of the viewer. The game shows the central 70% of the width first and lets the player pan to the sides, so the sides must be complete too. The mountains occupy only the band from 22% to 52% of the canvas height (their lower part will be hidden behind the wall). Everything above the ridgelines is fully transparent.
+
+DO NOT INCLUDE: sky color or clouds above the ridges; the wall; buildings; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame, border or door frame; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 3 — bg_court_wall:
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is the back wall layer of the painted courtyard. It is part of the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player sees it every time they open the app, so it must look beautiful and alive.
+
+SUBJECT: A long traditional earthen courtyard wall (tsuiji-bei) of warm, weathered cream plaster with a dark gray tiled coping on top, running across the whole width. Right of center, a sturdy wooden gate with its own small tiled roof and a small hanging lantern beside it. Behind and along the top of the wall, the soft crowns of a few garden trees and shrubs. At the foot of the wall, a narrow strip of moss, ferns and low shrubs.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. Shared canvas: this is one layer of a scene that the game builds by stacking several layers of the same 1024×1536 canvas exactly on top of each other. Paint ONLY what this layer describes, in exactly the position described (in percent of the canvas height from the top), and leave everything else fully transparent. Reference lines shared by all layers: the top of the back wall at 40%, the base of the back wall (where the gravel starts) at 50%, the bottom edge of the canvas is the gravel right in front of the viewer. The game shows the central 70% of the width first and lets the player pan to the sides, so the sides must be complete too. The wall runs from 40% (top of the coping) to 50% (its base) of the canvas height; the tree crowns behind it may rise up to 30%. Everything above the tree crowns and below 51% is fully transparent.
+
+DO NOT INCLUDE: mountains, sky, the gravel courtyard; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame, border or door frame; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 4 — bg_court_ground:
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is the main ground layer of the painted courtyard, where the games of the garden happen. It is part of the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player sees it every time they open the app, so it must look beautiful and alive.
+
+SUBJECT: The courtyard floor: a large field of pale, finely raked gravel with flowing concentric ripple patterns, bordered by soft mounds of deep green moss and a few small rocks along the edges. A path of large flat stepping stones starts at the bottom center and leads into the courtyard. Leave these spots EMPTY so the game can place objects on them: a round mossy island on the left at 60% height (a stone tower goes there), a wide open raked area in the center from 55% to 80% (the sand garden), a flat empty gravel area on the right side near the wall at 50% to 60% (a wooden meditation deck goes there), an empty mossy corner at the lower right at 75% to 88% (clay jars go there), and an empty spot at the foot of the wall on the left of the gate (a notice board goes there).
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. Shared canvas: this is one layer of a scene that the game builds by stacking several layers of the same 1024×1536 canvas exactly on top of each other. Paint ONLY what this layer describes, in exactly the position described (in percent of the canvas height from the top), and leave everything else fully transparent. Reference lines shared by all layers: the top of the back wall at 40%, the base of the back wall (where the gravel starts) at 50%, the bottom edge of the canvas is the gravel right in front of the viewer. The game shows the central 70% of the width first and lets the player pan to the sides, so the sides must be complete too. The ground fills from 50% of the canvas height down to the bottom edge, across the full width. Everything above 50% is fully transparent.
+
+DO NOT INCLUDE: the wall, sky or mountains; lanterns, stone towers, wooden decks, jars, boards or other objects on the gravel; big trees; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame, border or door frame; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 5 — bg_court_side_left:
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is the left framing layer of the painted courtyard, close to the viewer. It is part of the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player sees it every time they open the app, so it must look beautiful and alive.
+
+SUBJECT: A tall, lush clump of green bamboo rising along the left edge from the bottom to the top of the canvas, leaves catching the light. At its foot, a stone water basin (tsukubai) filled by a bamboo spout, with moss and a few rocks around it.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. Shared canvas: this is one layer of a scene that the game builds by stacking several layers of the same 1024×1536 canvas exactly on top of each other. Paint ONLY what this layer describes, in exactly the position described (in percent of the canvas height from the top), and leave everything else fully transparent. Reference lines shared by all layers: the top of the back wall at 40%, the base of the back wall (where the gravel starts) at 50%, the bottom edge of the canvas is the gravel right in front of the viewer. The game shows the central 70% of the width first and lets the player pan to the sides, so the sides must be complete too. Only the left 30% of the width is painted (the bamboo leaves may reach a little further near the top); everything else is fully transparent. The basin sits at about 52% to 58% of the canvas height.
+
+DO NOT INCLUDE: anything in the center or on the right; ground beyond the moss under the basin; sky; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame, border or door frame; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 6 — bg_court_side_right:
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is the right framing layer of the painted courtyard, close to the viewer. It is part of the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player sees it every time they open the app, so it must look beautiful and alive.
+
+SUBJECT: A slender, graceful deciduous tree with a light, airy canopy rising along the right edge, a few potted plants at its foot near the wall, and a low leafy shrub with ferns at the very bottom right.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. Shared canvas: this is one layer of a scene that the game builds by stacking several layers of the same 1024×1536 canvas exactly on top of each other. Paint ONLY what this layer describes, in exactly the position described (in percent of the canvas height from the top), and leave everything else fully transparent. Reference lines shared by all layers: the top of the back wall at 40%, the base of the back wall (where the gravel starts) at 50%, the bottom edge of the canvas is the gravel right in front of the viewer. The game shows the central 70% of the width first and lets the player pan to the sides, so the sides must be complete too. Only the right 25% of the width is painted (the tree canopy may reach a little further near the top); everything else is fully transparent.
+
+DO NOT INCLUDE: anything in the center or on the left; the wall; sky; wooden deck; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame, border or door frame; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 7 — obj_court_deck:
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a third of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: A low square wooden meditation platform (engawa-style deck) of warm aged planks on short wooden legs, with a large flat linen meditation cushion (zabuton) in the middle, two small clay tea bowls on the deck and two potted plants at the back corner.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 8 — obj_court_tower_base:
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a quarter of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: A round, soft mound of deep green moss with a low, wide, flat granite slab on top, like a pedestal. Nothing on the slab: the game stacks stones on it.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 9 — obj_court_jars:
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a quarter of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: Three large weathered clay rain jars of different heights and earthy glazes (rust, deep teal, sand) standing together on flat stones, with moss at their feet and a little water shining in the openings.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 10 — obj_court_board:
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a fifth of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: A Japanese wooden notice board for garden records: two dark wooden posts, a small curved dark tile roof on top, and a warm wooden panel with three or four pinned sheets of washi paper showing only faint ink brush marks (no readable writing). Seen slightly from the left, as it stands at the foot of the wall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+## Bloque B — Patio pintado: detalles y la entrada (5) ⬜
+
+Archivos, en orden: `obj_court_lantern_tall.png`, `obj_court_lantern_small.png`, `obj_court_rock.png`, `obj_court_rake.png`, `fg_court_doorway.png`. Carpeta: `store/art/court/`.
+Segundo en importancia: lo que da vida al patio y la vista desde la puerta al entrar. **Adjuntá `store/art/style/style_courtyard_ref.webp`.**
+
+```
+Generate exactly 5 separate images. Start generating immediately, without asking questions or requesting confirmation. Each image has its own complete instructions below; follow them separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.
+
+Image 1 — obj_court_lantern_tall:
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a fifth of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: A tall granite garden lantern (kasuga tōrō) with a warm glowing light window, a little moss on its roof.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 2 — obj_court_lantern_small:
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about an eighth of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: A small, squat granite garden lantern (yukimi tōrō) on a mossy rock, with a softly glowing light window.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 3 — obj_court_rock:
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a fifth of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: A large upright rough granite rock on a round mound of moss with two small companion stones, the centerpiece of a raked gravel garden.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 4 — obj_court_rake:
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a sixth of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: A wooden bamboo garden rake (for raking gravel) leaning at an angle, as if resting against something, its teeth touching the ground.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+
+Image 5 — fg_court_doorway:
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is the view from inside the house when the player opens the garden doors in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the wooden door frame and threshold are drawn on top of the courtyard, which shows through the opening.
+
+SUBJECT: The inside of a traditional Japanese house: dark aged wooden door posts on both sides, a wide wooden threshold beam and a few polished wooden floor planks at the bottom, catching warm light coming from the garden. The opening between the posts is EMPTY.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The posts occupy the left 9% and the right 9% of the width, the threshold and floor the bottom 14%. Everything inside the opening (the whole center) is fully transparent.
+
+DO NOT INCLUDE: the garden, sky or anything seen through the opening; sliding paper panels covering the opening; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
 
 ## Bloque 0 — Guía de estilo (2) ⬜
 
@@ -692,10 +905,11 @@ DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame o
 
 ---
 
-# Ya incluidas (48)
+# Ya incluidas (49)
 
 | Imagen | Archivo en el juego | Uso |
 |---|---|---|
+| `style_courtyard_ref` | `store/art/style/style_courtyard_ref.webp` | Tu referencia del patio (no se sube). Recortada sin el marco de la puerta es `assets/images/court/bg_court_ref.webp`, el patio provisorio de la pantalla principal (`GardenLayout.court`) hasta tener las capas. |
 | `logo_symbol` | `assets/images/brand/logo_symbol.webp` | Símbolo del logo (piedra sobre arena rastrillada). Pantalla de título (`lib/ui/title_intro.dart`); referencia para el ícono. |
 | `logo_wordmark` | `assets/images/brand/logo_wordmark.webp` | Nombre "Sandora". Pantalla de título. La versión clara para fondos oscuros se saca con código cuando haga falta. |
 | `style_keyart` | `store/art/style/style_keyart.webp` | Referencia de estilo: no va en el juego (`store/` no se sube al repo). Adjuntala en cada bloque siguiente. |

@@ -63,8 +63,11 @@ class _SkyLifePainter extends CustomPainter {
       final span = w + 160;
       final x = (i * 157 + t * speed) % span - 80;
       final y = h * (0.06 + 0.05 * (i % 3)) + (i >= 3 ? h * 0.02 : 0);
-      final p = Paint()..color = cloud.withValues(alpha: a);
       final scale = 0.8 + 0.1 * (i % 3) + (i >= 3 ? 0.35 : 0);
+      // Difusas, como pintadas en húmedo (círculos nítidos se ven pegados).
+      final p = Paint()
+        ..color = cloud.withValues(alpha: a * 0.8)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 9 * scale);
       for (final (dx, dy, r) in [(0.0, 0.0, 16.0), (18.0, -6.0, 20.0), (38.0, 0.0, 15.0), (20.0, 6.0, 16.0)]) {
         canvas.drawCircle(Offset(x + dx * scale, y + dy * scale), r * scale, p);
       }

@@ -15,10 +15,10 @@ IconData _weatherIcon(Weather w, DayPhase phase) => switch (w) {
 
 /// Momento del día, clima y, si hay, el regalo que dejaron en el jardín. Se
 /// toca para ver qué pasa y elegir el clima de donde está el jugador.
-class _MomentChip extends StatelessWidget {
+class MomentChip extends StatelessWidget {
   final DateTime now;
   final Weather weather;
-  const _MomentChip({required this.now, required this.weather});
+  const MomentChip({super.key, required this.now, required this.weather});
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +30,9 @@ class _MomentChip extends StatelessWidget {
     final open = gifts.where((g) => p.giftsLeft(g, weather: weather, afterRain: after, now: now) > 0).firstOrNull;
     return GestureDetector(
       onTap: () => _showNowSheet(context, now: now, weather: weather),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Palette.paper.withValues(alpha: 0.88),
-          borderRadius: BorderRadius.circular(14),
-        ),
+      child: Glass(
+        radius: BorderRadius.circular(16),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

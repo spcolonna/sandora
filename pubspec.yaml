@@ -73,6 +73,7 @@ flutter:
     - assets/images/icons/
     - assets/images/temple/
     - assets/images/bg/
+    - assets/images/court/
     - assets/images/decor/
     - assets/images/rain/
     - assets/images/stack/

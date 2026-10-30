@@ -19,6 +19,8 @@ class SceneArt {
     'bg_base_far': 'bg',
     'bg_base_ground': 'bg',
     'bg_base_foliage': 'bg',
+    // Patio pintado: por ahora un solo cuadro; después, en capas.
+    'bg_court_ref': 'court',
     'bg_rain_roof': 'rain',
     'obj_rain_vessel_01': 'rain',
     'obj_rain_vessel_02': 'rain',
@@ -94,13 +96,13 @@ ui.Rect? drawArtIn(ui.Canvas canvas, ui.Image? img, ui.Rect r) {
 
 /// Dibuja [img] cubriendo todo [r] sin deformarlo; lo que sobra a los costados
 /// (o arriba y abajo) queda afuera.
-void drawArtCover(ui.Canvas canvas, ui.Image img, ui.Rect r) {
+void drawArtCover(ui.Canvas canvas, ui.Image img, ui.Rect r, {ui.Paint? paint}) {
   final k = (r.width / img.width) > (r.height / img.height) ? r.width / img.width : r.height / img.height;
   final w = r.width / k, h = r.height / k;
   canvas.drawImageRect(
     img,
     ui.Rect.fromLTWH((img.width - w) / 2, (img.height - h) / 2, w, h),
     r,
-    ui.Paint()..filterQuality = ui.FilterQuality.medium,
+    (paint ?? ui.Paint())..filterQuality = ui.FilterQuality.medium,
   );
 }

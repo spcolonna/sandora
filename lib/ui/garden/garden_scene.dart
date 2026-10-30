@@ -15,11 +15,10 @@ import 'garden_forest.dart';
 import 'garden_decor.dart';
 import 'scene_art.dart';
 
-/// Lugares del jardín que se tocan: cada minijuego, el Mercado, el tablón y
-/// el cojín de meditación. Los del patio están en la primera vista; los del
+/// Lugares del jardín que se tocan: cada minijuego, el tablón y el cojín de
+/// meditación (el Mercado es una vista aparte, desde arriba). Los del patio están en la primera vista; los del
 /// estanque, en la segunda, y los del bosque, en la tercera.
 enum Place {
-  market,
   board,
   meditation,
   sand,
@@ -59,67 +58,102 @@ class GardenLayout {
   /// Dónde cuelgan los faroles que se encienden al anochecer.
   final List<Offset> lanterns;
 
-  GardenLayout._(this.size, this.ground, this.places, this.labels, this.lanterns);
+  /// El patio pintado (`bg_court_*`): todo sale del arte y el código solo
+  /// pone encima las decoraciones, la luz y el clima.
+  final bool painted;
+
+  GardenLayout._(this.size, this.ground, this.places, this.labels, this.lanterns, {this.painted = false});
+
+  /// Proporción del arte del patio pintado (ancho / alto).
+  static const courtAspect = 704 / 1578;
+
+  /// Si ya está el arte del patio pintado.
+  static bool get hasCourtArt => SceneArt.instance[courtArt] != null;
+  static const courtArt = 'bg_court_ref';
+
+  /// El patio pintado: cada lugar es lo que se ve en el arte (en fracciones
+  /// del arte, que llena [size] con su proporción).
+  factory GardenLayout.court(Size size) {
+    final w = size.width, h = size.height;
+    Rect at(double l, double t, double r, double b) => Rect.fromLTRB(w * l, h * t, w * r, h * b);
+    final places = {
+      Place.board: at(0.7, 0.37, 0.88, 0.47),
+      Place.meditation: at(0.7, 0.48, 0.99, 0.6),
+      Place.stack: at(0.12, 0.55, 0.37, 0.71),
+      Place.sand: at(0.39, 0.6, 0.74, 0.8),
+      Place.rain: at(0.76, 0.73, 0.99, 0.85),
+    };
+    return GardenLayout._(
+      size,
+      at(0.06, 0.49, 0.94, 1),
+      places,
+      {
+        Place.board: places[Place.board]!.bottomCenter,
+        Place.meditation: places[Place.meditation]!.bottomCenter,
+        Place.stack: places[Place.stack]!.bottomCenter,
+        Place.sand: Offset(w * 0.565, h * 0.74),
+        Place.rain: Offset(w * 0.86, h * 0.86),
+      },
+      [Offset(w * 0.49, h * 0.466), Offset(w * 0.07, h * 0.765), Offset(w * 0.92, h * 0.42)],
+      painted: true,
+    );
+  }
 
   /// 0 el patio, 1 el estanque, 2 el bosque.
   int get side => places.keys.first.side;
 
-  factory GardenLayout(Size size, int patio, {int side = 0}) {
-    if (side == 1) return GardenLayout._east(size);
-    if (side == 2) return GardenLayout._forest(size);
-    final w = size.width, h = size.height;
-    const inset = [0.1, 0.04, 0.0], top = [0.6, 0.56, 0.52];
+  /// [bottom] es lo que tapa la barra de abajo: los lugares terminan antes y
+  /// el suelo sigue hasta el borde.
+  factory GardenLayout(Size size, int patio, {int side = 0, double bottom = 0}) {
+    if (side == 1) return GardenLayout._east(size, bottom);
+    if (side == 2) return GardenLayout._forest(size, bottom);
+    final w = size.width, h = size.height, hb = h - bottom;
+    const inset = [0.07, 0.035, 0.0], top = [0.5, 0.47, 0.44];
     final k = patio.clamp(0, 2);
     final ground = Rect.fromLTRB(w * inset[k], h * top[k], w * (1 - inset[k]), h);
-    final gh = ground.height;
+    final gh = hb - ground.top;
     final sand = Rect.fromLTRB(
       ground.left + w * 0.05,
       ground.top + gh * 0.08,
       ground.left + ground.width * 0.66,
-      ground.top + gh * 0.62,
+      ground.top + gh * 0.6,
     );
     final stack = Rect.fromLTRB(sand.right + w * 0.04, ground.top + gh * 0.02, ground.right - w * 0.03, sand.bottom);
-    final rain = Rect.fromLTRB(ground.left + w * 0.05, sand.bottom + gh * 0.08, ground.right - w * 0.05, h - gh * 0.03);
-    final market = Rect.fromLTRB(w * 0.03, h * 0.29, w * 0.35, ground.top - h * 0.012);
-    final board = Rect.fromLTRB(w * 0.39, h * 0.35, w * 0.55, ground.top - h * 0.016);
-    final meditation = Rect.fromLTRB(w * 0.58, h * 0.17, w * 0.98, ground.top - h * 0.006);
+    final rain = Rect.fromLTRB(
+      ground.left + w * 0.05,
+      sand.bottom + gh * 0.07,
+      ground.right - w * 0.05,
+      hb - gh * 0.02,
+    );
+    // Detrás del patio, sobre el horizonte: el tablón y el pabellón.
+    final board = Rect.fromLTRB(w * 0.07, h * 0.29, w * 0.33, ground.top - h * 0.012);
+    final meditation = Rect.fromLTRB(w * 0.52, h * 0.12, w * 0.97, ground.top - h * 0.006);
     return GardenLayout._(
       size,
       ground,
+      {Place.board: board, Place.meditation: meditation, Place.sand: sand, Place.stack: stack, Place.rain: rain},
       {
-        Place.market: market,
-        Place.board: board,
-        Place.meditation: meditation,
-        Place.sand: sand,
-        Place.stack: stack,
-        Place.rain: rain,
-      },
-      {
-        Place.market: market.bottomCenter,
         Place.board: board.bottomCenter,
         Place.meditation: Offset(meditation.left + meditation.width * 0.55, meditation.bottom),
         Place.sand: Offset(sand.center.dx, sand.bottom),
         Place.stack: stack.bottomCenter,
         Place.rain: Offset(rain.left + rain.width * 0.82, rain.center.dy),
       },
-      [
-        Offset(market.right - market.width * 0.1, market.top + market.height * 0.42),
-        Offset(meditation.left + meditation.width * 0.1, meditation.bottom - meditation.height * 0.3),
-      ],
+      [Offset(meditation.left + meditation.width * 0.1, meditation.bottom - meditation.height * 0.3)],
     );
   }
 
   /// La vista del estanque: el agua con lotos, el shishi-odoshi, el bonsái,
   /// las piedras con musgo y el camino de hojas.
-  factory GardenLayout._east(Size size) {
-    final w = size.width, h = size.height;
+  factory GardenLayout._east(Size size, double bottom) {
+    final w = size.width, h = size.height, hb = h - bottom;
     final ground = Rect.fromLTRB(0, h * 0.56, w, h);
-    final gh = ground.height;
+    final gh = hb - ground.top;
     final pond = Rect.fromLTRB(w * 0.05, ground.top + gh * 0.06, w * 0.64, ground.top + gh * 0.52);
     final shishi = Rect.fromLTRB(w * 0.68, ground.top - h * 0.1, w * 0.97, ground.top + gh * 0.46);
-    final bonsai = Rect.fromLTRB(w * 0.34, h * 0.3, w * 0.64, ground.top - h * 0.01);
-    final moss = Rect.fromLTRB(w * 0.04, ground.top + gh * 0.6, w * 0.46, h - gh * 0.04);
-    final leaves = Rect.fromLTRB(w * 0.5, ground.top + gh * 0.58, w * 0.96, h - gh * 0.04);
+    final bonsai = Rect.fromLTRB(w * 0.39, h * 0.3, w * 0.69, ground.top - h * 0.01);
+    final moss = Rect.fromLTRB(w * 0.04, ground.top + gh * 0.6, w * 0.46, hb - gh * 0.04);
+    final leaves = Rect.fromLTRB(w * 0.5, ground.top + gh * 0.58, w * 0.96, hb - gh * 0.04);
     // Sobre la loma del fondo: el pabellón de caligrafía y el campanario.
     final enso = Rect.fromLTRB(w * 0.04, h * 0.3, w * 0.3, ground.top - h * 0.01);
     final bell = Rect.fromLTRB(w * 0.7, h * 0.13, w * 0.96, shishi.top - h * 0.02);
@@ -149,13 +183,13 @@ class GardenLayout {
   }
 
   /// La vista del bosque: el bambú, la casa de té y el río.
-  factory GardenLayout._forest(Size size) {
-    final w = size.width, h = size.height;
+  factory GardenLayout._forest(Size size, double bottom) {
+    final w = size.width, h = size.height, hb = h - bottom;
     final ground = Rect.fromLTRB(0, h * 0.56, w, h);
-    final gh = ground.height;
+    final gh = hb - ground.top;
     final flute = Rect.fromLTRB(w * 0.03, h * 0.14, w * 0.44, ground.top + gh * 0.24);
     final matcha = Rect.fromLTRB(w * 0.5, h * 0.3, w * 0.97, ground.top + gh * 0.24);
-    final lanterns = Rect.fromLTRB(0, ground.top + gh * 0.34, w, h - gh * 0.02);
+    final lanterns = Rect.fromLTRB(0, ground.top + gh * 0.34, w, hb - gh * 0.02);
     return GardenLayout._(
       size,
       ground,
@@ -182,6 +216,21 @@ List<Color> skyColors(double daylight, double warmth, {required bool morning}) {
   final warm = morning ? _skyDawn : _skyDusk;
   return [for (var i = 0; i < 2; i++) Color.lerp(Color.lerp(_skyNight[i], _skyDay[i], daylight), warm[i], warmth)!];
 }
+
+/// Dónde va el jardín en la pantalla: abajo, con la proporción para la que
+/// está pensado (o más bajo si no entra debajo de [top]); arriba queda cielo.
+Rect gardenStage(Size screen, {double top = 0}) {
+  final h = min(screen.width / 0.52, screen.height - top);
+  return Rect.fromLTWH(0, screen.height - h, screen.width, h);
+}
+
+/// Qué parte dibuja el [GardenPainter]: todo, solo el fondo lejano (cielo,
+/// sol y lomas, que se comparte entre las vistas y se mueve más lento) o solo
+/// lo cercano (cada vista).
+enum GardenLayer { all, sky, land }
+
+/// Cuánto se corren el cielo y las lomas por vista (en anchos de pantalla).
+const _skyDrift = 0.12, _hillDrift = 0.3;
 
 /// El jardín dibujado con código hasta tener los fondos y objetos del Lote 1.
 /// Lo vivo (nubes, estrellas, luciérnagas) va aparte, en `garden_view.dart`.
@@ -225,6 +274,13 @@ class GardenPainter extends CustomPainter {
   /// Decoraciones puestas en esta vista y dónde va cada una.
   final List<(String, Rect)> decor;
 
+  final GardenLayer layer;
+
+  /// Fondo lejano: en qué vista está el deslizamiento (0 a 2). Y dónde está
+  /// el borde de arriba de la pantalla (arriba del jardín, negativo): desde
+  /// ahí se pinta el cielo y cuelga el follaje.
+  final double drift, skyTop;
+
   GardenPainter({
     required this.layout,
     required this.tower,
@@ -242,59 +298,33 @@ class GardenPainter extends CustomPainter {
     this.streakObjects = const [],
     this.ensoInk,
     this.decor = const [],
+    this.layer = GardenLayer.all,
+    this.drift = 0,
+    this.skyTop = 0,
   });
 
   Size get size => layout.size;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final all = Offset.zero & size;
-    final grey = Color.lerp(const Color(0xFF2B3038), const Color(0xFFB8C0C6), daylight)!;
-    final sky = [for (final c in skyColors(daylight, warmth, morning: morning)) Color.lerp(c, grey, overcast * 0.8)!];
-    canvas.drawRect(
-      all,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: sky,
-        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height * 0.45)),
-    );
-    // El cielo pintado es de día: se funde con el degradado según la luz, el
-    // atardecer y las nubes, y de noche queda solo el degradado.
-    final skyArt = SceneArt.instance['bg_base_sky'];
-    final skyAlpha = daylight * (1 - 0.6 * warmth) * (1 - 0.85 * overcast);
-    if (skyArt != null && skyAlpha > 0.01) {
-      drawArt(
-        canvas,
-        skyArt,
-        Rect.fromLTWH(0, 0, size.width, size.height * 0.48),
-        paint: Paint()..color = Colors.white.withValues(alpha: skyAlpha.clamp(0.0, 1.0)),
-      );
-    }
-    _paintSunOrMoon(canvas);
-    if (rainbow > 0) _paintRainbow(canvas, size);
+    // Hasta arriba de la pantalla: el follaje del borde cuelga desde ahí.
+    final all = Rect.fromLTRB(0, skyTop, size.width, size.height);
+    if (layout.painted) return _paintCourt(canvas, all);
+    if (layer != GardenLayer.land) _paintSky(canvas);
+    if (layer == GardenLayer.sky) return;
     // La tierra se dibuja en una capa aparte para oscurecerla de noche sin
     // tocar el cielo.
     canvas.saveLayer(all, Paint());
-    _paintHills(canvas);
+    if (layer == GardenLayer.all) _paintHills(canvas, size.width);
     _paintGround(canvas);
     if (wet > 0) _paintPuddles(canvas);
-    if (snowy) {
-      canvas.drawRect(
-        all,
-        Paint()
-          ..color = const Color(0xFFF4F7FA).withValues(alpha: 0.5)
-          ..blendMode = BlendMode.srcATop,
-      );
-    }
+    if (snowy) _snow(canvas, all);
     final at = layout.places;
     if (layout.side == 0) {
       _paintSandBed(canvas, at[Place.sand]!);
       _paintFence(canvas);
       _paintTower(canvas, at[Place.stack]!);
       _paintJars(canvas, at[Place.rain]!);
-      _paintMarket(canvas, at[Place.market]!);
       _paintBoard(canvas, at[Place.board]!);
       _paintMeditation(canvas, at[Place.meditation]!);
     } else if (layout.side == 1) {
@@ -312,6 +342,77 @@ class GardenPainter extends CustomPainter {
     }
     paintDecorations(canvas, decor);
     _paintFoliage(canvas, size);
+    _tint(canvas, all);
+    canvas.restore();
+    _paintLanternLight(canvas);
+  }
+
+  /// El patio pintado, con lo que el arte no trae: decoraciones, nieve,
+  /// charcos, la hora del día y los faroles encendidos.
+  void _paintCourt(Canvas canvas, Rect all) {
+    canvas.saveLayer(all, Paint());
+    drawArt(canvas, SceneArt.instance[GardenLayout.courtArt]!, Offset.zero & size);
+    if (wet > 0) _paintPuddles(canvas);
+    if (snowy) _snow(canvas, all);
+    paintDecorations(canvas, decor);
+    _tint(canvas, all);
+    canvas.restore();
+    _paintLanternLight(canvas);
+  }
+
+  /// Cielo, sol o luna, arcoíris y lomas lejanas. Desde [skyTop] (arriba del
+  /// jardín) y, deslizando entre vistas, corridos un poco: parecen lejos.
+  void _paintSky(Canvas canvas) {
+    final w = size.width, h = size.height;
+    final all = Rect.fromLTRB(0, skyTop, w, h);
+    final grey = Color.lerp(const Color(0xFF2B3038), const Color(0xFFB8C0C6), daylight)!;
+    final sky = [for (final c in skyColors(daylight, warmth, morning: morning)) Color.lerp(c, grey, overcast * 0.8)!];
+    canvas.drawRect(
+      all,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: sky,
+        ).createShader(Rect.fromLTRB(0, skyTop, w, h * 0.45)),
+    );
+    canvas.save();
+    canvas.translate(-drift * w * _skyDrift, 0);
+    // El cielo pintado es de día: se funde con el degradado según la luz, el
+    // atardecer y las nubes, y de noche queda solo el degradado.
+    final skyArt = SceneArt.instance['bg_base_sky'];
+    final skyAlpha = daylight * (1 - 0.6 * warmth) * (1 - 0.85 * overcast);
+    if (skyArt != null && skyAlpha > 0.01) {
+      drawArtCover(
+        canvas,
+        skyArt,
+        Rect.fromLTRB(0, skyTop, w * (1 + 2 * _skyDrift), h * 0.48),
+        paint: Paint()..color = Colors.white.withValues(alpha: skyAlpha.clamp(0.0, 1.0)),
+      );
+    }
+    _paintSunOrMoon(canvas);
+    if (rainbow > 0) _paintRainbow(canvas, size);
+    canvas.restore();
+    // Las lomas se oscurecen de noche como la tierra.
+    canvas.saveLayer(all, Paint());
+    canvas.save();
+    canvas.translate(-drift * w * _hillDrift, 0);
+    _paintHills(canvas, w * (1 + 2 * _hillDrift));
+    canvas.restore();
+    if (snowy) _snow(canvas, all);
+    _tint(canvas, all);
+    canvas.restore();
+  }
+
+  void _snow(Canvas canvas, Rect all) => canvas.drawRect(
+    all,
+    Paint()
+      ..color = const Color(0xFFF4F7FA).withValues(alpha: 0.5)
+      ..blendMode = BlendMode.srcATop,
+  );
+
+  /// Noche, atardecer y nubes sobre lo ya dibujado en la capa.
+  void _tint(Canvas canvas, Rect all) {
     final dark = 1 - daylight;
     canvas.drawRect(
       all,
@@ -333,8 +434,6 @@ class GardenPainter extends CustomPainter {
           ..blendMode = BlendMode.srcATop,
       );
     }
-    canvas.restore();
-    _paintLanternLight(canvas);
   }
 
   void _paintSunOrMoon(Canvas canvas) {
@@ -361,29 +460,37 @@ class GardenPainter extends CustomPainter {
   }
 
   /// Lomas lejanas con niebla (`bg_base_far`): las cimas quedan a un tercio
-  /// de la pantalla y el suelo tapa el resto.
-  void _paintHills(Canvas canvas) {
+  /// de la pantalla y el suelo tapa el resto. [span] es el ancho a cubrir: más que la pantalla en el fondo que se
+  /// corre (el arte se repite espejado, así no se nota la unión).
+  void _paintHills(Canvas canvas, double span) {
     final w = size.width, h = size.height;
     final art = SceneArt.instance['bg_base_far'];
     if (art != null) {
-      drawArt(canvas, art, Rect.fromLTWH(0, h * 0.31, w, w * art.height / art.width));
+      final r = Rect.fromLTWH(0, h * 0.31, w, w * art.height / art.width);
+      for (var x = 0.0, i = 0; x < span; x += w, i++) {
+        canvas.save();
+        canvas.translate(i.isOdd ? x + w : x, 0);
+        if (i.isOdd) canvas.scale(-1, 1);
+        drawArt(canvas, art, r);
+        canvas.restore();
+      }
       return;
     }
     final far = Path()..moveTo(0, h * 0.4);
-    for (var x = 0.0; x <= w; x += 8) {
+    for (var x = 0.0; x <= span; x += 8) {
       far.lineTo(x, h * (0.36 + 0.035 * sin(x / 41 + 1) + 0.015 * sin(x / 11)));
     }
     far
-      ..lineTo(w, h)
+      ..lineTo(span, h)
       ..lineTo(0, h)
       ..close();
     canvas.drawPath(far, Paint()..color = const Color(0xFF8DA58C));
     final near = Path()..moveTo(0, h * 0.42);
-    for (var x = 0.0; x <= w; x += 8) {
+    for (var x = 0.0; x <= span; x += 8) {
       near.lineTo(x, h * (0.41 + 0.025 * sin(x / 33) + 0.012 * sin(x / 9 + 2)));
     }
     near
-      ..lineTo(w, h)
+      ..lineTo(span, h)
       ..lineTo(0, h)
       ..close();
     canvas.drawPath(near, Paint()..color = Palette.mossDark.withValues(alpha: 0.85));
@@ -430,7 +537,7 @@ class GardenPainter extends CustomPainter {
     final w = size.width * 0.7, half = art.height / 2;
     final h = w * half / art.width;
     final paint = Paint()..filterQuality = FilterQuality.medium;
-    canvas.drawImageRect(art, Rect.fromLTWH(0, 0, art.width.toDouble(), half), Rect.fromLTWH(0, 0, w, h), paint);
+    canvas.drawImageRect(art, Rect.fromLTWH(0, 0, art.width.toDouble(), half), Rect.fromLTWH(0, skyTop, w, h), paint);
     canvas.drawImageRect(
       art,
       Rect.fromLTWH(0, half, art.width.toDouble(), half),
@@ -559,7 +666,14 @@ class GardenPainter extends CustomPainter {
       ped.shift(Offset(0, scale * 0.35)).inflate(4),
       Paint()..color = Palette.ink.withValues(alpha: 0.12),
     );
-    canvas.drawRRect(RRect.fromRectAndRadius(ped, Radius.circular(scale * 0.15)), Paint()..color = Palette.stoneDark);
+    // El pedestal es una laja pintada (la del Apilado); sin el arte, un bloque.
+    final slab = SceneArt.instance['obj_stack_stone_04'];
+    if (slab != null) {
+      final w = ped.width * 1.08, h = w * slab.height / slab.width;
+      drawArt(canvas, slab, Rect.fromLTWH(ped.center.dx - w / 2, ped.top - h * 0.12, w, h));
+    } else {
+      canvas.drawRRect(RRect.fromRectAndRadius(ped, Radius.circular(scale * 0.15)), Paint()..color = Palette.stoneDark);
+    }
     final ghost = tower.isEmpty;
     final stones = ghost ? _ghostTower : tower;
     // Una torre alta se achica para no tapar el jardín; si ni así entra,
@@ -634,77 +748,6 @@ class GardenPainter extends CustomPainter {
       canvas.drawOval(mouth, Paint()..color = Color.lerp(glaze[i], Palette.ink, 0.3)!);
       canvas.drawOval(mouth.deflate(jw * 0.05), Paint()..color = Palette.water.withValues(alpha: 0.9));
     }
-  }
-
-  /// Puesto del Mercado: mostrador con mercadería, toldo a rayas y un farol.
-  void _paintMarket(Canvas canvas, Rect m) {
-    final w = m.width, h = m.height;
-    final wood = Paint()..color = Palette.wood;
-    final dark = Paint()..color = const Color(0xFF5E3D28);
-    canvas.drawOval(
-      Rect.fromLTRB(m.left, m.bottom - h * 0.08, m.right, m.bottom + h * 0.04),
-      Paint()..color = Palette.ink.withValues(alpha: 0.12),
-    );
-    for (final x in [m.left + w * 0.1, m.right - w * 0.1]) {
-      canvas.drawRect(Rect.fromLTRB(x - w * 0.025, m.top + h * 0.18, x + w * 0.025, m.bottom), dark);
-    }
-    final counter = Rect.fromLTRB(m.left + w * 0.04, m.top + h * 0.6, m.right - w * 0.04, m.bottom - h * 0.02);
-    canvas.drawRRect(RRect.fromRectAndRadius(counter, const Radius.circular(3)), wood);
-    canvas.drawRect(Rect.fromLTRB(counter.left, counter.top, counter.right, counter.top + h * 0.05), dark);
-    for (var x = counter.left + w * 0.12; x < counter.right - 4; x += w * 0.15) {
-      canvas.drawLine(
-        Offset(x, counter.top + h * 0.06),
-        Offset(x, counter.bottom),
-        Paint()
-          ..color = const Color(0xFF6F4A31)
-          ..strokeWidth = 1,
-      );
-    }
-    // Mercadería: frascos de esencias y un loto.
-    final goods = [Palette.water, Palette.sandShadow, Palette.wood, Palette.lantern, Palette.lotus];
-    for (var i = 0; i < goods.length; i++) {
-      final c = Offset(counter.left + counter.width * (0.14 + 0.18 * i), counter.top - h * 0.045);
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromCenter(center: c, width: w * 0.09, height: h * 0.09),
-          const Radius.circular(4),
-        ),
-        Paint()..color = goods[i],
-      );
-    }
-    // Toldo a rayas con borde ondulado.
-    final top = m.top + h * 0.08, bottom = m.top + h * 0.3;
-    final awning = Path()
-      ..moveTo(m.left + w * 0.06, top)
-      ..lineTo(m.right - w * 0.06, top)
-      ..lineTo(m.right, bottom)
-      ..lineTo(m.left, bottom)
-      ..close();
-    canvas.save();
-    canvas.clipPath(awning);
-    const stripes = 7;
-    for (var i = 0; i < stripes; i++) {
-      canvas.drawRect(
-        Rect.fromLTWH(m.left + w * i / stripes, top, w / stripes + 1, bottom - top),
-        Paint()..color = i.isEven ? Palette.lotus : Palette.paper,
-      );
-    }
-    canvas.restore();
-    for (var i = 0; i < stripes; i++) {
-      canvas.drawCircle(
-        Offset(m.left + w * (i + 0.5) / stripes, bottom),
-        w / stripes / 2,
-        Paint()..color = i.isEven ? Palette.lotus : Palette.paper,
-      );
-    }
-    canvas.drawRect(Rect.fromLTRB(m.left + w * 0.04, top - h * 0.05, m.right - w * 0.04, top), dark);
-    // Farol de papel colgado (se enciende de noche en _paintLanternLight).
-    final lamp = layout.lanterns[0];
-    canvas.drawLine(Offset(lamp.dx, bottom), lamp - Offset(0, h * 0.06), dark..strokeWidth = 1.2);
-    canvas.drawOval(
-      Rect.fromCenter(center: lamp, width: w * 0.1, height: h * 0.13),
-      Paint()..color = const Color(0xFFD8643F),
-    );
   }
 
   /// Tablón de piedras (los récords) con techito y papeles clavados.
@@ -827,7 +870,7 @@ class GardenPainter extends CustomPainter {
       _paintPaperLantern(canvas, lantern, w * 0.05, 0);
     }
     // Farol de piedra (tōrō).
-    final lamp = layout.lanterns[1];
+    final lamp = layout.lanterns[0];
     final s = w * 0.07;
     final stone = Paint()..color = Palette.stone;
     canvas.drawRect(
@@ -878,7 +921,7 @@ class GardenPainter extends CustomPainter {
   /// Centro del farol de papel de la racha, colgado de la rama del cerezo.
   Offset? get _paperLantern {
     final d = layout.places[Place.meditation];
-    if (d == null || !streakObjects.contains('lantern')) return null;
+    if (d == null || layout.painted || !streakObjects.contains('lantern')) return null;
     return Offset(d.left + d.width * 0.86, d.top + d.height * 0.34 + d.width * 0.12);
   }
 
@@ -961,6 +1004,9 @@ class GardenPainter extends CustomPainter {
       (old.rainbow - rainbow).abs() > 0.01 ||
       old.streakObjects.length != streakObjects.length ||
       old.ensoInk != ensoInk ||
+      old.layer != layer ||
+      old.drift != drift ||
+      old.skyTop != skyTop ||
       !_sameDecor(old.decor, decor);
 }
 

@@ -23,6 +23,10 @@ class GardenSign extends StatelessWidget {
   const GardenSign({super.key});
 
   static const _width = 170.0;
+
+  /// Lo que ocupa, para dejarle lugar.
+  static const width = _width, height = _width / _aspect;
+
   // Proporción de `ui_garden_sign` (recortado) y zona libre de la tabla,
   // debajo de los agujeros de las cuerdas.
   static const _aspect = 593 / 308;
