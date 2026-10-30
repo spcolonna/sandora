@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../fx/sfx.dart';
 import '../theme/palette.dart';
+import 'scene_art.dart';
 
 /// Entrada al jardín: dos puertas shoji con luz detrás que se corren a los
 /// lados; al abrirse entra un brillo que encandila y se va despacio, y el
@@ -74,6 +75,8 @@ class _GardenGateState extends State<GardenGate> with SingleTickerProviderStateM
           final slide = _span(0.22, 0.62);
           final flash = _span(0.3, 0.5, Curves.easeOut) * (1 - _span(0.5, 1.0, Curves.easeInOut));
           final settle = _span(0.3, 1.0, Curves.easeOutCubic);
+          // Al salir, el marco de la casa se agranda y se desvanece: se cruza el umbral.
+          final leave = _span(0.5, 0.95, Curves.easeInCubic);
           return Stack(
             fit: StackFit.expand,
             children: [
@@ -86,7 +89,7 @@ class _GardenGateState extends State<GardenGate> with SingleTickerProviderStateM
               ),
               IgnorePointer(
                 child: CustomPaint(
-                  painter: _DoorsPainter(slide: slide, light: light, flash: flash),
+                  painter: _DoorsPainter(slide: slide, light: light, flash: flash, leave: leave),
                 ),
               ),
             ],
@@ -98,8 +101,8 @@ class _GardenGateState extends State<GardenGate> with SingleTickerProviderStateM
 }
 
 class _DoorsPainter extends CustomPainter {
-  final double slide, light, flash;
-  _DoorsPainter({required this.slide, required this.light, required this.flash});
+  final double slide, light, flash, leave;
+  _DoorsPainter({required this.slide, required this.light, required this.flash, required this.leave});
 
   static const _frame = Color(0xFF5B3E2B);
   static const _frameLight = Color(0xFF7A563D);
@@ -126,6 +129,27 @@ class _DoorsPainter extends CustomPainter {
     }
     _door(canvas, Rect.fromLTWH(-gap, 0, half, h), left: true);
     _door(canvas, Rect.fromLTWH(half + gap, 0, half, h), left: false);
+    // El vano de la casa por delante: las puertas se corren detrás de los postes.
+    final doorway = SceneArt.instance['fg_court_doorway'];
+    if (doorway != null && leave < 1) {
+      final k = 1 + 0.45 * leave;
+      canvas.save();
+      canvas.translate(half, h * 0.45);
+      canvas.scale(k);
+      canvas.translate(-half, -h * 0.45);
+      // A lo ancho de la pantalla, apoyado abajo; lo que falta arriba son los
+      // postes, que se estiran.
+      final paint = Paint()
+        ..color = Color.fromRGBO(0, 0, 0, 1 - leave)
+        ..filterQuality = FilterQuality.medium;
+      final iw = doorway.width.toDouble(), ih = doorway.height.toDouble();
+      final dh = w * ih / iw, top = h - dh;
+      canvas.drawImageRect(doorway, Rect.fromLTWH(0, 0, iw, ih), Rect.fromLTWH(0, top, w, dh), paint);
+      if (top > 0) {
+        canvas.drawImageRect(doorway, Rect.fromLTWH(0, 0, iw, ih * 0.08), Rect.fromLTWH(0, 0, w, top + 1), paint);
+      }
+      canvas.restore();
+    }
     if (flash > 0) {
       final c = Offset(half, h * 0.45);
       final r = max(w, h) * (0.5 + 0.6 * flash);
@@ -193,5 +217,6 @@ class _DoorsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DoorsPainter old) => old.slide != slide || old.light != light || old.flash != flash;
+  bool shouldRepaint(_DoorsPainter old) =>
+      old.slide != slide || old.light != light || old.flash != flash || old.leave != leave;
 }

@@ -612,10 +612,10 @@ class StackGame extends FlameGame with TapCallbacks {
     );
     final art = SceneArt.instance['obj_stack_pedestal'];
     if (art != null) {
-      // El arte trae la laja y el musgo; la cara de arriba está al 45% y la
-      // laja ocupa el 70% del ancho.
-      final side = _pedestalWidth / 0.7;
-      drawArt(canvas, art, Rect.fromLTWH(-side / 2, -0.45 * side, side, side));
+      // El arte, recortado, trae la laja y el musgo: la laja ocupa el 75% del
+      // ancho y el medio de su cara de arriba está al 9% del alto.
+      final w = _pedestalWidth / 0.75, h = w * art.height / art.width;
+      drawArt(canvas, art, Rect.fromLTWH(-w / 2, -0.09 * h, w, h));
       return;
     }
     // Si no, la misma laja del patio: la cara de arriba al 20% del alto y el
@@ -672,8 +672,13 @@ class StackGame extends FlameGame with TapCallbacks {
     if (fg == null) return;
     final h = size.x * fg.height / fg.width;
     final y = (_rise * _ppm * 1.4) % h;
-    drawArt(canvas, fg, Rect.fromLTWH(0, y - h, size.x, h));
-    drawArt(canvas, fg, Rect.fromLTWH(0, y, size.x, h));
+    // Cada mitad corrida hacia su borde: las ramas enmarcan sin tapar la torre.
+    final iw = fg.width.toDouble(), ih = fg.height.toDouble(), half = size.x / 2, out = size.x * 0.14;
+    final paint = Paint()..filterQuality = FilterQuality.medium;
+    for (final top in [y - h, y]) {
+      canvas.drawImageRect(fg, Rect.fromLTWH(0, 0, iw / 2, ih), Rect.fromLTWH(-out, top, half, h), paint);
+      canvas.drawImageRect(fg, Rect.fromLTWH(iw / 2, 0, iw / 2, ih), Rect.fromLTWH(half + out, top, half, h), paint);
+    }
   }
 
   /// Bordes apenas más oscuros, como un cuadro: centra la mirada en la torre.

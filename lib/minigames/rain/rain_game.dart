@@ -453,6 +453,7 @@ class RainGame extends FlameGame with TapCallbacks {
     final cx = size.x / 2;
     final base = size.y * 1.78;
     final ink = Paint()..color = const Color(0xFF2B2F33);
+    final art = SceneArt.instance['char_meditator'];
     if (SceneArt.instance['bg_rain_roof'] != null) {
       // Sobre el piso de la galería: solo un almohadón.
       canvas.drawOval(
@@ -461,6 +462,12 @@ class RainGame extends FlameGame with TapCallbacks {
       );
     } else {
       canvas.drawRect(Rect.fromLTWH(0, base, size.x, size.y * 0.3), Paint()..color = const Color(0xFF4A3426));
+    }
+    if (art != null) {
+      // Sentado sobre el almohadón, del mismo ancho que la silueta de antes.
+      final h = 170.0, w = h * art.width / art.height;
+      drawArt(canvas, art, Rect.fromLTWH(cx - w / 2, base + 6 - h, w, h));
+      return;
     }
     final body = Path()
       ..moveTo(cx - 70, base)

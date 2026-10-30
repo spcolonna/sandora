@@ -786,9 +786,9 @@ BLOCKS = [
         ]),
     dict(
         id='15', title='Decoraciones del jardín (2 de 2)', folder='store/art/decor/',
-        intro=('Las seis decoraciones de nivel alto del modo Decorar. Igual que el Bloque 3: van a '
+        intro=('Las seis decoraciones de nivel alto del modo Decorar. Van a '
                '`assets/images/decor/obj_decor_<id>.webp` y reemplazan la versión pintada con código. Adjuntá '
-               '`store/art/style/style_keyart.webp` y `style_plants.png`.'),
+               '`store/art/style/style_keyart.webp`.'),
         images=[
             obj('obj_decor_basin', 'A low Japanese stone water basin (tsukubai): a rough rounded gray stone with a '
                 'shallow bowl of still, clear water carved in its top, and a thin bamboo spout above one side '
@@ -844,6 +844,21 @@ INCLUDED = {
                        'derecha (`GardenLayout.courtProps`).'),
     'obj_court_rake': ('assets/images/court/obj_court_rake.webp', 'Rastrillo, recortado, apoyado en el poste izquierdo '
                        'del tablón (`GardenLayout.courtProps`).'),
+    'fg_court_doorway': ('assets/images/court/fg_court_doorway.webp', 'Vano de la casa al entrar: las puertas shoji se '
+                         'corren detrás de los postes y, al cruzar, el marco se agranda y se desvanece (`garden_gate.dart`). '
+                         'A lo ancho de la pantalla, apoyado abajo; arriba se estiran los postes.'),
+    'bg_stack_far': ('assets/images/stack/bg_stack_far.webp', 'Fondo del Apilado: sube más lento que la torre '
+                     '(`stack_game.dart` `_paintFar`).'),
+    'obj_stack_pedestal': ('assets/images/stack/obj_stack_pedestal.webp', 'Laja sobre musgo, recortada: la laja ocupa el '
+                           '75 % del ancho y el medio de su cara de arriba está al 9 % del alto (`stack_game.dart`).'),
+    'fg_stack_leaves': ('assets/images/stack/fg_stack_leaves.webp', 'Hojas desenfocadas del frente del Apilado, con los '
+                        'extremos desvanecidos para repetirse hacia arriba; cada mitad corrida un 14 % hacia su borde.'),
+    'char_meditator': ('assets/images/rain/char_meditator.webp', 'Meditador de la Lluvia, recortado a 560 px, sentado en '
+                       'el almohadón de la galería (`rain_game.dart`).'),
+    'char_cat': ('store/art/characters/char_cat.webp', 'Gato del vecino, recortado. Referencia para animarlo en Rive; '
+                 'todavía no aparece en el juego (`store/` no se sube).'),
+    'char_monk': ('store/art/characters/char_monk.webp', 'Monje jardinero, recortado. Referencia para animarlo en Rive; '
+                  'todavía no aparece en el juego (`store/` no se sube).'),
     'logo_symbol': ('assets/images/brand/logo_symbol.webp', 'Símbolo del logo (piedra sobre arena rastrillada). '
                     'Pantalla de título (`lib/ui/title_intro.dart`); referencia para el ícono.'),
     'logo_wordmark': ('assets/images/brand/logo_wordmark.webp', 'Nombre "Sandora". Pantalla de título. La versión clara para '
@@ -951,44 +966,62 @@ def image_text(i, im):
     ])
 
 
-def block_text(b):
-    images = pending(b)
-    n = len(images)
-    assert n <= 10, b['id']
-    files = ', '.join(f'`{im["name"]}.png`' for im in images)
-    if n == 1:
-        head = 'Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.'
-        body = image_text(1, images[0]).split('\n', 1)[1]
-        prompt = f'{head}\n\n{body}'
-    else:
-        head = (f'Generate exactly {n} separate images. Start generating immediately, without asking questions or '
-                'requesting confirmation. Each image has its own complete instructions below; follow them '
-                'separately. Each image is its own file: do NOT combine them into a grid, collage or contact sheet.')
-        prompt = head + '\n\n' + '\n\n'.join(image_text(i, im) for i, im in enumerate(images, start=1))
-    return (f'## Bloque {b["id"]} — {b["title"]} ({n}) ⬜\n\n'
-            f'Archivos, en orden: {files}. Carpeta: `{b["folder"]}`.\n'
-            f'{b["intro"]}\n\n```\n{prompt}\n```\n')
+# Orden en que conviene generarlas: lo que más se ve en el juego primero. Cada uno con por qué va ahí.
+PRIORITY = [
+    ('15', 'Se ven en el modo Decorar y hoy están pintadas con código.'),
+    ('11', 'Cuatro minijuegos del estanque que hoy se dibujan con código.'),
+    ('10', 'El 3 en línea del estanque: fichas y poderes.'),
+    ('14', 'La tercera vista (el bosque) y sus minijuegos.'),
+    ('12', 'El suelo de la vista del estanque.'),
+    ('9', 'Para la ficha de la tienda: hace falta antes de publicar.'),
+    ('8', 'Opcional: el kit washi ya dibuja botones y paneles con código.'),
+    ('0', 'Opcional: el estilo ya quedó fijado por el patio pintado.'),
+]
+SINGLE = 'Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.'
+
+
+def reference(im):
+    return COURT_REF if im['style'] == COURT_STYLE else 'store/art/style/style_keyart.webp'
+
+
+def single_prompt(im):
+    return '\n\n'.join([SINGLE, image_text(1, im).split('\n', 1)[1]])
+
+
+def ordered_blocks():
+    by_id = {b['id']: b for b in BLOCKS}
+    listed = [(by_id[i], why) for i, why in PRIORITY]
+    rest = [(b, '') for b in BLOCKS if b['id'] not in dict(PRIORITY)]
+    return [(b, why) for b, why in listed + rest if pending(b)]
+
+
+def block_text(b, why, first):
+    out = [f'## Bloque {b["id"]} — {b["title"]} ({len(pending(b))})\n']
+    if why:
+        out.append(f'**Por qué ahora:** {why}\n')
+    out.append(f'{b["intro"]}\n')
+    for n, im in enumerate(pending(b), start=first):
+        out += [f'### {n}. `{im["name"]}` ⬜\n',
+                f'Guardala como `{b["folder"]}{im["name"]}.png`. Adjuntá `{reference(im)}`.\n',
+                f'```\n{single_prompt(im)}\n```\n']
+    return '\n'.join(out)
 
 
 HEADER = '''# Prompts para generar el arte
 
-Prompts para **ChatGPT** (generador de imágenes), en inglés porque así sigue mejor las instrucciones. Cubren la guía
-de estilo (Lote 0) y el arte del MVP (Lote 1 del GDD). **Generado por `tool/gen_prompts.py`: no editar a mano.**
+Prompts para **ChatGPT** (generador de imágenes), en inglés porque así sigue mejor las instrucciones. Cubren el arte
+que todavía falta, de lo más importante a lo opcional. **Generado por `tool/gen_prompts.py`: no editar a mano.**
 
 **Cómo usarlos:**
-- Cada bloque gris es **un solo mensaje**: copialo entero y pegalo en una conversación nueva. Arranca a generar sin
-  preguntar.
-- Los bloques tienen **10 imágenes como máximo**.
-- Cada imagen repite toda su descripción (formato, estilo, qué no incluir). Así sale consistente aunque la corras
-  sola, en otra conversación o en otra cuenta.
-- ChatGPT no les pone nombre: salen en el orden de la lista. Guardá cada PNG con el nombre que figura en
-  `Image N — <nombre>`, en la carpeta que se indica (`store/` no se commitea), y pedile a Claude que las integre.
-- **Integrar** es siempre: pasar el PNG a `.webp` en `assets/images/`, borrar el PNG, usarlo en el juego donde va y
-  sumarlo a `INCLUDED` en este script. Así sale de los bloques y queda en "Ya incluidas", al final.
-- Si una sale mal, regenerala sola: pegá `Create ONE single image. Start immediately, without asking questions.` y
-  debajo el texto de esa imagen (desde su línea `Create a ...` hasta su `DO NOT INCLUDE`).
-- **Orden:** primero lo que queda del Bloque B (la entrada; el A y los detalles del B ya están en el juego) y el C (el apilado con la misma estética), siempre con la referencia adjunta. Después el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
-  `store/art/style/style_keyart.webp` como referencia.
+- **Un prompt por imagen.** Cada bloque gris es un mensaje: copialo entero y pegalo en una conversación nueva (o
+  seguí en la misma). Arranca a generar sin preguntar.
+- **Van en orden de importancia:** la número 1 es la que más conviene hacer ahora. Cada bloque dice por qué está ahí.
+- Antes de pegar, **adjuntá la referencia** que indica cada imagen (arrastrala a la conversación).
+- Cada prompt trae toda su descripción (formato, estilo, qué no incluir), así sale consistente en cualquier
+  conversación o cuenta.
+- Guardá el PNG con el nombre y la carpeta que se indican (`store/` no se commitea) y pedile a Claude que las integre.
+- **Integrar** es siempre: pasar el PNG a `.webp` en `assets/images/`, usarlo en el juego donde va y sumarlo a
+  `INCLUDED` en este script. Así sale de la lista y queda en "Ya incluidas", al final.
 
 **Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_placeholder_audio.py`; los finales
 conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de la arena y las animaciones Rive
@@ -1014,9 +1047,13 @@ def included_text():
 
 def main():
     OUT.parent.mkdir(exist_ok=True)
-    todo = [b for b in BLOCKS if pending(b)]
-    total = sum(len(pending(b)) for b in todo)
-    text = HEADER + '\n' + '\n'.join(block_text(b) for b in todo) + '\n' + included_text()
+    todo = ordered_blocks()
+    total = sum(len(pending(b)) for b, _ in todo)
+    parts, n = [], 1
+    for b, why in todo:
+        parts.append(block_text(b, why, n))
+        n += len(pending(b))
+    text = HEADER + '\n' + '\n'.join(parts) + '\n' + included_text()
     OUT.write_text(text)
     print(f'{len(todo)} bloques, {total} imágenes por generar, {len(INCLUDED)} incluidas -> {OUT.relative_to(ROOT)}')
 
