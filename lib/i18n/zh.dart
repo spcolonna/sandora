@@ -341,4 +341,6 @@ const zh = <String, String>{
   'shop.deal': '今日特惠',
   'shop.dealBuy': '购买',
   'shop.dealTaken': '已放入你的箱子：从“装饰”中摆放。明天还有新的。',
+  'rain.last': '最后一滴',
+  'rain.stopped': '雨停了',
 };

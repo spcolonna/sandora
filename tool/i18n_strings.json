@@ -2378,5 +2378,19 @@
   "pt": "Está na sua caixa: coloque-a em Decorar. Amanhã tem outra.",
   "ja": "箱に入りました。「飾る」から置けます。明日はまた別のものが。",
   "zh": "已放入你的箱子：从“装饰”中摆放。明天还有新的。"
+ },
+ "rain.last": {
+  "es": "Última gota",
+  "en": "Last drop",
+  "pt": "Última gota",
+  "ja": "最後のしずく",
+  "zh": "最后一滴"
+ },
+ "rain.stopped": {
+  "es": "Paró la lluvia",
+  "en": "The rain has stopped",
+  "pt": "A chuva parou",
+  "ja": "雨がやんだ",
+  "zh": "雨停了"
  }
 }

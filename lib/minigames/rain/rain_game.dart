@@ -69,10 +69,34 @@ class RainGame extends FlameGame with TapCallbacks {
 
   // Geometría (en píxeles de pantalla, con la vista en el alero).
   double get eaveY => size.y * 0.17;
-  double get rimY => size.y * 0.70;
+
+  /// Piso donde se apoyan todas las vasijas (la base, no la boca).
+  double get floorY => size.y * 0.80;
   double get colW => size.x / vessels;
   double get vesselR => min(colW * 0.36, 48);
   double vesselX(int i) => colW * (i + 0.5);
+
+  /// Ancho (en radios), altura de la boca y ancho del agua, como fracción de
+  /// cada imagen.
+  static const _fit = [(2.4, 0.17, 0.5), (2.3, 0.17, 0.55), (2.6, 0.26, 0.65), (2.0, 0.15, 0.4), (2.6, 0.25, 0.72)];
+
+  /// Dónde va la vasija [i] de radio [r]: apoyada en el piso, como las demás.
+  Rect _vesselRect(int i, double r) {
+    final img = SceneArt.instance['obj_rain_vessel_0${i % 5 + 1}'];
+    if (img == null) return Rect.fromLTWH(vesselX(i) - r, floorY - r * 2.2, r * 2, r * 2.2);
+    final w = r * _fit[i % 5].$1, h = w * img.height / img.width;
+    return Rect.fromLTWH(vesselX(i) - w / 2, floorY - h, w, h);
+  }
+
+  /// Altura de la boca de la vasija [i], donde caen las gotas.
+  double mouthY(int i) {
+    final r = _vesselRect(i, vesselR);
+    final img = SceneArt.instance['obj_rain_vessel_0${i % 5 + 1}'];
+    return img == null ? r.top + vesselR * 0.6 : r.top + r.height * _fit[i % 5].$2;
+  }
+
+  /// Momento en que cae la última gota.
+  double get _lastTime => notes.isEmpty ? 0 : notes.last.time;
 
   @override
   void update(double dt) {
@@ -81,8 +105,11 @@ class RainGame extends FlameGame with TapCallbacks {
     if (_outroAt == null) {
       _view = 1 - _ease((_t / panSeconds).clamp(0, 1));
       judge.expire(_t);
-      final last = notes.isEmpty ? 0 : notes.last.time;
-      if (judge.done && _t > last + 0.8) _outroAt = _t;
+      if (judge.done && _t > _lastTime + 0.8) {
+        _outroAt = _t;
+        // La lluvia se apaga junto con la cámara: se terminó.
+        SoundBoard.instance.stopLoop(Ambience.rain, fade: const Duration(milliseconds: 1600));
+      }
     } else {
       final p = ((_t - _outroAt!) / panSeconds).clamp(0.0, 1.0);
       _view = _ease(p);
@@ -156,7 +183,7 @@ class RainGame extends FlameGame with TapCallbacks {
       _wobble[i] = 1;
       _lastTap.remove(i);
       SoundBoard.instance.play(Sfx.good, volume: 0.4);
-      _splash(Vector2(vesselX(i), rimY), Grade.perfect);
+      _splash(Vector2(vesselX(i), mouthY(i)), Grade.perfect);
       return;
     }
     final spilling = judge.overflowing[i];
@@ -170,7 +197,7 @@ class RainGame extends FlameGame with TapCallbacks {
     // Rebalsando, la nota suena apagada.
     final muffle = spilling ? 0.35 : 1.0;
     SoundBoard.instance.play(Sfx.rainNote, variant: i + 1, volume: (0.5 + 0.1 * note.grade!.index) * muffle);
-    final at = Vector2(vesselX(i), rimY);
+    final at = Vector2(vesselX(i), mouthY(i));
     _splash(at, note.grade!);
     celebrate(world, at, note.grade!, sound: false);
   }
@@ -294,8 +321,11 @@ class RainGame extends FlameGame with TapCallbacks {
 
   /// Lluvia de fondo, hasta [bottom].
   void _drawRainLines(Canvas canvas, double bottom) {
+    // Al terminar, la lluvia amaina hasta parar.
+    final calm = _outroAt == null ? 1.0 : (1 - (_t - _outroAt!) / panSeconds).clamp(0.0, 1.0);
+    if (calm == 0) return;
     final p = Paint()
-      ..color = const Color(0x55E6F3F5)
+      ..color = const Color(0xFFE6F3F5).withValues(alpha: 0.33 * calm)
       ..strokeWidth = 1.2;
     final slant = -1.5 + _windNow * 9;
     for (final d in _bgDrops) {
@@ -324,20 +354,24 @@ class RainGame extends FlameGame with TapCallbacks {
     final level = judge.level(i);
     final img = SceneArt.instance['obj_rain_vessel_0${i % 5 + 1}'];
     if (img != null) {
-      // Ancho (en radios), altura de la boca y ancho del agua, como fracción
-      // de la imagen: la boca queda justo en el borde donde caen las gotas.
-      const fit = [(2.4, 0.17, 0.5), (2.3, 0.17, 0.55), (2.6, 0.26, 0.65), (2.0, 0.15, 0.4), (2.6, 0.25, 0.72)];
-      final (k, mouthY, mouthW) = fit[i % 5];
-      final w = r * k, h = w * img.height / img.width;
-      drawArt(canvas, img, Rect.fromLTWH(x - w / 2, rimY - h * mouthY, w, h));
+      final (_, mouth, mouthW) = _fit[i % 5];
+      final dst = _vesselRect(i, r);
+      final w = dst.width, rimY = dst.top + dst.height * mouth;
+      // Sombra de apoyo: todas quedan en el mismo piso.
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(x, floorY - 2), width: w * 0.8, height: w * 0.12),
+        Paint()..color = const Color(0x40000000),
+      );
+      drawArt(canvas, img, dst);
       // El agua brilla más a medida que se llena.
       canvas.drawOval(
         Rect.fromCenter(center: Offset(x, rimY), width: w * mouthW * 0.85, height: w * mouthW * 0.24),
         Paint()..color = const Color(0xFFCDEBF0).withValues(alpha: 0.5 * level),
       );
-      if (judge.overflowing[i]) _drawSpill(canvas, x, w * mouthW / 2, h * (1 - mouthY));
+      if (judge.overflowing[i]) _drawSpill(canvas, x, rimY, w * mouthW / 2, floorY - rimY);
       return;
     }
+    final rimY = mouthY(i);
     final body = Path()
       ..moveTo(x - r * 0.75, rimY)
       ..quadraticBezierTo(x - r * 1.35, rimY + r * 0.9, x - r * 0.6, rimY + r * 1.6)
@@ -356,12 +390,12 @@ class RainGame extends FlameGame with TapCallbacks {
       Rect.fromCenter(center: Offset(x, rimY + 2 - 3 * level), width: r * 1.3, height: r * 0.28),
       Paint()..color = water,
     );
-    if (judge.overflowing[i]) _drawSpill(canvas, x, r * 0.8, r * 1.6);
+    if (judge.overflowing[i]) _drawSpill(canvas, x, rimY, r * 0.8, r * 1.6);
   }
 
-  /// Agua que desborda por los dos lados de la boca ([half] desde el centro)
+  /// Agua que desborda por los dos lados de la boca (en [rimY], [half] desde el centro)
   /// y cae [depth] hasta el piso, donde hace un charco.
-  void _drawSpill(Canvas canvas, double x, double half, double depth) {
+  void _drawSpill(Canvas canvas, double x, double rimY, double half, double depth) {
     final drip = Paint()..color = const Color(0xFF8FC6D0).withValues(alpha: 0.85);
     for (final side in [-1.0, 1.0]) {
       for (var k = 0; k < 3; k++) {
@@ -387,6 +421,7 @@ class RainGame extends FlameGame with TapCallbacks {
       // Con viento entra de costado y llega igual a su vasija.
       final x = vesselX(n.vessel) - n.wind * colW * b.d('windDrift') * pow(1 - p.clamp(0.0, 1.0), 1.4);
       // Caída con aceleración suave, como gravedad.
+      final rimY = mouthY(n.vessel);
       final y = eaveY + (rimY - eaveY) * (0.35 * p + 0.65 * p * p);
       canvas.save();
       canvas.translate(x, y);
@@ -400,10 +435,11 @@ class RainGame extends FlameGame with TapCallbacks {
         canvas.drawOval(Rect.fromCenter(center: Offset.zero, width: 9, height: 15), drop);
       }
       canvas.restore();
-      // Anillo que se cierra justo sobre la vasija en el momento del acierto.
+      // Anillo que se cierra justo sobre la boca de su vasija en el momento del
+      // acierto; no sigue a la gota cuando el viento la trae de costado.
       final ringR = vesselR * (0.8 + 2.2 * (1 - p).clamp(0, 1));
       canvas.drawCircle(
-        Offset(x, rimY),
+        Offset(vesselX(n.vessel), rimY),
         ringR,
         Paint()
           ..style = PaintingStyle.stroke
@@ -438,6 +474,7 @@ class RainGame extends FlameGame with TapCallbacks {
 
   void _drawHud(Canvas canvas, double off) {
     if (_outroAt != null && _view > 0.95) {
+      _text(canvas, tr('rain.stopped'), Offset(size.x / 2, size.y * 0.2), 20);
       _text(canvas, '${tr('rain.depth')}\n${(judge.accuracy * 100).round()}%', Offset(size.x / 2, size.y * 0.3), 30);
       return;
     }
@@ -466,16 +503,31 @@ class RainGame extends FlameGame with TapCallbacks {
       }
       if (_t < gust.start) _text(canvas, tr('leaves.wind'), Offset(size.x / 2, size.y * 0.33), 18);
     }
-    final last = notes.isEmpty ? 1.0 : notes.last.time;
-    final p = (_t / last).clamp(0.0, 1.0);
-    canvas.drawRect(Rect.fromLTWH(0, size.y - 4, size.x * p, 4), Paint()..color = const Color(0x88FFFFFF));
+    // Cuando la última gota ya cae, se avisa que es la última.
+    final lastAt = _lastTime;
+    if (_t > lastAt - fall && _t < lastAt + 0.8) {
+      final a = ((_t - (lastAt - fall)) / 0.4).clamp(0.0, 1.0);
+      _text(canvas, tr('rain.last'), Offset(size.x / 2, size.y * 0.33), 20, alpha: a);
+    }
+    // Cuánto falta: una barra sobre el piso que se vacía hasta la última gota.
+    final left = (1 - _t / max(lastAt, 1)).clamp(0.0, 1.0);
+    final bar = Rect.fromLTWH(32, size.y - 48, size.x - 64, 6);
+    canvas.drawRRect(RRect.fromRectAndRadius(bar, const Radius.circular(3)), Paint()..color = const Color(0x33FFFFFF));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(bar.left, bar.top, bar.width * left, bar.height), const Radius.circular(3)),
+      Paint()..color = const Color(0xCCE6F3F5),
+    );
   }
 
-  void _text(Canvas canvas, String s, Offset center, double fontSize) {
+  void _text(Canvas canvas, String s, Offset center, double fontSize, {double alpha = 1}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
-        style: TextStyle(color: const Color(0xFFF7F0DE), fontSize: fontSize, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: const Color(0xFFF7F0DE).withValues(alpha: alpha),
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,

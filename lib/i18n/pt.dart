@@ -114,8 +114,7 @@ const pt = <String, String>{
   'currency.lotus': 'Lótus',
   'shop.title': 'Mercado',
   'shop.desc': 'Troque o que sobra pelo que falta.',
-  'shop.lotusHint':
-      'Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao cumprir as três metas do dia e a cada semana de sequência meditando.',
+  'shop.lotusHint': 'Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao cumprir as três metas do dia e a cada semana de sequência meditando.',
   'shop.trades': 'Trocas do dia',
   'shop.withLotus': 'Com lótus',
   'shop.left': 'Restam {n} hoje',
@@ -152,8 +151,7 @@ const pt = <String, String>{
   'weather.title': 'O jardim agora',
   'weather.own': 'Clima próprio do jardim: muda a cada poucas horas.',
   'weather.real.title': 'Clima de onde você está',
-  'weather.real.desc':
-      'Usa sua localização aproximada para que chova no jardim quando chove lá fora. A localização não é guardada.',
+  'weather.real.desc': 'Usa sua localização aproximada para que chova no jardim quando chove lá fora. A localização não é guardada.',
   'weather.real.denied': 'Sem permissão de localização, o jardim continua com seu próprio clima.',
   'weather.real.failed': 'Não foi possível obter o clima agora; tentará de novo sozinho.',
   'weather.source': 'Previsão: MET Norway',
@@ -343,4 +341,6 @@ const pt = <String, String>{
   'shop.deal': 'Oferta do dia',
   'shop.dealBuy': 'Comprar',
   'shop.dealTaken': 'Está na sua caixa: coloque-a em Decorar. Amanhã tem outra.',
+  'rain.last': 'Última gota',
+  'rain.stopped': 'A chuva parou',
 };

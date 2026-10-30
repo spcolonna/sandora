@@ -341,4 +341,6 @@ const ja = <String, String>{
   'shop.deal': '本日のおすすめ',
   'shop.dealBuy': '買う',
   'shop.dealTaken': '箱に入りました。「飾る」から置けます。明日はまた別のものが。',
+  'rain.last': '最後のしずく',
+  'rain.stopped': '雨がやんだ',
 };

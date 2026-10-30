@@ -114,8 +114,7 @@ const en = <String, String>{
   'currency.lotus': 'Lotus',
   'shop.title': 'Market',
   'shop.desc': 'Trade what you have spare for what you need.',
-  'shop.lotusHint':
-      'Earn lotus with your daily offering (your first game or meditation), by completing all three daily goals and every week of meditation streak.',
+  'shop.lotusHint': 'Earn lotus with your daily offering (your first game or meditation), by completing all three daily goals and every week of meditation streak.',
   'shop.trades': 'Today\'s trades',
   'shop.withLotus': 'With lotus',
   'shop.left': '{n} left today',
@@ -152,8 +151,7 @@ const en = <String, String>{
   'weather.title': 'The garden now',
   'weather.own': 'The garden\'s own weather: it changes every few hours.',
   'weather.real.title': 'Weather where you are',
-  'weather.real.desc':
-      'Uses your approximate location so it rains in the garden when it rains outside. Your location is not stored.',
+  'weather.real.desc': 'Uses your approximate location so it rains in the garden when it rains outside. Your location is not stored.',
   'weather.real.denied': 'Without location permission, the garden keeps its own weather.',
   'weather.real.failed': 'Couldn\'t get the weather right now; it will try again on its own.',
   'weather.source': 'Forecast: MET Norway',
@@ -343,4 +341,6 @@ const en = <String, String>{
   'shop.deal': 'Deal of the day',
   'shop.dealBuy': 'Buy',
   'shop.dealTaken': 'It\'s in your box: place it from Decorate. A new one tomorrow.',
+  'rain.last': 'Last drop',
+  'rain.stopped': 'The rain has stopped',
 };
