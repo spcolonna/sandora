@@ -9,6 +9,7 @@ import 'fx/sfx.dart';
 import 'garden/garden_decor.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
+import 'widgets/washi.dart';
 
 /// La bandeja del modo Decorar: todo el catálogo. Lo que está en la caja se
 /// pone con un toque en la vista [side]; lo demás se compra y se pone con el
@@ -25,12 +26,7 @@ class DecorTray extends StatelessWidget {
 
   void _tap(BuildContext context, DecorItem d) {
     final p = Progress.instance;
-    final messenger = ScaffoldMessenger.of(context);
-    void tell(String text) {
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(text), duration: const Duration(seconds: 2)));
-    }
+    void tell(String text) => showWashiToast(context, text, duration: const Duration(seconds: 2));
 
     if (p.decorOn(side) >= p.decorRules.perSide) {
       SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);

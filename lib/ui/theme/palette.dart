@@ -16,6 +16,9 @@ abstract final class Palette {
   static const moss = Color(0xFF6E8B5B);
   static const mossDark = Color(0xFF4C6640);
   static const wood = Color(0xFF8A5A3C);
+
+  /// Terracota del sello: el nivel y los botones llenos.
+  static const clay = Color(0xFFA35A33);
   static const water = Color(0xFF5C9EA8);
   static const lantern = Color(0xFFE9A84C);
   static const lotus = Color(0xFFE3A6B4);
@@ -46,10 +49,14 @@ abstract final class Palette {
     dividerTheme: DividerThemeData(color: wood.withValues(alpha: 0.18), thickness: 1),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: ink.withValues(alpha: 0.9),
-      contentTextStyle: const TextStyle(color: sandLight, fontSize: 15),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      elevation: 0,
+      // Avisos en una tira de papel, como los carteles del patio.
+      backgroundColor: sandLight,
+      contentTextStyle: const TextStyle(color: ink, fontSize: 15, fontWeight: FontWeight.w600),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: wood.withValues(alpha: 0.25)),
+      ),
+      elevation: 4,
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: sandLight,
@@ -65,7 +72,7 @@ abstract final class Palette {
     ),
     textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: ink.withValues(alpha: 0.75))),
     filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(backgroundColor: const Color(0xFFA35A33), foregroundColor: sandLight),
+      style: FilledButton.styleFrom(backgroundColor: clay, foregroundColor: sandLight),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,

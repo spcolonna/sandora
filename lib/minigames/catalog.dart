@@ -206,8 +206,10 @@ class _PondOverlay extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Palette.paper.withValues(alpha: 0.9),
+                    color: Palette.paper.withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(16),
+                    image: const DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover, opacity: 0.8),
+                    border: Border.all(color: Palette.wood.withValues(alpha: 0.22)),
                   ),
                   child: Text(tr('pond.current'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
                 ),
@@ -276,8 +278,10 @@ class _StackOverlay extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Palette.paper.withValues(alpha: 0.9),
+                    color: Palette.paper.withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(16),
+                    image: const DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover, opacity: 0.8),
+                    border: Border.all(color: Palette.wood.withValues(alpha: 0.22)),
                   ),
                   child: Text(tr('stack.wind'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
                 ),

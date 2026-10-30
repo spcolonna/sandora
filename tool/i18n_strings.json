@@ -2392,5 +2392,19 @@
   "pt": "A chuva parou",
   "ja": "雨がやんだ",
   "zh": "雨停了"
+ },
+ "common.done": {
+  "es": "Listo",
+  "en": "Done",
+  "pt": "Pronto",
+  "ja": "完了",
+  "zh": "完成"
+ },
+ "gardens.go": {
+  "es": "Ir",
+  "en": "Go",
+  "pt": "Ir",
+  "ja": "行く",
+  "zh": "前往"
  }
 }

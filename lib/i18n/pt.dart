@@ -343,4 +343,6 @@ const pt = <String, String>{
   'shop.dealTaken': 'Está na sua caixa: coloque-a em Decorar. Amanhã tem outra.',
   'rain.last': 'Última gota',
   'rain.stopped': 'A chuva parou',
+  'common.done': 'Pronto',
+  'gardens.go': 'Ir',
 };

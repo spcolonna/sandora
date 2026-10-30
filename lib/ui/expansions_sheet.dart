@@ -74,38 +74,29 @@ class _Row extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     return Opacity(
       opacity: locked ? 0.55 : 1,
-      child: Card(
-        color: done ? Palette.lantern.withValues(alpha: 0.14) : Palette.sandLight.withValues(alpha: 0.7),
-        elevation: 0,
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Palette.wood.withValues(alpha: 0.16)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              Column(
+      child: WashiTile(
+        glow: done,
+        child: Row(
+          children: [
+            Column(
+              children: [
+                Icon(locked ? Icons.lock_rounded : icon, color: Palette.ink),
+                Text(tr('level.abbr', {'n': level}), style: text.labelSmall),
+              ],
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(locked ? Icons.lock_rounded : icon, color: Palette.ink),
-                  Text(tr('level.abbr', {'n': level}), style: text.labelSmall),
+                  Text(title, style: text.titleMedium),
+                  Text(subtitle, style: text.bodySmall),
+                  if (cost != null) ...[const SizedBox(height: 6), cost!],
                 ],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: text.titleMedium),
-                    Text(subtitle, style: text.bodySmall),
-                    if (cost != null) ...[const SizedBox(height: 6), cost!],
-                  ],
-                ),
-              ),
-              if (trailing != null) ...[const SizedBox(width: 8), trailing!],
-            ],
-          ),
+            ),
+            if (trailing != null) ...[const SizedBox(width: 8), trailing!],
+          ],
         ),
       ),
     );

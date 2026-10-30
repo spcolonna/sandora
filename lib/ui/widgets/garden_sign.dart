@@ -111,20 +111,8 @@ Future<void> showGardensSheet(BuildContext context) {
                 Text(tr('gardens.title'), style: text.titleLarge, textAlign: TextAlign.center),
                 const SizedBox(height: 8),
                 for (var i = 0; i < p.gardenCount; i++)
-                  ListTile(
-                    leading: Icon(i == p.currentGarden ? Icons.spa_rounded : Icons.spa_outlined, color: Palette.wood),
-                    title: Text(p.gardenNameAt(i) ?? tr('gardens.number', {'n': i + 1})),
-                    subtitle: i == p.currentGarden ? Text(tr('gardens.here')) : null,
-                    trailing: i == p.currentGarden
-                        ? IconButton(
-                            tooltip: tr('garden.name.title'),
-                            icon: const Icon(Icons.edit_rounded),
-                            onPressed: () {
-                              Navigator.pop(sheet);
-                              showGardenNameSheet(context);
-                            },
-                          )
-                        : const Icon(Icons.chevron_right_rounded),
+                  WashiTile(
+                    glow: i == p.currentGarden,
                     onTap: i == p.currentGarden
                         ? null
                         : () async {
@@ -132,25 +120,73 @@ Future<void> showGardensSheet(BuildContext context) {
                             await p.switchGarden(i);
                             if (context.mounted) _enterGarden(context);
                           },
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(p.gardenNameAt(i) ?? tr('gardens.number', {'n': i + 1}), style: text.titleMedium),
+                              if (i == p.currentGarden) Text(tr('gardens.here'), style: text.bodySmall),
+                            ],
+                          ),
+                        ),
+                        if (i == p.currentGarden)
+                          InkIconButton(
+                            glyph: InkGlyph.edit,
+                            size: 38,
+                            tooltip: tr('garden.name.title'),
+                            onPressed: () {
+                              Navigator.pop(sheet);
+                              showGardenNameSheet(context);
+                            },
+                          )
+                        else
+                          InkButton.small(
+                            label: tr('gardens.go'),
+                            onPressed: () async {
+                              Navigator.pop(sheet);
+                              await p.switchGarden(i);
+                              if (context.mounted) _enterGarden(context);
+                            },
+                          ),
+                      ],
+                    ),
                   ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.add_rounded),
-                  title: Text(tr('gardens.new')),
-                  subtitle: Text(
-                    p.gardenCount >= p.gardenMax
-                        ? tr('gardens.full')
-                        : p.level < p.gardenMinLevel
-                        ? tr('gardens.level', {'n': p.gardenMinLevel})
-                        : tr('gardens.newDesc'),
+                const SizedBox(height: 8),
+                WashiTile(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(tr('gardens.new'), style: text.titleMedium),
+                            Text(
+                              p.gardenCount >= p.gardenMax
+                                  ? tr('gardens.full')
+                                  : p.level < p.gardenMinLevel
+                                  ? tr('gardens.level', {'n': p.gardenMinLevel})
+                                  : tr('gardens.newDesc'),
+                              style: text.bodySmall,
+                            ),
+                            const SizedBox(height: 6),
+                            CurrencyChip.lotus(p.gardenCost),
+                          ],
+                        ),
+                      ),
+                      InkButton.small(
+                        label: tr('shop.dealBuy'),
+                        onPressed: p.canBuyGarden
+                            ? () async {
+                                Navigator.pop(sheet);
+                                SoundBoard.instance.play(Sfx.good, volume: 0.5);
+                                if (await p.buyGarden() && context.mounted) _enterGarden(context);
+                              }
+                            : null,
+                      ),
+                    ],
                   ),
-                  trailing: CurrencyChip.lotus(p.gardenCost),
-                  enabled: p.canBuyGarden,
-                  onTap: () async {
-                    Navigator.pop(sheet);
-                    SoundBoard.instance.play(Sfx.good, volume: 0.5);
-                    if (await p.buyGarden() && context.mounted) _enterGarden(context);
-                  },
                 ),
               ],
             ),
@@ -227,10 +263,14 @@ class _NameSheetState extends State<_NameSheet> {
             style: text.titleMedium,
             decoration: InputDecoration(
               hintText: tr('garden.name.hint'),
-              suffixIcon: IconButton(
-                tooltip: tr('garden.name.other'),
-                onPressed: _another,
-                icon: const Icon(Icons.autorenew_rounded),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.all(5),
+                child: InkIconButton(
+                  glyph: InkGlyph.replay,
+                  size: 36,
+                  tooltip: tr('garden.name.other'),
+                  onPressed: _another,
+                ),
               ),
             ),
             onSubmitted: (_) => _save(),

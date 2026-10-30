@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../fx/sfx.dart';
@@ -43,8 +44,45 @@ class WashiCard extends StatelessWidget {
   }
 }
 
+/// Una fila de papel para listas (ofertas, ampliaciones, jardines): aguada
+/// clara con borde de madera; [glow] la tiñe de farol cuando ya está hecha.
+class WashiTile extends StatelessWidget {
+  final Widget child;
+  final bool glow;
+  final Color? border;
+  final EdgeInsetsGeometry padding, margin;
+  final VoidCallback? onTap;
+  const WashiTile({
+    super.key,
+    required this.child,
+    this.glow = false,
+    this.border,
+    this.padding = const EdgeInsets.all(12),
+    this.margin = const EdgeInsets.symmetric(vertical: 4),
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final r = BorderRadius.circular(16);
+    final tile = Container(
+      margin: margin,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: glow ? Color.lerp(Palette.sandLight, Palette.lantern, 0.16) : Palette.sandLight.withValues(alpha: 0.75),
+        borderRadius: r,
+        image: const DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover, opacity: 0.35),
+        border: Border.all(color: border ?? Palette.wood.withValues(alpha: 0.16), width: border == null ? 1 : 1.5),
+      ),
+      child: child,
+    );
+    if (onTap == null) return tile;
+    return GestureDetector(behavior: HitTestBehavior.opaque, onTap: onTap, child: tile);
+  }
+}
+
 /// Glifos de tinta, pintados a pincel en vez de los íconos de sistema.
-enum InkGlyph { pause, back, close, replay, play, garden }
+enum InkGlyph { pause, back, close, replay, play, garden, edit, market }
 
 /// Botón principal: un trazo ancho de tinta tibia sobre el papel. El
 /// secundario ([quiet]) es solo la palabra en tinta; el de papel ([paper]),
@@ -148,6 +186,7 @@ class _InkButtonState extends State<InkButton> {
                         boxShadow: const [BoxShadow(color: Color(0x44000000), blurRadius: 10, offset: Offset(0, 3))],
                       ),
                       child: Center(
+                        widthFactor: 1,
                         child: Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: label),
                       ),
                     )
@@ -368,6 +407,20 @@ class _GlyphPainter extends CustomPainter {
         // Una piedra con su ondita de arena: volver al jardín.
         canvas.drawOval(Rect.fromLTRB(u * 0.22, u * 0.3, u * 0.78, u * 0.66), Paint()..color = color);
         brush(p(0.06, 0.84), p(0.94, 0.84));
+      case InkGlyph.edit:
+        // Un pincel en diagonal con su gota de tinta en la punta.
+        brush(p(0.84, 0.16), p(0.3, 0.7));
+        canvas.drawOval(
+          Rect.fromCenter(center: p(0.22, 0.8), width: u * 0.22, height: u * 0.16),
+          Paint()..color = color,
+        );
+      case InkGlyph.market:
+        // El puesto: un toldo de dos aguas y el mostrador.
+        brush(p(0.08, 0.38), p(0.5, 0.12));
+        brush(p(0.5, 0.12), p(0.92, 0.38));
+        brush(p(0.22, 0.4), p(0.22, 0.86));
+        brush(p(0.78, 0.4), p(0.78, 0.86));
+        brush(p(0.12, 0.62), p(0.88, 0.62));
     }
   }
 
@@ -463,6 +516,77 @@ Future<T?> showWashiDialog<T>(BuildContext context, {required String title, requ
       );
     },
   );
+}
+
+/// Elegir una hora sobre papel: dos ruedas en tinta, sin el reloj de Material.
+Future<TimeOfDay?> showWashiTimePicker(
+  BuildContext context, {
+  required TimeOfDay initial,
+  required String title,
+  required String done,
+}) {
+  var picked = initial;
+  final use24 = MediaQuery.alwaysUse24HourFormatOf(context);
+  return showWashiSheet<TimeOfDay>(
+    context,
+    builder: (sheet) => Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(title, style: Theme.of(sheet).textTheme.titleLarge, textAlign: TextAlign.center),
+          SizedBox(
+            height: 180,
+            child: CupertinoTheme(
+              data: const CupertinoThemeData(
+                textTheme: CupertinoTextThemeData(
+                  dateTimePickerTextStyle: TextStyle(fontSize: 22, color: Palette.ink, fontWeight: FontWeight.w600),
+                ),
+              ),
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                use24hFormat: use24,
+                minuteInterval: 5,
+                initialDateTime: DateTime(2000, 1, 1, initial.hour, initial.minute - initial.minute % 5),
+                onDateTimeChanged: (d) => picked = TimeOfDay(hour: d.hour, minute: d.minute),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          InkButton(label: done, height: 48, onPressed: () => Navigator.pop(sheet, picked)),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Un aviso corto en una tira de papel washi, abajo de la pantalla.
+void showWashiToast(BuildContext context, String text, {Duration duration = const Duration(milliseconds: 2400)}) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        padding: EdgeInsets.zero,
+        duration: duration,
+        content: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          decoration: BoxDecoration(
+            color: Palette.sandLight,
+            borderRadius: BorderRadius.circular(18),
+            image: const DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover),
+            border: Border.all(color: Palette.wood.withValues(alpha: 0.25)),
+            boxShadow: const [BoxShadow(color: Color(0x44000000), blurRadius: 14, offset: Offset(0, 4))],
+          ),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Palette.ink, fontSize: 15, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
 }
 
 /// Hoja que sube desde abajo, de papel washi, con una pincelada corta como

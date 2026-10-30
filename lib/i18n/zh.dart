@@ -343,4 +343,6 @@ const zh = <String, String>{
   'shop.dealTaken': '已放入你的箱子：从“装饰”中摆放。明天还有新的。',
   'rain.last': '最后一滴',
   'rain.stopped': '雨停了',
+  'common.done': '完成',
+  'gardens.go': '前往',
 };

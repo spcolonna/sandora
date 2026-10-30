@@ -343,4 +343,6 @@ const es = <String, String>{
   'shop.dealTaken': 'Está en tu caja: ponela desde Decorar. Mañana hay otra.',
   'rain.last': 'Última gota',
   'rain.stopped': 'Paró la lluvia',
+  'common.done': 'Listo',
+  'gardens.go': 'Ir',
 };

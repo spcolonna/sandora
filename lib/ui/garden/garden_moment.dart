@@ -99,15 +99,10 @@ Future<void> _showNowSheet(BuildContext context, {required DateTime now, require
                     if (!on) return ws.disableReal();
                     final result = await ws.enableReal();
                     if (result == RealWeatherResult.ok || !context.mounted) return;
-                    ScaffoldMessenger.of(context)
-                      ..hideCurrentSnackBar()
-                      ..showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            tr(result == RealWeatherResult.denied ? 'weather.real.denied' : 'weather.real.failed'),
-                          ),
-                        ),
-                      );
+                    showWashiToast(
+                      context,
+                      tr(result == RealWeatherResult.denied ? 'weather.real.denied' : 'weather.real.failed'),
+                    );
                   },
                 ),
                 if (ws.isReal(now)) Text(tr('weather.source'), style: text.bodySmall),

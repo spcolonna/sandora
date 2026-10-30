@@ -170,15 +170,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
   }
 
   void _toast(String text) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(text, textAlign: TextAlign.center),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(milliseconds: 2400),
-        ),
-      );
+    showWashiToast(context, text);
   }
 
   /// Anuncia una vez los minijuegos que se abrieron (por día o por zona).
@@ -667,10 +659,11 @@ class _WalletPanel extends StatelessWidget {
               ),
               Align(
                 alignment: Alignment.centerRight,
-                child: TextButton.icon(
+                child: InkButton.paper(
+                  label: tr('shop.title'),
+                  glyph: InkGlyph.market,
+                  height: 38,
                   onPressed: onMarket,
-                  icon: const Icon(Icons.storefront_rounded, size: 18),
-                  label: Text(tr('shop.title')),
                 ),
               ),
             ],
@@ -697,9 +690,9 @@ class _LevelPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => showExpansionsSheet(context),
-            borderRadius: BorderRadius.circular(8),
             child: Row(
               children: [
                 Badge(
@@ -707,7 +700,7 @@ class _LevelPanel extends StatelessWidget {
                   smallSize: 10,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    decoration: BoxDecoration(color: const Color(0xFFA35A33), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(color: Palette.clay, borderRadius: BorderRadius.circular(10)),
                     child: Text(
                       tr('level.short', {'n': p.level}),
                       style: const TextStyle(color: Palette.paper, fontWeight: FontWeight.w700),
@@ -809,40 +802,52 @@ class _MenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
-    Widget item(IconData icon, String label, bool dot) => Row(
-      children: [
-        Badge(
-          isLabelVisible: dot,
-          backgroundColor: Palette.lantern,
-          child: Icon(icon, color: Palette.ink),
-        ),
-        const SizedBox(width: 14),
-        Text(label),
-      ],
-    );
-    return PopupMenuButton<String>(
-      tooltip: '',
-      offset: const Offset(0, 52),
-      color: Palette.paper,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      onOpened: () => SoundBoard.instance.play(Sfx.uiTap, volume: 0.4),
-      onSelected: (id) {
-        switch (id) {
-          case 'decor':
-            onDecor();
-          case 'album':
-            SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-            showAlbumSheet(context);
-          case 'settings':
-            showSettingsSheet(context);
-        }
-      },
-      itemBuilder: (context) => [
-        if (p.decorUnlocked)
-          PopupMenuItem(value: 'decor', child: item(Icons.local_florist_rounded, tr('decor.title'), p.decorNew)),
-        PopupMenuItem(value: 'album', child: item(Icons.collections_bookmark_rounded, tr('album.title'), p.albumNew)),
-        PopupMenuItem(value: 'settings', child: item(Icons.settings_rounded, tr('settings.title'), false)),
-      ],
+    void open() {
+      SoundBoard.instance.play(Sfx.uiTap, volume: 0.4);
+      showWashiSheet<void>(
+        context,
+        builder: (sheet) {
+          Widget item(IconData icon, String label, bool dot, VoidCallback go) => WashiTile(
+            onTap: () {
+              Navigator.pop(sheet);
+              go();
+            },
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Badge(
+                  isLabelVisible: dot,
+                  backgroundColor: Palette.lantern,
+                  child: Icon(icon, color: Palette.wood),
+                ),
+                const SizedBox(width: 16),
+                Expanded(child: Text(label, style: Theme.of(sheet).textTheme.titleMedium)),
+              ],
+            ),
+          );
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (p.decorUnlocked) item(Icons.local_florist_rounded, tr('decor.title'), p.decorNew, onDecor),
+                  item(Icons.collections_bookmark_rounded, tr('album.title'), p.albumNew, () {
+                    SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+                    showAlbumSheet(context);
+                  }),
+                  item(Icons.settings_rounded, tr('settings.title'), false, () => showSettingsSheet(context)),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    return GestureDetector(
+      onTap: open,
       child: Badge(
         isLabelVisible: (p.decorUnlocked && p.decorNew) || p.albumNew,
         smallSize: 10,

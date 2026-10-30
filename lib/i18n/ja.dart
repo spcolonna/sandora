@@ -343,4 +343,6 @@ const ja = <String, String>{
   'shop.dealTaken': '箱に入りました。「飾る」から置けます。明日はまた別のものが。',
   'rain.last': '最後のしずく',
   'rain.stopped': '雨がやんだ',
+  'common.done': '完了',
+  'gardens.go': '行く',
 };
