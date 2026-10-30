@@ -9,6 +9,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -357,21 +358,31 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
   }
 
   void _paintWater(Canvas canvas, Rect board) {
-    canvas.drawRect(
-      Offset.zero & Size(size.x, size.y),
-      Paint()
-        ..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [const Color(0xFFCFE3DF), const Color(0xFFE8EEDC)]),
-    );
     final pond = RRect.fromRectAndRadius(board.inflate(10), Radius.circular(_cell * 0.5));
-    canvas.drawRRect(pond.shift(const Offset(0, 6)), Paint()..color = Palette.ink.withValues(alpha: 0.08));
-    canvas.drawRRect(
-      pond,
-      Paint()
-        ..shader = Gradient.linear(board.topCenter, board.bottomCenter, [
-          const Color(0xFF6FA9B0),
-          const Color(0xFF3F7F8C),
-        ]),
-    );
+    final water = SceneArt.instance['bg_pond_water'];
+    if (water != null) {
+      // El estanque pintado ocupa todo; el tablero apenas se oscurece.
+      drawArtCover(canvas, water, Offset.zero & Size(size.x, size.y));
+      canvas.drawRRect(pond, Paint()..color = const Color(0xFF0E2A30).withValues(alpha: 0.22));
+    } else {
+      canvas.drawRect(
+        Offset.zero & Size(size.x, size.y),
+        Paint()
+          ..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [
+            const Color(0xFFCFE3DF),
+            const Color(0xFFE8EEDC),
+          ]),
+      );
+      canvas.drawRRect(pond.shift(const Offset(0, 6)), Paint()..color = Palette.ink.withValues(alpha: 0.08));
+      canvas.drawRRect(
+        pond,
+        Paint()
+          ..shader = Gradient.linear(board.topCenter, board.bottomCenter, [
+            const Color(0xFF6FA9B0),
+            const Color(0xFF3F7F8C),
+          ]),
+      );
+    }
     // Ondas lentas sobre el agua.
     final ring = Paint()
       ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.08)
@@ -401,6 +412,10 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
     }
     canvas.save();
     canvas.translate(c.dx, c.dy);
+    if (_paintPieceArt(canvas, p, r, a)) {
+      canvas.restore();
+      return;
+    }
     switch (p.tile) {
       case Tile.lotus:
         _lotusFlower(canvas, r, a, open: p.power == Power.bloom);
@@ -433,6 +448,40 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
       }
     }
     canvas.restore();
+  }
+
+  /// Pieza pintada: el poder va detrás, como un halo, y la ficha encima un poco
+  /// más chica para que se siga viendo de qué tipo es. Devuelve false si falta
+  /// alguna imagen.
+  bool _paintPieceArt(Canvas canvas, Piece p, double r, double a) {
+    final art = SceneArt.instance;
+    final tile = p.tile == null ? art['spr_pond_power_moon'] : art['spr_pond_tile_${p.tile!.name}'];
+    if (tile == null) return false;
+    final paint = Paint()..color = Color.fromRGBO(0, 0, 0, a);
+    void fit(Image img, double side) {
+      final k = side / max(img.width, img.height);
+      final w = img.width * k, h = img.height * k;
+      drawArt(
+        canvas,
+        img,
+        Rect.fromCenter(center: Offset.zero, width: w, height: h),
+        paint: paint,
+      );
+    }
+
+    final halo = switch (p.power) {
+      Power.rowWave || Power.colWave => art['spr_pond_power_wave'],
+      Power.bloom => art['spr_pond_power_bloom'],
+      _ => null,
+    };
+    if (halo != null) {
+      canvas.save();
+      if (p.power == Power.colWave) canvas.rotate(pi / 2);
+      fit(halo, r * 2.4);
+      canvas.restore();
+    }
+    fit(tile, r * (halo == null ? 2.2 : 1.6));
+    return true;
   }
 
   void _lotusFlower(Canvas canvas, double r, double a, {bool open = false}) {

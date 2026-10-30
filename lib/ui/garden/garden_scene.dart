@@ -244,7 +244,7 @@ class GardenLayout {
         Place.flute: flute.bottomCenter,
         Place.lanterns: Offset(lanterns.center.dx, lanterns.bottom - gh * 0.04),
       },
-      [Offset(matcha.left + matcha.width * 0.1, matcha.top + matcha.height * 0.52)],
+      [teahouseLamp(matcha)],
     );
   }
 }

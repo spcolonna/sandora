@@ -64,6 +64,20 @@ class SceneArt {
     'obj_moss_rock': 'east',
     'obj_bonsai_pot': 'east',
     'obj_bonsai_trunk': 'east',
+    // Estanque de lotos (3 en línea).
+    'bg_pond_water': 'pond',
+    'spr_pond_tile_lotus': 'pond',
+    'spr_pond_tile_pad': 'pond',
+    'spr_pond_tile_stone': 'pond',
+    'spr_pond_tile_koi': 'pond',
+    'spr_pond_tile_drop': 'pond',
+    'spr_pond_power_wave': 'pond',
+    'spr_pond_power_bloom': 'pond',
+    'spr_pond_power_moon': 'pond',
+    // Vista del bosque.
+    'obj_tea_house': 'forest',
+    'obj_bamboo_grove': 'forest',
+    'obj_tea_bowl': 'forest',
     'spr_sand_rake_01': 'sand',
     'tex_sand_base': 'sand',
     // Decoraciones (`garden_decor.dart`): mientras falte alguna, se pinta con código.
@@ -116,11 +130,16 @@ void drawArt(ui.Canvas canvas, ui.Image img, ui.Rect dst, {ui.Paint? paint}) {
 /// en su borde de abajo. Devuelve dónde quedó (o null si no hay imagen).
 ui.Rect? drawArtIn(ui.Canvas canvas, ui.Image? img, ui.Rect r) {
   if (img == null) return null;
-  final k = (r.width / img.width) < (r.height / img.height) ? r.width / img.width : r.height / img.height;
-  final w = img.width * k, h = img.height * k;
-  final dst = ui.Rect.fromLTWH(r.center.dx - w / 2, r.bottom - h, w, h);
+  final dst = artRectIn(img, r);
   drawArt(canvas, img, dst);
   return dst;
+}
+
+/// Dónde queda [img] al dibujarlo con [drawArtIn] en [r].
+ui.Rect artRectIn(ui.Image img, ui.Rect r) {
+  final k = (r.width / img.width) < (r.height / img.height) ? r.width / img.width : r.height / img.height;
+  final w = img.width * k, h = img.height * k;
+  return ui.Rect.fromLTWH(r.center.dx - w / 2, r.bottom - h, w, h);
 }
 
 /// Dibuja [img] cubriendo todo [r] sin deformarlo; lo que sobra a los costados

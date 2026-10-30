@@ -9,6 +9,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -140,17 +141,41 @@ class MatchaGame extends FlameGame with DragCallbacks {
         ..color = Palette.ink.withValues(alpha: 0.18)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
     );
-    canvas.drawCircle(c, r * 1.18, Paint()..color = const Color(0xFF4B3A2E));
+    final art = SceneArt.instance['obj_tea_bowl'];
+    canvas.save();
+    if (art != null) {
+      // Boca de `obj_tea_bowl` (fracciones): el té ocupa ese óvalo.
+      final w = r * 2.58, h = w * art.height / art.width;
+      drawArt(canvas, art, Rect.fromLTWH(c.dx - w * 0.519, c.dy - h * 0.429, w, h));
+      final ky = h * 0.357 / (w * 0.403);
+      canvas.translate(c.dx, c.dy);
+      canvas.scale(1, ky);
+      canvas.translate(-c.dx, -c.dy);
+    } else {
+      canvas.drawCircle(c, r * 1.18, Paint()..color = const Color(0xFF4B3A2E));
+      canvas.drawCircle(
+        c,
+        r * 1.18,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4
+          ..color = const Color(0xFF8A6F55),
+      );
+    }
+    final foam = _foam;
+    final tea = Color.lerp(const Color(0xFF6E8F2E), const Color(0xFF9DBB55), foam)!;
+    // Más oscuro contra la pared del cuenco.
     canvas.drawCircle(
       c,
-      r * 1.18,
+      r,
       Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4
-        ..color = const Color(0xFF8A6F55),
+        ..shader = Gradient.radial(
+          c - Offset(r * 0.15, r * 0.2),
+          r * 1.15,
+          [Color.lerp(tea, const Color(0xFFFFFFFF), 0.12)!, tea, Color.lerp(tea, const Color(0xFF1E2A10), 0.35)!],
+          [0, 0.6, 1],
+        ),
     );
-    final foam = _foam;
-    canvas.drawCircle(c, r, Paint()..color = Color.lerp(const Color(0xFF6E8F2E), const Color(0xFF9DBB55), foam)!);
     // La espuma aparece de a poco: cada burbuja tiene su turno.
     final shown = (_bubbles.length * foam).round();
     final bubble = Paint()..color = const Color(0xFFD7E6A4).withValues(alpha: 0.85);
@@ -165,6 +190,7 @@ class MatchaGame extends FlameGame with DragCallbacks {
       canvas.drawCircle(p, br, bubble);
       canvas.drawCircle(p, br, rim);
     }
+    canvas.restore();
   }
 
   /// La cuenta que se mece al ritmo ideal: ir y volver son dos batidas.

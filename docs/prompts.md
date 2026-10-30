@@ -22,259 +22,13 @@ conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de l
 
 # Para generar ahora
 
-## Bloque 10 — Estanque de lotos (3 en línea) (9)
+## Bloque 14 — Bosque: Casa de té (Matcha), Bambú (Flauta) y Río (Linternas) (4)
 
-**Por qué ahora:** El 3 en línea del estanque: fichas y poderes.
-
-Fichas y poderes del 3 en línea del estanque. Se ven chicas (60 a 80 px) sobre agua oscura, así que cada una tiene que leerse por su forma y su color, no por el detalle. Adjuntá `store/art/style/style_keyart.webp`.
-
-### 1. `spr_pond_tile_lotus` ⬜
-
-Guardala como `store/art/pond/spr_pond_tile_lotus.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a tile of a match-three board in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown small (about 60 to 80 pixels) on dark water, next to many other tiles, so it must read instantly by its shape and color.
-
-SUBJECT: A single open lotus flower seen from slightly above, soft pink petals with a pale yellow center.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft light rim around the edge. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, water, frame, tile border or square; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 2. `spr_pond_tile_pad` ⬜
-
-Guardala como `store/art/pond/spr_pond_tile_pad.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a tile of a match-three board in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown small (about 60 to 80 pixels) on dark water, next to many other tiles, so it must read instantly by its shape and color.
-
-SUBJECT: A single round lily pad seen from above, bright green with its typical notch and a few soft veins.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft light rim around the edge. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, water, frame, tile border or square; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 3. `spr_pond_tile_stone` ⬜
-
-Guardala como `store/art/pond/spr_pond_tile_stone.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a tile of a match-three board in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown small (about 60 to 80 pixels) on dark water, next to many other tiles, so it must read instantly by its shape and color.
-
-SUBJECT: A single smooth, round river stone seen from above, pale gray, wet and slightly shiny.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft light rim around the edge. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, water, frame, tile border or square; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 4. `spr_pond_tile_koi` ⬜
-
-Guardala como `store/art/pond/spr_pond_tile_koi.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a tile of a match-three board in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown small (about 60 to 80 pixels) on dark water, next to many other tiles, so it must read instantly by its shape and color.
-
-SUBJECT: A single small koi fish seen from above, curved as if swimming, white with orange-red patches.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft light rim around the edge. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, water, frame, tile border or square; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 5. `spr_pond_tile_drop` ⬜
-
-Guardala como `store/art/pond/spr_pond_tile_drop.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a tile of a match-three board in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown small (about 60 to 80 pixels) on dark water, next to many other tiles, so it must read instantly by its shape and color.
-
-SUBJECT: A single big water drop, clear blue with a bright highlight, slightly flattened as if resting on a leaf.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft light rim around the edge. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, water, frame, tile border or square; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 6. `spr_pond_power_wave` ⬜
-
-Guardala como `store/art/pond/spr_pond_power_wave.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a tile of a match-three board in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown small (about 60 to 80 pixels) on dark water, next to many other tiles, so it must read instantly by its shape and color.
-
-SUBJECT: A small curling water wave in teal and white foam, stylized like a sumi-e ink wave, clearly moving to the side.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft light rim around the edge. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, water, frame, tile border or square; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 7. `spr_pond_power_bloom` ⬜
-
-Guardala como `store/art/pond/spr_pond_power_bloom.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a tile of a match-three board in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown small (about 60 to 80 pixels) on dark water, next to many other tiles, so it must read instantly by its shape and color.
-
-SUBJECT: A burst of lotus petals opening outward from a bright center, like a flower blooming in one instant, with a soft golden glow.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft light rim around the edge. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, water, frame, tile border or square; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 8. `spr_pond_power_moon` ⬜
-
-Guardala como `store/art/pond/spr_pond_power_moon.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a tile of a match-three board in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown small (about 60 to 80 pixels) on dark water, next to many other tiles, so it must read instantly by its shape and color.
-
-SUBJECT: A pale full moon reflected on water: a glowing cream disk with soft concentric ripples around it.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: One single object, perfectly centered, filling about 75% of the canvas. Bold, simple silhouette, soft light rim around the edge. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, water, frame, tile border or square; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 9. `bg_pond_water` ⬜
-
-Guardala como `store/art/pond/bg_pond_water.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), fully opaque, with NO transparency.
-
-PURPOSE: This is the background of the lotus pond match-three minigame in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game draws a grid of tiles on top of it.
-
-SUBJECT: Calm, deep pond water seen straight from above: dark green-blue with soft light ripples, a few out-of-focus lily pads and stones only along the edges.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The central 80% of the image is calm, even and dark so the tiles on top stay readable. The game shows this on tall phone screens (9:16), so the left and right 8% of the image may be cropped: keep everything important inside the central 84% of the width.
-
-DO NOT INCLUDE: tiles or grid; fish or flowers in the center; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-## Bloque 14 — Bosque: Casa de té (Matcha), Bambú (Flauta) y Río (Linternas) (7)
-
-**Por qué ahora:** La tercera vista (el bosque) y sus minijuegos.
+**Por qué ahora:** Lo que falta del bosque: batidor, flauta, linterna y el río.
 
 La tercera vista del jardín y las piezas de sus minijuegos. El código dibuja la espuma del té, las ráfagas de viento y la corriente, así que cada pieza va sola y recortada. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 10. `obj_tea_house` ⬜
-
-Guardala como `store/art/forest/obj_tea_house.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a decorative object that the player places in their garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game draws the ground and shadows itself and shows the object small (about 260 pixels tall), so the image must contain ONLY the object.
-
-SUBJECT: A tiny Japanese tea house (chashitsu): a low wooden platform, paper shoji walls with a thin wooden grid, a dark indigo noren curtain over the small entrance and a heavy dark thatched roof with softly curved eaves. Seen from the front and a little from above.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The object stands upright, seen from the front and slightly above (about 20 degrees), perfectly centered, filling about 80% of the canvas height. The bottom of the object sits on an imaginary flat ground line near the bottom of the canvas. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold, simple silhouette that still reads at small size.
-
-DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 11. `obj_bamboo_grove` ⬜
-
-Guardala como `store/art/forest/obj_bamboo_grove.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a decorative object that the player places in their garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game draws the ground and shadows itself and shows the object small (about 320 pixels tall), so the image must contain ONLY the object.
-
-SUBJECT: A tight grove of eight tall green bamboo culms of different heights and shades, with visible nodes and light fans of thin leaves near the tops, growing from a small mossy mound. Seen from the front.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The object stands upright, seen from the front and slightly above (about 20 degrees), perfectly centered, filling about 80% of the canvas height. The bottom of the object sits on an imaginary flat ground line near the bottom of the canvas. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold, simple silhouette that still reads at small size.
-
-DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 12. `obj_tea_bowl` ⬜
-
-Guardala como `store/art/forest/obj_tea_bowl.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is a decorative object that the player places in their garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game draws the ground and shadows itself and shows the object small (about 300 pixels wide), so the image must contain ONLY the object.
-
-SUBJECT: A single Japanese matcha bowl (chawan) seen straight from ABOVE: a thick, slightly irregular rim of dark brown glazed clay with a lighter drip, and the inside EMPTY, showing the pale bottom of the bowl.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: The object stands upright, seen from the front and slightly above (about 20 degrees), perfectly centered, filling about 80% of the canvas height. The bottom of the object sits on an imaginary flat ground line near the bottom of the canvas. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold, simple silhouette that still reads at small size.
-
-DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style; tea, foam, whisk or spoon.
-```
-
-### 13. `obj_tea_whisk` ⬜
+### 1. `obj_tea_whisk` ⬜
 
 Guardala como `store/art/forest/obj_tea_whisk.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -294,7 +48,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style; bowl or tea.
 ```
 
-### 14. `obj_bamboo_flute` ⬜
+### 2. `obj_bamboo_flute` ⬜
 
 Guardala como `store/art/forest/obj_bamboo_flute.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -314,7 +68,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style; hands or strings.
 ```
 
-### 15. `obj_river_lantern` ⬜
+### 3. `obj_river_lantern` ⬜
 
 Guardala como `store/art/forest/obj_river_lantern.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -334,7 +88,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style; water.
 ```
 
-### 16. `bg_river` ⬜
+### 4. `bg_river` ⬜
 
 Guardala como `store/art/forest/bg_river.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -360,7 +114,7 @@ DO NOT INCLUDE: stones in the water; boats, lanterns or docks; any text, letters
 
 Segunda vista del jardín (se llega deslizando). Va encima del mismo cielo y las mismas colinas que el patio. Adjuntá `store/art/style/style_keyart.webp` y `bg_base_ground`.
 
-### 17. `bg_east_ground` ⬜
+### 5. `bg_east_ground` ⬜
 
 Guardala como `store/art/bg/bg_east_ground.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -386,7 +140,7 @@ DO NOT INCLUDE: lanterns, trees, bamboo or objects; sky; any text, letters, numb
 
 Piezas de la marca. El logo (símbolo y nombre) ya está incluido; el juego los pone encima de `title_bg` y `store_feature`, así que esas imágenes van sin texto. El nombre del jardín de cada jugador lo escribe el juego sobre `ui_garden_sign`, así que esa pieza va vacía. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 18. `store_feature` ⬜
+### 6. `store_feature` ⬜
 
 Guardala como `store/art/brand/store_feature.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -412,7 +166,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 
 Piezas que el juego estira (nine-slice) y sobre las que escribe su propio texto. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 19. `ui_button` ⬜
+### 7. `ui_button` ⬜
 
 Guardala como `store/art/ui/ui_button.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -432,7 +186,7 @@ COMPOSITION: The button is centered, about 80% of the canvas width and 30% of it
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 20. `ui_panel` ⬜
+### 8. `ui_panel` ⬜
 
 Guardala como `store/art/ui/ui_panel.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -452,7 +206,7 @@ COMPOSITION: The panel is centered and fills about 90% of the canvas, perfectly 
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 21. `ui_score_frame` ⬜
+### 9. `ui_score_frame` ⬜
 
 Guardala como `store/art/ui/ui_score_frame.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -472,7 +226,7 @@ COMPOSITION: The plaque is centered, about 70% of the canvas width and 35% of it
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 22. `ui_serenity_bar` ⬜
+### 10. `ui_serenity_bar` ⬜
 
 Guardala como `store/art/ui/ui_serenity_bar.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -492,7 +246,7 @@ COMPOSITION: The bar is centered, horizontal, about 90% of the canvas width and 
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 23. `ui_result` ⬜
+### 11. `ui_result` ⬜
 
 Guardala como `store/art/ui/ui_result.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -512,7 +266,7 @@ COMPOSITION: The card is centered, about 75% of the canvas width and 90% of its 
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 24. `ui_pause` ⬜
+### 12. `ui_pause` ⬜
 
 Guardala como `store/art/ui/ui_pause.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -538,7 +292,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 
 Van primero: fijan el estilo de todo lo demás. Guardalas en `store/art/style/` y **adjuntá `store/art/style/style_keyart.webp` como referencia en cada bloque siguiente** (arrastrala a la conversación antes de pegar el prompt). Si el estilo no te convence, se cambia el párrafo STYLE en `tool/gen_prompts.py` y se regenera este archivo.
 
-### 25. `style_stones` ⬜
+### 13. `style_stones` ⬜
 
 Guardala como `store/art/style/style_stones.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -558,7 +312,7 @@ COMPOSITION: Each stone is separated from the others with generous empty paper a
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; labels; grid lines; frame or border; cast shadows on the paper; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 26. `style_plants` ⬜
+### 14. `style_plants` ⬜
 
 Guardala como `store/art/style/style_plants.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -580,7 +334,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 
 ---
 
-# Ya incluidas (86)
+# Ya incluidas (98)
 
 | Imagen | Archivo en el juego | Uso |
 |---|---|---|
@@ -670,3 +424,15 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 | `obj_bonsai_pot` | `assets/images/east/obj_bonsai_pot.webp` | Maceta del Bonsái, delante de la tierra del tronco (`bonsai_game.dart`). |
 | `obj_bonsai_trunk` | `assets/images/east/obj_bonsai_trunk.webp` | Árbol del Bonsái, estirado de la maceta a la copa de arriba para que sus ramas entren en las copas (`bonsai_game.dart`). |
 | `obj_decor_azalea` | `assets/images/decor/obj_decor_azalea.webp` | Azalea del modo Decorar, 480 px; el aspect del balance sigue al arte (`garden_decor.dart`). |
+| `spr_pond_tile_lotus` | `assets/images/pond/spr_pond_tile_lotus.webp` | Ficha del 3 en línea, 256 px (`pond_game.dart`). |
+| `spr_pond_tile_pad` | `assets/images/pond/spr_pond_tile_pad.webp` | Ficha del 3 en línea, 256 px (`pond_game.dart`). |
+| `spr_pond_tile_stone` | `assets/images/pond/spr_pond_tile_stone.webp` | Ficha del 3 en línea, 256 px (`pond_game.dart`). |
+| `spr_pond_tile_koi` | `assets/images/pond/spr_pond_tile_koi.webp` | Ficha del 3 en línea, 256 px (`pond_game.dart`). |
+| `spr_pond_tile_drop` | `assets/images/pond/spr_pond_tile_drop.webp` | Ficha del 3 en línea, 256 px (`pond_game.dart`). |
+| `spr_pond_power_wave` | `assets/images/pond/spr_pond_power_wave.webp` | Onda: halo detrás de la ficha, girado 90° en la de columna (`pond_game.dart`). |
+| `spr_pond_power_bloom` | `assets/images/pond/spr_pond_power_bloom.webp` | Flor abierta: halo detrás de la ficha (`pond_game.dart`). |
+| `spr_pond_power_moon` | `assets/images/pond/spr_pond_power_moon.webp` | Luna, la pieza sin tipo (`pond_game.dart`). |
+| `bg_pond_water` | `assets/images/pond/bg_pond_water.webp` | Fondo del 3 en línea; el tablero apenas se oscurece encima y el HUD va claro (`pond_game.dart`). |
+| `obj_tea_house` | `assets/images/forest/obj_tea_house.webp` | Casa de té de la vista del bosque, 480 px; el farolito cuelga del alero izquierdo (`garden_forest.dart`). |
+| `obj_bamboo_grove` | `assets/images/forest/obj_bamboo_grove.webp` | Bambú de la vista del bosque, 480 px (`garden_forest.dart`). |
+| `obj_tea_bowl` | `assets/images/forest/obj_tea_bowl.webp` | Cuenco del Matcha, 640 px; el té y la espuma llenan el óvalo de la boca (`matcha_game.dart`). |

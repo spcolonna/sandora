@@ -3,11 +3,18 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../theme/palette.dart';
+import 'scene_art.dart';
 
-/// Lugares de la vista del bosque, dibujados con código hasta tener arte.
+/// Lugares de la vista del bosque: el arte pintado si está y, si no, con código.
 
 /// Bosquecillo de bambú: cañas con nudos y matas de hojas arriba.
 void paintBambooGrove(Canvas canvas, Rect r) {
+  final art = SceneArt.instance['obj_bamboo_grove'];
+  if (art != null) {
+    _groundShadow(canvas, r, 0.7);
+    drawArtIn(canvas, art, r);
+    return;
+  }
   final rng = Random(21);
   final w = r.width, h = r.height;
   canvas.drawOval(
@@ -54,6 +61,13 @@ void paintBambooGrove(Canvas canvas, Rect r) {
 
 /// Casita de té: tarima, paredes de shoji, techo oscuro y un farolito.
 void paintTeahouse(Canvas canvas, Rect r, Offset lamp) {
+  final art = SceneArt.instance['obj_tea_house'];
+  if (art != null) {
+    _groundShadow(canvas, r, 0.95);
+    drawArtIn(canvas, art, r);
+    _hangingLamp(canvas, lamp, r.height * 0.07);
+    return;
+  }
   final w = r.width, h = r.height;
   canvas.drawOval(
     Rect.fromLTRB(r.left, r.bottom - h * 0.05, r.right, r.bottom + h * 0.04),
@@ -114,6 +128,44 @@ void paintTeahouse(Canvas canvas, Rect r, Offset lamp) {
   canvas.drawLine(Offset(lamp.dx, r.top + h * 0.42), lamp, dark..strokeWidth = 1.2);
   canvas.drawOval(
     Rect.fromCenter(center: lamp, width: w * 0.07, height: h * 0.09),
+    Paint()..color = const Color(0xFFD8643F),
+  );
+}
+
+/// Farolito de la casa de té: colgado del alero izquierdo de `obj_tea_house`
+/// o, sin arte, del techo dibujado.
+Offset teahouseLamp(Rect r) {
+  final art = SceneArt.instance['obj_tea_house'];
+  if (art == null) return Offset(r.left + r.width * 0.1, r.top + r.height * 0.52);
+  final d = artRectIn(art, r);
+  return Offset(d.left + d.width * 0.12, d.top + d.height * 0.58);
+}
+
+/// Sombra apoyada en el suelo, de [width] del ancho de [r].
+void _groundShadow(Canvas canvas, Rect r, double width) {
+  canvas.drawOval(
+    Rect.fromCenter(
+      center: Offset(r.center.dx, r.bottom - r.height * 0.01),
+      width: r.width * width,
+      height: r.height * 0.08,
+    ),
+    Paint()
+      ..color = Palette.ink.withValues(alpha: 0.16)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+  );
+}
+
+/// Farolito colgado de un cordel de [cord] de largo (se enciende de noche).
+void _hangingLamp(Canvas canvas, Offset lamp, double cord) {
+  canvas.drawLine(
+    lamp - Offset(0, cord),
+    lamp,
+    Paint()
+      ..color = const Color(0xFF5E3D28)
+      ..strokeWidth = 1.2,
+  );
+  canvas.drawOval(
+    Rect.fromCenter(center: lamp, width: cord * 0.5, height: cord * 0.7),
     Paint()..color = const Color(0xFFD8643F),
   );
 }

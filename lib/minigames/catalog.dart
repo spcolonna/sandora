@@ -169,6 +169,8 @@ class _LeavesOverlay extends StatelessWidget {
   }
 }
 
+const _pondShadow = [Shadow(color: Color(0x99000000), blurRadius: 6, offset: Offset(0, 1))];
+
 class _PondOverlay extends StatelessWidget {
   final PondGame game;
   const _PondOverlay(this.game);
@@ -187,13 +189,19 @@ class _PondOverlay extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Claro sobre el agua oscura del estanque.
                   Text(
                     tr('pond.points', {'n': hud.score}),
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: Palette.ink),
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                      color: Palette.paper,
+                      shadows: _pondShadow,
+                    ),
                   ),
                   Text(
                     trN('pond.moves', hud.moves),
-                    style: TextStyle(fontSize: 15, color: Palette.ink.withValues(alpha: 0.7)),
+                    style: TextStyle(fontSize: 15, color: Palette.paper.withValues(alpha: 0.85), shadows: _pondShadow),
                   ),
                 ],
               ),

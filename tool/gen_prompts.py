@@ -976,6 +976,24 @@ INCLUDED = {
                          'que sus ramas entren en las copas (`bonsai_game.dart`).'),
     'obj_decor_azalea': ('assets/images/decor/obj_decor_azalea.webp', 'Azalea del modo Decorar, 480 px; el aspect del balance '
                       'sigue al arte (`garden_decor.dart`).'),
+    'spr_pond_tile_lotus': ('assets/images/pond/spr_pond_tile_lotus.webp', 'Ficha del 3 en línea, 256 px (`pond_game.dart`).'),
+    'spr_pond_tile_pad': ('assets/images/pond/spr_pond_tile_pad.webp', 'Ficha del 3 en línea, 256 px (`pond_game.dart`).'),
+    'spr_pond_tile_stone': ('assets/images/pond/spr_pond_tile_stone.webp', 'Ficha del 3 en línea, 256 px (`pond_game.dart`).'),
+    'spr_pond_tile_koi': ('assets/images/pond/spr_pond_tile_koi.webp', 'Ficha del 3 en línea, 256 px (`pond_game.dart`).'),
+    'spr_pond_tile_drop': ('assets/images/pond/spr_pond_tile_drop.webp', 'Ficha del 3 en línea, 256 px (`pond_game.dart`).'),
+    'spr_pond_power_wave': ('assets/images/pond/spr_pond_power_wave.webp', 'Onda: halo detrás de la ficha, girado 90° '
+                            'en la de columna (`pond_game.dart`).'),
+    'spr_pond_power_bloom': ('assets/images/pond/spr_pond_power_bloom.webp', 'Flor abierta: halo detrás de la ficha '
+                             '(`pond_game.dart`).'),
+    'spr_pond_power_moon': ('assets/images/pond/spr_pond_power_moon.webp', 'Luna, la pieza sin tipo (`pond_game.dart`).'),
+    'bg_pond_water': ('assets/images/pond/bg_pond_water.webp', 'Fondo del 3 en línea; el tablero apenas se oscurece '
+                      'encima y el HUD va claro (`pond_game.dart`).'),
+    'obj_tea_house': ('assets/images/forest/obj_tea_house.webp', 'Casa de té de la vista del bosque, 480 px; el farolito '
+                      'cuelga del alero izquierdo (`garden_forest.dart`).'),
+    'obj_bamboo_grove': ('assets/images/forest/obj_bamboo_grove.webp', 'Bambú de la vista del bosque, 480 px '
+                         '(`garden_forest.dart`).'),
+    'obj_tea_bowl': ('assets/images/forest/obj_tea_bowl.webp', 'Cuenco del Matcha, 640 px; el té y la espuma llenan el '
+                     'óvalo de la boca (`matcha_game.dart`).'),
 }
 
 
@@ -996,8 +1014,7 @@ def image_text(i, im):
 
 # Orden en que conviene generarlas: lo que más se ve en el juego primero. Cada uno con por qué va ahí.
 PRIORITY = [
-    ('10', 'El 3 en línea del estanque: fichas y poderes.'),
-    ('14', 'La tercera vista (el bosque) y sus minijuegos.'),
+    ('14', 'Lo que falta del bosque: batidor, flauta, linterna y el río.'),
     ('12', 'El suelo de la vista del estanque.'),
     ('9', 'Para la ficha de la tienda: hace falta antes de publicar.'),
     ('8', 'Opcional: el kit washi ya dibuja botones y paneles con código.'),
