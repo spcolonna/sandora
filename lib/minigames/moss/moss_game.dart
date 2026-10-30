@@ -10,6 +10,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -260,6 +261,22 @@ class MossGame extends FlameGame with DragCallbacks {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 4,
       );
+      final art = SceneArt.instance['obj_moss_rock'];
+      if (art != null) {
+        // La piedra pintada, recortada a la forma de la grilla: se toma el
+        // centro del arte (los bordes son transparentes).
+        canvas.save();
+        canvas.clipPath(path);
+        final iw = art.width.toDouble(), ih = art.height.toDouble();
+        canvas.drawImageRect(
+          art,
+          Rect.fromLTRB(iw * 0.1, ih * 0.14, iw * 0.9, ih * 0.86),
+          rect.inflate(c),
+          Paint()..filterQuality = FilterQuality.medium,
+        );
+        canvas.restore();
+        continue;
+      }
       canvas.drawPath(
         path,
         Paint()
@@ -297,6 +314,16 @@ class MossGame extends FlameGame with DragCallbacks {
           ..add(_top + (j + 0.5 + (h1 - 0.5) * 0.9) * c);
       }
     }
+    // Con la textura, el musgo sobre piedra toma su color de ella.
+    final tex = SceneArt.instance['tex_moss'];
+    final texShader = tex == null
+        ? null
+        : ImageShader(
+            tex,
+            TileMode.repeated,
+            TileMode.repeated,
+            Float64List.fromList([0.5, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+          );
     for (var n = 0; n < buckets.length; n++) {
       if (buckets[n].isEmpty) continue;
       final group = n ~/ _levels;
@@ -309,7 +336,8 @@ class MossGame extends FlameGame with DragCallbacks {
         PointMode.points,
         Float32List.fromList(buckets[n]),
         Paint()
-          ..color = color
+          ..color = onRock && texShader != null ? const Color(0xFFFFFFFF).withValues(alpha: min(1, 0.45 + m)) : color
+          ..shader = onRock ? texShader : null
           ..strokeWidth = c * (onRock ? 1.1 + 0.5 * m : 1.0)
           ..strokeCap = StrokeCap.round,
       );

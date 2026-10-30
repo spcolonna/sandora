@@ -946,6 +946,34 @@ INCLUDED = {
                       'sigue al arte (`garden_decor.dart`).'),
     'obj_decor_moss': ('assets/images/decor/obj_decor_moss.webp', 'Musgo con helechos del modo Decorar, 480 px; el aspect del balance '
                       'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_basin': ('assets/images/decor/obj_decor_basin.webp', 'Tsukubai con caño del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_bench': ('assets/images/decor/obj_decor_bench.webp', 'Banco de madera del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_jizo': ('assets/images/decor/obj_decor_jizo.webp', 'Jizō del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_pagoda': ('assets/images/decor/obj_decor_pagoda.webp', 'Pagoda de piedra del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_maple': ('assets/images/decor/obj_decor_maple.webp', 'Arce rojo del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_decor_sakura': ('assets/images/decor/obj_decor_sakura.webp', 'Cerezo en flor del modo Decorar, 480 px; el aspect del balance '
+                      'sigue al arte (`garden_decor.dart`).'),
+    'obj_shishi_bamboo': ('assets/images/east/obj_shishi_bamboo.webp', 'Bambú del Shishi-odoshi, 640 px, boca a la izquierda; gira '
+                          'y se llena por encima (`shishi_game.dart`).'),
+    'obj_shishi_basin': ('assets/images/east/obj_shishi_basin.webp', 'Cuenco del Shishi-odoshi, con las ondas sobre su agua '
+                         '(`shishi_game.dart`).'),
+    'spr_leaf_01': ('assets/images/east/spr_leaf_01.webp', 'Hoja de arce naranja de Hojas al viento, 128 px, con sombra (`leaves_game.dart`).'),
+    'spr_leaf_02': ('assets/images/east/spr_leaf_02.webp', 'Hoja de arce roja de Hojas al viento, 128 px, con sombra (`leaves_game.dart`).'),
+    'spr_leaf_03': ('assets/images/east/spr_leaf_03.webp', 'Hoja de ginkgo de Hojas al viento, 128 px, con sombra (`leaves_game.dart`).'),
+    'spr_leaf_04': ('assets/images/east/spr_leaf_04.webp', 'Hoja seca de roble de Hojas al viento, 128 px, con sombra (`leaves_game.dart`).'),
+    'tex_moss': ('assets/images/east/tex_moss.webp', 'Musgo continuo a 512 px: da color a los toques sobre la piedra '
+                 '(`moss_game.dart`).'),
+    'obj_moss_rock': ('assets/images/east/obj_moss_rock.webp', 'Piedra del Musgo: se toma su centro, recortado a la forma de cada roca '
+                      '(`moss_game.dart`).'),
+    'obj_bonsai_pot': ('assets/images/east/obj_bonsai_pot.webp', 'Maceta del Bonsái, delante de la tierra del tronco '
+                       '(`bonsai_game.dart`).'),
+    'obj_bonsai_trunk': ('assets/images/east/obj_bonsai_trunk.webp', 'Árbol del Bonsái, estirado de la maceta a la copa de arriba para '
+                         'que sus ramas entren en las copas (`bonsai_game.dart`).'),
     'obj_decor_azalea': ('assets/images/decor/obj_decor_azalea.webp', 'Azalea del modo Decorar, 480 px; el aspect del balance '
                       'sigue al arte (`garden_decor.dart`).'),
 }
@@ -968,8 +996,6 @@ def image_text(i, im):
 
 # Orden en que conviene generarlas: lo que más se ve en el juego primero. Cada uno con por qué va ahí.
 PRIORITY = [
-    ('15', 'Se ven en el modo Decorar y hoy están pintadas con código.'),
-    ('11', 'Cuatro minijuegos del estanque que hoy se dibujan con código.'),
     ('10', 'El 3 en línea del estanque: fichas y poderes.'),
     ('14', 'La tercera vista (el bosque) y sus minijuegos.'),
     ('12', 'El suelo de la vista del estanque.'),

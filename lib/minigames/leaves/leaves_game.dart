@@ -9,6 +9,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -283,9 +284,26 @@ class LeavesGame extends FlameGame with DragCallbacks {
     // Las hojas: con sombra; las que vuelan rápido se levantan (sombra más
     // lejos y un poco más grandes).
     final shadow = Paint()..color = Palette.ink.withValues(alpha: 0.14);
+    final shadowArt = Paint()..colorFilter = ColorFilter.mode(Palette.ink.withValues(alpha: 0.18), BlendMode.srcIn);
     for (final l in _leaves) {
       final lift = min(1.0, l.v.distance / 420);
       final s = (10 + 5 * l.weight) * (1 + 0.18 * lift);
+      final art = SceneArt.instance['spr_leaf_0${l.color + 1}'];
+      if (art != null) {
+        // La hoja pintada, un poco más grande que la silueta (tiene puntas).
+        final r = Rect.fromCenter(center: Offset.zero, width: s * 2.6, height: s * 2.6 * art.height / art.width);
+        canvas.save();
+        canvas.translate(l.p.dx + 2 + 6 * lift, l.p.dy + 3 + 10 * lift);
+        canvas.rotate(l.angle);
+        drawArt(canvas, art, r, paint: shadowArt);
+        canvas.restore();
+        canvas.save();
+        canvas.translate(l.p.dx, l.p.dy);
+        canvas.rotate(l.angle);
+        drawArt(canvas, art, r);
+        canvas.restore();
+        continue;
+      }
       final leaf = Path()
         ..moveTo(-s, 0)
         ..quadraticBezierTo(0, -s * 0.6, s, 0)

@@ -10,6 +10,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -337,10 +338,24 @@ class ShishiGame extends FlameGame with TapCallbacks {
 
   void _paintBowl(Canvas canvas) {
     final bowl = _bowl;
-    canvas.drawOval(bowl.shift(const Offset(0, 5)), Paint()..color = Palette.ink.withValues(alpha: 0.12));
-    canvas.drawOval(bowl, Paint()..color = Palette.stoneDark);
-    final water = bowl.deflate(7);
-    canvas.drawOval(water, Paint()..color = Palette.water);
+    final art = SceneArt.instance['obj_shishi_basin'];
+    final Rect water;
+    if (art != null) {
+      // El cuenco pintado, con su agua donde estaba el óvalo.
+      final w = bowl.width * 1.3, h = w * art.height / art.width;
+      final dst = Rect.fromLTWH(bowl.center.dx - w / 2, bowl.center.dy - h * 0.19, w, h);
+      canvas.drawOval(
+        Rect.fromLTRB(dst.left + w * 0.05, dst.bottom - h * 0.12, dst.right - w * 0.05, dst.bottom + h * 0.04),
+        Paint()..color = Palette.ink.withValues(alpha: 0.12),
+      );
+      drawArt(canvas, art, dst);
+      water = Rect.fromLTRB(dst.left + w * 0.19, dst.top + h * 0.05, dst.right - w * 0.19, dst.top + h * 0.32);
+    } else {
+      canvas.drawOval(bowl.shift(const Offset(0, 5)), Paint()..color = Palette.ink.withValues(alpha: 0.12));
+      canvas.drawOval(bowl, Paint()..color = Palette.stoneDark);
+      water = bowl.deflate(7);
+      canvas.drawOval(water, Paint()..color = Palette.water);
+    }
     canvas.save();
     canvas.clipPath(Path()..addOval(water));
     for (final r in _ripples) {
@@ -405,14 +420,21 @@ class ShishiGame extends FlameGame with TapCallbacks {
     const h = _thick;
     final tube = Rect.fromLTWH(-_len * 0.55, -h / 2, _len, h);
     final rr = RRect.fromRectAndRadius(tube, const Radius.circular(12));
-    canvas.drawRRect(
-      rr,
-      Paint()
-        ..shader = Gradient.linear(Offset(0, -h / 2), Offset(0, h / 2), [
-          const Color(0xFFB3C77E),
-          const Color(0xFF8A9D58),
-        ]),
-    );
+    final art = SceneArt.instance['obj_shishi_bamboo'];
+    if (art != null) {
+      // El bambú pintado (boca a la izquierda), con su alto proporcional.
+      final ah = _len * art.height / art.width;
+      drawArt(canvas, art, Rect.fromLTWH(tube.left, -ah / 2, _len, ah));
+    } else {
+      canvas.drawRRect(
+        rr,
+        Paint()
+          ..shader = Gradient.linear(Offset(0, -h / 2), Offset(0, h / 2), [
+            const Color(0xFFB3C77E),
+            const Color(0xFF8A9D58),
+          ]),
+      );
+    }
     // Agua adentro: crece desde la boca hacia el centro.
     final fill = _shownFill;
     if (fill > 0) {
@@ -433,15 +455,17 @@ class ShishiGame extends FlameGame with TapCallbacks {
         ..color = Palette.ink.withValues(alpha: 0.35)
         ..strokeWidth = 2,
     );
-    final node = Paint()..color = const Color(0xFF6E7F45);
-    for (final x in [-0.25, 0.1, 0.32]) {
-      canvas.drawRect(Rect.fromLTWH(_len * x, -h / 2, 3, h), node);
+    if (art == null) {
+      final node = Paint()..color = const Color(0xFF6E7F45);
+      for (final x in [-0.25, 0.1, 0.32]) {
+        canvas.drawRect(Rect.fromLTWH(_len * x, -h / 2, 3, h), node);
+      }
+      // Boca cortada en bisel.
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(tube.left + 4, 0), width: 10, height: h),
+        Paint()..color = const Color(0xFF55633A),
+      );
     }
-    // Boca cortada en bisel.
-    canvas.drawOval(
-      Rect.fromCenter(center: Offset(tube.left + 4, 0), width: 10, height: h),
-      Paint()..color = const Color(0xFF55633A),
-    );
     canvas.restore();
     canvas.drawCircle(_pivot, 6, Paint()..color = Palette.wood);
   }

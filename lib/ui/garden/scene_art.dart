@@ -53,6 +53,17 @@ class SceneArt {
     'bg_stack_far': 'stack',
     'obj_stack_pedestal': 'stack',
     'fg_stack_leaves': 'stack',
+    // Minijuegos de la vista del estanque.
+    'obj_shishi_bamboo': 'east',
+    'obj_shishi_basin': 'east',
+    'spr_leaf_01': 'east',
+    'spr_leaf_02': 'east',
+    'spr_leaf_03': 'east',
+    'spr_leaf_04': 'east',
+    'tex_moss': 'east',
+    'obj_moss_rock': 'east',
+    'obj_bonsai_pot': 'east',
+    'obj_bonsai_trunk': 'east',
     'spr_sand_rake_01': 'sand',
     'tex_sand_base': 'sand',
     // Decoraciones (`garden_decor.dart`): mientras falte alguna, se pinta con código.

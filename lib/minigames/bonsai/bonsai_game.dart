@@ -8,6 +8,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -246,6 +247,22 @@ class BonsaiGame extends FlameGame with DragCallbacks {
       }
     }
     // Maceta y tronco.
+    final potArt = SceneArt.instance['obj_bonsai_pot'], trunkArt = SceneArt.instance['obj_bonsai_trunk'];
+    if (potArt != null && trunkArt != null) {
+      // El árbol pintado, de la tierra de la maceta a la copa de arriba (un
+      // poco estirado) para que sus ramas entren en las copas.
+      final tw = size.x * 0.85, th = (_pot.dy + 4 - _pads[2].center.dy) / 0.93;
+      drawArt(canvas, trunkArt, Rect.fromLTWH(_pot.dx - tw / 2, _pot.dy + 4 + th * 0.07 - th, tw, th));
+      final pw = size.x * 0.5, ph = pw * potArt.height / potArt.width;
+      drawArt(canvas, potArt, Rect.fromLTWH(_pot.dx - pw / 2, _pot.dy + 4, pw, ph));
+    } else {
+      _paintTrunk(canvas);
+    }
+    _paintCanopy(canvas);
+    super.render(canvas);
+  }
+
+  void _paintTrunk(Canvas canvas) {
     final pot = Rect.fromCenter(center: _pot + const Offset(0, 24), width: size.x * 0.42, height: 46);
     canvas.drawRRect(RRect.fromRectAndRadius(pot, const Radius.circular(8)), Paint()..color = const Color(0xFF7A4E3A));
     final trunk = Paint()
@@ -262,6 +279,9 @@ class BonsaiGame extends FlameGame with DragCallbacks {
     for (final r in _pads) {
       canvas.drawLine(fork, r.center, trunk..strokeWidth = 8);
     }
+  }
+
+  void _paintCanopy(Canvas canvas) {
     // Copas base (lo que ya está bien): nubes de follaje con sombra y luz.
     final pads = _pads;
     for (var i = 0; i < pads.length; i++) {
@@ -318,6 +338,5 @@ class BonsaiGame extends FlameGame with DragCallbacks {
       RRect.fromRectAndRadius(Rect.fromLTWH(24, size.y * 0.1, (size.x - 110) * k, 6), const Radius.circular(3)),
       Paint()..color = Palette.moss,
     );
-    super.render(canvas);
   }
 }
