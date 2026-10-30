@@ -64,37 +64,52 @@ class GardenLayout {
 
   GardenLayout._(this.size, this.ground, this.places, this.labels, this.lanterns, {this.painted = false});
 
-  /// Proporción del arte del patio pintado (ancho / alto).
-  static const courtAspect = 704 / 1578;
+  /// Proporción del lienzo del patio pintado (ancho / alto): todas las capas
+  /// `bg_court_*` comparten el mismo lienzo de 1024×1536.
+  static const courtAspect = 2 / 3;
 
-  /// Si ya está el arte del patio pintado.
-  static bool get hasCourtArt => SceneArt.instance[courtArt] != null;
-  static const courtArt = 'bg_court_ref';
+  /// Si ya están las capas del patio pintado.
+  static bool get hasCourtArt =>
+      SceneArt.instance['bg_court_sky'] != null && SceneArt.instance['bg_court_ground'] != null;
+
+  /// Objetos del patio pintado: cada uno apoyado en el suelo del arte. Ancho,
+  /// centro y base, en fracciones del lienzo (el alto sale de la imagen).
+  static const courtObjects = {
+    Place.stack: ('obj_court_tower_base', 0.24, 0.34, 0.715),
+    Place.board: ('obj_court_board', 0.13, 0.485, 0.515),
+    Place.meditation: ('obj_court_deck', 0.3, 0.7, 0.62),
+    Place.rain: ('obj_court_jars', 0.2, 0.7, 0.86),
+  };
+
+  /// Dónde queda el objeto de [place] en un lienzo de [size].
+  static Rect? courtObject(Place place, Size size) {
+    final (name, width, x, bottom) = courtObjects[place] ?? (null, 0.0, 0.0, 0.0);
+    final img = name == null ? null : SceneArt.instance[name];
+    if (img == null) return null;
+    final w = size.width * width, h = w * img.height / img.width;
+    return Rect.fromLTWH(size.width * x - w / 2, size.height * bottom - h, w, h);
+  }
 
   /// El patio pintado: cada lugar es lo que se ve en el arte (en fracciones
-  /// del arte, que llena [size] con su proporción).
+  /// del lienzo, que llena [size] con su proporción).
   factory GardenLayout.court(Size size) {
     final w = size.width, h = size.height;
     Rect at(double l, double t, double r, double b) => Rect.fromLTRB(w * l, h * t, w * r, h * b);
     final places = {
-      Place.board: at(0.7, 0.37, 0.88, 0.47),
-      Place.meditation: at(0.7, 0.48, 0.99, 0.6),
-      Place.stack: at(0.12, 0.55, 0.37, 0.71),
-      Place.sand: at(0.39, 0.6, 0.74, 0.8),
-      Place.rain: at(0.76, 0.73, 0.99, 0.85),
+      Place.board: courtObject(Place.board, size) ?? at(0.42, 0.42, 0.545, 0.515),
+      Place.meditation: courtObject(Place.meditation, size) ?? at(0.55, 0.45, 0.85, 0.62),
+      // La torre crece hacia arriba desde la laja: se toca también por encima.
+      Place.stack: at(0.22, 0.52, 0.46, 0.715),
+      Place.sand: at(0.47, 0.63, 0.66, 0.745),
+      Place.rain: courtObject(Place.rain, size) ?? at(0.6, 0.75, 0.8, 0.86),
     };
     return GardenLayout._(
       size,
-      at(0.06, 0.49, 0.94, 1),
+      at(0.15, 0.5, 0.85, 1),
       places,
-      {
-        Place.board: places[Place.board]!.bottomCenter,
-        Place.meditation: places[Place.meditation]!.bottomCenter,
-        Place.stack: places[Place.stack]!.bottomCenter,
-        Place.sand: Offset(w * 0.565, h * 0.74),
-        Place.rain: Offset(w * 0.86, h * 0.86),
-      },
-      [Offset(w * 0.49, h * 0.466), Offset(w * 0.07, h * 0.765), Offset(w * 0.92, h * 0.42)],
+      {for (final e in places.entries) e.key: e.value.bottomCenter},
+      // El farol junto al portón.
+      [Offset(w * 0.83, h * 0.4)],
       painted: true,
     );
   }
@@ -281,6 +296,11 @@ class GardenPainter extends CustomPainter {
   /// ahí se pinta el cielo y cuelga el follaje.
   final double drift, skyTop;
 
+  /// Cámara del patio pintado: acercamiento y centro de la vista (en el
+  /// lienzo). Mueve cada capa a su profundidad.
+  final double camZoom;
+  final Offset? camCenter;
+
   GardenPainter({
     required this.layout,
     required this.tower,
@@ -301,6 +321,8 @@ class GardenPainter extends CustomPainter {
     this.layer = GardenLayer.all,
     this.drift = 0,
     this.skyTop = 0,
+    this.camZoom = 1,
+    this.camCenter,
   });
 
   Size get size => layout.size;
@@ -309,7 +331,7 @@ class GardenPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // Hasta arriba de la pantalla: el follaje del borde cuelga desde ahí.
     final all = Rect.fromLTRB(0, skyTop, size.width, size.height);
-    if (layout.painted) return _paintCourt(canvas, all);
+    if (layout.painted) return _paintCourt(canvas, Offset.zero & size);
     if (layer != GardenLayer.land) _paintSky(canvas);
     if (layer == GardenLayer.sky) return;
     // La tierra se dibuja en una capa aparte para oscurecerla de noche sin
@@ -347,17 +369,57 @@ class GardenPainter extends CustomPainter {
     _paintLanternLight(canvas);
   }
 
-  /// El patio pintado, con lo que el arte no trae: decoraciones, nieve,
-  /// charcos, la hora del día y los faroles encendidos.
+  /// El patio pintado: las capas del lienzo, cada una a su profundidad, y
+  /// encima lo que el arte no trae (la torre, decoraciones, clima y hora).
   void _paintCourt(Canvas canvas, Rect all) {
+    final w = size.width;
     canvas.saveLayer(all, Paint());
-    drawArt(canvas, SceneArt.instance[GardenLayout.courtArt]!, Offset.zero & size);
+    _courtLayer(canvas, 'bg_court_sky', 0.15);
+    _courtLayer(canvas, 'bg_court_far', 0.3);
+    _courtLayer(canvas, 'bg_court_wall', 0.7);
+    _courtLayer(canvas, 'bg_court_ground', 1);
     if (wet > 0) _paintPuddles(canvas);
     if (snowy) _snow(canvas, all);
+    for (final place in [Place.board, Place.meditation, Place.rain]) {
+      final r = GardenLayout.courtObject(place, size);
+      if (r != null) drawArt(canvas, SceneArt.instance[GardenLayout.courtObjects[place]!.$1]!, r);
+    }
+    _paintCourtTower(canvas);
     paintDecorations(canvas, decor);
+    // Lo más cerca: el bambú y el arce del frente, corridos hacia afuera para
+    // enmarcar sin tapar; al acercarse se abren.
+    _courtLayer(canvas, 'bg_court_side_left', 1.5, dx: -0.07 * w);
+    _courtLayer(canvas, 'bg_court_side_right', 1.5, dx: 0.07 * w);
     _tint(canvas, all);
     canvas.restore();
     _paintLanternLight(canvas);
+  }
+
+  /// Una capa del lienzo a la profundidad [depth] (1 el suelo; menos, más
+  /// lejos; más, más cerca). Al acercar o mover la cámara, lo lejano se mueve
+  /// menos y lo cercano más: eso da la profundidad (paralaje).
+  void _courtLayer(Canvas canvas, String name, double depth, {double dx = 0}) {
+    final img = SceneArt.instance[name];
+    if (img == null) return;
+    final z = camZoom, c = camCenter ?? size.center(Offset.zero), c0 = size.center(Offset.zero);
+    final s = (1 + (z - 1) * depth) / z;
+    canvas.save();
+    canvas.translate(c.dx + (c.dx - c0.dx) * (1 - depth), c.dy + (c.dy - c0.dy) * (1 - depth));
+    canvas.scale(s);
+    canvas.translate(-c.dx + dx, -c.dy);
+    drawArt(canvas, img, Offset.zero & size);
+    canvas.restore();
+  }
+
+  /// La laja del patio y, encima, la torre guardada del Apilado.
+  void _paintCourtTower(Canvas canvas) {
+    final r = GardenLayout.courtObject(Place.stack, size);
+    if (r == null) return;
+    drawArt(canvas, SceneArt.instance[GardenLayout.courtObjects[Place.stack]!.$1]!, r);
+    // La cara de arriba de la laja está al 20% del alto del arte y ocupa el
+    // 74% del ancho, que es el pedestal de 3.4 m del juego.
+    final base = Offset(r.center.dx, r.top + r.height * 0.2);
+    _towerStones(canvas, base, r.width * 0.74 / 3.4, size.height * 0.16);
   }
 
   /// Cielo, sol o luna, arcoíris y lomas lejanas. Desde [skyTop] (arriba del
@@ -674,12 +736,18 @@ class GardenPainter extends CustomPainter {
     } else {
       canvas.drawRRect(RRect.fromRectAndRadius(ped, Radius.circular(scale * 0.15)), Paint()..color = Palette.stoneDark);
     }
+    _towerStones(canvas, base, scale, r.height - scale * 1.1);
+  }
+
+  /// Las piedras de la torre guardada desde [base] hacia arriba, a [scale]
+  /// píxeles por metro. Una torre alta se achica para entrar en [room]; si ni
+  /// así entra, sigue hacia arriba fuera de la escena.
+  void _towerStones(Canvas canvas, Offset base, double scale, double room) {
     final ghost = tower.isEmpty;
     final stones = ghost ? _ghostTower : tower;
-    // Una torre alta se achica para no tapar el jardín; si ni así entra,
-    // sigue hacia arriba fuera de la escena.
     final meters = stones.fold(0.0, (a, s) => a + s.h * 0.88);
-    final stoneScale = max(scale * 0.3, min(scale, (r.height - scale * 1.1) * 1.2 / max(meters, 0.1)));
+    final stoneScale = max(scale * 0.3, min(scale, room * 1.2 / max(meters, 0.1)));
+    final top = base.dy - room * 1.2;
     canvas.save();
     canvas.translate(base.dx, base.dy);
     canvas.scale(stoneScale);
@@ -696,7 +764,7 @@ class GardenPainter extends CustomPainter {
       );
       bottom += prevH == null ? 0 : 0.12 * min(prevH, s.h);
       final y = bottom - s.h / 2;
-      if (base.dy + (y - s.h) * stoneScale < r.top - r.height * 0.2) break;
+      if (base.dy + (y - s.h) * stoneScale < top) break;
       canvas.save();
       canvas.translate(s.x, y);
       paintStone(canvas, shape, opacity: ghost ? 0.45 : 1);
@@ -1007,6 +1075,8 @@ class GardenPainter extends CustomPainter {
       old.layer != layer ||
       old.drift != drift ||
       old.skyTop != skyTop ||
+      old.camZoom != camZoom ||
+      old.camCenter != camCenter ||
       !_sameDecor(old.decor, decor);
 }
 

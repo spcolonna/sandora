@@ -337,6 +337,8 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
     final painter = GardenPainter(
       layer: GardenLayer.land,
       skyTop: painted ? 0 : -_stageTop,
+      camZoom: painted ? _zoom : 1,
+      camCenter: painted ? (_box.center(Offset.zero) - _shift) / _zoom - _stageOrigin : null,
       layout: layout,
       tower: p.tower,
       drawing: p.sandDrawing,

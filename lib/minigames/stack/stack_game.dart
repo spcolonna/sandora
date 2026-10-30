@@ -9,6 +9,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -82,6 +83,9 @@ class StackGame extends FlameGame with TapCallbacks {
   double _camY = 0;
   bool _camReady = false;
 
+  /// Fondo pintado: el patio desenfocado detrás de la torre.
+  Image? _far;
+
   /// Balanceo de la torre (0 quieta; 1 o más, se cae) y su fase.
   double _wobble = 0;
   double _phase = 0;
@@ -97,9 +101,12 @@ class StackGame extends FlameGame with TapCallbacks {
   double _windDir = 1;
   final _leaves = <_Leaf>[];
 
-  double get _ppm => size.x / b.d('worldWidth');
+  double get _ppm => size.x / b.d('viewWidth');
   double get _visibleH => size.y / _ppm;
   int get _height => _tower.length;
+
+  /// Cámara con la torre vacía: el piso queda al 82% de la pantalla.
+  double get _restCam => 1 - 0.32 * _visibleH;
   double get _topY => _tower.isEmpty ? 0 : _tower.last.top;
 
   Offset _toScreen(double x, double y) => Offset(size.x / 2 + x * _ppm, size.y / 2 + (y - _camY) * _ppm);
@@ -124,6 +131,50 @@ class StackGame extends FlameGame with TapCallbacks {
     }
     _hanging = _bag.removeLast();
     _publish();
+    final far = SceneArt.instance['bg_stack_far'];
+    if (far != null) {
+      final w = far.width.toDouble(), h = far.height.toDouble();
+      _far = await _bake([far], Rect.fromLTWH(0, 0, w, h), fadeTop: 0.15);
+    } else {
+      // Sin fondo propio: las capas del patio, de las montañas al ripio, desenfocadas.
+      final layers = [
+        for (final n in ['bg_court_sky', 'bg_court_far', 'bg_court_wall', 'bg_court_ground']) ?SceneArt.instance[n],
+      ];
+      if (layers.isNotEmpty) {
+        final w = layers.first.width.toDouble(), h = layers.first.height.toDouble();
+        _far = await _bake(layers, Rect.fromLTRB(0, h * 0.2, w, h * 0.8), blur: 4, fadeTop: 0.22);
+      }
+    }
+  }
+
+  /// Recorta [crop] de las capas [src] (una sobre otra) a una imagen nueva, desenfocada y con el borde de
+  /// arriba desvanecido si se pide. Se hace una vez: pintarlo por cuadro cuesta.
+  Future<Image> _bake(List<Image> src, Rect crop, {double blur = 0, double fadeTop = 0}) async {
+    final w = crop.width.round(), h = crop.height.round();
+    final dst = Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble());
+    final rec = PictureRecorder();
+    final c = Canvas(rec)..saveLayer(dst, Paint());
+    c.saveLayer(
+      dst,
+      Paint()..imageFilter = blur > 0 ? ImageFilter.blur(sigmaX: blur, sigmaY: blur, tileMode: TileMode.clamp) : null,
+    );
+    for (final img in src) {
+      c.drawImageRect(img, crop, dst, Paint()..filterQuality = FilterQuality.medium);
+    }
+    c.restore();
+    if (fadeTop > 0) {
+      c.drawRect(
+        dst,
+        Paint()
+          ..blendMode = BlendMode.dstIn
+          ..shader = Gradient.linear(Offset.zero, Offset(0, h * fadeTop), [
+            const Color(0x00FFFFFF),
+            const Color(0xFFFFFFFF),
+          ]),
+      );
+    }
+    c.restore();
+    return rec.endRecording().toImage(w, h);
   }
 
   /// Apoya [shape] arriba de todo con su centro en [x].
@@ -146,7 +197,7 @@ class StackGame extends FlameGame with TapCallbacks {
       b.d('swingSpeedPerHeight') * rules.heightFactor(_height);
 
   double get _hoverX => b.d('swingAmplitude') * sin(_swing);
-  double get _hoverY => _topY - 3.2;
+  double get _hoverY => _topY - b.d('hoverGap') + 0.06 * sin(_t * 1.7);
 
   /// Corrimiento de la piedra [i] por el balanceo: la punta es la que más se
   /// mueve; la base, nada.
@@ -192,8 +243,9 @@ class StackGame extends FlameGame with TapCallbacks {
       _maybeFinish(dt);
     }
     _updateDebris(dt);
-    // La cámara sigue la punta de la torre, suave.
-    final target = min(-0.28 * _visibleH, _topY + 0.08 * _visibleH);
+    // La cámara sube con cada piedra: primero más despacio que la torre (así
+    // se sigue viendo el piso) y, cuando la punta llega a media pantalla, a la par.
+    final target = min(_restCam + 0.6 * _topY, _topY - 0.05 * _visibleH);
     _camY = _camReady ? _camY + (target - _camY) * min(1, dt * 2.5) : target;
     _camReady = true;
     for (final l in _leaves) {
@@ -427,6 +479,7 @@ class StackGame extends FlameGame with TapCallbacks {
   @override
   void render(Canvas canvas) {
     _paintSky(canvas);
+    _paintFar(canvas);
     final ppm = _ppm;
     canvas.save();
     canvas.translate(size.x / 2, size.y / 2 - _camY * ppm);
@@ -439,24 +492,24 @@ class StackGame extends FlameGame with TapCallbacks {
       if (s.y < top || s.y > bottom) continue;
       final sway = _sway(i);
       final lean = _tower.isEmpty ? 0.0 : 2 * sway / max(1, -_tower[i].y);
+      // Sombra de contacto sobre la de abajo: le da peso y volumen a la pila.
+      _contact(canvas, s.x + sway, s.y + s.shape.height * 0.42, s.shape.width * 0.8, 0.32);
       _paintAt(canvas, s.shape, s.x + sway, s.y, s.tilt + lean);
     }
     for (final d in _debris) {
       _paintAt(canvas, d.shape, d.x, d.y, d.angle, opacity: d.fade);
     }
     final drop = _drop;
-    if (drop != null) _paintAt(canvas, drop.shape, drop.x, drop.y, 0);
+    if (drop != null) {
+      final near = (1 - (_topY - drop.y) / b.d('hoverGap')).clamp(0.0, 1.0);
+      _contact(canvas, drop.x, _topY + 0.04, drop.shape.width * (0.5 + 0.3 * near), 0.12 + 0.2 * near);
+      _paintAt(canvas, drop.shape, drop.x, drop.y, 0);
+    }
     final hanging = _hanging;
     if (hanging != null && !_over) {
-      // Hilo y piedra que se balancea.
+      // Sin hilo: la piedra flota y su sombra sobre la punta ayuda a apuntar.
       final alpha = _canDrop ? 1.0 : 0.5;
-      canvas.drawLine(
-        Offset(_hoverX, _camY - _visibleH / 2),
-        Offset(_hoverX, _hoverY),
-        Paint()
-          ..color = Palette.ink.withValues(alpha: 0.15 * alpha)
-          ..strokeWidth = 0.02,
-      );
+      _contact(canvas, _hoverX, _topY + 0.04, hanging.width * 0.5, 0.12 * alpha);
       _paintAt(canvas, hanging, _hoverX, _hoverY, 0, opacity: alpha);
     }
     canvas.restore();
@@ -468,6 +521,8 @@ class StackGame extends FlameGame with TapCallbacks {
       canvas.drawOval(const Rect.fromLTWH(-7, -3, 14, 6), leaf);
       canvas.restore();
     }
+    _paintLeaves(canvas);
+    _paintVignette(canvas);
     super.render(canvas);
   }
 
@@ -479,38 +534,161 @@ class StackGame extends FlameGame with TapCallbacks {
     canvas.restore();
   }
 
-  /// El cielo se va oscureciendo con la altura y pasan nubes con paralaje.
-  void _paintSky(Canvas canvas) {
-    final alt = (-_camY / 120).clamp(0.0, 1.0);
-    final top = Color.lerp(Palette.skyTop, const Color(0xFF7FA6C2), alt)!;
-    final bottom = Color.lerp(Palette.skyBottom, Palette.skyTop, alt)!;
-    canvas.drawRect(
-      Offset.zero & Size(size.x, size.y),
-      Paint()..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [top, bottom]),
+  /// Sombra suave y achatada centrada en ([x], [y]), en metros.
+  void _contact(Canvas canvas, double x, double y, double width, double alpha) {
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(x, y), width: width, height: width * 0.16),
+      Paint()
+        ..color = Palette.ink.withValues(alpha: alpha)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.07),
     );
-    final cloud = Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: 0.5);
+  }
+
+  /// Cuánto subió la cámara desde el piso, en metros.
+  double get _rise => max(0, _restCam - _camY);
+
+  /// Cielo pintado; con la altura se va poniendo más azul y pasan nubes.
+  void _paintSky(Canvas canvas) {
+    final screen = Offset.zero & Size(size.x, size.y);
+    final sky = SceneArt.instance['bg_base_sky'];
+    if (sky != null) {
+      drawArtCover(canvas, sky, screen);
+    } else {
+      canvas.drawRect(
+        screen,
+        Paint()..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [Palette.skyTop, Palette.skyBottom]),
+      );
+    }
+    final alt = (_rise / 120).clamp(0.0, 1.0);
+    if (alt > 0) {
+      canvas.drawRect(
+        screen,
+        Paint()
+          ..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [
+            const Color(0xFF6F98B8).withValues(alpha: 0.55 * alt),
+            const Color(0xFF9CC0D6).withValues(alpha: 0.3 * alt),
+          ]),
+      );
+    }
+    // Nubes desenfocadas que pasan más lento que la torre (paralaje).
+    final clouds = (_rise / 8).clamp(0.0, 1.0);
+    if (clouds == 0) return;
+    final cloud = Paint()
+      ..color = const Color(0xFFFFFBF2).withValues(alpha: 0.55 * clouds)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
     const spacing = 260.0;
-    final scroll = -_camY * _ppm * 0.3;
+    final scroll = _rise * _ppm * 0.3;
     final first = ((scroll - size.y) / spacing).floor();
     for (var k = first; k < first + size.y / spacing + 3; k++) {
       final r = Random(k);
       final y = size.y - (k * spacing - scroll) - spacing;
       final x = (r.nextDouble() * 1.4 - 0.2) * size.x + sin(_t * 0.05 + k) * 20;
-      final w = 90 + r.nextDouble() * 80;
-      canvas.drawOval(Rect.fromCenter(center: Offset(x, y), width: w, height: w * 0.32), cloud);
-      canvas.drawOval(Rect.fromCenter(center: Offset(x + w * 0.2, y - 10), width: w * 0.6, height: w * 0.3), cloud);
+      final w = 110 + r.nextDouble() * 90;
+      canvas.drawOval(Rect.fromCenter(center: Offset(x, y), width: w, height: w * 0.3), cloud);
+      canvas.drawOval(Rect.fromCenter(center: Offset(x + w * 0.2, y - 12), width: w * 0.6, height: w * 0.3), cloud);
     }
   }
 
+  /// El patio detrás de la torre, desenfocado. Baja más despacio que el piso
+  /// al subir la cámara, así se lee la distancia.
+  void _paintFar(Canvas canvas) {
+    final far = _far;
+    if (far == null) return;
+    final w = size.x * 1.08, h = w * far.height / far.width;
+    // El borde de abajo del recorte queda un poco por debajo de la pantalla
+    // con la cámara en el piso; el ripio del cuadro hace de suelo.
+    final bottom = size.y * 1.08 + _rise * _ppm * 0.3;
+    if (bottom - h > size.y) return;
+    drawArt(canvas, far, Rect.fromLTWH((size.x - w) / 2, bottom - h, w, h));
+  }
+
   void _paintGround(Canvas canvas) {
-    canvas.drawRect(const Rect.fromLTWH(-40, 1, 80, 30), Paint()..color = Palette.sand);
-    canvas.drawRect(const Rect.fromLTWH(-40, 1, 80, 0.15), Paint()..color = Palette.sandShadow);
-    final ped = RRect.fromRectAndRadius(
-      const Rect.fromLTWH(-_pedestalWidth / 2, 0, _pedestalWidth, 1),
-      const Radius.circular(0.15),
+    // Isla de musgo donde se apoya la base, con sombra hacia abajo a la derecha.
+    canvas.drawOval(
+      Rect.fromCenter(center: const Offset(0.25, 1.12), width: _pedestalWidth + 2.2, height: 0.8),
+      Paint()
+        ..color = Palette.ink.withValues(alpha: 0.28)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.18),
     );
-    canvas.drawRRect(ped, Paint()..color = Palette.stoneDark);
-    canvas.drawRect(const Rect.fromLTWH(-_pedestalWidth / 2, 0, _pedestalWidth, 0.12), Paint()..color = Palette.moss);
+    final art = SceneArt.instance['obj_stack_pedestal'];
+    if (art != null) {
+      // El arte trae la laja y el musgo; la cara de arriba está al 45% y la
+      // laja ocupa el 70% del ancho.
+      final side = _pedestalWidth / 0.7;
+      drawArt(canvas, art, Rect.fromLTWH(-side / 2, -0.45 * side, side, side));
+      return;
+    }
+    // Si no, la misma laja del patio: la cara de arriba al 20% del alto y el
+    // 74% del ancho.
+    final court = SceneArt.instance['obj_court_tower_base'];
+    if (court != null) {
+      final w = _pedestalWidth / 0.74, h = w * court.height / court.width;
+      drawArt(canvas, court, Rect.fromLTWH(-w / 2, -0.2 * h, w, h));
+      return;
+    }
+    canvas.drawPicture(_moss ??= _paintMoss());
+    // La base: una laja ancha (el arte de la laja, si está).
+    final slab = SceneArt.instance['obj_stack_stone_04'];
+    const base = Rect.fromLTWH(-_pedestalWidth / 2, -0.06, _pedestalWidth, 1.06);
+    _contact(canvas, 0.1, 0.98, _pedestalWidth * 1.05, 0.45);
+    if (slab != null) {
+      drawArt(canvas, slab, base);
+    } else {
+      canvas.drawRRect(RRect.fromRectAndRadius(base, const Radius.circular(0.15)), Paint()..color = Palette.stoneDark);
+    }
+  }
+
+  Picture? _moss;
+
+  /// Musgo pintado a toques: muchas manchas suaves de verdes distintos dentro
+  /// de un óvalo, más oscuras abajo. Se graba una vez y se reusa.
+  Picture _paintMoss() {
+    final rec = PictureRecorder();
+    final c = Canvas(rec);
+    final rng = Random(7);
+    const greens = [Color(0xFF4F6B3A), Color(0xFF6E8B5B), Color(0xFF86A060), Color(0xFF9DB473)];
+    const cx = 0.0, cy = 1.0, rx = (_pedestalWidth + 1.8) / 2, ry = 0.36;
+    for (var i = 0; i < 420; i++) {
+      final a = rng.nextDouble() * 2 * pi, d = sqrt(rng.nextDouble());
+      final x = cx + cos(a) * d * rx, y = cy + sin(a) * d * ry;
+      // Abajo más oscuro, arriba a la izquierda le da la luz.
+      final light = ((cy - y) / ry - (x - cx) / rx * 0.4 + 1) / 2;
+      final k = (light * 3 + rng.nextDouble() * 1.2 - 0.4).clamp(0, 3).round();
+      final r = 0.05 + rng.nextDouble() * 0.11;
+      c.drawCircle(
+        Offset(x, y),
+        r,
+        Paint()
+          ..color = greens[k].withValues(alpha: 0.75)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.5),
+      );
+    }
+    return rec.endRecording();
+  }
+
+  /// Hojas desenfocadas muy cerca de la cámara: pasan más rápido que la torre.
+  void _paintLeaves(Canvas canvas) {
+    final fg = SceneArt.instance['fg_stack_leaves'];
+    if (fg == null) return;
+    final h = size.x * fg.height / fg.width;
+    final y = (_rise * _ppm * 1.4) % h;
+    drawArt(canvas, fg, Rect.fromLTWH(0, y - h, size.x, h));
+    drawArt(canvas, fg, Rect.fromLTWH(0, y, size.x, h));
+  }
+
+  /// Bordes apenas más oscuros, como un cuadro: centra la mirada en la torre.
+  void _paintVignette(Canvas canvas) {
+    final c = Offset(size.x / 2, size.y * 0.45);
+    canvas.drawRect(
+      Offset.zero & Size(size.x, size.y),
+      Paint()
+        ..shader = Gradient.radial(
+          c,
+          size.y * 0.75,
+          [const Color(0x00000000), Palette.ink.withValues(alpha: 0.22)],
+          [0.55, 1],
+        ),
+    );
   }
 }
 

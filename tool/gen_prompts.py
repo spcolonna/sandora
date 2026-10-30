@@ -160,8 +160,7 @@ BLOCKS = [
         intro=('**Primero que todo:** la pantalla principal. Son las capas del patio en perspectiva, como la imagen de '
                'referencia, que se apilan en el mismo lienzo; la cámara las mueve a distinto ritmo al acercarte y '
                'moverte por el jardín, y eso da la profundidad. **Adjuntá `' + COURT_REF + '` en la conversación** '
-               'antes de pegar el prompt (es tu imagen de referencia, ya copiada ahí). Mientras no estén, el juego usa '
-               'esa misma imagen recortada (`bg_court_ref`).'),
+               'antes de pegar el prompt (es tu imagen de referencia, ya copiada ahí).'),
         images=[
             court_layer(
                 'bg_court_sky', True,
@@ -262,6 +261,50 @@ BLOCKS = [
                 'bottom 14%. Everything inside the opening (the whole center) is fully transparent.',
                 f'the garden, sky or anything seen through the opening; sliding paper panels covering the opening; '
                 f'{NO_TEXT}; people; {NO_STYLE}.', style=COURT_STYLE),
+        ]),
+    dict(
+        id='C', title='Apilado de piedras con la estética del patio', folder='store/art/stack/',
+        intro=('Tercero: el primer minijuego con el mismo estilo del patio. La cámara está al lado de la torre, a la '
+               'altura de los ojos, y sube a medida que la pila crece; las capas se mueven a distinto ritmo. **Adjuntá `'
+               + COURT_REF + '`.** Mientras no estén, el juego usa las capas del patio desenfocadas y la laja del patio. Copiá cada '
+               'imagen a `assets/images/stack/` con su nombre.'),
+        images=[
+            img('bg_stack_far', PORTRAIT_OPAQUE,
+                f'This is the background of the stone stacking mini-game in {GAME}. The player stacks stones in the '
+                'foreground, so the background must be soft and calm and never compete with the stones.',
+                'The same walled courtyard as the attached reference, but seen from INSIDE it, standing on the gravel '
+                'next to a mossy island and looking toward the back wall at eye level: the cream plaster wall with its '
+                'dark tiled coping and the wooden gate a little to the right, garden trees and bamboo behind the wall, '
+                'misty forested mountains beyond, and a luminous morning sky with a few wispy clouds. Painted with a '
+                'gentle depth of field: everything is softly out of focus, like a photo focused on something close.',
+                'Eye-level camera, horizon at about 62% of the canvas height. The raked pale gravel fills the bottom '
+                '25%, with soft ripple lines running horizontally. The sky fills the top 45% and stays fairly plain so '
+                'the stones read clearly on it. Keep the center of the canvas free of strong shapes (that is where the '
+                'stone tower stands). ' + CROP_NOTE,
+                f'stones, stone towers or cairns; lanterns or objects in the center; people or animals; {NO_TEXT}; '
+                f'frame or border; {NO_STYLE}.', style=COURT_STYLE),
+            img('obj_stack_pedestal', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This is the base of the stone tower in the stone stacking mini-game of {GAME}. The game stacks '
+                'painted stones on top of it, so its top must be flat.',
+                'A wide, low, flat-topped slab of weathered granite resting on a round island of deep green moss, '
+                'with a few tiny ferns and a little pale gravel at the edges of the moss.',
+                'Seen from the side at eye level, perfectly centered. The slab is about 70% of the canvas width and '
+                'its flat, level top edge sits exactly at 45% of the canvas height. The moss island spreads under it, '
+                'wider than the slab (about 90% of the width), with its bottom at about 75% of the height. Soft '
+                'contact shadow under the slab on the moss. Everything else, including all four corners, stays '
+                'empty and transparent.',
+                f'stones on top of the slab; background, sky, wall or scenery; {NO_TEXT}; frame or border; '
+                f'{NO_STYLE}.', style=COURT_STYLE),
+            img('fg_stack_leaves', PORTRAIT_ALPHA + ALPHA_FALLBACK,
+                f'This is a foreground layer of the stone stacking mini-game in {GAME}: leaves very close to the '
+                'camera that move faster than the rest when the camera rises, which gives depth.',
+                'A few sprays of bamboo leaves and a maple branch very close to the camera, strongly out of focus '
+                '(soft, blurry shapes with a gentle glow where the light passes through), entering from the left '
+                'edge at the top and from the right edge at the bottom.',
+                'Only the left 18% and the right 18% of the width are painted; the whole center is fully '
+                'transparent, it must never cover the stones.',
+                f'stems or leaves in the center; background or sky; {NO_TEXT}; frame or border; {NO_STYLE}.',
+                style=COURT_STYLE),
         ]),
     dict(
         id='0', title='Guía de estilo', folder='store/art/style/',
@@ -771,8 +814,28 @@ BLOCKS = [
 # Imágenes ya integradas al juego: no se vuelven a pedir. Nombre -> (dónde está, para qué se usa).
 INCLUDED = {
     'style_courtyard_ref': ('store/art/style/style_courtyard_ref.webp', 'Tu referencia del patio (no se sube). '
-                            'Recortada sin el marco de la puerta es `assets/images/court/bg_court_ref.webp`, el patio '
-                            'provisorio de la pantalla principal (`GardenLayout.court`) hasta tener las capas.'),
+                            'Adjuntala en los bloques del patio y de los minijuegos con su estética.'),
+    'bg_court_sky': ('assets/images/court/bg_court_sky.webp', 'Cielo del patio pintado, la capa más lejana: se mueve '
+                     'apenas al acercar (profundidad 0.15, `garden_scene.dart` `_paintCourt`).'),
+    'bg_court_far': ('assets/images/court/bg_court_far.webp', 'Montañas detrás del muro (profundidad 0.3). También, '
+                     'desenfocadas, en el fondo del Apilado (`stack_game.dart`).'),
+    'bg_court_wall': ('assets/images/court/bg_court_wall.webp', 'Muro con el portón y su farol (profundidad 0.7); el '
+                      'farol se enciende al anochecer (`GardenLayout.court`).'),
+    'bg_court_ground': ('assets/images/court/bg_court_ground.webp', 'Suelo del patio: el ripio rastrillado, el plano de '
+                        'los lugares, la torre y las decoraciones (profundidad 1).'),
+    'bg_court_side_left': ('assets/images/court/bg_court_side_left.webp', 'Bambú y tsukubai del frente (profundidad '
+                           '1.5), corrido un 7 % hacia afuera para enmarcar sin tapar; al acercar se abre.'),
+    'bg_court_side_right': ('assets/images/court/bg_court_side_right.webp', 'Arce y macetas del frente (profundidad '
+                            '1.5), corrido un 7 % hacia afuera; al acercar se abre.'),
+    'obj_court_tower_base': ('assets/images/court/obj_court_tower_base.webp', 'Laja de la torre, recortada: la cara de '
+                             'arriba al 20 % del alto y el 74 % del ancho es el pedestal. En el patio con la torre '
+                             'guardada encima y de base en el Apilado (`GardenLayout.courtObjects`).'),
+    'obj_court_board': ('assets/images/court/obj_court_board.webp', 'Tablón de récords, recortado, al pie del muro a la '
+                        'izquierda del portón (`GardenLayout.courtObjects`).'),
+    'obj_court_deck': ('assets/images/court/obj_court_deck.webp', 'Tarima de meditación, recortada, a la derecha frente '
+                       'al portón (`GardenLayout.courtObjects`).'),
+    'obj_court_jars': ('assets/images/court/obj_court_jars.webp', 'Vasijas de la Lluvia, recortadas, abajo a la '
+                       'derecha (`GardenLayout.courtObjects`).'),
     'logo_symbol': ('assets/images/brand/logo_symbol.webp', 'Símbolo del logo (piedra sobre arena rastrillada). '
                     'Pantalla de título (`lib/ui/title_intro.dart`); referencia para el ícono.'),
     'logo_wordmark': ('assets/images/brand/logo_wordmark.webp', 'Nombre "Sandora". Pantalla de título. La versión clara para '
@@ -916,7 +979,7 @@ de estilo (Lote 0) y el arte del MVP (Lote 1 del GDD). **Generado por `tool/gen_
   sumarlo a `INCLUDED` en este script. Así sale de los bloques y queda en "Ya incluidas", al final.
 - Si una sale mal, regenerala sola: pegá `Create ONE single image. Start immediately, without asking questions.` y
   debajo el texto de esa imagen (desde su línea `Create a ...` hasta su `DO NOT INCLUDE`).
-- **Orden:** primero los Bloques A y B (el patio pintado de la pantalla principal, con su referencia adjunta). Después el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
+- **Orden:** primero el Bloque B (los detalles del patio pintado; el A ya está en el juego) y el C (el apilado con la misma estética), siempre con la referencia adjunta. Después el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
   `store/art/style/style_keyart.webp` como referencia.
 
 **Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_placeholder_audio.py`; los finales
