@@ -76,15 +76,40 @@ class GardenLayout {
   /// centro y base, en fracciones del lienzo (el alto sale de la imagen).
   static const courtObjects = {
     Place.stack: ('obj_court_tower_base', 0.24, 0.34, 0.715),
-    Place.board: ('obj_court_board', 0.13, 0.485, 0.515),
-    Place.meditation: ('obj_court_deck', 0.3, 0.7, 0.62),
+    Place.board: ('obj_court_board', 0.13, 0.445, 0.515),
+    // La tarima, contra el muro bajo el arbolito y espejada: mira al jardín.
+    Place.meditation: ('obj_court_deck', 0.19, 0.61, 0.55),
     Place.rain: ('obj_court_jars', 0.2, 0.7, 0.86),
+  };
+
+  /// Detalles del patio pintado que no son lugares (no se tocan): faroles, la
+  /// roca y el rastrillo, apoyados en el suelo igual que los objetos.
+  static const courtProps = [
+    ('obj_court_lantern_tall', 0.075, 0.235, 0.56),
+    // Apoyado en el poste del tablón.
+    ('obj_court_rake', 0.055, 0.365, 0.522),
+    // En la loma de musgo del centro.
+    ('obj_court_lantern_small', 0.055, 0.49, 0.592),
+    ('obj_court_rock', 0.095, 0.765, 0.672),
+  ];
+
+  /// La ventana encendida de cada farol, en fracciones de su arte.
+  static const _lanternWindows = {
+    'obj_court_lantern_tall': Offset(0.484, 0.44),
+    'obj_court_lantern_small': Offset(0.484, 0.498),
   };
 
   /// Dónde queda el objeto de [place] en un lienzo de [size].
   static Rect? courtObject(Place place, Size size) {
-    final (name, width, x, bottom) = courtObjects[place] ?? (null, 0.0, 0.0, 0.0);
-    final img = name == null ? null : SceneArt.instance[name];
+    final o = courtObjects[place];
+    return o == null ? null : courtRect(o, size);
+  }
+
+  /// Dónde queda un objeto (nombre, ancho, centro y base) en un lienzo de
+  /// [size], o null si falta su arte.
+  static Rect? courtRect((String, double, double, double) o, Size size) {
+    final (name, width, x, bottom) = o;
+    final img = SceneArt.instance[name];
     if (img == null) return null;
     final w = size.width * width, h = w * img.height / img.width;
     return Rect.fromLTWH(size.width * x - w / 2, size.height * bottom - h, w, h);
@@ -96,8 +121,8 @@ class GardenLayout {
     final w = size.width, h = size.height;
     Rect at(double l, double t, double r, double b) => Rect.fromLTRB(w * l, h * t, w * r, h * b);
     final places = {
-      Place.board: courtObject(Place.board, size) ?? at(0.42, 0.42, 0.545, 0.515),
-      Place.meditation: courtObject(Place.meditation, size) ?? at(0.55, 0.45, 0.85, 0.62),
+      Place.board: courtObject(Place.board, size) ?? at(0.38, 0.42, 0.51, 0.515),
+      Place.meditation: courtObject(Place.meditation, size) ?? at(0.515, 0.44, 0.705, 0.55),
       // La torre crece hacia arriba desde la laja: se toca también por encima.
       Place.stack: at(0.22, 0.52, 0.46, 0.715),
       Place.sand: at(0.47, 0.63, 0.66, 0.745),
@@ -108,8 +133,13 @@ class GardenLayout {
       at(0.15, 0.5, 0.85, 1),
       places,
       {for (final e in places.entries) e.key: e.value.bottomCenter},
-      // El farol junto al portón.
-      [Offset(w * 0.83, h * 0.4)],
+      // El farol junto al portón y los de piedra.
+      [
+        Offset(w * 0.83, h * 0.4),
+        for (final p in courtProps)
+          if ((_lanternWindows[p.$1], courtRect(p, size)) case (final win?, final r?))
+            Offset(r.left + r.width * win.dx, r.top + r.height * win.dy),
+      ],
       painted: true,
     );
   }
@@ -380,16 +410,43 @@ class GardenPainter extends CustomPainter {
     _courtLayer(canvas, 'bg_court_ground', 1);
     if (wet > 0) _paintPuddles(canvas);
     if (snowy) _snow(canvas, all);
-    for (final place in [Place.board, Place.meditation, Place.rain]) {
-      final r = GardenLayout.courtObject(place, size);
-      if (r != null) drawArt(canvas, SceneArt.instance[GardenLayout.courtObjects[place]!.$1]!, r);
+    // Los objetos y detalles del arte, de atrás para adelante.
+    final objects = [
+      for (final place in [Place.board, Place.meditation, Place.rain])
+        if (GardenLayout.courtObject(place, size) case final r?) (r, GardenLayout.courtObjects[place]!.$1),
+      for (final p in GardenLayout.courtProps)
+        if (GardenLayout.courtRect(p, size) case final r?) (r, p.$1),
+    ]..sort((a, b) => a.$1.bottom.compareTo(b.$1.bottom));
+    for (final (r, name) in objects) {
+      final img = SceneArt.instance[name]!;
+      if (name == GardenLayout.courtObjects[Place.meditation]!.$1) {
+        // Apoyada en la arena: su sombra la asienta.
+        canvas.drawOval(
+          Rect.fromLTRB(r.left, r.bottom - r.height * 0.3, r.right, r.bottom + r.height * 0.03),
+          Paint()
+            ..color = const Color(0xFF32230A).withValues(alpha: 0.4)
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, r.width * 0.04),
+        );
+        canvas.save();
+        canvas.translate(r.left + r.right, 0);
+        canvas.scale(-1, 1);
+        drawArt(canvas, img, r);
+        canvas.restore();
+      } else {
+        drawArt(canvas, img, r);
+      }
     }
     _paintCourtTower(canvas);
     paintDecorations(canvas, decor);
     // Lo más cerca: el bambú y el arce del frente, corridos hacia afuera para
-    // enmarcar sin tapar; al acercarse se abren.
-    _courtLayer(canvas, 'bg_court_side_left', 1.5, dx: -0.07 * w);
-    _courtLayer(canvas, 'bg_court_side_right', 1.5, dx: 0.07 * w);
+    // enmarcar sin tapar. Al acercarse se abren y se desvanecen, así nunca
+    // tapan el lugar al que se va.
+    final open = ((camZoom - 1) / 1.1).clamp(0.0, 1.0);
+    final side = Paint()..color = Color.fromRGBO(0, 0, 0, 1 - 0.75 * open);
+    canvas.saveLayer(all, side);
+    _courtLayer(canvas, 'bg_court_side_left', 1.5, dx: -(0.07 + 0.22 * open) * w);
+    _courtLayer(canvas, 'bg_court_side_right', 1.5, dx: (0.07 + 0.22 * open) * w);
+    canvas.restore();
     _tint(canvas, all);
     canvas.restore();
     _paintLanternLight(canvas);
@@ -416,9 +473,10 @@ class GardenPainter extends CustomPainter {
     final r = GardenLayout.courtObject(Place.stack, size);
     if (r == null) return;
     drawArt(canvas, SceneArt.instance[GardenLayout.courtObjects[Place.stack]!.$1]!, r);
-    // La cara de arriba de la laja está al 20% del alto del arte y ocupa el
-    // 74% del ancho, que es el pedestal de 3.4 m del juego.
-    final base = Offset(r.center.dx, r.top + r.height * 0.2);
+    // El centro de la cara de arriba de la laja está al 49% del ancho y al 19%
+    // del alto del arte; la cara ocupa el 74% del ancho, que es el pedestal de
+    // 3.4 m del juego.
+    final base = Offset(r.left + r.width * 0.49, r.top + r.height * 0.19);
     _towerStones(canvas, base, r.width * 0.74 / 3.4, size.height * 0.16);
   }
 
@@ -749,7 +807,9 @@ class GardenPainter extends CustomPainter {
     final stoneScale = max(scale * 0.3, min(scale, room * 1.2 / max(meters, 0.1)));
     final top = base.dy - room * 1.2;
     canvas.save();
-    canvas.translate(base.dx, base.dy);
+    // La primera piedra va en el centro de la base, aunque en el juego haya
+    // caído corrida: la torre se ve asentada.
+    canvas.translate(base.dx - (stones.isEmpty ? 0 : stones.first.x) * stoneScale, base.dy);
     canvas.scale(stoneScale);
     var bottom = 0.0;
     double? prevH;

@@ -832,10 +832,18 @@ INCLUDED = {
                              'guardada encima y de base en el Apilado (`GardenLayout.courtObjects`).'),
     'obj_court_board': ('assets/images/court/obj_court_board.webp', 'Tablón de récords, recortado, al pie del muro a la '
                         'izquierda del portón (`GardenLayout.courtObjects`).'),
-    'obj_court_deck': ('assets/images/court/obj_court_deck.webp', 'Tarima de meditación, recortada, a la derecha frente '
-                       'al portón (`GardenLayout.courtObjects`).'),
+    'obj_court_deck': ('assets/images/court/obj_court_deck.webp', 'Tarima de meditación, recortada y espejada, contra '
+                       'el muro bajo el arbolito, mirando al jardín (`GardenLayout.courtObjects`).'),
     'obj_court_jars': ('assets/images/court/obj_court_jars.webp', 'Vasijas de la Lluvia, recortadas, abajo a la '
                        'derecha (`GardenLayout.courtObjects`).'),
+    'obj_court_lantern_tall': ('assets/images/court/obj_court_lantern_tall.webp', 'Farol alto, recortado, sobre el '
+                               'musgo de la izquierda; su ventana se enciende al anochecer (`GardenLayout.courtProps`).'),
+    'obj_court_lantern_small': ('assets/images/court/obj_court_lantern_small.webp', 'Farol bajo, recortado, en la loma '
+                                'de musgo del centro; se enciende al anochecer (`GardenLayout.courtProps`).'),
+    'obj_court_rock': ('assets/images/court/obj_court_rock.webp', 'Roca con musgo, recortada, sobre el musgo de la '
+                       'derecha (`GardenLayout.courtProps`).'),
+    'obj_court_rake': ('assets/images/court/obj_court_rake.webp', 'Rastrillo, recortado, apoyado en el poste izquierdo '
+                       'del tablón (`GardenLayout.courtProps`).'),
     'logo_symbol': ('assets/images/brand/logo_symbol.webp', 'Símbolo del logo (piedra sobre arena rastrillada). '
                     'Pantalla de título (`lib/ui/title_intro.dart`); referencia para el ícono.'),
     'logo_wordmark': ('assets/images/brand/logo_wordmark.webp', 'Nombre "Sandora". Pantalla de título. La versión clara para '
@@ -979,7 +987,7 @@ de estilo (Lote 0) y el arte del MVP (Lote 1 del GDD). **Generado por `tool/gen_
   sumarlo a `INCLUDED` en este script. Así sale de los bloques y queda en "Ya incluidas", al final.
 - Si una sale mal, regenerala sola: pegá `Create ONE single image. Start immediately, without asking questions.` y
   debajo el texto de esa imagen (desde su línea `Create a ...` hasta su `DO NOT INCLUDE`).
-- **Orden:** primero el Bloque B (los detalles del patio pintado; el A ya está en el juego) y el C (el apilado con la misma estética), siempre con la referencia adjunta. Después el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
+- **Orden:** primero lo que queda del Bloque B (la entrada; el A y los detalles del B ya están en el juego) y el C (el apilado con la misma estética), siempre con la referencia adjunta. Después el Bloque 0. Cuando el estilo te guste, el resto en cualquier orden, siempre adjuntando
   `store/art/style/style_keyart.webp` como referencia.
 
 **Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_placeholder_audio.py`; los finales
