@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'widgets/washi.dart';
+
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
 import '../minigames/catalog.dart';
@@ -15,9 +17,8 @@ Future<void> showBoardSheet(BuildContext context) {
     for (final m in minigames) (m.icon, m.name, p.gameUnlocked(m.id) ? m.record : '—'),
     (Icons.self_improvement_rounded, tr('meditation.title'), trN('board.days', p.meditationStreak)),
   ];
-  return showModalBottomSheet(
-    context: context,
-    showDragHandle: true,
+  return showWashiSheet(
+    context,
     isScrollControlled: true,
     builder: (context) => SafeArea(
       child: SingleChildScrollView(
@@ -34,7 +35,7 @@ Future<void> showBoardSheet(BuildContext context) {
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
-                    Icon(icon, color: Palette.moss),
+                    Icon(icon, color: Palette.wood),
                     const SizedBox(width: 12),
                     Expanded(child: Text(name, style: text.titleSmall)),
                     Text(value, style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
@@ -46,8 +47,9 @@ Future<void> showBoardSheet(BuildContext context) {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Palette.sand.withValues(alpha: 0.6),
+                color: Palette.sandLight.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Palette.wood.withValues(alpha: 0.16)),
               ),
               child: Row(
                 children: [

@@ -8,6 +8,7 @@ import '../fx/calm.dart';
 import '../theme/palette.dart';
 import 'currency.dart';
 import 'level_up.dart';
+import 'washi.dart';
 
 /// La próxima meta: lo que ya se puede abrir, lo que falta juntar o el nivel
 /// que viene. Siempre a la vista, para saber qué hacer después.
@@ -54,7 +55,7 @@ class NextGoal extends StatelessWidget {
         padding: const EdgeInsets.only(top: 4),
         child: Row(
           children: [
-            Icon(Icons.flag_rounded, size: 15, color: Palette.moss.withValues(alpha: 0.8)),
+            Icon(Icons.flag_rounded, size: 15, color: Palette.wood.withValues(alpha: 0.8)),
             const SizedBox(width: 6),
             Expanded(
               child: AnimatedSwitcher(
@@ -119,15 +120,7 @@ class CalmBar extends StatelessWidget {
       tween: Tween(end: value),
       duration: const Duration(milliseconds: 1400),
       curve: Curves.easeInOutCubic,
-      builder: (context, v, _) => ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: LinearProgressIndicator(
-          value: v,
-          minHeight: 10,
-          color: color,
-          backgroundColor: Palette.sandShadow.withValues(alpha: 0.4),
-        ),
-      ),
+      builder: (context, v, _) => BrushBar(value: v, height: 10, color: color),
     );
   }
 }

@@ -16,6 +16,7 @@ import '../fx/sfx.dart';
 import '../theme/palette.dart';
 import '../widgets/currency.dart';
 import '../widgets/glass.dart';
+import '../widgets/washi.dart';
 import 'garden_decor.dart';
 import 'garden_scene.dart';
 import 'garden_touch.dart';
@@ -488,19 +489,16 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
           left: (picked.$3.center.dx - 80).clamp(4.0, size.width - 164),
           top: (picked.$3.top - 46).clamp(4.0, size.height - 40),
           width: 160,
-          child: FilledButton.tonalIcon(
-            style: FilledButton.styleFrom(
-              backgroundColor: Palette.paper,
-              foregroundColor: Palette.ink,
-              visualDensity: VisualDensity.compact,
+          child: Center(
+            child: InkButton.paper(
+              label: tr('decor.store'),
+              height: 38,
+              onPressed: () {
+                SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+                p.storeDecor(picked.$1);
+                setState(() => _picked = null);
+              },
             ),
-            onPressed: () {
-              SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-              p.storeDecor(picked.$1);
-              setState(() => _picked = null);
-            },
-            icon: const Icon(Icons.inventory_2_rounded, size: 18),
-            label: Text(tr('decor.store')),
           ),
         ),
     ];

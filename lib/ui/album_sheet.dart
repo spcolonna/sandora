@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'widgets/washi.dart';
+
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
 import '../minigames/sand/sand_shapes.dart';
@@ -26,12 +28,7 @@ class _Item {
 /// una sombra con la pista para conseguirlo.
 Future<void> showAlbumSheet(BuildContext context) {
   Progress.instance.markAlbumSeen();
-  return showModalBottomSheet(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) => const _Album(),
-  );
+  return showWashiSheet(context, isScrollControlled: true, builder: (context) => const _Album());
 }
 
 class _Album extends StatefulWidget {
@@ -71,15 +68,7 @@ class _AlbumState extends State<_Album> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: total == 0 ? 0 : owned / total,
-                  minHeight: 6,
-                  color: Palette.lantern,
-                  backgroundColor: Palette.sandShadow.withValues(alpha: 0.35),
-                ),
-              ),
+              BrushBar(value: total == 0 ? 0 : owned / total, height: 8),
               for (final (si, (title, items)) in sections.indexed) ...[
                 const SizedBox(height: 18),
                 Row(

@@ -30,6 +30,7 @@ import 'theme/palette.dart';
 import 'widgets/currency.dart';
 import 'widgets/glass.dart';
 import 'widgets/next_goal.dart';
+import 'widgets/washi.dart';
 
 /// Pantalla principal: el jardín a pantalla completa, que también es el menú
 /// (se toca cada lugar para entrar). Arriba flota lo justo: el nivel, la
@@ -463,7 +464,7 @@ class _DecorBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            FilledButton(onPressed: onDone, child: Text(tr('decor.done'))),
+            InkButton.small(label: tr('decor.done'), onPressed: onDone),
           ],
         ),
       ),
@@ -706,7 +707,7 @@ class _LevelPanel extends StatelessWidget {
                   smallSize: 10,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    decoration: BoxDecoration(color: Palette.moss, borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(color: const Color(0xFFA35A33), borderRadius: BorderRadius.circular(10)),
                     child: Text(
                       tr('level.short', {'n': p.level}),
                       style: const TextStyle(color: Palette.paper, fontWeight: FontWeight.w700),
@@ -919,7 +920,7 @@ class _SideDots extends StatelessWidget {
                     width: page == i ? 18 : 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: page == i ? Palette.moss : Palette.ink.withValues(alpha: 0.25),
+                      color: page == i ? Palette.wood : Palette.ink.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),

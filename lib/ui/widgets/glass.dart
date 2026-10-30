@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../theme/palette.dart';
+import 'washi.dart';
 
 /// Vidrio esmerilado sobre el jardín: lo de arriba (nivel, billetera, botones)
 /// se lee sin tapar lo que hay detrás.
@@ -45,6 +46,12 @@ class Glass extends StatelessWidget {
                 ],
               ),
               border: Border.all(color: Colors.white.withValues(alpha: 0.55), width: 0.8),
+              // Las fibras del washi, apenas, para que el vidrio sea papel.
+              image: DecorationImage(
+                image: const AssetImage(washiTexture),
+                fit: BoxFit.cover,
+                opacity: (opacity * 0.7).clamp(0.0, 1.0),
+              ),
             ),
             child: child,
           ),

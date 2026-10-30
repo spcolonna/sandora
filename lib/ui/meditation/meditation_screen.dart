@@ -168,9 +168,9 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
       children: [
         Align(
           alignment: Alignment.centerLeft,
-          child: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close_rounded, color: _light, shadows: _shadow),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: InkIconButton(glyph: InkGlyph.close, size: 42, onPressed: () => Navigator.pop(context)),
           ),
         ),
         const SizedBox(height: 8),
@@ -203,12 +203,13 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
+          runSpacing: 8,
           children: [
             for (final m in p.meditationRules.durations)
-              ChoiceChip(
-                label: Text(tr('meditation.minutes', {'n': m})),
+              InkChip(
+                label: tr('meditation.minutes', {'n': m}),
                 selected: _minutes == m,
-                onSelected: (_) => setState(() => _minutes = m),
+                onTap: () => setState(() => _minutes = m),
               ),
           ],
         ),
@@ -217,23 +218,24 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
+          runSpacing: 8,
           children: [
-            ChoiceChip(
-              label: Text(tr('meditation.silence')),
+            InkChip(
+              label: tr('meditation.silence'),
               selected: _ambience == null,
-              onSelected: (_) => setState(() => _ambience = null),
+              onTap: () => setState(() => _ambience = null),
             ),
             for (final a in Ambience.forMeditation)
-              ChoiceChip(
-                label: Text(tr('meditation.ambience.${a.name}')),
+              InkChip(
+                label: tr('meditation.ambience.${a.name}'),
                 selected: _ambience == a,
-                onSelected: (_) => setState(() => _ambience = a),
+                onTap: () => setState(() => _ambience = a),
               ),
           ],
         ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(tr('meditation.intervalBell', {'n': p.economy.balance.meditation.i('intervalBellMinutes')})),
+        const SizedBox(height: 8),
+        InkToggleRow(
+          title: tr('meditation.intervalBell', {'n': p.economy.balance.meditation.i('intervalBellMinutes')}),
           value: _intervalBell,
           onChanged: (v) => setState(() => _intervalBell = v),
         ),

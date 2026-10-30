@@ -60,9 +60,8 @@ class MomentChip extends StatelessWidget {
 /// Qué pasa ahora en el jardín (momento, clima, regalos) y la opción de usar
 /// el clima de donde está el jugador.
 Future<void> _showNowSheet(BuildContext context, {required DateTime now, required Weather weather}) {
-  return showModalBottomSheet(
-    context: context,
-    showDragHandle: true,
+  return showWashiSheet(
+    context,
     builder: (context) => ListenableBuilder(
       listenable: WeatherService.instance,
       builder: (context, _) {
@@ -84,7 +83,7 @@ Future<void> _showNowSheet(BuildContext context, {required DateTime now, require
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    Icon(_weatherIcon(w, phase), color: Palette.moss),
+                    Icon(_weatherIcon(w, phase), color: Palette.wood),
                     const SizedBox(width: 12),
                     Text('${tr('moment.${phase.name}')} · ${tr('weather.${w.name}')}', style: text.titleSmall),
                   ],
@@ -92,12 +91,9 @@ Future<void> _showNowSheet(BuildContext context, {required DateTime now, require
                 const SizedBox(height: 8),
                 Text(hint, style: text.bodyMedium),
                 const SizedBox(height: 8),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(tr('weather.real.title')),
-                  subtitle: Text(
-                    ws.useReal ? tr('weather.real.desc') : '${tr('weather.own')} ${tr('weather.real.desc')}',
-                  ),
+                InkToggleRow(
+                  title: tr('weather.real.title'),
+                  subtitle: ws.useReal ? tr('weather.real.desc') : '${tr('weather.own')} ${tr('weather.real.desc')}',
                   value: ws.useReal,
                   onChanged: (on) async {
                     if (!on) return ws.disableReal();
@@ -110,7 +106,6 @@ Future<void> _showNowSheet(BuildContext context, {required DateTime now, require
                           content: Text(
                             tr(result == RealWeatherResult.denied ? 'weather.real.denied' : 'weather.real.failed'),
                           ),
-                          behavior: SnackBarBehavior.floating,
                         ),
                       );
                   },

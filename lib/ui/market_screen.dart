@@ -12,6 +12,7 @@ import 'garden/garden_decor.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
 import 'widgets/glass.dart';
+import 'widgets/washi.dart';
 
 /// Mercado: trueques para conseguir lo que los minijuegos no dan. Los de
 /// monedas comunes tienen límite diario; los de lotos, no (el loto ya es escaso).
@@ -30,99 +31,109 @@ class MarketScreen extends StatelessWidget {
     final top = MediaQuery.paddingOf(context).top;
     return Scaffold(
       backgroundColor: Palette.paper,
-      body: ListenableBuilder(
-        listenable: Progress.instance,
-        builder: (context, _) {
-          final p = Progress.instance;
-          final text = Theme.of(context).textTheme;
-          final daily = p.shop.offers.where((o) => o.daily != null);
-          final lotus = p.shop.offers.where((o) => o.daily == null);
-          final deal = p.dealToday();
-          return CustomScrollView(
-            slivers: [
-              // El toldo del puesto, con el título y lo que se tiene para cambiar.
-              SliverToBoxAdapter(
-                child: CustomPaint(
-                  painter: _AwningPainter(),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(8, top + 4, 16, 18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => Navigator.of(context).maybePop(),
-                              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Palette.ink),
-                            ),
-                            Text(tr('shop.title'), style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                        const SizedBox(height: 46),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Glass(
-                            opacity: 0.8,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                            child: Wrap(
-                              spacing: 14,
-                              runSpacing: 6,
-                              children: [
-                                CurrencyChip.pebbles(p.pebbles),
-                                for (final e in Essence.values) CurrencyChip.essence(e, p.essences[e]!),
-                                CurrencyChip.lotus(p.lotus),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(16, 4, 16, MediaQuery.paddingOf(context).bottom + 24),
-                sliver: SliverList.list(
-                  children: [
-                    Text(tr('shop.desc'), style: text.bodyMedium, textAlign: TextAlign.center),
-                    if (deal != null) ...[const SizedBox(height: 14), _DealCard(deal)],
-                    const SizedBox(height: 16),
-                    Text(tr('shop.trades'), style: text.titleSmall),
-                    for (final o in daily) _OfferRow(o),
-                    const SizedBox(height: 12),
-                    Text(tr('shop.withLotus'), style: text.titleSmall),
-                    for (final o in lotus) _OfferRow(o),
-                    // Paquetes de lotos: solo si la venta está prendida y la tienda los devolvió.
-                    ValueListenableBuilder(
-                      valueListenable: LotusStore.instance.products,
-                      builder: (context, products, _) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          image: DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover),
+        ),
+        child: ListenableBuilder(
+          listenable: Progress.instance,
+          builder: (context, _) {
+            final p = Progress.instance;
+            final text = Theme.of(context).textTheme;
+            final daily = p.shop.offers.where((o) => o.daily != null);
+            final lotus = p.shop.offers.where((o) => o.daily == null);
+            final deal = p.dealToday();
+            return CustomScrollView(
+              slivers: [
+                // El toldo del puesto, con el título y lo que se tiene para cambiar.
+                SliverToBoxAdapter(
+                  child: CustomPaint(
+                    painter: _AwningPainter(),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(8, top + 4, 16, 18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (products.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            Text(tr('shop.buyLotus'), style: text.titleSmall),
-                            for (final pr in products)
-                              ListTile(
-                                contentPadding: EdgeInsets.zero,
-                                leading: CurrencyChip.lotus(LotusStore.instance.lotusOf(pr), prefix: '+'),
-                                title: Text(pr.title),
-                                trailing: FilledButton.tonal(
-                                  onPressed: () => LotusStore.instance.buy(pr),
-                                  child: Text(pr.price),
+                          Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
+                                child: InkIconButton(
+                                  glyph: InkGlyph.back,
+                                  size: 42,
+                                  tooltip: tr('result.garden'),
+                                  onPressed: () => Navigator.of(context).maybePop(),
                                 ),
                               ),
-                          ],
+                              Text(tr('shop.title'), style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                          const SizedBox(height: 46),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Glass(
+                              opacity: 0.8,
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              child: Wrap(
+                                spacing: 14,
+                                runSpacing: 6,
+                                children: [
+                                  CurrencyChip.pebbles(p.pebbles),
+                                  for (final e in Essence.values) CurrencyChip.essence(e, p.essences[e]!),
+                                  CurrencyChip.lotus(p.lotus),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Text(tr('shop.lotusHint'), style: text.bodySmall, textAlign: TextAlign.center),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(16, 4, 16, MediaQuery.paddingOf(context).bottom + 24),
+                  sliver: SliverList.list(
+                    children: [
+                      Text(tr('shop.desc'), style: text.bodyMedium, textAlign: TextAlign.center),
+                      if (deal != null) ...[const SizedBox(height: 14), _DealCard(deal)],
+                      const SizedBox(height: 16),
+                      Text(tr('shop.trades'), style: text.titleSmall),
+                      for (final o in daily) _OfferRow(o),
+                      const SizedBox(height: 12),
+                      Text(tr('shop.withLotus'), style: text.titleSmall),
+                      for (final o in lotus) _OfferRow(o),
+                      // Paquetes de lotos: solo si la venta está prendida y la tienda los devolvió.
+                      ValueListenableBuilder(
+                        valueListenable: LotusStore.instance.products,
+                        builder: (context, products, _) => Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (products.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              Text(tr('shop.buyLotus'), style: text.titleSmall),
+                              for (final pr in products)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: CurrencyChip.lotus(LotusStore.instance.lotusOf(pr), prefix: '+'),
+                                  title: Text(pr.title),
+                                  trailing: InkButton.small(
+                                    label: pr.price,
+                                    onPressed: () => LotusStore.instance.buy(pr),
+                                  ),
+                                ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(tr('shop.lotusHint'), style: text.bodySmall, textAlign: TextAlign.center),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -183,9 +194,13 @@ class _OfferRow extends StatelessWidget {
     return Opacity(
       opacity: soldOut ? 0.55 : 1,
       child: Card(
-        color: Colors.white.withValues(alpha: 0.6),
+        color: Palette.sandLight.withValues(alpha: 0.7),
         elevation: 0,
         margin: const EdgeInsets.symmetric(vertical: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Palette.wood.withValues(alpha: 0.16)),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -211,7 +226,8 @@ class _OfferRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              FilledButton(
+              InkButton.small(
+                label: tr('shop.trade'),
                 onPressed: p.canTrade(o)
                     ? () {
                         if (p.trade(o)) {
@@ -220,7 +236,6 @@ class _OfferRow extends StatelessWidget {
                         }
                       }
                     : null,
-                child: Text(tr('shop.trade')),
               ),
             ],
           ),
@@ -299,7 +314,8 @@ class _DealCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             if (!taken)
-              FilledButton(
+              InkButton.small(
+                label: tr('shop.dealBuy'),
                 onPressed: p.canBuyDeal()
                     ? () {
                         if (p.buyDeal()) {
@@ -308,10 +324,9 @@ class _DealCard extends StatelessWidget {
                         }
                       }
                     : null,
-                child: Text(tr('shop.dealBuy')),
               )
             else
-              const Icon(Icons.check_circle_rounded, color: Palette.moss),
+              const Icon(Icons.check_circle_rounded, color: Palette.wood),
           ],
         ),
       ),

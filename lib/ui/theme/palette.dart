@@ -29,13 +29,50 @@ abstract final class Palette {
 
   static ThemeData theme() => ThemeData(
     useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(seedColor: moss, surface: paper),
+    // Tinta tibia y madera, como el kit de papel washi: nada del verde de Material.
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: wood,
+      primary: wood,
+      secondary: lantern,
+      surface: paper,
+      surfaceContainerHighest: sand,
+    ),
     scaffoldBackgroundColor: paper,
     textTheme: const TextTheme().apply(bodyColor: ink, displayColor: ink),
     // Toques suaves: la onda de los botones es tenue (pilar 8).
     splashFactory: InkRipple.splashFactory,
-    splashColor: moss.withValues(alpha: 0.10),
-    highlightColor: moss.withValues(alpha: 0.05),
+    splashColor: wood.withValues(alpha: 0.10),
+    highlightColor: wood.withValues(alpha: 0.05),
+    dividerTheme: DividerThemeData(color: wood.withValues(alpha: 0.18), thickness: 1),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: ink.withValues(alpha: 0.9),
+      contentTextStyle: const TextStyle(color: sandLight, fontSize: 15),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      elevation: 0,
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: sandLight,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: wood.withValues(alpha: 0.2)),
+      ),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: lantern,
+      linearTrackColor: sandShadow.withValues(alpha: 0.35),
+    ),
+    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: ink.withValues(alpha: 0.75))),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(backgroundColor: const Color(0xFFA35A33), foregroundColor: sandLight),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: sandLight.withValues(alpha: 0.7),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+    ),
+    textSelectionTheme: TextSelectionThemeData(cursorColor: wood, selectionColor: lantern.withValues(alpha: 0.35)),
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
         TargetPlatform.android: CalmPageTransitionsBuilder(),

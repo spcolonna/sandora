@@ -10,6 +10,7 @@ import '../fx/reward_flight.dart';
 import '../fx/sfx.dart';
 import '../theme/palette.dart';
 import 'currency.dart';
+import 'washi.dart';
 
 /// El texto de una meta del día ("Jugá 3 partidas").
 String dailyLabel(GoalDef g) => g.id == 'all' ? tr('daily.all') : tr('daily.${g.id}', {'n': g.target});
@@ -83,9 +84,8 @@ class DailyGoalsLine extends StatelessWidget {
 }
 
 Future<void> showDailyGoalsSheet(BuildContext context) {
-  return showModalBottomSheet(
-    context: context,
-    showDragHandle: true,
+  return showWashiSheet(
+    context,
     builder: (context) => ListenableBuilder(
       listenable: Progress.instance,
       builder: (context, _) {
@@ -173,18 +173,10 @@ class _GoalRow extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween(end: progress / goal.target),
-                          duration: Calm.appear,
-                          builder: (context, v, _) => LinearProgressIndicator(
-                            value: v,
-                            minHeight: 6,
-                            color: Palette.lantern,
-                            backgroundColor: Palette.sandShadow.withValues(alpha: 0.35),
-                          ),
-                        ),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(end: progress / goal.target),
+                        duration: Calm.appear,
+                        builder: (context, v, _) => BrushBar(value: v, height: 7),
                       ),
                     ),
                     const SizedBox(width: 8),

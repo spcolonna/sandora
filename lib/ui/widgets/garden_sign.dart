@@ -11,6 +11,7 @@ import '../garden/garden_gate.dart';
 import '../garden_screen.dart';
 import '../theme/palette.dart';
 import 'currency.dart';
+import 'washi.dart';
 
 /// Cuántas sugerencias de nombre hay en i18n (`garden.suggest.N`).
 const _suggestions = 8;
@@ -93,10 +94,8 @@ class GardenSign extends StatelessWidget {
 /// otros para pasar a ellos y uno nuevo para comprar con lotos.
 Future<void> showGardensSheet(BuildContext context) {
   SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-  return showModalBottomSheet(
-    context: context,
-    showDragHandle: true,
-    backgroundColor: Palette.paper,
+  return showWashiSheet(
+    context,
     builder: (sheet) => ListenableBuilder(
       listenable: Progress.instance,
       builder: (sheet, _) {
@@ -113,7 +112,7 @@ Future<void> showGardensSheet(BuildContext context) {
                 const SizedBox(height: 8),
                 for (var i = 0; i < p.gardenCount; i++)
                   ListTile(
-                    leading: Icon(i == p.currentGarden ? Icons.spa_rounded : Icons.spa_outlined, color: Palette.moss),
+                    leading: Icon(i == p.currentGarden ? Icons.spa_rounded : Icons.spa_outlined, color: Palette.wood),
                     title: Text(p.gardenNameAt(i) ?? tr('gardens.number', {'n': i + 1})),
                     subtitle: i == p.currentGarden ? Text(tr('gardens.here')) : null,
                     trailing: i == p.currentGarden
@@ -171,13 +170,7 @@ void _enterGarden(BuildContext context) {
 /// escrita que se puede aceptar tal cual.
 Future<void> showGardenNameSheet(BuildContext context) {
   Progress.instance.markGardenNameOffered();
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    backgroundColor: Palette.paper,
-    builder: (context) => const _NameSheet(),
-  );
+  return showWashiSheet(context, isScrollControlled: true, builder: (context) => const _NameSheet());
 }
 
 class _NameSheet extends StatefulWidget {
@@ -234,9 +227,6 @@ class _NameSheetState extends State<_NameSheet> {
             style: text.titleMedium,
             decoration: InputDecoration(
               hintText: tr('garden.name.hint'),
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.6),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
               suffixIcon: IconButton(
                 tooltip: tr('garden.name.other'),
                 onPressed: _another,
@@ -249,11 +239,11 @@ class _NameSheetState extends State<_NameSheet> {
           Row(
             children: [
               Expanded(
-                child: TextButton(onPressed: () => Navigator.pop(context), child: Text(tr('garden.name.later'))),
+                child: InkButton.quiet(label: tr('garden.name.later'), onPressed: () => Navigator.pop(context)),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: FilledButton(onPressed: _save, child: Text(tr('garden.name.save'))),
+                child: InkButton(label: tr('garden.name.save'), height: 48, onPressed: _save),
               ),
             ],
           ),

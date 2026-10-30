@@ -51,21 +51,32 @@ enum InkGlyph { pause, back, close, replay, play, garden }
 /// una píldora de washi para apoyar sobre la escena sin robarle la mirada.
 class InkButton extends StatefulWidget {
   final String label;
-  final VoidCallback onPressed;
+
+  /// Sin acción, el botón queda apagado (más claro y sin responder).
+  final VoidCallback? onPressed;
   final InkGlyph? glyph;
-  final bool quiet, paper;
+  final bool quiet, paper, compact;
   final double height;
   const InkButton({super.key, required this.label, required this.onPressed, this.glyph, this.height = 54})
     : quiet = false,
-      paper = false;
+      paper = false,
+      compact = false;
+
+  /// El trazo principal, pero del ancho de la palabra: para filas y tarjetas.
+  const InkButton.small({super.key, required this.label, required this.onPressed, this.glyph, this.height = 40})
+    : quiet = false,
+      paper = false,
+      compact = true;
 
   const InkButton.quiet({super.key, required this.label, required this.onPressed, this.glyph, this.height = 44})
     : quiet = true,
-      paper = false;
+      paper = false,
+      compact = false;
 
   const InkButton.paper({super.key, required this.label, required this.onPressed, this.glyph, this.height = 44})
     : quiet = true,
-      paper = true;
+      paper = true,
+      compact = false;
 
   @override
   State<InkButton> createState() => _InkButtonState();
@@ -94,7 +105,7 @@ class _InkButtonState extends State<InkButton> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: color,
-              fontSize: widget.quiet ? 16 : 18,
+              fontSize: widget.quiet || widget.compact ? 16 : 18,
               fontWeight: widget.quiet ? FontWeight.w600 : FontWeight.w700,
               letterSpacing: 0.3,
             ),
@@ -102,45 +113,54 @@ class _InkButtonState extends State<InkButton> {
         ),
       ],
     );
+    final on = widget.onPressed != null;
     return Semantics(
       button: true,
+      enabled: on,
       label: widget.label,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => _set(true),
-        onTapCancel: () => _set(false),
-        onTapUp: (_) => _set(false),
-        onTap: () {
-          Haptics.light();
-          widget.onPressed();
-        },
-        child: AnimatedScale(
-          scale: _down ? 0.96 : 1,
-          duration: const Duration(milliseconds: 90),
-          child: SizedBox(
-            height: widget.height,
-            width: widget.paper ? null : double.infinity,
-            child: widget.paper
-                ? DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Palette.paper,
-                      borderRadius: BorderRadius.circular(widget.height / 2),
-                      image: const DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover),
-                      border: Border.all(color: Palette.wood.withValues(alpha: 0.25)),
-                      boxShadow: const [BoxShadow(color: Color(0x44000000), blurRadius: 10, offset: Offset(0, 3))],
+        onTapDown: on ? (_) => _set(true) : null,
+        onTapCancel: on ? () => _set(false) : null,
+        onTapUp: on ? (_) => _set(false) : null,
+        onTap: on
+            ? () {
+                Haptics.light();
+                widget.onPressed!();
+              }
+            : null,
+        child: AnimatedOpacity(
+          opacity: on ? 1 : 0.45,
+          duration: const Duration(milliseconds: 150),
+          child: AnimatedScale(
+            scale: _down ? 0.96 : 1,
+            duration: const Duration(milliseconds: 90),
+            child: SizedBox(
+              height: widget.height,
+              width: widget.paper || widget.compact ? null : double.infinity,
+              child: widget.paper
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Palette.paper,
+                        borderRadius: BorderRadius.circular(widget.height / 2),
+                        image: const DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover),
+                        border: Border.all(color: Palette.wood.withValues(alpha: 0.25)),
+                        boxShadow: const [BoxShadow(color: Color(0x44000000), blurRadius: 10, offset: Offset(0, 3))],
+                      ),
+                      child: Center(
+                        child: Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: label),
+                      ),
+                    )
+                  : widget.quiet
+                  ? Center(child: label)
+                  : CustomPaint(
+                      painter: _BrushFill(pressed: _down),
+                      child: Center(
+                        widthFactor: widget.compact ? 1 : null,
+                        child: Padding(padding: const EdgeInsets.symmetric(horizontal: 18), child: label),
+                      ),
                     ),
-                    child: Center(
-                      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: label),
-                    ),
-                  )
-                : widget.quiet
-                ? Center(child: label)
-                : CustomPaint(
-                    painter: _BrushFill(pressed: _down),
-                    child: Center(
-                      child: Padding(padding: const EdgeInsets.symmetric(horizontal: 18), child: label),
-                    ),
-                  ),
+            ),
           ),
         ),
       ),
@@ -159,7 +179,7 @@ class _BrushFill extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final h = size.height, w = size.width;
-    final path = _wobblyCapsule(Rect.fromLTWH(0, 0, w, h), seed: 3, amp: 1.6);
+    final path = _wobblyCapsule(Rect.fromLTWH(0, 0, w, h), seed: 3, amp: min(1.6, h * 0.022));
     canvas.drawShadow(path, const Color(0xFF000000), pressed ? 2 : 5, false);
     canvas.drawPath(
       path,
@@ -443,4 +463,250 @@ Future<T?> showWashiDialog<T>(BuildContext context, {required String title, requ
       );
     },
   );
+}
+
+/// Hoja que sube desde abajo, de papel washi, con una pincelada corta como
+/// tirador. Reemplaza a la hoja de Material en todos los menús del jardín.
+Future<T?> showWashiSheet<T>(BuildContext context, {required WidgetBuilder builder, bool isScrollControlled = false}) {
+  return showModalBottomSheet<T>(
+    context: context,
+    isScrollControlled: isScrollControlled,
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    barrierColor: Palette.ink.withValues(alpha: 0.38),
+    builder: (context) => _WashiSheet(child: Builder(builder: builder)),
+  );
+}
+
+class _WashiSheet extends StatelessWidget {
+  final Widget child;
+  const _WashiSheet({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    const r = BorderRadius.vertical(top: Radius.circular(28));
+    return Container(
+      decoration: const BoxDecoration(
+        color: Palette.paper,
+        borderRadius: r,
+        boxShadow: [BoxShadow(color: Color(0x44000000), blurRadius: 24, offset: Offset(0, -4))],
+        image: DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover, alignment: Alignment.topCenter),
+      ),
+      foregroundDecoration: BoxDecoration(
+        borderRadius: r,
+        border: Border(top: BorderSide(color: Palette.wood.withValues(alpha: 0.22))),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 30),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              child,
+              const Positioned(
+                top: -18,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: CustomPaint(size: Size(46, 6), painter: _HandlePainter()),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// El tirador: un trazo corto de tinta aguada.
+class _HandlePainter extends CustomPainter {
+  const _HandlePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawPath(
+      _wobblyCapsule(Offset.zero & size, seed: 2, amp: 0.4),
+      Paint()..color = Palette.ink.withValues(alpha: 0.22),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_HandlePainter old) => false;
+}
+
+/// Interruptor de papel: un surco de aguada y una piedrita de tinta que se
+/// corre; encendido, el surco se llena con el trazo tibio del pincel.
+class InkToggle extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  const InkToggle({super.key, required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      toggled: value,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onChanged == null
+            ? null
+            : () {
+                Haptics.light();
+                onChanged!(!value);
+              },
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: value ? 1 : 0),
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          builder: (context, t, _) => CustomPaint(
+            size: const Size(52, 30),
+            painter: _TogglePainter(t, enabled: onChanged != null),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TogglePainter extends CustomPainter {
+  final double t;
+  final bool enabled;
+  _TogglePainter(this.t, {required this.enabled});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final track = Rect.fromLTWH(0, 5, size.width, size.height - 10);
+    canvas.drawPath(
+      _wobblyCapsule(track, seed: 4, amp: 0.6),
+      Paint()..color = Palette.sandShadow.withValues(alpha: 0.45),
+    );
+    if (t > 0) {
+      final fill = _wobblyCapsule(
+        Rect.fromLTWH(0, 5, track.height + (size.width - track.height) * t, track.height),
+        seed: 8,
+        amp: 0.6,
+      );
+      canvas.drawPath(
+        fill,
+        Paint()
+          ..shader = LinearGradient(
+            colors: [
+              _BrushFill._base.withValues(alpha: 0.85 * t),
+              _BrushFill._deep.withValues(alpha: t),
+            ],
+          ).createShader(track),
+      );
+    }
+    final r = size.height / 2 - 2;
+    final c = Offset(r + 2 + (size.width - 2 * r - 4) * t, size.height / 2);
+    canvas.drawCircle(c + const Offset(0, 1.5), r, Paint()..color = const Color(0x33000000));
+    canvas.drawCircle(c, r, Paint()..color = Palette.sandLight);
+    canvas.drawCircle(
+      c,
+      r,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = Palette.wood.withValues(alpha: 0.35),
+    );
+    if (!enabled) canvas.drawRect(Offset.zero & size, Paint()..color = Palette.paper.withValues(alpha: 0.5));
+  }
+
+  @override
+  bool shouldRepaint(_TogglePainter old) => old.t != t || old.enabled != enabled;
+}
+
+/// Una línea de ajuste: el texto a la izquierda y el interruptor de papel.
+class InkToggleRow extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  const InkToggleRow({super.key, required this.title, this.subtitle, required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onChanged == null
+          ? null
+          : () {
+              Haptics.light();
+              onChanged!(!value);
+            },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: text.titleMedium),
+                  if (subtitle != null)
+                    Text(subtitle!, style: text.bodySmall?.copyWith(color: Palette.ink.withValues(alpha: 0.6))),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            IgnorePointer(
+              child: InkToggle(value: value, onChanged: onChanged),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Opción para elegir entre varias: una píldora de papel que, elegida, se
+/// vuelve el trazo tibio del pincel.
+class InkChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const InkChip({super.key, required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(
+      fontSize: 15,
+      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+      color: selected ? Palette.sandLight : Palette.ink.withValues(alpha: 0.72),
+    );
+    final label = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Center(widthFactor: 1, child: Text(this.label, style: style)),
+    );
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (!selected) Haptics.light();
+          onTap();
+        },
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          child: SizedBox(
+            key: ValueKey(selected),
+            height: 38,
+            child: selected
+                ? CustomPaint(painter: _BrushFill(pressed: false), child: label)
+                : DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Palette.sandLight.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(19),
+                      border: Border.all(color: Palette.wood.withValues(alpha: 0.28)),
+                    ),
+                    child: label,
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
 }

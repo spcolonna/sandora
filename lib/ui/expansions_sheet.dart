@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'widgets/washi.dart';
+
 import '../garden/levels.dart';
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
@@ -10,9 +12,8 @@ import 'widgets/currency.dart';
 /// Lo que trae cada nivel: ampliaciones del jardín (se compran con tokens una
 /// vez alcanzado el nivel) y el Modo meditación.
 Future<void> showExpansionsSheet(BuildContext context) {
-  return showModalBottomSheet(
-    context: context,
-    showDragHandle: true,
+  return showWashiSheet(
+    context,
     isScrollControlled: true,
     builder: (context) => ListenableBuilder(
       listenable: Progress.instance,
@@ -74,9 +75,13 @@ class _Row extends StatelessWidget {
     return Opacity(
       opacity: locked ? 0.55 : 1,
       child: Card(
-        color: done ? Palette.moss.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.6),
+        color: done ? Palette.lantern.withValues(alpha: 0.14) : Palette.sandLight.withValues(alpha: 0.7),
         elevation: 0,
         margin: const EdgeInsets.symmetric(vertical: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Palette.wood.withValues(alpha: 0.16)),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -120,7 +125,7 @@ class _MeditationRow extends StatelessWidget {
       level: Progress.instance.levels.meditationLevel,
       done: unlocked,
       locked: !unlocked,
-      trailing: unlocked ? const Icon(Icons.check_circle_rounded, color: Palette.moss) : null,
+      trailing: unlocked ? const Icon(Icons.check_circle_rounded, color: Palette.wood) : null,
     );
   }
 }
@@ -136,13 +141,14 @@ class _ExpansionRow extends StatelessWidget {
     final reached = p.level >= e.level;
     final Widget? trailing;
     if (owned) {
-      trailing = const Icon(Icons.check_circle_rounded, color: Palette.moss);
+      trailing = const Icon(Icons.check_circle_rounded, color: Palette.wood);
     } else if (!e.ready) {
       trailing = Text(tr('exp.soon'), style: Theme.of(context).textTheme.labelMedium);
     } else if (!reached) {
       trailing = null;
     } else {
-      trailing = FilledButton(
+      trailing = InkButton.small(
+        label: tr('exp.buy'),
         onPressed: p.canAfford(e)
             ? () {
                 if (p.buyExpansion(e)) {
@@ -151,7 +157,6 @@ class _ExpansionRow extends StatelessWidget {
                 }
               }
             : null,
-        child: Text(tr('exp.buy')),
       );
     }
     return _Row(
