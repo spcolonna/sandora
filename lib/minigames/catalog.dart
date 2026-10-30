@@ -4,6 +4,7 @@ import '../garden/economy.dart';
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
 import '../ui/theme/palette.dart';
+import '../ui/widgets/washi.dart';
 import 'bell/bell_game.dart';
 import 'bonsai/bonsai_game.dart';
 import 'common/minigame_screen.dart';
@@ -286,7 +287,7 @@ class _StackOverlay extends StatelessWidget {
             Positioned(
               bottom: pad.bottom + 20,
               right: 20,
-              child: FilledButton.tonal(onPressed: game.endRun, child: Text(tr('stack.finish'))),
+              child: InkButton.paper(label: tr('stack.finish'), onPressed: game.endRun),
             ),
         ],
       ),

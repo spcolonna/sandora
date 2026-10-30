@@ -13,6 +13,7 @@ import '../../ui/widgets/currency.dart';
 import '../../ui/widgets/daily_goals.dart';
 import '../../ui/widgets/level_up.dart';
 import '../../ui/widgets/next_goal.dart';
+import '../../ui/widgets/washi.dart';
 import '../catalog.dart';
 import 'minigame_screen.dart';
 
@@ -115,10 +116,9 @@ class _ResultPanelState extends State<ResultPanel> {
               child: CalmAppear(
                 delay: const Duration(milliseconds: 150),
                 rise: 18,
-                child: Container(
+                child: WashiCard(
                   margin: const EdgeInsets.symmetric(horizontal: 24),
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                  decoration: BoxDecoration(color: Palette.paper, borderRadius: BorderRadius.circular(24)),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -213,14 +213,9 @@ class _ResultPanelState extends State<ResultPanel> {
                       ],
                       const SizedBox(height: 16),
                       // "Otra vez" es lo más grande y está a mano; el jardín, debajo.
-                      FilledButton.icon(
-                        onPressed: widget.onAgain,
-                        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(54)),
-                        icon: const Icon(Icons.replay_rounded),
-                        label: Text(tr('result.again'), style: const TextStyle(fontSize: 18)),
-                      ),
+                      InkButton(label: tr('result.again'), glyph: InkGlyph.replay, onPressed: widget.onAgain),
                       const SizedBox(height: 4),
-                      TextButton(onPressed: widget.onGarden, child: Text(tr('result.garden'))),
+                      InkButton.quiet(label: tr('result.garden'), onPressed: widget.onGarden),
                     ],
                   ),
                 ),
@@ -294,15 +289,7 @@ class _LevelGain extends StatelessWidget {
             tween: Tween(begin: from, end: to),
             duration: total,
             curve: Interval(wait, 1, curve: Curves.easeInOutCubic),
-            builder: (context, v, _) => ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: v,
-                minHeight: 10,
-                color: Palette.lantern,
-                backgroundColor: Palette.sandShadow.withValues(alpha: 0.4),
-              ),
-            ),
+            builder: (context, v, _) => BrushBar(value: v),
           ),
         ),
       ],

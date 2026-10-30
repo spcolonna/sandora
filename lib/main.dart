@@ -10,6 +10,7 @@ import 'garden/weather_service.dart';
 import 'i18n/i18n.dart';
 import 'minigames/catalog.dart';
 import 'settings.dart';
+import 'ui/meditation/meditation_screen.dart';
 import 'ui/brand_intro.dart';
 import 'ui/fx/sfx.dart';
 import 'ui/garden/garden_gate.dart';
@@ -63,7 +64,8 @@ class SandoraApp extends StatelessWidget {
   }
 }
 
-/// Para probar un minijuego directo: `flutter run --dart-define=SANDORA_GAME=moss`.
+/// Para probar un minijuego directo: `flutter run --dart-define=SANDORA_GAME=moss`
+/// (o `meditation`).
 /// Abre el jardín y encima el juego (al salir se vuelve al jardín).
 const _gameOverride = String.fromEnvironment('SANDORA_GAME');
 
@@ -79,8 +81,11 @@ class _DebugGameState extends State<_DebugGame> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final game = minigames.firstWhere((m) => m.id == _gameOverride);
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => game.screen()));
+      // `meditation` abre la meditación, que no es un minijuego del catálogo.
+      final screen = _gameOverride == 'meditation'
+          ? const MeditationScreen()
+          : minigames.firstWhere((m) => m.id == _gameOverride).screen();
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
     });
   }
 

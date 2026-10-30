@@ -1,10 +1,13 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 import '../../i18n/i18n.dart';
 import '../../ui/fx/calm.dart';
+import '../../ui/meditation/meditation_backdrop.dart';
 import '../../ui/theme/palette.dart';
+import '../../ui/widgets/washi.dart';
 
 /// El gesto de cada minijuego, para la tarjeta de cómo se juega.
 enum IntroGesture { tap, hold, trace, swipe, paint, swap, pull }
@@ -35,6 +38,8 @@ class IntroCard extends StatelessWidget {
   final VoidCallback onBack;
   const IntroCard({super.key, required this.id, required this.onStart, required this.onBack});
 
+  static final _still = ValueNotifier<double>(0);
+
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
@@ -42,13 +47,22 @@ class IntroCard extends StatelessWidget {
       color: Palette.sand,
       child: Stack(
         children: [
+          // Detrás, el patio en penumbra y desenfocado: se sale del jardín al juego.
+          if (MeditationBackdrop.available)
+            Positioned.fill(
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: CustomPaint(
+                  painter: MeditationBackdrop(clock: _still, night: 0.3, dawn: 0, breath: () => 0),
+                ),
+              ),
+            ),
           Center(
             child: CalmAppear(
               rise: 18,
-              child: Container(
+              child: WashiCard(
                 margin: const EdgeInsets.symmetric(horizontal: 28),
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                decoration: BoxDecoration(color: Palette.paper, borderRadius: BorderRadius.circular(24)),
+                padding: const EdgeInsets.fromLTRB(24, 26, 24, 12),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -58,10 +72,7 @@ class IntroCard extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(tr('mg.$id.desc'), style: text.titleMedium, textAlign: TextAlign.center),
                     const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(onPressed: onStart, child: Text(tr('intro.start'))),
-                    ),
+                    InkButton(label: tr('intro.start'), glyph: InkGlyph.play, onPressed: onStart),
                   ],
                 ),
               ),
@@ -70,11 +81,7 @@ class IntroCard extends StatelessWidget {
           Positioned(
             top: MediaQuery.paddingOf(context).top + 8,
             left: 12,
-            child: IconButton.filledTonal(
-              onPressed: onBack,
-              tooltip: tr('result.garden'),
-              icon: const Icon(Icons.arrow_back_rounded),
-            ),
+            child: InkIconButton(glyph: InkGlyph.back, onPressed: onBack, tooltip: tr('result.garden')),
           ),
         ],
       ),
@@ -186,24 +193,22 @@ class _DemoPainter extends CustomPainter {
         );
     }
 
-    // La mano: la punta del índice en el dedo.
+    // La yema del dedo: una mancha de tinta que se aprieta al tocar.
     final tip = at(_finger(gesture == IntroGesture.tap || gesture == IntroGesture.hold ? 0 : k));
-    final press = gesture == IntroGesture.tap ? 1 - 0.12 * sin(((t * 2) % 1) * pi) : 1.0;
-    final icon = Icons.touch_app_rounded;
-    final tp = TextPainter(
-      text: TextSpan(
-        text: String.fromCharCode(icon.codePoint),
-        style: TextStyle(
-          fontFamily: icon.fontFamily,
-          package: icon.fontPackage,
-          fontSize: 44 * press,
-          color: ink.withValues(alpha: 0.85 * max(0.3, fade)),
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    // En el ícono, la punta del índice queda arriba, un poco a la izquierda del centro.
-    tp.paint(canvas, tip - Offset(tp.width * 0.42, tp.height * 0.08));
+    final press = gesture == IntroGesture.tap ? 1 - 0.18 * sin(((t * 2) % 1) * pi) : 1.0;
+    final a = max(0.3, fade);
+    canvas.drawCircle(
+      tip,
+      22 * press,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            ink.withValues(alpha: 0.28 * a),
+            ink.withValues(alpha: 0),
+          ],
+        ).createShader(Rect.fromCircle(center: tip, radius: 22 * press)),
+    );
+    canvas.drawCircle(tip, 9 * press, Paint()..color = ink.withValues(alpha: 0.7 * a));
   }
 
   @override

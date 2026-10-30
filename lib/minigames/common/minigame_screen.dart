@@ -6,7 +6,7 @@ import '../../garden/progress.dart';
 import '../../garden/reminders.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
-import '../../ui/theme/palette.dart';
+import '../../ui/widgets/washi.dart';
 import 'intro_card.dart';
 import 'result_panel.dart';
 
@@ -81,18 +81,22 @@ class _MinigameScreenState extends State<MinigameScreen> {
   Future<void> _pause() async {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
     _game.pauseEngine();
-    final choice = await showDialog<_PauseChoice>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Palette.paper,
-        title: Text(tr('pause.title')),
-        actionsOverflowButtonSpacing: 8,
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, _PauseChoice.quit), child: Text(tr('pause.quit'))),
-          TextButton(onPressed: () => Navigator.pop(context, _PauseChoice.restart), child: Text(tr('pause.restart'))),
-          FilledButton(onPressed: () => Navigator.pop(context, _PauseChoice.resume), child: Text(tr('pause.resume'))),
-        ],
-      ),
+    final choice = await showWashiDialog<_PauseChoice>(
+      context,
+      title: tr('pause.title'),
+      actions: [
+        InkButton(
+          label: tr('pause.resume'),
+          glyph: InkGlyph.play,
+          onPressed: () => Navigator.pop(context, _PauseChoice.resume),
+        ),
+        InkButton.quiet(
+          label: tr('pause.restart'),
+          glyph: InkGlyph.replay,
+          onPressed: () => Navigator.pop(context, _PauseChoice.restart),
+        ),
+        InkButton.quiet(label: tr('pause.quit'), onPressed: () => Navigator.pop(context, _PauseChoice.quit)),
+      ],
     );
     if (!mounted) return;
     switch (choice) {
@@ -137,7 +141,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
             Positioned(
               top: MediaQuery.paddingOf(context).top + 8,
               right: 12,
-              child: IconButton.filledTonal(onPressed: _pause, icon: const Icon(Icons.pause_rounded)),
+              child: InkIconButton(glyph: InkGlyph.pause, onPressed: _pause, tooltip: tr('pause.title')),
             ),
           if (_outcome != null)
             ResultPanel(
