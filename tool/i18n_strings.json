@@ -2630,5 +2630,33 @@
   "pt": "Volto quando estiver pronto. Fico por aqui {n} dias",
   "ja": "できたら戻ってきます。{n}日ほど近くにいます",
   "zh": "完成后我会回来。我会在附近待{n}天"
+ },
+ "settings.reset": {
+  "es": "Reiniciar partida",
+  "en": "Restart game",
+  "pt": "Reiniciar jogo",
+  "ja": "最初からやり直す",
+  "zh": "重新开始游戏"
+ },
+ "settings.resetAsk": {
+  "es": "¿Borrar todo el jardín y empezar de cero?",
+  "en": "Erase your whole garden and start over?",
+  "pt": "Apagar todo o jardim e começar do zero?",
+  "ja": "庭をすべて消して最初から始めますか？",
+  "zh": "清除整个庭院并从头开始吗？"
+ },
+ "settings.resetYes": {
+  "es": "Borrar y empezar",
+  "en": "Erase and start",
+  "pt": "Apagar e começar",
+  "ja": "消して始める",
+  "zh": "清除并开始"
+ },
+ "common.cancel": {
+  "es": "Cancelar",
+  "en": "Cancel",
+  "pt": "Cancelar",
+  "ja": "キャンセル",
+  "zh": "取消"
  }
 }

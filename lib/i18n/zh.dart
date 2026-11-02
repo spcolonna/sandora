@@ -377,4 +377,8 @@ const zh = <String, String>{
   'req.claim': '收下',
   'req.thanks': '谢谢！留下这个作为谢礼',
   'req.waiting': '完成后我会回来。我会在附近待{n}天',
+  'settings.reset': '重新开始游戏',
+  'settings.resetAsk': '清除整个庭院并从头开始吗？',
+  'settings.resetYes': '清除并开始',
+  'common.cancel': '取消',
 };

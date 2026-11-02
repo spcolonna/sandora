@@ -24,6 +24,7 @@ import '../widgets/washi.dart';
 import 'garden_decor.dart';
 import 'garden_scene.dart';
 import 'garden_touch.dart';
+import 'scene_art.dart';
 import 'tea_visit.dart';
 
 part 'garden_care.dart';

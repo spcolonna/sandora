@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 
 import 'widgets/washi.dart';
 
+import '../balance/balance.dart';
 import '../i18n/i18n.dart';
+import '../garden/progress.dart';
 import '../garden/reminders.dart';
+import '../garden/weather_service.dart';
 import '../settings.dart';
 import 'fx/sfx.dart';
+import 'garden/garden_gate.dart';
+import 'garden_screen.dart';
+import 'title_intro.dart';
 
 Future<void> showSettingsSheet(BuildContext context) {
   return showWashiSheet(
@@ -87,6 +93,10 @@ Future<void> showSettingsSheet(BuildContext context) {
                         InkChip(label: tr('lang.$l'), selected: l == currentLanguage, onTap: () => s.setLang(l)),
                     ],
                   ),
+                  const SizedBox(height: 18),
+                  Center(
+                    child: InkButton.quiet(label: tr('settings.reset'), onPressed: () => _askReset(context)),
+                  ),
                   const SizedBox(height: 12),
                 ],
               ),
@@ -95,5 +105,29 @@ Future<void> showSettingsSheet(BuildContext context) {
         );
       },
     ),
+  );
+}
+
+/// Pregunta antes de borrar la partida; si se confirma, empieza de cero desde
+/// la pantalla de título (los ajustes quedan).
+Future<void> _askReset(BuildContext context) async {
+  final yes = await showWashiDialog<bool>(
+    context,
+    title: tr('settings.resetAsk'),
+    actions: [
+      InkButton(label: tr('settings.resetYes'), onPressed: () => Navigator.of(context, rootNavigator: true).pop(true)),
+      InkButton.quiet(label: tr('common.cancel'), onPressed: () => Navigator.of(context, rootNavigator: true).pop()),
+    ],
+  );
+  if (yes != true || !context.mounted) return;
+  final navigator = Navigator.of(context, rootNavigator: true);
+  await Progress.instance.reset(Balance.instance);
+  await WeatherService.instance.load(Balance.instance);
+  await Reminders.instance.reschedule();
+  navigator.pushAndRemoveUntil(
+    MaterialPageRoute<void>(
+      builder: (_) => const TitleIntro(next: GardenGate(child: GardenScreen())),
+    ),
+    (_) => false,
   );
 }

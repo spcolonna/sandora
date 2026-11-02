@@ -1046,6 +1046,23 @@ INCLUDED = {
                          '(`garden_forest.dart`).'),
     'obj_tea_bowl': ('assets/images/forest/obj_tea_bowl.webp', 'Cuenco del Matcha, 640 px; el té y la espuma llenan el '
                      'óvalo de la boca (`matcha_game.dart`).'),
+    'obj_tea_whisk': ('assets/images/forest/obj_tea_whisk.webp', 'Batidor del Matcha, 220 px; salió de costado y se '
+                      'dibuja con las varillas bajo el dedo (`matcha_game.dart`).'),
+    'obj_bamboo_flute': ('assets/images/forest/obj_bamboo_flute.webp', 'Flauta, 900 px de alto; se arma por partes '
+                         'para que sus huecos caigan en las filas del juego (`flute_game.dart`).'),
+    'obj_river_lantern': ('assets/images/forest/obj_river_lantern.webp', 'Linterna del río, 200 px; apagada se '
+                          'dibuja en gris (`lanterns_game.dart`).'),
+    'bg_river': ('assets/images/forest/bg_river.webp', 'Fondo de las Linternas, 768×1152; el agua ocupa el 84 % del '
+                 'ancho, igual que el río del juego (`lanterns_game.dart`).'),
+    'char_visitor_traveler': ('assets/images/court/char_visitor_traveler.webp', 'Viajero, 480 px de alto '
+                              '(`garden_visitor.dart`). El monje usa `char_visitor_monk`, sacado de `char_monk`.'),
+    'char_visitor_potter': ('assets/images/court/char_visitor_potter.webp', 'Alfarero, 480 px de alto.'),
+    'char_visitor_gardener': ('assets/images/court/char_visitor_gardener.webp', 'Jardinero, 480 px de alto.'),
+    'char_visitor_fisher': ('assets/images/court/char_visitor_fisher.webp', 'Pescador, 480 px de alto.'),
+    'obj_upgrade_border': ('assets/images/court/obj_upgrade_border.webp', 'Borde de piedras de las mejoras 1 y 2, '
+                           '560 px (`garden_upgrades.dart`).'),
+    'obj_upgrade_bloom': ('assets/images/court/obj_upgrade_bloom.webp', 'Borde con flores de la mejora 3, 560 px; '
+                          'el brillo sigue siendo código.'),
 }
 
 

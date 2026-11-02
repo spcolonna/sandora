@@ -259,6 +259,29 @@ class Progress extends ChangeNotifier {
     return true;
   }
 
+  /// Lo que no es de la partida: los ajustes, si ya se pidió permiso para
+  /// los recordatorios, si el clima es el real y las compras ya entregadas.
+  static const _keepOnReset = {
+    'sound',
+    'music',
+    'haptics',
+    'language',
+    'reminders',
+    'reminderMinutes',
+    'reminders.asked',
+    'weather.real',
+    'lotus.delivered',
+  };
+
+  /// Borra toda la partida y la vuelve a cargar como el primer día.
+  Future<void> reset(Balance balance) async {
+    for (final k in _prefs.getKeys().toList()) {
+      if (!_keepOnReset.contains(k)) await _prefs.remove(k);
+    }
+    await load(balance);
+    notifyListeners();
+  }
+
   Future<void> load(Balance balance, {DateTime? now}) async {
     _balance = balance;
     economy = Economy(balance);

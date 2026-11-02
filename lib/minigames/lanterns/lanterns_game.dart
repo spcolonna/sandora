@@ -9,6 +9,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -196,11 +197,18 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
   /// El agua, con flechitas que muestran hacia dónde empuja la corriente.
   void _drawRiver(Canvas canvas) {
     final r = _river;
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(r.inflate(10), const Radius.circular(18)),
-      Paint()..color = const Color(0xFFB8A784),
-    );
-    canvas.drawRRect(RRect.fromRectAndRadius(r, const Radius.circular(14)), Paint()..color = Palette.water);
+    final bg = SceneArt.instance['bg_river'];
+    if (bg != null) {
+      // El río pintado ocupa el 84 % del ancho, igual que [_river]; el agua
+      // se estira hacia abajo si la pantalla es más alta.
+      drawArt(canvas, bg, Offset.zero & Size(size.x, size.y));
+    } else {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(r.inflate(10), const Radius.circular(18)),
+        Paint()..color = const Color(0xFFB8A784),
+      );
+      canvas.drawRRect(RRect.fromRectAndRadius(r, const Radius.circular(14)), Paint()..color = Palette.water);
+    }
     final arrow = Paint()
       ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.28)
       ..strokeWidth = 1.6
@@ -268,6 +276,43 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
       );
     }
+    final art = SceneArt.instance['obj_river_lantern'];
+    if (art != null) {
+      final aw = 40.0, ah = aw * art.height / art.width;
+      // Apagada: el papel sin luz, gris.
+      final dim = lit
+          ? null
+          : (Paint()
+              ..colorFilter = const ColorFilter.matrix([
+                0.25, 0.4, 0.1, 0, 0, //
+                0.25, 0.4, 0.1, 0, 0, //
+                0.25, 0.4, 0.1, 0, 0, //
+                0, 0, 0, 1, 0,
+              ]));
+      drawArt(
+        canvas,
+        art,
+        Rect.fromCenter(center: c, width: aw, height: ah),
+        paint: dim,
+      );
+    } else {
+      _drawPaperLantern(canvas, c, lit);
+    }
+    // Esperando: un anillo que late invita a tocarla.
+    if (_run == null) {
+      canvas.drawCircle(
+        c,
+        24 + 4 * sin(_t * 3),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..color = Palette.paper.withValues(alpha: 0.7),
+      );
+    }
+  }
+
+  /// Sin el arte: una base de madera y un cubo de papel.
+  void _drawPaperLantern(Canvas canvas, Offset c, bool lit) {
     final s = 13.0;
     canvas.drawRect(
       Rect.fromCenter(center: c + Offset(0, s * 0.8), width: s * 2.2, height: s * 0.45),
@@ -284,17 +329,6 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
         ..strokeWidth = 1.2
         ..color = Palette.wood,
     );
-    // Esperando: un anillo que late invita a tocarla.
-    if (_run == null) {
-      canvas.drawCircle(
-        c,
-        24 + 4 * sin(_t * 3),
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
-          ..color = Palette.paper.withValues(alpha: 0.7),
-      );
-    }
   }
 
   void _drawHud(Canvas canvas) {

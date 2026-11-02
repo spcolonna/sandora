@@ -213,6 +213,13 @@ class MatchaGame extends FlameGame with DragCallbacks {
   void _drawWhisk(Canvas canvas) {
     final w = _whisk;
     if (w == null) return;
+    final art = SceneArt.instance['obj_tea_whisk'];
+    if (art != null) {
+      // Visto de costado: las varillas, arriba, quedan bajo el dedo.
+      final aw = 64.0, ah = aw * art.height / art.width;
+      drawArt(canvas, art, Rect.fromLTWH(w.dx - aw / 2, w.dy - ah * 0.3, aw, ah));
+      return;
+    }
     final tine = Paint()
       ..color = const Color(0xFFE6D3A3)
       ..strokeWidth = 2;

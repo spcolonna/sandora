@@ -39,8 +39,13 @@ class _UpgradePainter extends CustomPainter {
           ).createShader(glow),
       );
     }
-    // Borde de piedritas por delante del lugar.
-    for (var i = 0; i <= 8; i++) {
+    // Borde de piedritas por delante del lugar (con flores en el nivel 3).
+    final border = SceneArt.instance[tier >= 3 ? 'obj_upgrade_bloom' : 'obj_upgrade_border'];
+    if (border != null) {
+      final w = rx * 2.2, bh = w * border.height / border.width;
+      drawArt(canvas, border, Rect.fromLTWH(base.dx - w / 2, base.dy + ry * 0.7 - bh, w, bh));
+    }
+    for (var i = 0; i <= 8 && border == null; i++) {
       final a = pi * (0.08 + 0.84 * i / 8);
       final at = base + Offset(cos(a) * rx, sin(a) * ry * 0.6);
       final s = r.width * (0.045 + 0.012 * ((i * 5) % 3));
@@ -73,6 +78,17 @@ class _UpgradePainter extends CustomPainter {
 
   /// Un farolito de piedra; de noche, la ventana encendida.
   void _lantern(Canvas canvas, Offset foot, double w) {
+    final art = SceneArt.instance['obj_court_lantern_small'];
+    if (art != null) {
+      final ah = w * 2.4, aw = ah * art.width / art.height;
+      canvas.drawOval(
+        Rect.fromCenter(center: foot, width: aw * 1.1, height: w * 0.35),
+        Paint()..color = const Color(0x33000000),
+      );
+      drawArt(canvas, art, Rect.fromLTWH(foot.dx - aw / 2, foot.dy - ah, aw, ah));
+      _night(canvas, foot - Offset(0, ah * 0.62), w);
+      return;
+    }
     final stone = Paint()..color = const Color(0xFF8E887D);
     final dark = Paint()..color = const Color(0xFF6E685E);
     canvas.drawOval(
@@ -88,9 +104,21 @@ class _UpgradePainter extends CustomPainter {
       window,
       Paint()..color = Color.lerp(const Color(0xFF4A453E), const Color(0xFFFFD27A), 0.25 + 0.75 * night)!,
     );
+    _night(canvas, window.center, w);
+    final roof = Path()
+      ..moveTo(box.left - w * 0.25, box.top)
+      ..lineTo(box.center.dx, box.top - w * 0.45)
+      ..lineTo(box.right + w * 0.25, box.top)
+      ..close();
+    canvas.drawPath(roof, dark);
+  }
+
+  /// De noche, la luz de la ventana del farolito.
+  void _night(Canvas canvas, Offset window, double w) {
+    final night = (1 - daylight).clamp(0.0, 1.0);
     if (night > 0.2) {
       canvas.drawCircle(
-        window.center,
+        window,
         w * 1.2,
         Paint()
           ..shader = RadialGradient(
@@ -98,15 +126,9 @@ class _UpgradePainter extends CustomPainter {
               Palette.lantern.withValues(alpha: 0.4 * night),
               Palette.lantern.withValues(alpha: 0),
             ],
-          ).createShader(Rect.fromCircle(center: window.center, radius: w * 1.2)),
+          ).createShader(Rect.fromCircle(center: window, radius: w * 1.2)),
       );
     }
-    final roof = Path()
-      ..moveTo(box.left - w * 0.25, box.top)
-      ..lineTo(box.center.dx, box.top - w * 0.45)
-      ..lineTo(box.right + w * 0.25, box.top)
-      ..close();
-    canvas.drawPath(roof, dark);
   }
 
   @override

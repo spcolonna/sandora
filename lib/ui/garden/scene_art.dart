@@ -78,6 +78,18 @@ class SceneArt {
     'obj_tea_house': 'forest',
     'obj_bamboo_grove': 'forest',
     'obj_tea_bowl': 'forest',
+    'obj_tea_whisk': 'forest',
+    'obj_bamboo_flute': 'forest',
+    'obj_river_lantern': 'forest',
+    'bg_river': 'forest',
+    // Visitantes con pedidos y mejoras de lugares.
+    'char_visitor_monk': 'court',
+    'char_visitor_traveler': 'court',
+    'char_visitor_potter': 'court',
+    'char_visitor_gardener': 'court',
+    'char_visitor_fisher': 'court',
+    'obj_upgrade_border': 'court',
+    'obj_upgrade_bloom': 'court',
     'spr_sand_rake_01': 'sand',
     'tex_sand_base': 'sand',
     // Decoraciones (`garden_decor.dart`): mientras falte alguna, se pinta con código.

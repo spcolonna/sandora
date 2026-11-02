@@ -9,6 +9,7 @@ import '../../balance/balance.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
@@ -195,18 +196,23 @@ class FluteGame extends FlameGame with TapCallbacks {
 
   /// La flauta vertical con sus cuatro huecos.
   void _drawFlute(Canvas canvas) {
-    final top = _holeY(FluteRules.holes - 1) - size.y * 0.12, bottom = _holeY(0) + size.y * 0.1;
-    final body = RRect.fromRectAndRadius(
-      Rect.fromLTRB(_fluteX - 16, top, _fluteX + 16, bottom),
-      const Radius.circular(12),
-    );
-    canvas.drawRRect(body.shift(const Offset(3, 4)), Paint()..color = Palette.ink.withValues(alpha: 0.15));
-    canvas.drawRRect(body, Paint()..color = const Color(0xFFD9C27E));
-    final node = Paint()
-      ..color = const Color(0xFFA88E4E)
-      ..strokeWidth = 3;
-    for (final y in [top + 24, bottom - 24, (_holeY(1) + _holeY(2)) / 2]) {
-      canvas.drawLine(Offset(_fluteX - 16, y), Offset(_fluteX + 16, y), node);
+    final art = SceneArt.instance['obj_bamboo_flute'];
+    if (art != null) {
+      _drawFluteArt(canvas, art);
+    } else {
+      final top = _holeY(FluteRules.holes - 1) - size.y * 0.12, bottom = _holeY(0) + size.y * 0.1;
+      final body = RRect.fromRectAndRadius(
+        Rect.fromLTRB(_fluteX - 16, top, _fluteX + 16, bottom),
+        const Radius.circular(12),
+      );
+      canvas.drawRRect(body.shift(const Offset(3, 4)), Paint()..color = Palette.ink.withValues(alpha: 0.15));
+      canvas.drawRRect(body, Paint()..color = const Color(0xFFD9C27E));
+      final node = Paint()
+        ..color = const Color(0xFFA88E4E)
+        ..strokeWidth = 3;
+      for (final y in [top + 24, bottom - 24, (_holeY(1) + _holeY(2)) / 2]) {
+        canvas.drawLine(Offset(_fluteX - 16, y), Offset(_fluteX + 16, y), node);
+      }
     }
     for (var i = 0; i < FluteRules.holes; i++) {
       final c = Offset(_fluteX, _holeY(i));
@@ -226,8 +232,44 @@ class FluteGame extends FlameGame with TapCallbacks {
           );
         }
       }
-      canvas.drawCircle(c, 8, Paint()..color = const Color(0xFF3B2E22));
+      if (art == null) canvas.drawCircle(c, 8, Paint()..color = const Color(0xFF3B2E22));
       if (_covered(i)) canvas.drawCircle(c, 12, Paint()..color = const Color(0xFFE7C3A8));
+    }
+  }
+
+  /// Dónde están los huecos en `obj_bamboo_flute` (fracción del alto, del
+  /// de abajo al de arriba).
+  static const _artHoles = [0.647, 0.557, 0.43, 0.344];
+
+  /// La flauta pintada armada por partes, para que sus huecos caigan en las
+  /// filas del juego: las puntas, el nudo y cada hueco sin deformar, y caña
+  /// lisa estirada entre ellos.
+  void _drawFluteArt(Canvas canvas, Image art) {
+    const w = 44.0;
+    final len = art.height * w / art.width;
+    final x = _fluteX - w / 2;
+    final paint = Paint()..filterQuality = FilterQuality.medium;
+    void strip(double s0, double s1, double y0, [double? y1]) => canvas.drawImageRect(
+      art,
+      Rect.fromLTRB(0, s0 * art.height, art.width.toDouble(), s1 * art.height),
+      Rect.fromLTRB(x, y0, x + w, y1 ?? y0 + (s1 - s0) * len),
+      paint,
+    );
+    final top = _holeY(FluteRules.holes - 1) - size.y * 0.05 - 0.29 * len;
+    final low = _holeY(0) + size.y * 0.04;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTRB(x, top, x + w, low + 0.31 * len),
+        const Radius.circular(14),
+      ).shift(const Offset(3, 4)),
+      Paint()..color = Palette.ink.withValues(alpha: 0.15),
+    );
+    strip(0.365, 0.41, top + 0.29 * len - 1, low + 1);
+    strip(0, 0.29, top);
+    strip(0.69, 1, low);
+    strip(0.485, 0.525, (_holeY(1) + _holeY(2)) / 2 - 0.02 * len);
+    for (var i = 0; i < FluteRules.holes; i++) {
+      strip(_artHoles[i] - 0.03, _artHoles[i] + 0.03, _holeY(i) - 0.03 * len);
     }
   }
 

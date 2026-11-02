@@ -377,4 +377,8 @@ const ja = <String, String>{
   'req.claim': '受け取る',
   'req.thanks': 'ありがとう！お礼にこれをどうぞ',
   'req.waiting': 'できたら戻ってきます。{n}日ほど近くにいます',
+  'settings.reset': '最初からやり直す',
+  'settings.resetAsk': '庭をすべて消して最初から始めますか？',
+  'settings.resetYes': '消して始める',
+  'common.cancel': 'キャンセル',
 };

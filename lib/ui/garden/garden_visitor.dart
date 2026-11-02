@@ -62,11 +62,22 @@ class _VisitorPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final foot = Offset(size.width / 2, size.height - 2);
     if (state == VisitorState.waiting) return _note(canvas, foot);
-    final robe = _robes[who] ?? const Color(0xFF7A6A5A);
     canvas.drawOval(
       Rect.fromCenter(center: foot, width: h * 0.55, height: h * 0.1),
       Paint()..color = const Color(0x33000000),
     );
+    final art = SceneArt.instance['char_visitor_$who'];
+    if (art != null) {
+      drawArtIn(canvas, art, Rect.fromCenter(center: foot - Offset(0, h * 0.5), width: h, height: h));
+    } else {
+      _figure(canvas, foot);
+    }
+    _bubble(canvas, foot);
+  }
+
+  /// Sin el arte: la túnica, la cabeza y el sombrero, con código.
+  void _figure(Canvas canvas, Offset foot) {
+    final robe = _robes[who] ?? const Color(0xFF7A6A5A);
     // La túnica, ancha abajo, y las mangas.
     final body = Path()
       ..moveTo(foot.dx - h * 0.24, foot.dy)
@@ -100,6 +111,9 @@ class _VisitorPainter extends CustomPainter {
         ..close();
       canvas.drawPath(hat, Paint()..color = const Color(0xFFCDB077));
     }
+  }
+
+  void _bubble(Canvas canvas, Offset foot) {
     // La burbuja: "?" si trae un pedido, "!" si vuelve por su regalo.
     final bob = sin(t * 2.4) * h * 0.04;
     final c = Offset(foot.dx + h * 0.28, foot.dy - h * 1.22 + bob);
