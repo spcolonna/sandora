@@ -149,6 +149,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
       windy: w.rules.windy,
       blockHours: w.rules.blockHours,
     );
+    Progress.instance.refreshVisitor(DateTime.now());
     if (!mounted || news == CareNews.none) return;
     showWashiToast(context, tr(news == CareNews.storm ? 'care.storm' : 'care.grew'));
   }

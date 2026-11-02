@@ -8,6 +8,7 @@ import '../../garden/care.dart';
 import '../../garden/day_cycle.dart';
 import '../../garden/progress.dart';
 import '../../garden/weather.dart';
+import '../../garden/visitors.dart';
 import '../../garden/weather_service.dart';
 import '../../i18n/i18n.dart';
 import '../../minigames/enso/enso_ink.dart';
@@ -18,6 +19,7 @@ import '../theme/palette.dart';
 import '../widgets/currency.dart';
 import '../widgets/glass.dart';
 import '../upgrade_sheet.dart';
+import '../visitor_sheet.dart';
 import '../widgets/washi.dart';
 import 'garden_decor.dart';
 import 'garden_scene.dart';
@@ -29,6 +31,7 @@ part 'garden_gifts.dart';
 part 'garden_moment.dart';
 part 'garden_sky.dart';
 part 'garden_upgrades.dart';
+part 'garden_visitor.dart';
 
 /// El jardín es el menú: cada lugar se toca para entrar (minijuegos, Mercado,
 /// tablón, meditación). Cambia con la hora del dispositivo y el clima y, según
@@ -448,6 +451,8 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
             _CareSpot(key: ValueKey('care${t.id}'), task: t, rect: r, onFix: (at) => _fixCare(t, at)),
         for (final (id, at, kind) in _bursts)
           _CareBurst(key: ValueKey('burst$id'), at: at, kind: kind, serenity: p.careRules.serenityPerFix),
+        if (widget.side == 0 && p.visitorState != VisitorState.none)
+          _VisitorSpot(layout: layout, life: _life, seconds: () => _t),
         if (widget.side == 0) _TowerCollect(above: layout.places[Place.stack]!),
         if (widget.side == 0)
           for (final g in cycle.giftsAt(now, weather, afterRain: afterRain))

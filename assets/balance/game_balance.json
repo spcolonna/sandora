@@ -383,6 +383,27 @@
       { "level": 13, "pebbles": 1000, "essence": 50, "bonus": 0.15 }
     ]
   },
+  "visitors": {
+    "_comment": "Visitantes con pedidos: desde el día de juego fromDay, como mucho uno por día llega a la entrada del patio con un pedido. Si se acepta, vence a los expireDays días. kind: decor (poner la decoración target), decorCount (n puestas), serenity (llegar a n), stars (n estrellas en el minijuego target), noCare (sin cuidados pendientes), upgrade (mejorar un lugar). give: lo que deja al cumplirse.",
+    "fromDay": 3,
+    "expireDays": 2,
+    "who": ["monk", "traveler", "potter", "gardener", "fisher"],
+    "requests": [
+      { "id": "step", "kind": "decor", "target": "step", "give": { "pebbles": 40 } },
+      { "id": "bamboo", "kind": "decor", "target": "bamboo", "give": { "wood": 8 } },
+      { "id": "lantern", "kind": "decor", "target": "lantern", "give": { "light": 8 } },
+      { "id": "basin", "kind": "decor", "target": "basin", "give": { "water": 8 } },
+      { "id": "decor3", "kind": "decorCount", "n": 3, "give": { "pebbles": 60 } },
+      { "id": "decor8", "kind": "decorCount", "n": 8, "give": { "lotus": 1 } },
+      { "id": "serene", "kind": "serenity", "n": 800, "give": { "light": 5 } },
+      { "id": "sand2", "kind": "stars", "target": "sand", "n": 2, "give": { "sand": 6 } },
+      { "id": "rain2", "kind": "stars", "target": "rain", "n": 2, "give": { "water": 6 } },
+      { "id": "stack2", "kind": "stars", "target": "stack", "n": 2, "give": { "sand": 6 } },
+      { "id": "leaves2", "kind": "stars", "target": "leaves", "n": 2, "give": { "wood": 6 } },
+      { "id": "tidy", "kind": "noCare", "give": { "wood": 6 } },
+      { "id": "upgrade", "kind": "upgrade", "give": { "lotus": 1 } }
+    ]
+  },
   "care": {
     "_comment": "Cuidados del jardín mientras uno no está: maleza cada weedEveryHours horas (hasta maxWeeds), hojas en bloques con viento o tormenta, la arena borrada si llovió o nevó, y con tormenta piedras caídas de la torre, una vasija volcada y una decoración tumbada. Arreglar cada uno da serenityPerFix y, hasta rewardedPerDay por día, pebblesPerFix. Cada cuidado pendiente suma decayPerTask a la caída diaria de la serenidad.",
     "weedEveryHours": 8,

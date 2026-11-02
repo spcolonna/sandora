@@ -16,6 +16,7 @@ import 'meditation_rules.dart';
 import 'shop.dart';
 import 'tea_visits.dart';
 import 'upgrades.dart';
+import 'visitors.dart';
 import 'weather.dart';
 
 /// Una piedra de la torre guardada en el jardín (unidades del mundo del
@@ -42,6 +43,14 @@ class Progress extends ChangeNotifier {
   late DecorRules decorRules;
   late CareRules careRules;
   late UpgradeRules upgradeRules;
+  late VisitorRules visitorRules;
+
+  /// El visitante de ahora (quién y qué pide), el día en que llegó o se
+  /// aceptó, y en qué está. Son de la cuenta.
+  String? visitorWho, _visitorReq;
+  int _visitorDay = -1, _visitorLastDay = -1;
+  bool _visitorAccepted = false, _visitorDone = false;
+  String? _visitorLastReq;
 
   /// Mejoras compradas de cada lugar de este jardín (id del minijuego → nivel).
   Map<String, int> upgrades = {};
@@ -262,6 +271,7 @@ class Progress extends ChangeNotifier {
     decorRules = DecorRules(balance);
     careRules = CareRules(balance);
     upgradeRules = UpgradeRules(balance);
+    visitorRules = VisitorRules(balance);
     _unlockDays = balance.section('unlocks').nums('days');
     final unlocks = balance.section('unlocks');
     _zoneOf = unlocks.has('zones') ? unlocks.sub('zones').stringMap() : {};
@@ -281,6 +291,14 @@ class Progress extends ChangeNotifier {
     _careAt = careAt == null ? null : DateTime.fromMillisecondsSinceEpoch(careAt);
     _weedAt = weedAt == null ? null : DateTime.fromMillisecondsSinceEpoch(weedAt);
     upgrades = (jsonDecode(_prefs.getString('upgrades') ?? '{}') as Map).map((k, v) => MapEntry(k as String, v as int));
+    final v = jsonDecode(_prefs.getString('visitor') ?? 'null') as Map<String, dynamic>?;
+    visitorWho = v?['who'] as String?;
+    _visitorReq = v?['req'] as String?;
+    _visitorDay = v?['day'] as int? ?? -1;
+    _visitorAccepted = v?['accepted'] as bool? ?? false;
+    _visitorDone = v?['done'] as bool? ?? false;
+    _visitorLastDay = _prefs.getInt('visitor.lastDay') ?? -1;
+    _visitorLastReq = _prefs.getString('visitor.lastReq');
     _careDay = _prefs.getInt('care.day') ?? -1;
     _carePaid = _prefs.getInt('care.paid') ?? 0;
     final start = balance.serenity.i('start');
@@ -944,11 +962,137 @@ class Progress extends ChangeNotifier {
       _addTo(c.key, -c.value);
     }
     upgrades[game] = upgradeTier(game) + 1;
+    if (visitorRequest?.kind == RequestKind.upgrade && _visitorAccepted) _visitorFulfilled();
     _prefs.setString('upgrades', jsonEncode(upgrades));
     _saveWallet();
     notifyListeners();
     return true;
   }
+
+  // --- Visitantes con pedidos ---
+
+  VisitorRequest? get visitorRequest => _visitorReq == null ? null : visitorRules.byId(_visitorReq!);
+
+  VisitorState get visitorState {
+    if (visitorRequest == null || visitorWho == null) return VisitorState.none;
+    if (!_visitorAccepted) return VisitorState.offering;
+    return _visitorDone ? VisitorState.done : VisitorState.waiting;
+  }
+
+  GardenFacts get _facts => GardenFacts(
+    level: level,
+    serenity: serenity,
+    decorPlaced: decor.where((d) => d.placed).length,
+    pendingCare: care.length,
+    decorPlacedIds: {
+      for (final d in decor)
+        if (d.placed) d.id,
+    },
+    decorUnlocked: (id) => decorUnlocked && level >= (decorRules.byId(id)?.level ?? 999),
+    gameOpen: gameUnlocked,
+    canEverUpgrade: upgradeRules.places.any(
+      (g) =>
+          gameUnlocked(g) &&
+          upgradeRules.next(upgradeTier(g)) != null &&
+          level >= upgradeRules.next(upgradeTier(g))!.level,
+    ),
+  );
+
+  /// Al entrar y cada tanto: llega un visitante nuevo (uno por día desde
+  /// cierto día), vence el pedido viejo o se da por cumplido lo que ya se ve.
+  void refreshVisitor(DateTime now) {
+    final today = _dayIndex(now);
+    var changed = false;
+    if (visitorState == VisitorState.offering && _visitorDay != today) {
+      _clearVisitor();
+      changed = true;
+    } else if (visitorState == VisitorState.waiting) {
+      if (today - _visitorDay > visitorRules.expireDays) {
+        _clearVisitor();
+        changed = true;
+      } else if (visitorRules.satisfied(visitorRequest!, _facts)) {
+        _visitorDone = true;
+        changed = true;
+      }
+    }
+    if (visitorState == VisitorState.none && playDay >= visitorRules.fromDay && _visitorLastDay != today) {
+      final pick = visitorRules.pick(today, _facts, lastId: _visitorLastReq);
+      _visitorLastDay = today;
+      _prefs.setInt('visitor.lastDay', today);
+      if (pick != null) {
+        visitorWho = pick.$1;
+        _visitorReq = pick.$2.id;
+        _visitorDay = today;
+        _visitorAccepted = _visitorDone = false;
+        changed = true;
+      }
+    }
+    if (changed) {
+      _saveVisitor();
+      notifyListeners();
+    }
+  }
+
+  /// Para los tests: un visitante con el pedido [req] que llegó el día de [now].
+  @visibleForTesting
+  void debugVisitor(String who, String req, DateTime now) {
+    visitorWho = who;
+    _visitorReq = req;
+    _visitorDay = _dayIndex(now);
+    _visitorAccepted = _visitorDone = false;
+  }
+
+  /// Se acepta el pedido: el visitante se va y vuelve cuando se cumpla.
+  void acceptVisitor({DateTime? now}) {
+    if (visitorState != VisitorState.offering) return;
+    _visitorAccepted = true;
+    _visitorDay = _dayIndex(now ?? gardenNow());
+    if (visitorRules.satisfied(visitorRequest!, _facts)) _visitorDone = true;
+    _saveVisitor();
+    notifyListeners();
+  }
+
+  /// Se recibe el regalo del pedido cumplido. Devuelve lo que dejó.
+  Map<String, int> claimVisitor() {
+    if (visitorState != VisitorState.done) return const {};
+    final give = visitorRequest!.give;
+    for (final e in give.entries) {
+      _addTo(e.key, e.value);
+    }
+    _discover('visitor.$visitorWho');
+    _clearVisitor();
+    _saveWallet();
+    _saveVisitor();
+    notifyListeners();
+    return give;
+  }
+
+  void _visitorFulfilled() {
+    _visitorDone = true;
+    _saveVisitor();
+  }
+
+  void _clearVisitor() {
+    _visitorLastReq = _visitorReq;
+    if (_visitorLastReq != null) _prefs.setString('visitor.lastReq', _visitorLastReq!);
+    visitorWho = _visitorReq = null;
+    _visitorAccepted = _visitorDone = false;
+  }
+
+  void _saveVisitor() => _prefs.setString(
+    'visitor',
+    jsonEncode(
+      _visitorReq == null
+          ? null
+          : {
+              'who': visitorWho,
+              'req': _visitorReq,
+              'day': _visitorDay,
+              'accepted': _visitorAccepted,
+              'done': _visitorDone,
+            },
+    ),
+  );
 
   /// Los cuidados de la vista [side] (sin los de decoraciones que ya no están puestas).
   Iterable<CareTask> careOn(int side) =>
@@ -1084,6 +1228,10 @@ class Progress extends ChangeNotifier {
     advanceGuide(1);
     // Jugar en un lugar también lo arregla: un dibujo nuevo en la arena, la
     // torre rearmada, las vasijas otra vez en uso.
+    final req = visitorRequest;
+    if (req != null && _visitorAccepted && req.kind == RequestKind.stars && req.target == game && stars >= req.n) {
+      _visitorFulfilled();
+    }
     final fixes = {'sand': CareKind.sand, 'stack': CareKind.stone, 'rain': CareKind.jar}[game];
     if (fixes != null && care.any((t) => t.kind == fixes)) {
       care.removeWhere((t) => t.kind == fixes);

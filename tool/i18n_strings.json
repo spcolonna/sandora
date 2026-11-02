@@ -2560,5 +2560,75 @@
   "pt": "A partir do nível {n}",
   "ja": "レベル{n}から",
   "zh": "{n}级起"
+ },
+ "req.decor": {
+  "es": "¿Podrías poner {item} en tu jardín? Me haría muy feliz verlo",
+  "en": "Could you place {item} in your garden? I'd love to see it",
+  "pt": "Você poderia colocar {item} no seu jardim? Eu adoraria ver",
+  "ja": "庭に{item}を置いてもらえますか？ぜひ見てみたいです",
+  "zh": "能在你的庭院里放一个{item}吗？我很想看看"
+ },
+ "req.decorCount": {
+  "es": "Me encantaría ver {n} decoraciones en tu jardín",
+  "en": "I'd love to see {n} decorations in your garden",
+  "pt": "Eu adoraria ver {n} decorações no seu jardim",
+  "ja": "庭に飾りが{n}個あるところを見たいです",
+  "zh": "我很想看到你的庭院里有{n}件装饰"
+ },
+ "req.serenity": {
+  "es": "Tu jardín sería perfecto con {n} de serenidad",
+  "en": "Your garden would be perfect with {n} serenity",
+  "pt": "Seu jardim ficaria perfeito com {n} de serenidade",
+  "ja": "静けさが{n}になれば、庭は完璧です",
+  "zh": "你的庭院若有{n}点宁静就完美了"
+ },
+ "req.stars": {
+  "es": "¿Me mostrás {n} estrellas en {game}?",
+  "en": "Will you show me {n} stars in {game}?",
+  "pt": "Você me mostra {n} estrelas em {game}?",
+  "ja": "{game}で星を{n}つ見せてくれますか？",
+  "zh": "能让我看看你在{game}中拿到{n}颗星吗？"
+ },
+ "req.noCare": {
+  "es": "Ayudame a dejar el jardín en orden: sin maleza ni nada para acomodar",
+  "en": "Help me tidy the garden: no weeds and nothing out of place",
+  "pt": "Me ajude a deixar o jardim em ordem: sem mato e nada fora do lugar",
+  "ja": "庭を整えましょう。雑草も散らかりもない状態に",
+  "zh": "帮我把庭院收拾好：没有杂草，也没有东西乱放"
+ },
+ "req.upgrade": {
+  "es": "Me gustaría ver uno de tus lugares mejorado",
+  "en": "I'd like to see one of your places improved",
+  "pt": "Eu gostaria de ver um dos seus lugares melhorado",
+  "ja": "あなたの場所をひとつ改良したところを見たいです",
+  "zh": "我想看看你改良其中一个地点"
+ },
+ "req.accept": {
+  "es": "Lo hago",
+  "en": "I'll do it",
+  "pt": "Eu faço",
+  "ja": "やってみます",
+  "zh": "我来做"
+ },
+ "req.claim": {
+  "es": "Recibir",
+  "en": "Receive",
+  "pt": "Receber",
+  "ja": "受け取る",
+  "zh": "收下"
+ },
+ "req.thanks": {
+  "es": "¡Gracias! Te dejo esto en agradecimiento",
+  "en": "Thank you! I'll leave you this as thanks",
+  "pt": "Obrigado! Deixo isto como agradecimento",
+  "ja": "ありがとう！お礼にこれをどうぞ",
+  "zh": "谢谢！留下这个作为谢礼"
+ },
+ "req.waiting": {
+  "es": "Vuelvo cuando esté listo. Me quedo por la zona {n} días",
+  "en": "I'll come back when it's done. I'll be around for {n} days",
+  "pt": "Volto quando estiver pronto. Fico por aqui {n} dias",
+  "ja": "できたら戻ってきます。{n}日ほど近くにいます",
+  "zh": "完成后我会回来。我会在附近待{n}天"
  }
 }

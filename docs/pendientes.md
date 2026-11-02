@@ -62,6 +62,19 @@
 - [x] Más eventos del clima: arcoíris un rato después de la lluvia (se toca: Luz), charcos que se secan y hojas con
       viento en algunos bloques. Probar: `--dart-define=SANDORA_AFTER_RAIN=20 --dart-define=SANDORA_WEATHER=clear`.
 
+## Jardín que se decora, se cuida y se mejora (2026-11-02)
+- [x] **Decorar a la vista:** botón de la florcita en el jardín, regalo y guía al nivel 3, decoraciones del día en el
+      Mercado ("Poner ahora") y +6 lugares por vista con cada patio.
+- [x] **Cuidados** (`lib/garden/care.dart`, balance `care`): maleza, hojas, arena borrada, piedras caídas, vasija
+      volcada y decoraciones tumbadas; se arreglan con un gesto y devuelven serenidad. Probar:
+      `--dart-define=SANDORA_AWAY_H=30 --dart-define=SANDORA_WEATHER=storm`.
+- [x] **Mejoras de lugares** (`lib/garden/upgrades.dart`, balance `upgrades`): 3 niveles por lugar desde el modo
+      Decorar (martillito), dibujados con código. Falta: arte propio de cada nivel y mostrarlos en el álbum.
+- [x] **Visitantes con pedidos** (`lib/garden/visitors.dart`, balance `visitors`): desde el día 3, en la entrada del
+      patio. Dibujados con código; falta su arte (sumar prompts).
+- [x] Minijuegos: sonido de error suave, cierre de partida, pincel del Ensō y sonidos propios (placeholders de
+      `tool/gen_placeholder_audio.py`).
+
 ## Minijuegos (2026-10-28)
 - [x] **Apilado nuevo:** sin Forge2D; bolsa de 12 piedras por partida (6 tipos) que se suman a la torre guardada.
       Equilibrio con azar (`StackRules`): el balanceo y el riesgo dependen de qué tan centrada cayó y de la altura;
