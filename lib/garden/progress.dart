@@ -1039,10 +1039,12 @@ class Progress extends ChangeNotifier {
       }
     }
     if (visitorState == VisitorState.none && playDay >= visitorRules.fromDay && _visitorLastDay != today) {
+      // Si hoy no hay nada que pedir, se vuelve a mirar más tarde (el día no
+      // se gasta hasta que llega alguien).
       final pick = visitorRules.pick(today, _facts, lastId: _visitorLastReq);
-      _visitorLastDay = today;
-      _prefs.setInt('visitor.lastDay', today);
       if (pick != null) {
+        _visitorLastDay = today;
+        _prefs.setInt('visitor.lastDay', today);
         visitorWho = pick.$1;
         _visitorReq = pick.$2.id;
         _visitorDay = today;
