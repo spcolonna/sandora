@@ -60,11 +60,12 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     setState(() => _panel = _panel == panel ? _Panel.none : panel);
   }
 
-  void _market() {
+  Future<void> _market() async {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
     Progress.instance.advanceGuide(2);
     setState(() => _panel = _Panel.none);
-    openMarket(context);
+    // Desde el Mercado, "Poner ahora" vuelve al jardín decorando.
+    if (await openMarket(context) == true && mounted) _setDecorating(true);
   }
 
   /// Modo Decorar, y la decoración recién puesta desde la bandeja.
@@ -76,6 +77,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
   void _setDecorating(bool on) {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+    if (on) Progress.instance.advanceGuide(3);
     setState(() {
       _decorating = on;
       _fresh = null;
@@ -346,7 +348,16 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                             child: switch (_panel) {
                               _Panel.wallet => _WalletPanel(onMarket: _market),
                               _Panel.level => const _LevelPanel(),
-                              _Panel.none when p.guideStep == 1 => _MarketHint(onTap: () => p.advanceGuide(2)),
+                              _Panel.none when p.guideStep == 1 => _GuideHint(
+                                text: tr('guide.market'),
+                                right: 30,
+                                onTap: () => p.advanceGuide(2),
+                              ),
+                              _Panel.none when p.guideStep == 2 && p.decorUnlocked => _GuideHint(
+                                text: tr('guide.decor'),
+                                right: 80,
+                                onTap: () => _setDecorating(true),
+                              ),
                               _Panel.none => const SizedBox.shrink(),
                             },
                           ),
@@ -497,6 +508,16 @@ class _Hud extends StatelessWidget {
                 const SizedBox(width: 8),
                 _WalletPill(open: panel == _Panel.wallet, onTap: () => onPanel(_Panel.wallet)),
                 const Spacer(),
+                if (p.decorUnlocked) ...[
+                  _RoundButton(
+                    icon: Icons.local_florist_rounded,
+                    tooltip: tr('decor.title'),
+                    dot: p.decorNew,
+                    pulse: p.guideStep == 2,
+                    onTap: onDecor,
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 _RoundButton(
                   icon: Icons.storefront_rounded,
                   tooltip: tr('shop.title'),
@@ -505,7 +526,7 @@ class _Hud extends StatelessWidget {
                   onTap: onMarket,
                 ),
                 const SizedBox(width: 8),
-                _MenuButton(onDecor: onDecor),
+                const _MenuButton(),
               ],
             ),
           ),
@@ -794,10 +815,9 @@ class _RoundButtonState extends State<_RoundButton> with SingleTickerProviderSta
   }
 }
 
-/// El resto, guardado en un menú: decorar, el álbum y los ajustes.
+/// El resto, guardado en un menú: el álbum y los ajustes.
 class _MenuButton extends StatelessWidget {
-  final VoidCallback onDecor;
-  const _MenuButton({required this.onDecor});
+  const _MenuButton();
 
   @override
   Widget build(BuildContext context) {
@@ -832,7 +852,6 @@ class _MenuButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (p.decorUnlocked) item(Icons.local_florist_rounded, tr('decor.title'), p.decorNew, onDecor),
                   item(Icons.collections_bookmark_rounded, tr('album.title'), p.albumNew, () {
                     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
                     showAlbumSheet(context);
@@ -849,7 +868,7 @@ class _MenuButton extends StatelessWidget {
     return GestureDetector(
       onTap: open,
       child: Badge(
-        isLabelVisible: (p.decorUnlocked && p.decorNew) || p.albumNew,
+        isLabelVisible: p.albumNew,
         smallSize: 10,
         backgroundColor: Palette.lantern,
         offset: const Offset(-2, 2),
@@ -862,10 +881,14 @@ class _MenuButton extends StatelessWidget {
   }
 }
 
-/// Primera partida guiada: después de jugar, la burbuja que señala el Mercado.
-class _MarketHint extends StatelessWidget {
+/// Guía: una burbuja bajo la fila de arriba que señala un botón (el Mercado
+/// después de la primera partida, decorar al llegar a su nivel). [right] es
+/// cuánto se corre desde el borde para quedar debajo de ese botón.
+class _GuideHint extends StatelessWidget {
+  final String text;
+  final double right;
   final VoidCallback onTap;
-  const _MarketHint({required this.onTap});
+  const _GuideHint({required this.text, required this.right, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -876,7 +899,7 @@ class _MarketHint extends StatelessWidget {
         child: CalmAppear(
           delay: const Duration(milliseconds: 400),
           child: Container(
-            margin: const EdgeInsets.only(right: 30, top: 4),
+            margin: EdgeInsets.only(right: right, top: 4),
             constraints: const BoxConstraints(maxWidth: 240),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
@@ -888,7 +911,7 @@ class _MarketHint extends StatelessWidget {
               ],
             ),
             child: Text(
-              tr('guide.market'),
+              text,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Palette.ink),
             ),

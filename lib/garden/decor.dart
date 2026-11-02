@@ -54,13 +54,25 @@ class DecorRules {
   /// Cuántas decoraciones entran en cada vista.
   final int perSide;
 
+  /// Cuántas más entran por cada ampliación de patio.
+  final int perPatio;
+
   final int minLevel;
+
+  /// La que se regala al llegar a [minLevel], para estrenar el modo Decorar.
+  final String welcomeGift;
+
+  /// Cuántas ofrece el Mercado cada día, además de la oferta.
+  final int marketCount;
 
   DecorRules(Balance balance)
     : items = [for (final s in balance.section('decor').sections('items')) DecorItem.from(s)],
       growth = balance.section('decor').d('growth'),
       perSide = balance.section('decor').i('perSide'),
-      minLevel = balance.section('decor').i('minLevel');
+      perPatio = balance.section('decor').i('perPatio'),
+      minLevel = balance.section('decor').i('minLevel'),
+      welcomeGift = balance.section('decor').s('welcomeGift'),
+      marketCount = balance.section('decor').i('marketCount');
 
   DecorItem? byId(String id) => items.where((d) => d.id == id).firstOrNull;
 

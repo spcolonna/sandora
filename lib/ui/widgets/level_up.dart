@@ -17,7 +17,12 @@ class LevelUpBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unlocks = Progress.instance.levels.unlocksAt(level);
+    final p = Progress.instance;
+    final unlocks = p.levels.unlocksAt(level);
+    final decor = [
+      for (final d in p.decorRules.items)
+        if (d.level == level) tr('decor.${d.id}'),
+    ];
     final text = Theme.of(context).textTheme;
     return CalmAppear(
       delay: const Duration(milliseconds: 900),
@@ -49,6 +54,14 @@ class LevelUpBanner extends StatelessWidget {
               if (unlocks.isNotEmpty)
                 Text(
                   tr('level.unlocked', {'list': unlocks.map(unlockName).join(', ')}),
+                  style: text.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              if (level == p.decorRules.minLevel)
+                Text(tr('level.decorOpen'), style: text.bodyMedium, textAlign: TextAlign.center),
+              if (decor.isNotEmpty)
+                Text(
+                  tr('level.newDecor', {'list': decor.join(', ')}),
                   style: text.bodyMedium,
                   textAlign: TextAlign.center,
                 ),

@@ -348,10 +348,13 @@
     "max": 4
   },
   "decor": {
-    "_comment": "Decoraciones que se ponen libremente en las tres vistas (modo Decorar). Se compran desde minLevel; cada una pide su level. Cada copia más en el mismo jardín cuesta growth veces la anterior (Piedritas redondeadas de a 5). size: ancho como fracción de la vista; aspect: alto/ancho. perSide: cuántas entran por vista. Es el sumidero del final: con todas las ampliaciones compradas, sobran Piedritas.",
+    "_comment": "Decoraciones que se ponen libremente en las tres vistas (modo Decorar). Se compran desde minLevel; cada una pide su level. Cada copia más en el mismo jardín cuesta growth veces la anterior (Piedritas redondeadas de a 5). size: ancho como fracción de la vista; aspect: alto/ancho. perSide: cuántas entran por vista; perPatio: cuántas más por cada ampliación de patio. welcomeGift: la que se regala al llegar a minLevel. marketCount: cuántas ofrece el Mercado cada día (además de la oferta). Es el sumidero del final: con todas las ampliaciones compradas, sobran Piedritas.",
     "minLevel": 3,
     "growth": 1.35,
     "perSide": 12,
+    "perPatio": 6,
+    "welcomeGift": "step",
+    "marketCount": 4,
     "items": [
       {"id": "step", "level": 3, "cost": {"pebbles": 60, "sand": 5}, "size": 0.12, "aspect": 0.82},
       {"id": "rocks", "level": 3, "cost": {"pebbles": 90, "sand": 8}, "size": 0.15, "aspect": 0.9},

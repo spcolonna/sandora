@@ -17,10 +17,11 @@ import 'widgets/washi.dart';
 /// Mercado: trueques para conseguir lo que los minijuegos no dan. Los de
 /// monedas comunes tienen límite diario; los de lotos, no (el loto ya es escaso).
 /// Es una vista aparte que entra deslizando desde el costado (y se vuelve
-/// deslizando hacia el otro lado).
-Future<void> openMarket(BuildContext context) {
+/// deslizando hacia el otro lado). Devuelve true si se eligió "Poner ahora":
+/// el jardín entra al modo Decorar.
+Future<bool?> openMarket(BuildContext context) {
   Progress.instance.markDealSeen();
-  return Navigator.of(context).push(CupertinoPageRoute<void>(builder: (_) => const MarketScreen()));
+  return Navigator.of(context).push(CupertinoPageRoute<bool>(builder: (_) => const MarketScreen()));
 }
 
 class MarketScreen extends StatelessWidget {
@@ -43,6 +44,7 @@ class MarketScreen extends StatelessWidget {
             final daily = p.shop.offers.where((o) => o.daily != null);
             final lotus = p.shop.offers.where((o) => o.daily == null);
             final deal = p.dealToday();
+            final decor = p.marketDecor();
             return CustomScrollView(
               slivers: [
                 // El toldo del puesto, con el título y lo que se tiene para cambiar.
@@ -96,6 +98,21 @@ class MarketScreen extends StatelessWidget {
                     children: [
                       Text(tr('shop.desc'), style: text.bodyMedium, textAlign: TextAlign.center),
                       if (deal != null) ...[const SizedBox(height: 14), _DealCard(deal)],
+                      if (decor.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        Text(tr('shop.decor'), style: text.titleSmall),
+                        for (final d in decor) _DecorRow(d),
+                      ] else if (!p.decorUnlocked) ...[
+                        const SizedBox(height: 14),
+                        WashiTile(
+                          margin: EdgeInsets.zero,
+                          child: Text(
+                            tr('shop.decorSoon', {'n': p.decorRules.minLevel}),
+                            style: text.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       Text(tr('shop.trades'), style: text.titleSmall),
                       for (final o in daily) _OfferRow(o),
@@ -298,7 +315,9 @@ class _DealCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          if (!taken)
+          if (taken && p.decorStored(d.id) > 0)
+            _PlaceNow()
+          else if (!taken)
             InkButton.small(
               label: tr('shop.dealBuy'),
               onPressed: p.canBuyDeal()
@@ -312,6 +331,71 @@ class _DealCard extends StatelessWidget {
             )
           else
             const Icon(Icons.check_circle_rounded, color: Palette.wood),
+        ],
+      ),
+    );
+  }
+}
+
+/// Vuelve al jardín en modo Decorar, con lo comprado listo en la caja.
+class _PlaceNow extends StatelessWidget {
+  const _PlaceNow();
+
+  @override
+  Widget build(BuildContext context) =>
+      InkButton.small(label: tr('shop.placeNow'), onPressed: () => Navigator.of(context).pop(true));
+}
+
+/// Una de las decoraciones del día: se compra (va a la caja) y, si ya hay en
+/// la caja, se puede ir a ponerla.
+class _DecorRow extends StatelessWidget {
+  final DecorItem d;
+  const _DecorRow(this.d);
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Progress.instance;
+    final text = Theme.of(context).textTheme;
+    final stored = p.decorStored(d.id);
+    return WashiTile(
+      padding: const EdgeInsets.fromLTRB(6, 8, 12, 8),
+      child: Row(
+        children: [
+          SizedBox(width: 60, height: 60, child: CustomPaint(painter: DecorPainter(d.id, d.aspect))),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tr('decor.${d.id}'), style: text.titleMedium),
+                const SizedBox(height: 2),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 2,
+                  children: [for (final c in p.decorCost(d).entries) CurrencyChip.of(c.key, c.value)],
+                ),
+                if (stored > 0) Text(tr('shop.inBox', {'n': stored}), style: text.bodySmall),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkButton.small(
+                label: tr('shop.dealBuy'),
+                onPressed: p.canBuyDecor(d)
+                    ? () {
+                        if (p.buyDecor(d)) {
+                          SoundBoard.instance.play(Sfx.good, volume: 0.5);
+                          Haptics.light();
+                        }
+                      }
+                    : null,
+              ),
+              if (stored > 0) ...[const SizedBox(height: 6), const _PlaceNow()],
+            ],
+          ),
         ],
       ),
     );

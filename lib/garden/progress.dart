@@ -138,6 +138,9 @@ class Progress extends ChangeNotifier {
   /// la primera partida, señalar el nivel y el Mercado, 2 = terminada.
   int guideStep = 0;
 
+  /// Si ya se regaló la decoración de bienvenida (al llegar al nivel de decorar).
+  bool _decorGift = false;
+
   /// Minijuegos cuya tarjeta de cómo se juega ya se vio.
   Set<String> introSeen = {};
 
@@ -292,6 +295,8 @@ class Progress extends ChangeNotifier {
       for (final d in jsonDecode(_prefs.getString('decor') ?? '[]') as List)
         if (decorRules.byId((d as List)[0] as String) != null) PlacedDecor.fromJson(d),
     ];
+    _decorGift = _prefs.getBool('decor.gift') ?? false;
+    _decorWelcome();
     lotus = _prefs.getInt('lotus') ?? 0;
     _lotusDay = _prefs.getInt('lotus.day') ?? -1;
     _shopDay = _prefs.getInt('shop.day') ?? 0;
@@ -436,6 +441,7 @@ class Progress extends ChangeNotifier {
     final before = level;
     calm += amount;
     _prefs.setInt('calm', calm);
+    _decorWelcome();
     return level > before ? level : null;
   }
 
@@ -471,6 +477,33 @@ class Progress extends ChangeNotifier {
 
   /// Si ya se puede decorar (el botón aparece desde ese nivel).
   bool get decorUnlocked => level >= decorRules.minLevel;
+
+  /// Al llegar al nivel de decorar se regala una decoración, que queda en la
+  /// caja: así el modo Decorar se estrena sin gastar.
+  void _decorWelcome() {
+    if (_decorGift || !decorUnlocked) return;
+    final d = decorRules.byId(decorRules.welcomeGift);
+    if (d == null) return;
+    _decorGift = true;
+    _prefs.setBool('decor.gift', true);
+    decor.add(PlacedDecor(d.id));
+    _discover('decor.${d.id}');
+    _saveDecor();
+  }
+
+  /// Cuántas decoraciones entran en cada vista: cada patio suma lugar.
+  int get decorCapacity => decorRules.perSide + patioSize * decorRules.perPatio;
+
+  /// Las decoraciones del Mercado de hoy: algunas de las ya destrabadas, sin
+  /// la oferta. Cambian cada día del jardín.
+  List<DecorItem> marketDecor({DateTime? now}) {
+    if (!decorUnlocked) return const [];
+    final deal = dealToday(now: now);
+    final day = dayCycle.gardenDay(now ?? gardenNow());
+    final pool = decorRules.items.where((d) => d.level <= level && d != deal).toList()
+      ..shuffle(Random(day * 7919 + 11));
+    return pool.take(decorRules.marketCount).toList();
+  }
 
   /// Hay algo para hacer en el modo Decorar: una decoración en la caja o una
   /// que todavía no se tiene y ya se puede comprar.
@@ -575,7 +608,7 @@ class Progress extends ChangeNotifier {
   /// su índice, o null si no hay en la caja o la vista está llena.
   int? placeDecor(String id, int side, double x, double y) {
     final i = decor.indexWhere((d) => d.id == id && !d.placed);
-    if (i < 0 || decorOn(side) >= decorRules.perSide) return null;
+    if (i < 0 || decorOn(side) >= decorCapacity) return null;
     decor[i]
       ..side = side
       ..x = x

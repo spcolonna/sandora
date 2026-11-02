@@ -28,7 +28,7 @@ class DecorTray extends StatelessWidget {
     final p = Progress.instance;
     void tell(String text) => showWashiToast(context, text, duration: const Duration(seconds: 2));
 
-    if (p.decorOn(side) >= p.decorRules.perSide) {
+    if (p.decorOn(side) >= p.decorCapacity) {
       SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
       return tell(tr('decor.full'));
     }

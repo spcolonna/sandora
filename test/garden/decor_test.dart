@@ -140,4 +140,39 @@ void main() {
     expect(p.dealNew, isFalse);
     expect(p.buyDeal(), isFalse);
   });
+
+  test('al llegar al nivel de decorar se regala una decoración, una sola vez', () async {
+    final p = Progress.instance;
+    await p.load(balance);
+    p.calm = p.levels.calmToReach(p.decorRules.minLevel) - 1;
+    expect(p.decor, isEmpty);
+    while (!p.decorUnlocked) {
+      p.finishRun('stack', 3);
+    }
+    expect(p.decor.single.id, p.decorRules.welcomeGift);
+    expect(p.decor.single.placed, isFalse, reason: 'queda en la caja');
+    p.finishRun('stack', 3);
+    await p.load(balance);
+    expect(p.decor.length, 1, reason: 'no se repite');
+  });
+
+  test('el Mercado ofrece decoraciones destrabadas, sin la oferta, fijas en el día', () async {
+    final p = await rich(level: 8);
+    final day = DateTime.now();
+    final list = p.marketDecor(now: day);
+    expect(list.length, p.decorRules.marketCount);
+    expect(list.map((d) => d.id).toSet().length, list.length);
+    expect(list.every((d) => d.level <= 8), isTrue);
+    expect(list, isNot(contains(p.dealToday(now: day))));
+    expect(p.marketDecor(now: day).map((d) => d.id), list.map((d) => d.id));
+  });
+
+  test('cada ampliación de patio suma lugar para decorar', () async {
+    final p = await rich();
+    final base = p.decorCapacity;
+    expect(base, p.decorRules.perSide);
+    final patio = p.levels.expansions.firstWhere((e) => !e.zone);
+    expect(p.buyExpansion(patio), isTrue);
+    expect(p.decorCapacity, base + p.decorRules.perPatio);
+  });
 }

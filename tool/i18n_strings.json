@@ -413,11 +413,11 @@
   "zh": "庭院 I"
  },
  "exp.patio1.desc": {
-  "es": "El jardín crece: más lugar para tus objetos",
-  "en": "The garden grows: more room for your objects",
-  "pt": "O jardim cresce: mais espaço para seus objetos",
-  "ja": "庭が広がり、置ける物が増える",
-  "zh": "庭院变大：可以摆放更多物件"
+  "es": "El jardín crece: entran 6 decoraciones más en cada vista",
+  "en": "The garden grows: 6 more decorations fit in each view",
+  "pt": "O jardim cresce: cabem mais 6 decorações em cada vista",
+  "ja": "庭が広がり、各エリアに飾りが6個多く置ける",
+  "zh": "庭院变大：每个区域可多摆6件装饰"
  },
  "exp.patio2.name": {
   "es": "Patio II",
@@ -427,11 +427,11 @@
   "zh": "庭院 II"
  },
  "exp.patio2.desc": {
-  "es": "El jardín ocupa todo el terreno",
-  "en": "The garden fills the whole grounds",
-  "pt": "O jardim ocupa todo o terreno",
-  "ja": "庭が敷地いっぱいに広がる",
-  "zh": "庭院占满整块土地"
+  "es": "El jardín ocupa todo el terreno: 6 decoraciones más en cada vista",
+  "en": "The garden fills the whole grounds: 6 more decorations in each view",
+  "pt": "O jardim ocupa todo o terreno: mais 6 decorações em cada vista",
+  "ja": "庭が敷地いっぱいに。各エリアに飾りが6個多く置ける",
+  "zh": "庭院占满整块土地：每个区域再多摆6件装饰"
  },
  "exp.pond.name": {
   "es": "Estanque",
@@ -2406,5 +2406,54 @@
   "pt": "Ir",
   "ja": "行く",
   "zh": "前往"
+ },
+ "guide.decor": {
+  "es": "¡Ya podés decorar! Tocá acá: te regalamos unos escalones",
+  "en": "You can decorate now! Tap here: we left you some stepping stones",
+  "pt": "Agora você pode decorar! Toque aqui: deixamos uns degraus de presente",
+  "ja": "飾り付けができるようになりました！ここをタップ。飛び石をプレゼント",
+  "zh": "现在可以装饰了！点这里：送你一些踏脚石"
+ },
+ "level.newDecor": {
+  "es": "Nuevas decoraciones: {list}",
+  "en": "New decorations: {list}",
+  "pt": "Novas decorações: {list}",
+  "ja": "新しい飾り：{list}",
+  "zh": "新装饰：{list}"
+ },
+ "level.decorOpen": {
+  "es": "Ya podés decorar tu jardín",
+  "en": "You can now decorate your garden",
+  "pt": "Agora você pode decorar seu jardim",
+  "ja": "庭を飾れるようになりました",
+  "zh": "现在可以装饰你的庭院了"
+ },
+ "shop.decor": {
+  "es": "Decoraciones del día",
+  "en": "Today's decorations",
+  "pt": "Decorações do dia",
+  "ja": "今日の飾り",
+  "zh": "今日装饰"
+ },
+ "shop.decorSoon": {
+  "es": "Desde el nivel {n} vas a poder comprar decoraciones para tu jardín",
+  "en": "From level {n} you can buy decorations for your garden",
+  "pt": "A partir do nível {n} você poderá comprar decorações para o seu jardim",
+  "ja": "レベル{n}から庭の飾りを買えます",
+  "zh": "从{n}级起可以为庭院购买装饰"
+ },
+ "shop.placeNow": {
+  "es": "Poner ahora",
+  "en": "Place now",
+  "pt": "Colocar agora",
+  "ja": "今すぐ置く",
+  "zh": "立即摆放"
+ },
+ "shop.inBox": {
+  "es": "En la caja: {n}",
+  "en": "In the box: {n}",
+  "pt": "Na caixa: {n}",
+  "ja": "箱の中：{n}",
+  "zh": "盒中：{n}"
  }
 }
