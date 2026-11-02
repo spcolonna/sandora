@@ -374,6 +374,15 @@
       {"id": "sakura", "level": 17, "cost": {"pebbles": 1000, "wood": 50, "light": 25}, "size": 0.3, "aspect": 0.99}
     ]
   },
+  "upgrades": {
+    "_comment": "Mejoras de los lugares con minijuego (desde el modo Decorar). Cada lugar tiene estos niveles en orden: se compran con Piedritas y essence de la esencia de ese minijuego, desde el nivel del jugador level. bonus: cuánto más rinden en Piedritas sus partidas. Cada nivel se ve en el jardín (borde de piedras, farolito, brillo). places: los lugares que se mejoran (ids de minijuego).",
+    "places": ["sand", "stack", "rain", "pond", "shishi", "leaves", "moss", "bonsai", "enso", "bell", "matcha", "flute", "lanterns"],
+    "tiers": [
+      { "level": 4, "pebbles": 150, "essence": 10, "bonus": 0.05 },
+      { "level": 8, "pebbles": 450, "essence": 25, "bonus": 0.10 },
+      { "level": 13, "pebbles": 1000, "essence": 50, "bonus": 0.15 }
+    ]
+  },
   "care": {
     "_comment": "Cuidados del jardín mientras uno no está: maleza cada weedEveryHours horas (hasta maxWeeds), hojas en bloques con viento o tormenta, la arena borrada si llovió o nevó, y con tormenta piedras caídas de la torre, una vasija volcada y una decoración tumbada. Arreglar cada uno da serenityPerFix y, hasta rewardedPerDay por día, pebblesPerFix. Cada cuidado pendiente suma decayPerTask a la caída diaria de la serenidad.",
     "weedEveryHours": 8,

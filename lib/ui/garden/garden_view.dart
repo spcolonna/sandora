@@ -17,6 +17,7 @@ import '../fx/sfx.dart';
 import '../theme/palette.dart';
 import '../widgets/currency.dart';
 import '../widgets/glass.dart';
+import '../upgrade_sheet.dart';
 import '../widgets/washi.dart';
 import 'garden_decor.dart';
 import 'garden_scene.dart';
@@ -27,6 +28,7 @@ part 'garden_care.dart';
 part 'garden_gifts.dart';
 part 'garden_moment.dart';
 part 'garden_sky.dart';
+part 'garden_upgrades.dart';
 
 /// El jardín es el menú: cada lugar se toca para entrar (minijuegos, Mercado,
 /// tablón, meditación). Cambia con la hora del dispositivo y el clima y, según
@@ -410,7 +412,19 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
           bottom: 0,
           child: RepaintBoundary(child: CustomPaint(painter: _ShiftedPainter(_stageTop, painter))),
         ),
+      // Las mejoras de cada lugar.
+      for (final e in layout.places.entries)
+        if (p.upgradeTier(e.key.name) > 0)
+          _UpgradeDeco(place: e.value, tier: p.upgradeTier(e.key.name), daylight: daylight),
       if (decorating) ..._decorHandles(p, layout, decor),
+      if (decorating)
+        for (final e in layout.labels.entries)
+          if (p.upgradeRules.places.contains(e.key.name) && p.gameUnlocked(e.key.name))
+            _UpgradeBadge(
+              at: e.value - Offset(0, 34 / (painted ? _zoom : 1)),
+              game: e.key.name,
+              scale: painted ? 1 / _zoom : 1,
+            ),
       // Fuera de los lugares, el jardín responde al toque.
       if (!decorating)
         Positioned.fill(

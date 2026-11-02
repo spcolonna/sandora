@@ -15,6 +15,7 @@ import 'levels.dart';
 import 'meditation_rules.dart';
 import 'shop.dart';
 import 'tea_visits.dart';
+import 'upgrades.dart';
 import 'weather.dart';
 
 /// Una piedra de la torre guardada en el jardín (unidades del mundo del
@@ -40,6 +41,10 @@ class Progress extends ChangeNotifier {
   late TeaVisits teaVisits;
   late DecorRules decorRules;
   late CareRules careRules;
+  late UpgradeRules upgradeRules;
+
+  /// Mejoras compradas de cada lugar de este jardín (id del minijuego → nivel).
+  Map<String, int> upgrades = {};
 
   /// Cuidados pendientes de este jardín (maleza, hojas, lo que tiró el clima).
   List<CareTask> care = [];
@@ -178,6 +183,7 @@ class Progress extends ChangeNotifier {
     'care',
     'care.at',
     'care.weedAt',
+    'upgrades',
   ];
 
   /// Fotos de cada jardín (la del actual puede estar vieja: manda lo vivo).
@@ -255,6 +261,7 @@ class Progress extends ChangeNotifier {
     teaVisits = TeaVisits(balance);
     decorRules = DecorRules(balance);
     careRules = CareRules(balance);
+    upgradeRules = UpgradeRules(balance);
     _unlockDays = balance.section('unlocks').nums('days');
     final unlocks = balance.section('unlocks');
     _zoneOf = unlocks.has('zones') ? unlocks.sub('zones').stringMap() : {};
@@ -273,6 +280,7 @@ class Progress extends ChangeNotifier {
     final careAt = _prefs.getInt('care.at'), weedAt = _prefs.getInt('care.weedAt');
     _careAt = careAt == null ? null : DateTime.fromMillisecondsSinceEpoch(careAt);
     _weedAt = weedAt == null ? null : DateTime.fromMillisecondsSinceEpoch(weedAt);
+    upgrades = (jsonDecode(_prefs.getString('upgrades') ?? '{}') as Map).map((k, v) => MapEntry(k as String, v as int));
     _careDay = _prefs.getInt('care.day') ?? -1;
     _carePaid = _prefs.getInt('care.paid') ?? 0;
     final start = balance.serenity.i('start');
@@ -909,6 +917,39 @@ class Progress extends ChangeNotifier {
     return news;
   }
 
+  /// Nivel de mejora del lugar del minijuego [game] (0 sin mejorar).
+  int upgradeTier(String game) => upgrades[game] ?? 0;
+
+  /// Lo que cuesta la próxima mejora de [game] (vacío si ya está al máximo).
+  Map<String, int> upgradeCost(String game) {
+    final t = upgradeRules.next(upgradeTier(game));
+    if (t == null) return const {};
+    return {'pebbles': t.pebbles, economy.essenceOf(game).name: t.essence};
+  }
+
+  bool canUpgrade(String game) {
+    final t = upgradeRules.next(upgradeTier(game));
+    return t != null &&
+        gameUnlocked(game) &&
+        level >= t.level &&
+        upgradeCost(game).entries.every((c) => walletOf(c.key) >= c.value);
+  }
+
+  /// Hay algún lugar que ya se puede mejorar (para avisarlo en el modo Decorar).
+  bool get upgradeAvailable => upgradeRules.places.any(canUpgrade);
+
+  bool buyUpgrade(String game) {
+    if (!canUpgrade(game)) return false;
+    for (final c in upgradeCost(game).entries) {
+      _addTo(c.key, -c.value);
+    }
+    upgrades[game] = upgradeTier(game) + 1;
+    _prefs.setString('upgrades', jsonEncode(upgrades));
+    _saveWallet();
+    notifyListeners();
+    return true;
+  }
+
   /// Los cuidados de la vista [side] (sin los de decoraciones que ya no están puestas).
   Iterable<CareTask> careOn(int side) =>
       care.where((t) => t.decor == null ? t.side == side : t.decor! < decor.length && decor[t.decor!].side == side);
@@ -1055,7 +1096,14 @@ class Progress extends ChangeNotifier {
     }
     final run = (_plays[game] ?? 0) + 1;
     _plays[game] = run;
-    final reward = economy.reward(game, stars, run);
+    final base = economy.reward(game, stars, run);
+    // Un lugar mejorado rinde más Piedritas.
+    final reward = Reward(
+      (base.pebbles * (1 + upgradeRules.bonus(upgradeTier(game)))).round(),
+      base.essence,
+      base.essenceAmount,
+      tired: base.tired,
+    );
     pebbles += reward.pebbles;
     essences[reward.essence] = essences[reward.essence]! + reward.essenceAmount;
     serenity = economy.serenityAfterPlay(serenity);

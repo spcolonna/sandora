@@ -2184,11 +2184,11 @@
   "zh": "装饰"
  },
  "decor.hint": {
-  "es": "Tocá algo de abajo para ponerlo y arrastralo a su lugar",
-  "en": "Tap something below to place it, then drag it into position",
-  "pt": "Toque em algo abaixo para colocar e arraste até o lugar",
-  "ja": "下のものをタップして置き、ドラッグして動かそう",
-  "zh": "点击下方物品放置，再拖到合适的位置"
+  "es": "Tocá algo de abajo para ponerlo y arrastralo a su lugar. El martillo mejora cada lugar",
+  "en": "Tap something below to place it, then drag it into position. The hammer improves each place",
+  "pt": "Toque em algo abaixo para colocá-lo e arraste até o lugar. O martelo melhora cada lugar",
+  "ja": "下から選んで置き、ドラッグで位置を決めます。ハンマーで場所を改良できます",
+  "zh": "点下方物品放置，再拖到合适位置。锤子可以改良每个地点"
  },
  "decor.done": {
   "es": "Listo",
@@ -2497,5 +2497,68 @@
   "pt": "Seu jardim sente sua falta: talvez tenha crescido um pouco de mato",
   "ja": "庭があなたを待っています。雑草が生えているかも",
   "zh": "你的庭院想你了：也许长出了一些杂草"
+ },
+ "up.title": {
+  "es": "Mejorar: {place}",
+  "en": "Improve: {place}",
+  "pt": "Melhorar: {place}",
+  "ja": "改良：{place}",
+  "zh": "改良：{place}"
+ },
+ "up.desc": {
+  "es": "Cada mejora se ve en el jardín y hace que sus partidas den más piedritas",
+  "en": "Each improvement shows in the garden and makes its games give more pebbles",
+  "pt": "Cada melhoria aparece no jardim e faz suas partidas darem mais pedrinhas",
+  "ja": "改良は庭に表れ、その遊びで小石が多くもらえます",
+  "zh": "每次改良都会显示在庭院里，并让该游戏获得更多小石子"
+ },
+ "up.t1": {
+  "es": "Borde de piedras",
+  "en": "Stone border",
+  "pt": "Borda de pedras",
+  "ja": "石の縁取り",
+  "zh": "石头围边"
+ },
+ "up.t2": {
+  "es": "Farolito de piedra",
+  "en": "Little stone lantern",
+  "pt": "Lanterninha de pedra",
+  "ja": "小さな石灯籠",
+  "zh": "小石灯笼"
+ },
+ "up.t3": {
+  "es": "Brillo cálido y flores",
+  "en": "Warm glow and flowers",
+  "pt": "Brilho quente e flores",
+  "ja": "温かな光と花",
+  "zh": "温暖光晕与花朵"
+ },
+ "up.bonus": {
+  "es": "+{n} % de piedritas en sus partidas",
+  "en": "+{n}% pebbles from its games",
+  "pt": "+{n}% de pedrinhas nas partidas",
+  "ja": "この遊びの小石 +{n}%",
+  "zh": "该游戏小石子 +{n}%"
+ },
+ "up.buy": {
+  "es": "Mejorar",
+  "en": "Improve",
+  "pt": "Melhorar",
+  "ja": "改良する",
+  "zh": "改良"
+ },
+ "up.max": {
+  "es": "Mejorado al máximo",
+  "en": "Fully improved",
+  "pt": "Melhorado ao máximo",
+  "ja": "最大まで改良済み",
+  "zh": "已改良至最高"
+ },
+ "up.needLevel": {
+  "es": "Desde el nivel {n}",
+  "en": "From level {n}",
+  "pt": "A partir do nível {n}",
+  "ja": "レベル{n}から",
+  "zh": "{n}级起"
  }
 }

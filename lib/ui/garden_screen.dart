@@ -535,7 +535,7 @@ class _Hud extends StatelessWidget {
                   _RoundButton(
                     icon: Icons.local_florist_rounded,
                     tooltip: tr('decor.title'),
-                    dot: p.decorNew,
+                    dot: p.decorNew || p.upgradeAvailable,
                     pulse: p.guideStep == 2,
                     onTap: onDecor,
                   ),
