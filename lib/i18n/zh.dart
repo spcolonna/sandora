@@ -381,4 +381,6 @@ const zh = <String, String>{
   'settings.resetAsk': '清除整个庭院并从头开始吗？',
   'settings.resetYes': '清除并开始',
   'common.cancel': '取消',
+  'stack.tower.one': '{n}块石头的塔',
+  'stack.tower.other': '{n}块石头的塔',
 };

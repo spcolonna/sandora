@@ -35,7 +35,24 @@ Future<void> main() async {
   WeatherService.instance.refresh();
   // El audio carga en segundo plano: la app abre sin esperarlo.
   SoundBoard.instance.init();
+  _redrawOnLanguage();
   runApp(const SandoraApp());
+}
+
+/// Al cambiar el idioma, todo se redibuja: los widgets const que usan `tr`
+/// no dependen de nada que cambie y se quedarían con el idioma anterior.
+void _redrawOnLanguage() {
+  var lang = currentLanguage;
+  AppSettings.instance.addListener(() {
+    if (lang == currentLanguage) return;
+    lang = currentLanguage;
+    void dirty(Element e) {
+      e.markNeedsBuild();
+      e.visitChildren(dirty);
+    }
+
+    WidgetsBinding.instance.rootElement?.visitChildren(dirty);
+  });
 }
 
 class SandoraApp extends StatelessWidget {

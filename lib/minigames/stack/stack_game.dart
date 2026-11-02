@@ -452,11 +452,11 @@ class StackGame extends FlameGame with TapCallbacks {
       RunOutcome(
         score: max(0, net) + _perfects * b.i('perfectBonus'),
         stars: stars,
-        headline: [
+        headline: trN('stack.tower', _height),
+        detail: [
           if (_placedRun > 0) trN('stack.added', _placedRun),
           if (_lostRun > 0) trN('stack.lost', _lostRun),
-          trN('stack.height', _height),
-        ].join('\n'),
+        ].join(' · '),
         record: record,
       ),
     );

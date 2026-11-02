@@ -124,9 +124,12 @@ Future<void> _askReset(BuildContext context) async {
   await Progress.instance.reset(Balance.instance);
   await WeatherService.instance.load(Balance.instance);
   await Reminders.instance.reschedule();
+  // Sin transición: el jardín viejo se va enseguida y no convive con el nuevo
+  // (comparten las llaves del HUD).
   navigator.pushAndRemoveUntil(
-    MaterialPageRoute<void>(
-      builder: (_) => const TitleIntro(next: GardenGate(child: GardenScreen())),
+    PageRouteBuilder<void>(
+      transitionDuration: Duration.zero,
+      pageBuilder: (_, _, _) => const TitleIntro(next: GardenGate(child: GardenScreen())),
     ),
     (_) => false,
   );

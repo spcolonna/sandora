@@ -51,8 +51,15 @@ class GardenTouch extends StatefulWidget {
 class _GardenTouchState extends State<GardenTouch> with SingleTickerProviderStateMixin {
   final _touches = <_Touch>[];
   final _clock = ValueNotifier<double>(0);
-  late final Ticker _ticker = createTicker(_tick);
+  late final Ticker _ticker;
   var _seed = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // No perezoso: si nunca se tocó, dispose lo crearía ya fuera del árbol.
+    _ticker = createTicker(_tick);
+  }
 
   void _tick(Duration elapsed) {
     _clock.value = elapsed.inMicroseconds / 1e6;

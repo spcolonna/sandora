@@ -139,6 +139,11 @@ class _ResultPanelState extends State<ResultPanel> {
                       ),
                       const SizedBox(height: 8),
                       Text(outcome.headline, style: text.headlineSmall, textAlign: TextAlign.center),
+                      if (outcome.detail?.isNotEmpty ?? false)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(outcome.detail!, style: text.bodyMedium, textAlign: TextAlign.center),
+                        ),
                       const SizedBox(height: 4),
                       CalmAppear(
                         delay: after(0),

@@ -114,8 +114,7 @@ const en = <String, String>{
   'currency.lotus': 'Lotus',
   'shop.title': 'Market',
   'shop.desc': 'Trade what you have spare for what you need.',
-  'shop.lotusHint':
-      'Earn lotus with your daily offering (your first game or meditation), by completing all three daily goals and every week of meditation streak.',
+  'shop.lotusHint': 'Earn lotus with your daily offering (your first game or meditation), by completing all three daily goals and every week of meditation streak.',
   'shop.trades': 'Today\'s trades',
   'shop.withLotus': 'With lotus',
   'shop.left': '{n} left today',
@@ -152,8 +151,7 @@ const en = <String, String>{
   'weather.title': 'The garden now',
   'weather.own': 'The garden\'s own weather: it changes every few hours.',
   'weather.real.title': 'Weather where you are',
-  'weather.real.desc':
-      'Uses your approximate location so it rains in the garden when it rains outside. Your location is not stored.',
+  'weather.real.desc': 'Uses your approximate location so it rains in the garden when it rains outside. Your location is not stored.',
   'weather.real.denied': 'Without location permission, the garden keeps its own weather.',
   'weather.real.failed': 'Couldn\'t get the weather right now; it will try again on its own.',
   'weather.source': 'Forecast: MET Norway',
@@ -383,4 +381,6 @@ const en = <String, String>{
   'settings.resetAsk': 'Erase your whole garden and start over?',
   'settings.resetYes': 'Erase and start',
   'common.cancel': 'Cancel',
+  'stack.tower.one': 'A tower of {n} stone',
+  'stack.tower.other': 'A tower of {n} stones',
 };

@@ -41,7 +41,13 @@ abstract final class Palette {
       surfaceContainerHighest: sand,
     ),
     scaffoldBackgroundColor: paper,
-    textTheme: const TextTheme().apply(bodyColor: ink, displayColor: ink),
+    // Los títulos en el mismo peso que los botones y los carteles: en el peso
+    // fino de Material quedaban como de otra app.
+    textTheme: const TextTheme(
+      headlineSmall: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
+      titleLarge: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.3),
+      titleMedium: TextStyle(fontWeight: FontWeight.w600),
+    ).apply(bodyColor: ink, displayColor: ink),
     // Toques suaves: la onda de los botones es tenue (pilar 8).
     splashFactory: InkRipple.splashFactory,
     splashColor: wood.withValues(alpha: 0.10),

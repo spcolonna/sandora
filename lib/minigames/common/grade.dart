@@ -88,8 +88,9 @@ void celebrate(
       style: TextStyle(
         fontSize: (16 + 5 * grade.index) * scale,
         fontWeight: FontWeight.w700,
-        color: grade == Grade.good ? Palette.mossDark : grade.color,
-        shadows: const [Shadow(color: Color(0x88FFFFFF), blurRadius: 4)],
+        // Más oscuro que las lucecitas: el ámbar puro se perdía sobre la arena.
+        color: grade == Grade.good ? Palette.mossDark : Color.lerp(grade.color, Palette.ink, 0.35),
+        shadows: const [Shadow(color: Color(0xCCFFF8EA), blurRadius: 6)],
       ),
     ),
   );

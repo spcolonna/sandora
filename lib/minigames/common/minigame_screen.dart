@@ -19,7 +19,17 @@ class RunOutcome {
   /// Línea principal del resultado ("12 piedras", "Profundidad 84%").
   final String headline;
   final bool record;
-  const RunOutcome({required this.score, required this.stars, required this.headline, this.record = false});
+
+  /// Un renglón chico debajo del titular, con el detalle de la partida.
+  final String? detail;
+
+  const RunOutcome({
+    required this.score,
+    required this.stars,
+    required this.headline,
+    this.detail,
+    this.record = false,
+  });
 }
 
 typedef GameBuilder = FlameGame Function(void Function(RunOutcome) finish);

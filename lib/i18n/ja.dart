@@ -381,4 +381,6 @@ const ja = <String, String>{
   'settings.resetAsk': '庭をすべて消して最初から始めますか？',
   'settings.resetYes': '消して始める',
   'common.cancel': 'キャンセル',
+  'stack.tower.one': '{n}個の石の塔',
+  'stack.tower.other': '{n}個の石の塔',
 };

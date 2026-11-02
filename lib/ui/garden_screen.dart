@@ -201,6 +201,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
   /// Anuncia una vez los minijuegos que se abrieron (por día o por zona).
   void _announceUnlocks() {
+    if (!mounted) return;
     // Si hay un minijuego (u otra pantalla) encima, se avisa al volver.
     if (ModalRoute.of(context)?.isCurrent == false) return;
     final p = Progress.instance;

@@ -2658,5 +2658,19 @@
   "pt": "Cancelar",
   "ja": "キャンセル",
   "zh": "取消"
+ },
+ "stack.tower.one": {
+  "es": "Torre de {n} piedra",
+  "en": "A tower of {n} stone",
+  "pt": "Torre de {n} pedra",
+  "ja": "{n}個の石の塔",
+  "zh": "{n}块石头的塔"
+ },
+ "stack.tower.other": {
+  "es": "Torre de {n} piedras",
+  "en": "A tower of {n} stones",
+  "pt": "Torre de {n} pedras",
+  "ja": "{n}個の石の塔",
+  "zh": "{n}块石头的塔"
  }
 }
