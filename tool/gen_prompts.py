@@ -47,9 +47,9 @@ CROP_NOTE = ('The game shows this on tall phone screens (9:16), so the left and 
              'keep everything important inside the central 84% of the width.')
 
 
-def img(name, fmt, purpose, subject, composition, exclude, style=STYLE):
+def img(name, fmt, purpose, subject, composition, exclude, style=STYLE, refs=None):
     return dict(name=name, fmt=fmt, purpose=purpose, subject=subject, composition=composition, exclude=exclude,
-                style=style)
+                style=style, refs=refs)
 
 
 def obj(name, subject, size_hint='about 120 pixels tall', extra_excl=''):
@@ -152,6 +152,22 @@ def court_obj(name, subject, size_hint):
         f'any background, gravel bed, wall, sky or scenery behind the object; {NO_TEXT}; other objects; people or '
         f'animals; {NO_STYLE}.',
         style=COURT_STYLE)
+
+
+def visitor(name, subject):
+    """Visitante del portón: de pie, en la familia del monje (`char_monk`)."""
+    return img(
+        name, PORTRAIT_ALPHA + ALPHA_FALLBACK,
+        f'This is a visitor of {GAME}: a villager who comes to the gate of the player\'s garden with a small request '
+        'and comes back later with a gift. It appears small, standing at the gate, so the silhouette must read '
+        'instantly. It belongs to the same family of characters as the attached old monk: same proportions, same '
+        'brushwork, same warmth.',
+        f'{subject} Kind, calm expression, simple shapes and soft details.',
+        'Full body, three-quarter view facing left, standing, centered, filling about 80% of the canvas height, '
+        'feet on an imaginary floor line near the bottom. Everything the figure holds fits inside the image. '
+        'Everything around the figure is fully transparent.',
+        f'any background, ground or cast shadow; {NO_TEXT}; other characters or animals; weapons; {NO_STYLE}.',
+        refs=('store/art/style/style_keyart.webp', 'store/art/characters/char_monk.webp'))
 
 
 BLOCKS = [
@@ -808,6 +824,42 @@ BLOCKS = [
             obj('obj_decor_sakura', 'A small cherry tree in full bloom: a dark, gently twisting trunk and a soft, '
                 'rounded canopy of pale pink blossoms with a few petals falling.', 'about 190 pixels tall'),
         ]),
+    dict(
+        id='16', title='Visitantes con pedidos', folder='store/art/characters/',
+        intro=('Los que llegan al portón del patio con un pedido. El **monje** no hace falta: se reusa `char_monk` '
+               '(espejado). El código dibuja la burbuja con "?" o "!" y la nota mientras se espera. Se ven chicos '
+               '(un décimo del ancho), así que la silueta tiene que leerse sola. Adjuntá '
+               '`store/art/style/style_keyart.webp` **y** `store/art/characters/char_monk.webp`, para que salgan de la '
+               'misma familia.'),
+        images=[visitor(n, s) for n, s in [
+            ('char_visitor_traveler', 'A tired but cheerful traveler of no particular age or gender with a wide '
+             'conical straw hat (kasa), a slate-blue travel coat (#6C7A8A) tied at the waist, straw sandals, a small '
+             'cloth bundle on the back and a walking staff in one hand.'),
+            ('char_visitor_potter', 'A sturdy village potter of no particular age or gender with a short straw hat, '
+             'a clay-brown work robe (#8A5A3C) with rolled-up sleeves and a stained apron, holding a small '
+             'unglazed clay bowl in both hands.'),
+            ('char_visitor_gardener', 'A young village gardener of no particular age or gender with a straw hat, '
+             'a moss-green work robe (#5E7A44) with a light sash, holding a small potted pine seedling against the '
+             'chest. Clearly younger and different from the old monk.'),
+            ('char_visitor_fisher', 'A weathered old fisher of no particular age or gender with a conical straw hat, '
+             'a deep teal robe (#3F6C80) with a straw rain cape over the shoulders, a bamboo fishing rod resting on '
+             'one shoulder and a small woven basket at the hip.'),
+        ]]),
+    dict(
+        id='17', title='Mejoras de lugares', folder='store/art/court/',
+        intro=('Lo que suma cada nivel de mejora alrededor de un lugar del jardín. El **farolito** del nivel 2 no hace '
+               'falta: se reusa `obj_court_lantern_small`. El brillo del nivel 3 lo hace el código. **Adjuntá `'
+               + COURT_REF + '`.**'),
+        images=[
+            court_obj('obj_upgrade_border', 'A low curved border of about nine small rounded river stones in soft '
+                      'grays, set in a gentle crescent (a shallow smile shape) with a few tufts of moss between '
+                      'them, as if edging the front of a garden spot. Wide and low, about five times wider than '
+                      'tall.', 'about a quarter of the screen width'),
+            court_obj('obj_upgrade_bloom', 'The same kind of low crescent of small rounded river stones, now with '
+                      'little clumps of soft pink and white flowers (like small azaleas and wild pinks) growing '
+                      'between the stones, and a few fallen petals on the gravel. Wide and low, about five times '
+                      'wider than tall.', 'about a quarter of the screen width'),
+        ]),
 ]
 
 
@@ -1014,6 +1066,8 @@ def image_text(i, im):
 
 # Orden en que conviene generarlas: lo que más se ve en el juego primero. Cada uno con por qué va ahí.
 PRIORITY = [
+    ('16', 'Ya están en el juego, dibujados con código: es lo que más se nota que falta pintar.'),
+    ('17', 'Se ven en cada lugar mejorado; hoy son piedras y flores de código.'),
     ('14', 'Lo que falta del bosque: batidor, flauta, linterna y el río.'),
     ('12', 'El suelo de la vista del estanque.'),
     ('9', 'Para la ficha de la tienda: hace falta antes de publicar.'),
@@ -1024,6 +1078,8 @@ SINGLE = 'Create ONE single image. Start generating immediately, without asking 
 
 
 def reference(im):
+    if im['refs']:
+        return '` y `'.join(im['refs'])
     return COURT_REF if im['style'] == COURT_STYLE else 'store/art/style/style_keyart.webp'
 
 

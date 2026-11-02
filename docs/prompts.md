@@ -22,13 +22,145 @@ conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de l
 
 # Para generar ahora
 
+## Bloque 16 — Visitantes con pedidos (4)
+
+**Por qué ahora:** Ya están en el juego, dibujados con código: es lo que más se nota que falta pintar.
+
+Los que llegan al portón del patio con un pedido. El **monje** no hace falta: se reusa `char_monk` (espejado). El código dibuja la burbuja con "?" o "!" y la nota mientras se espera. Se ven chicos (un décimo del ancho), así que la silueta tiene que leerse sola. Adjuntá `store/art/style/style_keyart.webp` **y** `store/art/characters/char_monk.webp`, para que salgan de la misma familia.
+
+### 1. `char_visitor_traveler` ⬜
+
+Guardala como `store/art/characters/char_visitor_traveler.png`. Adjuntá `store/art/style/style_keyart.webp` y `store/art/characters/char_monk.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a visitor of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): a villager who comes to the gate of the player's garden with a small request and comes back later with a gift. It appears small, standing at the gate, so the silhouette must read instantly. It belongs to the same family of characters as the attached old monk: same proportions, same brushwork, same warmth.
+
+SUBJECT: A tired but cheerful traveler of no particular age or gender with a wide conical straw hat (kasa), a slate-blue travel coat (#6C7A8A) tied at the waist, straw sandals, a small cloth bundle on the back and a walking staff in one hand. Kind, calm expression, simple shapes and soft details.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Full body, three-quarter view facing left, standing, centered, filling about 80% of the canvas height, feet on an imaginary floor line near the bottom. Everything the figure holds fits inside the image. Everything around the figure is fully transparent.
+
+DO NOT INCLUDE: any background, ground or cast shadow; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other characters or animals; weapons; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 2. `char_visitor_potter` ⬜
+
+Guardala como `store/art/characters/char_visitor_potter.png`. Adjuntá `store/art/style/style_keyart.webp` y `store/art/characters/char_monk.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a visitor of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): a villager who comes to the gate of the player's garden with a small request and comes back later with a gift. It appears small, standing at the gate, so the silhouette must read instantly. It belongs to the same family of characters as the attached old monk: same proportions, same brushwork, same warmth.
+
+SUBJECT: A sturdy village potter of no particular age or gender with a short straw hat, a clay-brown work robe (#8A5A3C) with rolled-up sleeves and a stained apron, holding a small unglazed clay bowl in both hands. Kind, calm expression, simple shapes and soft details.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Full body, three-quarter view facing left, standing, centered, filling about 80% of the canvas height, feet on an imaginary floor line near the bottom. Everything the figure holds fits inside the image. Everything around the figure is fully transparent.
+
+DO NOT INCLUDE: any background, ground or cast shadow; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other characters or animals; weapons; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 3. `char_visitor_gardener` ⬜
+
+Guardala como `store/art/characters/char_visitor_gardener.png`. Adjuntá `store/art/style/style_keyart.webp` y `store/art/characters/char_monk.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a visitor of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): a villager who comes to the gate of the player's garden with a small request and comes back later with a gift. It appears small, standing at the gate, so the silhouette must read instantly. It belongs to the same family of characters as the attached old monk: same proportions, same brushwork, same warmth.
+
+SUBJECT: A young village gardener of no particular age or gender with a straw hat, a moss-green work robe (#5E7A44) with a light sash, holding a small potted pine seedling against the chest. Clearly younger and different from the old monk. Kind, calm expression, simple shapes and soft details.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Full body, three-quarter view facing left, standing, centered, filling about 80% of the canvas height, feet on an imaginary floor line near the bottom. Everything the figure holds fits inside the image. Everything around the figure is fully transparent.
+
+DO NOT INCLUDE: any background, ground or cast shadow; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other characters or animals; weapons; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 4. `char_visitor_fisher` ⬜
+
+Guardala como `store/art/characters/char_visitor_fisher.png`. Adjuntá `store/art/style/style_keyart.webp` y `store/art/characters/char_monk.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a PORTRAIT image with a 2:3 aspect ratio (1024×1536, not square, not landscape), PNG with a transparent background (real alpha channel) wherever the description says the image is empty. If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a visitor of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): a villager who comes to the gate of the player's garden with a small request and comes back later with a gift. It appears small, standing at the gate, so the silhouette must read instantly. It belongs to the same family of characters as the attached old monk: same proportions, same brushwork, same warmth.
+
+SUBJECT: A weathered old fisher of no particular age or gender with a conical straw hat, a deep teal robe (#3F6C80) with a straw rain cape over the shoulders, a bamboo fishing rod resting on one shoulder and a small woven basket at the hip. Kind, calm expression, simple shapes and soft details.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Full body, three-quarter view facing left, standing, centered, filling about 80% of the canvas height, feet on an imaginary floor line near the bottom. Everything the figure holds fits inside the image. Everything around the figure is fully transparent.
+
+DO NOT INCLUDE: any background, ground or cast shadow; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other characters or animals; weapons; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+## Bloque 17 — Mejoras de lugares (2)
+
+**Por qué ahora:** Se ven en cada lugar mejorado; hoy son piedras y flores de código.
+
+Lo que suma cada nivel de mejora alrededor de un lugar del jardín. El **farolito** del nivel 2 no hace falta: se reusa `obj_court_lantern_small`. El brillo del nivel 3 lo hace el código. **Adjuntá `store/art/style/style_courtyard_ref.webp`.**
+
+### 5. `obj_upgrade_border` ⬜
+
+Guardala como `store/art/court/obj_upgrade_border.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a quarter of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: A low curved border of about nine small rounded river stones in soft grays, set in a gentle crescent (a shallow smile shape) with a few tufts of moss between them, as if edging the front of a garden spot. Wide and low, about five times wider than tall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 6. `obj_upgrade_bloom` ⬜
+
+Guardala como `store/art/court/obj_upgrade_bloom.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a quarter of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
+
+SUBJECT: The same kind of low crescent of small rounded river stones, now with little clumps of soft pink and white flowers (like small azaleas and wild pinks) growing between the stones, and a few fallen petals on the gravel. Wide and low, about five times wider than tall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
 ## Bloque 14 — Bosque: Casa de té (Matcha), Bambú (Flauta) y Río (Linternas) (4)
 
 **Por qué ahora:** Lo que falta del bosque: batidor, flauta, linterna y el río.
 
 La tercera vista del jardín y las piezas de sus minijuegos. El código dibuja la espuma del té, las ráfagas de viento y la corriente, así que cada pieza va sola y recortada. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 1. `obj_tea_whisk` ⬜
+### 7. `obj_tea_whisk` ⬜
 
 Guardala como `store/art/forest/obj_tea_whisk.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -48,7 +180,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style; bowl or tea.
 ```
 
-### 2. `obj_bamboo_flute` ⬜
+### 8. `obj_bamboo_flute` ⬜
 
 Guardala como `store/art/forest/obj_bamboo_flute.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -68,7 +200,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style; hands or strings.
 ```
 
-### 3. `obj_river_lantern` ⬜
+### 9. `obj_river_lantern` ⬜
 
 Guardala como `store/art/forest/obj_river_lantern.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -88,7 +220,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style; water.
 ```
 
-### 4. `bg_river` ⬜
+### 10. `bg_river` ⬜
 
 Guardala como `store/art/forest/bg_river.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -114,7 +246,7 @@ DO NOT INCLUDE: stones in the water; boats, lanterns or docks; any text, letters
 
 Segunda vista del jardín (se llega deslizando). Va encima del mismo cielo y las mismas colinas que el patio. Adjuntá `store/art/style/style_keyart.webp` y `bg_base_ground`.
 
-### 5. `bg_east_ground` ⬜
+### 11. `bg_east_ground` ⬜
 
 Guardala como `store/art/bg/bg_east_ground.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -140,7 +272,7 @@ DO NOT INCLUDE: lanterns, trees, bamboo or objects; sky; any text, letters, numb
 
 Piezas de la marca. El logo (símbolo y nombre) ya está incluido; el juego los pone encima de `title_bg` y `store_feature`, así que esas imágenes van sin texto. El nombre del jardín de cada jugador lo escribe el juego sobre `ui_garden_sign`, así que esa pieza va vacía. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 6. `store_feature` ⬜
+### 12. `store_feature` ⬜
 
 Guardala como `store/art/brand/store_feature.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -166,7 +298,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 
 Piezas que el juego estira (nine-slice) y sobre las que escribe su propio texto. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 7. `ui_button` ⬜
+### 13. `ui_button` ⬜
 
 Guardala como `store/art/ui/ui_button.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -186,7 +318,7 @@ COMPOSITION: The button is centered, about 80% of the canvas width and 30% of it
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 8. `ui_panel` ⬜
+### 14. `ui_panel` ⬜
 
 Guardala como `store/art/ui/ui_panel.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -206,7 +338,7 @@ COMPOSITION: The panel is centered and fills about 90% of the canvas, perfectly 
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 9. `ui_score_frame` ⬜
+### 15. `ui_score_frame` ⬜
 
 Guardala como `store/art/ui/ui_score_frame.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -226,7 +358,7 @@ COMPOSITION: The plaque is centered, about 70% of the canvas width and 35% of it
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 10. `ui_serenity_bar` ⬜
+### 16. `ui_serenity_bar` ⬜
 
 Guardala como `store/art/ui/ui_serenity_bar.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -246,7 +378,7 @@ COMPOSITION: The bar is centered, horizontal, about 90% of the canvas width and 
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 11. `ui_result` ⬜
+### 17. `ui_result` ⬜
 
 Guardala como `store/art/ui/ui_result.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -266,7 +398,7 @@ COMPOSITION: The card is centered, about 75% of the canvas width and 90% of its 
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; icons or symbols unless described; any background or scenery; drop shadow outside the element; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 12. `ui_pause` ⬜
+### 18. `ui_pause` ⬜
 
 Guardala como `store/art/ui/ui_pause.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -292,7 +424,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 
 Van primero: fijan el estilo de todo lo demás. Guardalas en `store/art/style/` y **adjuntá `store/art/style/style_keyart.webp` como referencia en cada bloque siguiente** (arrastrala a la conversación antes de pegar el prompt). Si el estilo no te convence, se cambia el párrafo STYLE en `tool/gen_prompts.py` y se regenera este archivo.
 
-### 13. `style_stones` ⬜
+### 19. `style_stones` ⬜
 
 Guardala como `store/art/style/style_stones.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -312,7 +444,7 @@ COMPOSITION: Each stone is separated from the others with generous empty paper a
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; labels; grid lines; frame or border; cast shadows on the paper; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 14. `style_plants` ⬜
+### 20. `style_plants` ⬜
 
 Guardala como `store/art/style/style_plants.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
