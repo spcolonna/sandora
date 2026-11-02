@@ -1,31 +1,86 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../fx/sfx.dart';
+import '../garden/scene_art.dart';
 import '../theme/palette.dart';
 
 /// Papel washi pintado: la textura con fibras y bordes tostados que usa la
 /// caligrafía, para que paneles y botones parezcan parte del patio.
 const washiTexture = 'assets/images/temple/bg_enso_paper.webp';
 
-/// Una hoja de washi con sombra suave, para paneles y tarjetas.
+/// Las piezas pintadas del kit: qué parte del centro se estira (en píxeles de
+/// la imagen) y, para las que no se ajustan a su alto o ancho, cuánto se
+/// achica.
+abstract final class _Art {
+  static const panel = Rect.fromLTRB(100, 100, 620, 597);
+  static const result = Rect.fromLTRB(150, 420, 570, 740);
+  static const button = Rect.fromLTRB(110, 60, 610, 146);
+  static const score = Rect.fromLTRB(120, 70, 480, 152);
+  static const bar = Rect.fromLTRB(220, 60, 820, 100);
+}
+
+/// Pinta una pieza del kit en nine-slice. [fit] decide cuánto se achica:
+/// fijo, para que entre justo a lo ancho o para que entre justo a lo alto.
+class _NinePainter extends CustomPainter {
+  final ui.Image img;
+  final Rect slice;
+  final double Function(ui.Image img, Size size) fit;
+  _NinePainter(this.img, this.slice, this.fit);
+
+  static double byHeight(ui.Image img, Size size) => img.height / size.height;
+  static double byWidth(ui.Image img, Size size) => img.width / size.width;
+
+  @override
+  void paint(Canvas canvas, Size size) => drawArtNine(canvas, img, slice, Offset.zero & size, fit(img, size));
+
+  @override
+  bool shouldRepaint(_NinePainter old) => old.img != img || old.slice != slice;
+}
+
+/// Qué marco lleva una [WashiCard]: el panel con esquinas de bronce o la
+/// tarjeta de resultado (bambú en las esquinas y bruma arriba, para las
+/// estrellas).
+enum WashiFrame { panel, result }
+
+/// Una hoja de washi en su marco de madera pintado, para paneles y tarjetas.
 class WashiCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding, margin;
   final double radius;
+  final WashiFrame frame;
   const WashiCard({
     super.key,
     required this.child,
     this.padding = const EdgeInsets.fromLTRB(22, 22, 22, 14),
     this.margin = EdgeInsets.zero,
     this.radius = 22,
+    this.frame = WashiFrame.panel,
   });
 
   @override
   Widget build(BuildContext context) {
     final r = BorderRadius.circular(radius);
+    final result = frame == WashiFrame.result;
+    final art = SceneArt.instance[result ? 'ui_result' : 'ui_panel'];
+    if (art != null) {
+      return Container(
+        margin: margin,
+        decoration: BoxDecoration(
+          borderRadius: r,
+          boxShadow: const [BoxShadow(color: Color(0x44000000), blurRadius: 24, offset: Offset(0, 8))],
+        ),
+        child: CustomPaint(
+          painter: result
+              ? _NinePainter(art, _Art.result, _NinePainter.byWidth)
+              : _NinePainter(art, _Art.panel, (_, _) => 3),
+          child: Padding(padding: padding, child: child),
+        ),
+      );
+    }
     return Container(
       margin: margin,
       decoration: BoxDecoration(
@@ -129,7 +184,12 @@ class _InkButtonState extends State<InkButton> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.quiet ? Palette.ink.withValues(alpha: 0.72) : Palette.sandLight;
+    // Sobre la madera clara del botón pintado, tinta; sobre el trazo, papel.
+    final color = widget.quiet
+        ? Palette.ink.withValues(alpha: 0.72)
+        : SceneArt.instance['ui_button'] != null
+        ? Palette.ink
+        : Palette.sandLight;
     final label = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -193,7 +253,10 @@ class _InkButtonState extends State<InkButton> {
                   : widget.quiet
                   ? Center(child: label)
                   : CustomPaint(
-                      painter: _BrushFill(pressed: _down),
+                      painter: switch (SceneArt.instance['ui_button']) {
+                        final art? => _NinePainter(art, _Art.button, _NinePainter.byHeight),
+                        null => _BrushFill(pressed: _down),
+                      },
                       child: Center(
                         widthFactor: widget.compact ? 1 : null,
                         child: Padding(padding: const EdgeInsets.symmetric(horizontal: 18), child: label),
@@ -297,7 +360,11 @@ Path _wobblyCapsule(Rect r, {required int seed, double amp = 1.4}) {
   return path..close();
 }
 
-/// Botón redondo de papel con un glifo de tinta (pausa, volver, cerrar).
+/// Los botones redondos que ya tienen su piedra pintada.
+const _paintedGlyphs = {InkGlyph.pause: 'assets/images/ui/ui_pause.webp'};
+
+/// Botón redondo de papel con un glifo de tinta (pausa, volver, cerrar). La
+/// pausa es una piedra de río pintada con dos trazos de musgo.
 class InkIconButton extends StatefulWidget {
   final InkGlyph glyph;
   final VoidCallback onPressed;
@@ -315,6 +382,7 @@ class _InkIconButtonState extends State<InkIconButton> {
   @override
   Widget build(BuildContext context) {
     final s = widget.size;
+    final painted = _paintedGlyphs[widget.glyph];
     final button = GestureDetector(
       onTapDown: (_) => setState(() => _down = true),
       onTapCancel: () => setState(() => _down = false),
@@ -323,23 +391,25 @@ class _InkIconButtonState extends State<InkIconButton> {
       child: AnimatedScale(
         scale: _down ? 0.9 : 1,
         duration: const Duration(milliseconds: 90),
-        child: Container(
-          width: s,
-          height: s,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Palette.paper,
-            image: const DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover),
-            border: Border.all(color: Palette.wood.withValues(alpha: 0.25)),
-            boxShadow: const [BoxShadow(color: Color(0x44000000), blurRadius: 10, offset: Offset(0, 3))],
-          ),
-          child: Center(
-            child: CustomPaint(
-              size: Size.square(s * 0.44),
-              painter: _GlyphPainter(widget.glyph, Palette.ink.withValues(alpha: 0.85)),
-            ),
-          ),
-        ),
+        child: painted != null
+            ? Image.asset(painted, width: s * 1.15, height: s * 1.15, filterQuality: FilterQuality.medium)
+            : Container(
+                width: s,
+                height: s,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Palette.paper,
+                  image: const DecorationImage(image: AssetImage(washiTexture), fit: BoxFit.cover),
+                  border: Border.all(color: Palette.wood.withValues(alpha: 0.25)),
+                  boxShadow: const [BoxShadow(color: Color(0x44000000), blurRadius: 10, offset: Offset(0, 3))],
+                ),
+                child: Center(
+                  child: CustomPaint(
+                    size: Size.square(s * 0.44),
+                    painter: _GlyphPainter(widget.glyph, Palette.ink.withValues(alpha: 0.85)),
+                  ),
+                ),
+              ),
       ),
     );
     return Semantics(
@@ -476,6 +546,88 @@ class _BrushBarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BrushBarPainter old) => old.value != value || old.color != color;
+}
+
+/// La barra de Calma y Serenidad: un surco tallado en piedra clara, con una
+/// piedra de musgo en la punta, que se llena con un trazo tibio. Sin el arte,
+/// la [BrushBar].
+class StoneBar extends StatelessWidget {
+  final double value;
+  final Color color;
+  final double height;
+  const StoneBar({super.key, required this.value, this.color = Palette.lantern, this.height = 22});
+
+  @override
+  Widget build(BuildContext context) {
+    final art = SceneArt.instance['ui_serenity_bar'];
+    if (art == null) return BrushBar(value: value, color: color, height: height * 0.5);
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: CustomPaint(painter: _StoneBarPainter(art, value.clamp(0.0, 1.0), color)),
+    );
+  }
+}
+
+class _StoneBarPainter extends CustomPainter {
+  final ui.Image art;
+  final double value;
+  final Color color;
+  _StoneBarPainter(this.art, this.value, this.color);
+
+  // El hueco del surco, en píxeles de la imagen (153 de alto).
+  static const _left = 150.0, _right = 40.0, _top = 70.0, _bottom = 36.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = art.height / size.height;
+    drawArtNine(canvas, art, _Art.bar, Offset.zero & size, s);
+    if (value <= 0) return;
+    final groove = Rect.fromLTRB(_left / s, _top / s, size.width - _right / s, size.height - _bottom / s);
+    final w = max(groove.height, groove.width * value);
+    final fill = RRect.fromRectAndRadius(
+      Rect.fromLTWH(groove.left, groove.top, w, groove.height),
+      Radius.circular(groove.height / 2),
+    );
+    final dark = Color.lerp(color, Palette.wood, 0.35)!;
+    canvas.drawRRect(
+      fill,
+      Paint()..shader = LinearGradient(colors: [color.withValues(alpha: 0.9), dark]).createShader(fill.outerRect),
+    );
+    // Un brillo de agua arriba, para que parezca dentro de la piedra.
+    canvas.drawLine(
+      Offset(groove.left + groove.height * 0.6, groove.top + groove.height * 0.3),
+      Offset(groove.left + w - groove.height * 0.6, groove.top + groove.height * 0.3),
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.35)
+        ..strokeWidth = groove.height * 0.18
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_StoneBarPainter old) => old.value != value || old.color != color || old.art != art;
+}
+
+/// La placa de madera oscura con borde de piedra detrás del puntaje de los
+/// minijuegos. El texto va claro encima.
+class ScoreFrame extends StatelessWidget {
+  final Widget child;
+  const ScoreFrame({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final art = SceneArt.instance['ui_score_frame'];
+    final inner = DefaultTextStyle.merge(
+      style: const TextStyle(color: Palette.paper),
+      child: child,
+    );
+    if (art == null) return inner;
+    return CustomPaint(
+      painter: _NinePainter(art, _Art.score, (img, size) => img.height / max(size.height, 1)),
+      child: Padding(padding: const EdgeInsets.fromLTRB(28, 10, 28, 12), child: inner),
+    );
+  }
 }
 
 /// Diálogo sobre papel washi, con un título y botones en columna.

@@ -19,6 +19,12 @@ class SceneArt {
     'bg_base_far': 'bg',
     'bg_base_ground': 'bg',
     'bg_base_foliage': 'bg',
+    // Kit de interfaz pintado (nine-slice, en `washi.dart`).
+    'ui_panel': 'ui',
+    'ui_result': 'ui',
+    'ui_button': 'ui',
+    'ui_score_frame': 'ui',
+    'ui_serenity_bar': 'ui',
     // Patio pintado: capas del mismo lienzo y objetos apoyados en el suelo.
     'bg_court_sky': 'court',
     'bg_court_far': 'court',
@@ -136,6 +142,22 @@ void drawArt(ui.Canvas canvas, ui.Image img, ui.Rect dst, {ui.Paint? paint}) {
     dst,
     (paint ?? ui.Paint())..filterQuality = ui.FilterQuality.medium,
   );
+}
+
+/// Dibuja [img] en nine-slice dentro de [dst]: el centro [slice] (en píxeles
+/// de la imagen) se estira y los bordes quedan como se pintaron, achicados
+/// [scale] veces.
+void drawArtNine(ui.Canvas canvas, ui.Image img, ui.Rect slice, ui.Rect dst, double scale) {
+  canvas.save();
+  canvas.translate(dst.left, dst.top);
+  canvas.scale(1 / scale);
+  canvas.drawImageNine(
+    img,
+    slice,
+    ui.Rect.fromLTWH(0, 0, dst.width * scale, dst.height * scale),
+    ui.Paint()..filterQuality = ui.FilterQuality.medium,
+  );
+  canvas.restore();
 }
 
 /// Dibuja [img] lo más grande posible dentro de [r], sin deformarlo y apoyado

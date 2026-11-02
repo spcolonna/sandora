@@ -731,14 +731,18 @@ BLOCKS = [
             img('bg_east_ground', PORTRAIT_ALPHA + ALPHA_FALLBACK,
                 f'This is the ground layer of the second garden view in {GAME}, the pond side. The game places the '
                 'shishi-odoshi, the bonsai, the mossy rocks and the leafy path on top of it.',
-                'A small Japanese garden seen from a gentle three-quarter view from above: grass and moss ground with '
-                'a calm irregular pond in the lower left, a curving gravel path from the bottom edge to the right, '
-                'and a few low flat stones around the pond edge.',
-                'The ground fills only the lower 55% of the image; above it everything is fully transparent. Leave '
-                'open, calm areas at the upper right, the middle right and above the pond for the objects. '
+                'A wide, continuous meadow of soft grass and cushion moss seen from a gentle three-quarter view from '
+                'above, the ground of a Japanese garden: gentle variations of light and dark greens, a few patches '
+                'of bare earth and scattered tiny pebbles, nothing else. The game draws the pond and the leafy path '
+                'itself, so the ground is plain and even.',
+                'This is NOT an island or a floating patch: the ground runs edge to edge, touching the left, right '
+                'and bottom edges of the canvas, and fills the lower 50% of the image. Its top edge is a soft, '
+                'slightly irregular horizon of grass tufts and low moss; above it everything is fully transparent. '
+                'Even, calm lighting with no strong focal point, so objects placed anywhere on it look grounded. '
                 + CROP_NOTE,
-                f'lanterns, trees, bamboo or objects; sky; {NO_TEXT}; people or animals; frame or border; '
-                f'{NO_STYLE}.'),
+                f'a pond, water, a path, stepping stones, rocks, lanterns, trees, bamboo or objects; an island shape '
+                f'or visible ground edges on the sides or bottom; sky; {NO_TEXT}; people or animals; frame or '
+                f'border; {NO_STYLE}.'),
         ]),
     dict(
         id='13', title='Caligrafía (Ensō) y Templo (Campana)', folder='store/art/temple/',
@@ -919,6 +923,18 @@ INCLUDED = {
                      'sube al repo). Adjuntala en cada bloque siguiente.'),
     'title_bg': ('assets/images/title/title_bg.webp', 'Fondo de la pantalla de título (`lib/ui/title_intro.dart`), con '
                  'el logo sobre el cielo.'),
+    'ui_panel': ('assets/images/ui/ui_panel.webp', 'Marco de todos los paneles y diálogos (`WashiCard`, nine-slice '
+                 'en `washi.dart`).'),
+    'ui_result': ('assets/images/ui/ui_result.webp', 'Tarjeta de resultado de los minijuegos; las estrellas caen en '
+                  'la bruma de arriba (`result_panel.dart`).'),
+    'ui_button': ('assets/images/ui/ui_button.webp', 'Botón principal y chico (`InkButton`), con el texto en tinta.'),
+    'ui_pause': ('assets/images/ui/ui_pause.webp', 'Botón de pausa de los minijuegos (`InkIconButton`).'),
+    'ui_score_frame': ('assets/images/ui/ui_score_frame.webp', 'Placa detrás del puntaje de Estanque, Hojas y Apilado '
+                       '(`ScoreFrame`).'),
+    'ui_serenity_bar': ('assets/images/ui/ui_serenity_bar.webp', 'Barra de Calma y Serenidad (`StoneBar`): panel de '
+                        'nivel, próxima meta y resultado.'),
+    'store_feature': ('store/art/brand/store_feature_play.png', 'Gráfico de funciones de Play, 1024×500 con el logo '
+                      '(no va en el juego). Sin logo: `store_feature_1024x500.png`.'),
     'ui_garden_sign': ('assets/images/ui/ui_garden_sign.webp', 'Cartel del jardín, recortado (`lib/ui/widgets/'
                        'garden_sign.dart`). Se usa de ancho fijo con el nombre sobre la tabla, sin nine-slice.'),
     'app_icon': ('store/icon/app_icon.png', 'Ícono de la app (no se sube: `store/`). Se regenera con `dart run '
@@ -1086,9 +1102,9 @@ PRIORITY = [
     ('16', 'Ya están en el juego, dibujados con código: es lo que más se nota que falta pintar.'),
     ('17', 'Se ven en cada lugar mejorado; hoy son piedras y flores de código.'),
     ('14', 'Lo que falta del bosque: batidor, flauta, linterna y el río.'),
-    ('12', 'El suelo de la vista del estanque.'),
+    ('12', 'El suelo de la vista del estanque. La primera salió como una isla con estanque propio: este prompt pide '
+           'un prado de borde a borde, sin agua ni sendero (los dibuja el juego).'),
     ('9', 'Para la ficha de la tienda: hace falta antes de publicar.'),
-    ('8', 'Opcional: el kit washi ya dibuja botones y paneles con código.'),
     ('0', 'Opcional: el estilo ya quedó fijado por el patio pintado.'),
 ]
 SINGLE = 'Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.'

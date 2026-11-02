@@ -120,7 +120,7 @@ class CalmBar extends StatelessWidget {
       tween: Tween(end: value),
       duration: const Duration(milliseconds: 1400),
       curve: Curves.easeInOutCubic,
-      builder: (context, v, _) => BrushBar(value: v, height: 10, color: color),
+      builder: (context, v, _) => StoneBar(value: v, color: color),
     );
   }
 }

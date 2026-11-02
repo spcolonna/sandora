@@ -117,8 +117,9 @@ class _ResultPanelState extends State<ResultPanel> {
                 delay: const Duration(milliseconds: 150),
                 rise: 18,
                 child: WashiCard(
+                  frame: WashiFrame.result,
                   margin: const EdgeInsets.symmetric(horizontal: 24),
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                  padding: const EdgeInsets.fromLTRB(28, 26, 28, 22),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -294,7 +295,7 @@ class _LevelGain extends StatelessWidget {
             tween: Tween(begin: from, end: to),
             duration: total,
             curve: Interval(wait, 1, curve: Curves.easeInOutCubic),
-            builder: (context, v, _) => BrushBar(value: v),
+            builder: (context, v, _) => StoneBar(value: v),
           ),
         ),
       ],

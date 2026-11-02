@@ -140,9 +140,11 @@ class _LeavesOverlay extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    tr('leaves.pile', {'n': hud.inPile, 'total': hud.total}),
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Palette.ink),
+                  ScoreFrame(
+                    child: Text(
+                      tr('leaves.pile', {'n': hud.inPile, 'total': hud.total}),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                    ),
                   ),
                   Text(
                     tr('leaves.time', {'n': hud.seconds.ceil()}),
@@ -190,13 +192,10 @@ class _PondOverlay extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Claro sobre el agua oscura del estanque.
-                  Text(
-                    tr('pond.points', {'n': hud.score}),
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      color: Palette.paper,
-                      shadows: _pondShadow,
+                  ScoreFrame(
+                    child: Text(
+                      tr('pond.points', {'n': hud.score}),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                     ),
                   ),
                   Text(
@@ -246,9 +245,11 @@ class _StackOverlay extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  trN('stack.height', hud.height),
-                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: Palette.ink),
+                ScoreFrame(
+                  child: Text(
+                    trN('stack.height', hud.height),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                  ),
                 ),
                 Text(
                   trN('stack.bag', hud.bag),

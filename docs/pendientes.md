@@ -25,8 +25,11 @@
 - [x] Meditación: objetos de racha cada 7 días (`meditation.streakObjects` del balance): cuenco tibetano, cojín de
       brocado y farol de papel que de noche se enciende, junto al cerezo. Son de la cuenta. Dibujados con código hasta
       tener arte.
-- [ ] Integrar `store_feature` (Bloque 9, solo para la tienda). Ya están el logo, el fondo del título
-      (`title_bg`) y el cartel del jardín (`ui_garden_sign`).
+- [x] `store_feature` listo para Play: `store/art/brand/store_feature_play.png` (1024×500, con el logo).
+- [x] Kit de interfaz pintado (Bloque 8): paneles, tarjeta de resultado, botón principal, pausa, placa de puntaje y
+      barra de Calma (`washi.dart`, nine-slice). Sin el arte vuelve a dibujarse con código.
+- [ ] `bg_east_ground` otra vez: la primera salió como isla con estanque. El prompt nuevo pide un prado de borde a
+      borde (`docs/prompts.md`, Bloque 12).
 - [x] Ampliaciones: los patios agrandan el jardín; el Estanque abre el Estanque de lotos, la Sala de caligrafía el
       Ensō y el Templo la Campana (`unlocks.zones` en el balance).
 - [x] **Vista del bosque** (tercera página del jardín): Casa de té (Matcha, Madera), Bosque de bambú (Flauta, Madera)
