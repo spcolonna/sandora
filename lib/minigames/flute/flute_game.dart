@@ -70,6 +70,8 @@ class FluteGame extends FlameGame with TapCallbacks {
           streak: streak,
           streakNote: false,
         );
+      } else {
+        missCue(volume: 0.22);
       }
     }
     if (_scores.length == _song.length && _t > _song.last.start + _song.last.length + 1) _end();
@@ -116,6 +118,7 @@ class FluteGame extends FlameGame with TapCallbacks {
     final record = pct > Progress.instance.best('flute');
     Progress.instance.setBest('flute', pct);
     final stars = starsFor(harmony, rules.b.list('stars'));
+    closeRun(world, Vector2(size.x / 2, size.y * 0.42), stars);
     Future.delayed(const Duration(milliseconds: 1600), () {
       finish(RunOutcome(score: pct, stars: stars, headline: tr('flute.result', {'n': pct}), record: record));
     });

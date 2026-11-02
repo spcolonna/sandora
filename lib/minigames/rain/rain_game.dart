@@ -107,6 +107,7 @@ class RainGame extends FlameGame with TapCallbacks {
       judge.expire(_t);
       if (judge.done && _t > _lastTime + 0.8) {
         _outroAt = _t;
+        closeRun(world, Vector2(size.x / 2, size.y * 0.42), starsFor(judge.accuracy, b.list('stars')));
         // La lluvia se apaga junto con la cámara: se terminó.
         SoundBoard.instance.stopLoop(Ambience.rain, fade: const Duration(milliseconds: 1600));
       }
@@ -191,7 +192,7 @@ class RainGame extends FlameGame with TapCallbacks {
     _wobble[i] = 1;
     if (!spilling && judge.overflowing[i]) _overflowHintAt ??= _t;
     if (note == null) {
-      SoundBoard.instance.play(Sfx.uiTap, volume: 0.2);
+      missCue(volume: 0.2);
       return;
     }
     // Rebalsando, la nota suena apagada.

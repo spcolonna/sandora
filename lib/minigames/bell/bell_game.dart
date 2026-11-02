@@ -124,6 +124,7 @@ class BellGame extends FlameGame with DragCallbacks {
     final record = pct > Progress.instance.best('bell');
     Progress.instance.setBest('bell', pct);
     final stars = starsFor(harmony, rules.b.list('stars'));
+    closeRun(world, Vector2(_bell.dx, _bell.dy), stars);
     Future.delayed(const Duration(milliseconds: 2200), () {
       finish(RunOutcome(score: pct, stars: stars, headline: tr('bell.result', {'n': pct}), record: record));
     });

@@ -3,7 +3,8 @@
 Son sintéticos: sirven para validar timing y sensación al tacto hasta tener
 grabaciones reales (ver GDD, "Audio"). Uso:
 
-    python3 tools/gen_placeholder_audio.py
+    python3 tool/gen_placeholder_audio.py               # todos
+    python3 tool/gen_placeholder_audio.py sfx_miss ...  # solo esos (prefijo del nombre)
 
 Escribe .wav temporales y los convierte a .m4a (AAC) con ffmpeg en
 assets/audio/.
@@ -11,6 +12,7 @@ assets/audio/.
 
 import os
 import subprocess
+import sys
 import tempfile
 import wave
 
@@ -19,6 +21,8 @@ import numpy as np
 SR = 44100
 OUT = os.path.join(os.path.dirname(__file__), "..", "assets", "audio")
 rng = np.random.default_rng(7)
+# Prefijos pedidos por línea de comandos: si hay, solo se escriben esos.
+ONLY = sys.argv[1:]
 
 
 def t(seconds):
@@ -91,7 +95,33 @@ def arpeggio(freqs, step, decay):
     return out
 
 
+def sweep_tone(f0, f1, seconds, decay):
+    """Tono que se desliza de f0 a f1 (una gota que cae al agua)."""
+    x = t(seconds)
+    f = f0 + (f1 - f0) * np.clip(x / (seconds * 0.35), 0, 1)
+    phase = 2 * np.pi * np.cumsum(f) / SR
+    return np.sin(phase) * env(len(x), 0.002, decay)
+
+
+def swish(seconds, a0, a1, attack):
+    """Ruido que se abre y se cierra: hojas, escoba, pincel."""
+    x = t(seconds)
+    n = rng.standard_normal(len(x))
+    y = np.zeros_like(n)
+    acc = 0.0
+    alphas = np.linspace(a0, a1, len(n))
+    for i, v in enumerate(n):
+        acc += alphas[i] * (v - acc)
+        y[i] = acc
+    # Sin graves: se resta una versión más lenta.
+    y -= lowpass(y, 0.02)
+    shape = np.sin(np.pi * np.clip(x / seconds, 0, 1)) ** 2
+    return y * shape * env(len(x), attack, 10.0)
+
+
 def write(name, samples, gain=0.8):
+    if ONLY and not any(name.startswith(o) for o in ONLY):
+        return
     samples = samples / (np.max(np.abs(samples)) or 1) * gain
     pcm = (samples * 32767).astype(np.int16)
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
@@ -135,6 +165,34 @@ def main():
     write("sfx_ui_perfect", arpeggio([392.0, 523.25, 659.25, 783.99], 0.11, 0.45), 0.55)
     write("sfx_meditation_bell", singing_bowl(), 0.7)
     write("sfx_cat_meow", bell(700, 0.5, 0.15) * np.sin(2 * np.pi * 6 * t(0.5)) ** 2, 0.4)
+    # Error: dos tonos de madera apagados que bajan. Avisa sin retar.
+    miss = np.zeros(int(SR * 0.6))
+    for k, f in enumerate([330.0, 262.0]):
+        note = bell(f, 0.45, 0.09) * 0.9 ** k
+        start = int(SR * 0.09 * k)
+        miss[start:start + len(note)] += note
+    write("sfx_miss", lowpass(miss, 0.25), 0.3)
+    # Cierre de partida: campanitas que bajan y un cuenco suave debajo.
+    finish = arpeggio([783.99, 659.25, 523.25, 392.0], 0.16, 0.7)
+    bowl = singing_bowl(196.0, len(finish) / SR) * 0.35
+    write("sfx_finish", finish + bowl[:len(finish)], 0.5)
+    # Toc de bambú: hueco, con la caña que resuena un instante.
+    x = t(0.4)
+    tok = (np.sin(2 * np.pi * 410 * x) * np.exp(-x / 0.07)
+           + 0.5 * np.sin(2 * np.pi * 1030 * x) * np.exp(-x / 0.025)
+           + 0.3 * lowpass(rng.standard_normal(len(x)), 0.3) * np.exp(-x / 0.006))
+    write("sfx_bamboo_tok", tok * env(len(x), 0.001, 10.0), 0.6)
+    for i, (f0, f1) in enumerate([(700, 1500), (600, 1300), (820, 1700)], start=1):
+        write(f"sfx_water_drop_{i:02d}", sweep_tone(f0, f1, 0.25, 0.07), 0.45)
+    for i, (a0, a1) in enumerate([(0.15, 0.5), (0.3, 0.7)], start=1):
+        write(f"sfx_leaf_rustle_{i:02d}", swish(0.35, a0, a1, 0.04), 0.35)
+    for i, (a0, a1) in enumerate([(0.08, 0.2), (0.1, 0.25)], start=1):
+        write(f"sfx_brush_{i:02d}", swish(0.28, a0, a1, 0.05), 0.3)
+    # Arrancar maleza: un "pop" de tierra que cede.
+    x = t(0.25)
+    pluck = sweep_tone(220, 120, 0.25, 0.05) + 0.4 * lowpass(rng.standard_normal(len(x)), 0.2) * np.exp(-x / 0.03)
+    write("sfx_pluck", pluck, 0.45)
+    write("sfx_sweep", swish(0.45, 0.2, 0.6, 0.08), 0.4)
 
 
 if __name__ == "__main__":

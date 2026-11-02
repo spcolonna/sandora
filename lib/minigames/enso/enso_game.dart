@@ -29,6 +29,10 @@ class EnsoGame extends FlameGame with DragCallbacks {
   /// Ancho del pincel en cada punto del trazo (suavizado).
   final _widths = <double>[];
   double _t = 0;
+
+  /// Recorrido desde el último roce del pincel: suena cada tanto, más fuerte
+  /// cuanto más rápido va.
+  double _since = 0;
   bool _drawing = false, _over = false;
   EnsoResult? _result;
 
@@ -51,6 +55,9 @@ class EnsoGame extends FlameGame with DragCallbacks {
     _stroke.clear();
     _widths.clear();
     _drawing = true;
+    _since = 0;
+    SoundBoard.instance.play(Sfx.brush, volume: 0.25);
+    Haptics.light();
     _add(Offset(event.localPosition.x, event.localPosition.y));
   }
 
@@ -67,6 +74,12 @@ class EnsoGame extends FlameGame with DragCallbacks {
       final last = _stroke.last;
       final dt = max(0.008, _t - last.t);
       final speed = (at - last.at).distance / dt / size.x; // anchos por segundo
+      _since += (at - last.at).distance;
+      if (_since > size.x * 0.14) {
+        _since = 0;
+        SoundBoard.instance.play(Sfx.brush, volume: (0.15 + 0.25 * (speed / 2.2)).clamp(0.15, 0.4));
+        Haptics.light();
+      }
       final target = maxW - (maxW - minW) * (speed / 2.2).clamp(0.0, 1.0);
       w = _widths.last + (target - _widths.last) * 0.25;
     }
@@ -85,7 +98,7 @@ class EnsoGame extends FlameGame with DragCallbacks {
       _retryAt = _t;
       _stroke.clear();
       _widths.clear();
-      SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+      missCue(volume: 0.25);
       return;
     }
     _end(r);
@@ -102,7 +115,7 @@ class EnsoGame extends FlameGame with DragCallbacks {
     }
     final stars = starsFor(r.total, b.list('stars'));
     final c = _stroke.map((p) => p.at).reduce((a, p) => a + p) / _stroke.length.toDouble();
-    if (stars > 0) celebrate(world, Vector2(c.dx, c.dy), Grade.values[stars - 1]);
+    closeRun(world, Vector2(c.dx, c.dy), stars);
     Future.delayed(const Duration(milliseconds: 1600), () {
       finish(RunOutcome(score: pct, stars: stars, headline: tr('enso.result', {'n': pct}), record: record));
     });

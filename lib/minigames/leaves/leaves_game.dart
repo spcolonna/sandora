@@ -121,7 +121,7 @@ class LeavesGame extends FlameGame with DragCallbacks {
       l.v += (push + jitter) * b.d('sweepForce');
       l.spin += (_rng.nextDouble() - 0.5) * 8;
     }
-    if (touched && _rng.nextDouble() < 0.15) SoundBoard.instance.play(Sfx.uiTap, volume: 0.15);
+    if (touched && _rng.nextDouble() < 0.15) SoundBoard.instance.play(Sfx.leafRustle, volume: 0.3);
   }
 
   @override

@@ -20,7 +20,15 @@ enum Sfx {
   perfect('sfx_ui_perfect', 1),
   catMeow('sfx_cat_meow', 1),
   fluteNote('sfx_flute_note', 4),
-  bell('sfx_meditation_bell', 1);
+  bell('sfx_meditation_bell', 1),
+  miss('sfx_miss', 1),
+  finish('sfx_finish', 1),
+  bambooTok('sfx_bamboo_tok', 1),
+  waterDrop('sfx_water_drop', 3),
+  leafRustle('sfx_leaf_rustle', 2),
+  brush('sfx_brush', 2),
+  pluck('sfx_pluck', 1),
+  sweep('sfx_sweep', 1);
 
   final String file;
   final int variants;

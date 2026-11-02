@@ -447,6 +447,7 @@ class StackGame extends FlameGame with TapCallbacks {
     ]);
     final net = _height - _startHeight;
     final stars = starsFor(max(0, net).toDouble(), b.list('starNet'));
+    closeRun(world, Vector2(size.x / 2, size.y * 0.42), stars);
     finish(
       RunOutcome(
         score: max(0, net) + _perfects * b.i('perfectBonus'),

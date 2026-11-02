@@ -175,7 +175,7 @@ class ShishiGame extends FlameGame with TapCallbacks {
     // Al volver, el extremo cerrado golpea la piedra: el "toc".
     if (!_clacked && _tip >= 0.78) {
       _clacked = true;
-      SoundBoard.instance.play(Sfx.stackPlace, volume: 0.45 + 0.4 * min(1, _fill));
+      SoundBoard.instance.play(Sfx.bambooTok, volume: 0.45 + 0.4 * min(1, _fill));
       Haptics.medium();
     }
     if (_tip >= 1) {
@@ -199,7 +199,7 @@ class ShishiGame extends FlameGame with TapCallbacks {
       celebrate(world, Vector2(c.dx, c.dy - 40), grade, streak: _streak.hit(grade));
     } else if (_fill > 1) {
       _streak.miss();
-      Haptics.light();
+      missCue();
       for (var i = 0; i < 16; i++) {
         _drops.add((c, Offset((_rng.nextDouble() - 0.5) * 260, -60 - _rng.nextDouble() * 220), 1.2));
       }
@@ -213,6 +213,7 @@ class ShishiGame extends FlameGame with TapCallbacks {
     final record = _points > Progress.instance.best('shishi');
     Progress.instance.setBest('shishi', _points);
     final stars = starsFor(_points.toDouble(), b.list('stars'));
+    closeRun(world, Vector2(_pivot.dx, _pivot.dy), stars);
     finish(
       RunOutcome(
         score: _points,

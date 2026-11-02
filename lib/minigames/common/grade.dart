@@ -122,6 +122,21 @@ void celebrate(
   }
 }
 
+/// El cierre de una partida, antes del panel: campanitas que bajan, un
+/// golpe suave y, si hubo estrellas, lucecitas en [position]. Así ningún
+/// juego termina en silencio.
+void closeRun(Component parent, Vector2 position, int stars) {
+  SoundBoard.instance.play(Sfx.finish, volume: 0.5);
+  Haptics.medium();
+  if (stars > 0) celebrate(parent, position, Grade.values[stars - 1], sound: false, scale: 1.3);
+}
+
+/// Un error: un sonido de madera apagado y una vibración leve. Avisa sin retar.
+void missCue({double volume = 0.35}) {
+  SoundBoard.instance.play(Sfx.miss, volume: volume);
+  Haptics.light();
+}
+
 /// Estrellas (0 a 3) según los umbrales crecientes [thresholds].
 int starsFor(double value, List<double> thresholds) => thresholds.where((t) => value >= t).length;
 

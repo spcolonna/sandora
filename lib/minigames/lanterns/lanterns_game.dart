@@ -92,7 +92,7 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
       return;
     }
     _stones.add(p);
-    SoundBoard.instance.play(Sfx.stackPlace, volume: 0.35);
+    SoundBoard.instance.play(Sfx.waterDrop, volume: 0.4);
     Haptics.light();
   }
 
@@ -145,6 +145,7 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
       case LanternEnd.missed:
         _misses++;
         _streak.miss();
+        missCue();
         if (_misses >= rules.b.i('tries')) {
           _scores.add(0);
           _say(tr('lanterns.gone'));
@@ -154,7 +155,7 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
         }
       case LanternEnd.out:
         _outAt = _t;
-        Haptics.light();
+        missCue(volume: 0.25);
         _say(tr('lanterns.out'));
     }
   }
@@ -176,6 +177,7 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
     final record = pct > Progress.instance.best('lanterns');
     Progress.instance.setBest('lanterns', pct);
     final stars = starsFor(harmony, rules.b.list('stars'));
+    closeRun(world, Vector2(size.x / 2, size.y * 0.42), stars);
     Future.delayed(const Duration(milliseconds: 1800), () {
       finish(RunOutcome(score: pct, stars: stars, headline: tr('lanterns.result', {'n': pct}), record: record));
     });

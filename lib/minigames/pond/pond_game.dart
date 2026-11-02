@@ -142,7 +142,7 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
       _try(sel, i);
     } else {
       _selected = sel == i ? null : i;
-      SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+      SoundBoard.instance.play(Sfx.waterDrop, volume: 0.3);
     }
   }
 
@@ -156,7 +156,7 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
     } else {
       _bounce = (a, c);
       _bounceT = 0;
-      Haptics.light();
+      missCue(volume: 0.25);
     }
   }
 
@@ -262,6 +262,7 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
     final record = _score > Progress.instance.best('pond');
     Progress.instance.setBest('pond', _score);
     final stars = starsFor(_score.toDouble(), b.list('stars'));
+    closeRun(world, Vector2(size.x / 2, size.y * 0.42), stars);
     Future.delayed(const Duration(milliseconds: 900), () {
       finish(
         RunOutcome(

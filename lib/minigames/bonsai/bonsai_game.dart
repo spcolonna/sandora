@@ -156,7 +156,7 @@ class BonsaiGame extends FlameGame with DragCallbacks {
       } else {
         _goodCut++;
         _streak.miss();
-        Haptics.medium();
+        missCue();
       }
     }
   }
@@ -187,7 +187,7 @@ class BonsaiGame extends FlameGame with DragCallbacks {
     final record = pct > Progress.instance.best('bonsai');
     Progress.instance.setBest('bonsai', pct);
     final stars = starsFor(harmony, b.list('stars'));
-    if (stars > 0) celebrate(world, Vector2(_center.dx, _center.dy), Grade.values[stars - 1]);
+    closeRun(world, Vector2(_center.dx, _center.dy), stars);
     Future.delayed(const Duration(milliseconds: 700), () {
       finish(RunOutcome(score: pct, stars: stars, headline: tr('bonsai.result', {'n': pct}), record: record));
     });
