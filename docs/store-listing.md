@@ -7,7 +7,7 @@ palabras clave 100 (App Store, separadas por coma, sin espacios de más) y descr
 - Categoría: Juegos › Casual (secundaria: Puzle / Simulación).
 - Clasificación por edad: 4+ (App Store) / PEGI 3 · Everyone (Play). Sin violencia, sin chat, sin compras activas.
 - URL de soporte y de privacidad: publicar `docs/privacy/index.html` (por ejemplo con GitHub Pages) y usar esa URL.
-- Contacto: **pendiente** (el mismo que va en el User-Agent de MET Norway).
+- Contacto: `orakigames.uy@gmail.com` (el mismo que va en el User-Agent de MET Norway).
 
 ## Español
 
@@ -323,6 +323,49 @@ Sandora 是一座通过简短宁静的小游戏成长的禅意庭园。
 
 无广告。无需账号。进度保存在你的手机上。
 ```
+
+## Capturas
+
+Se sacan con `tool/screenshots.sh` (simulador de iOS) y quedan en `store/screenshots/<dispositivo>/`, que no se
+commitea. Cada una compila con sus `--dart-define`: `SANDORA_DAY=7` (todo abierto), `SANDORA_HOUR`,
+`SANDORA_WEATHER` y `SANDORA_GAME=<id>`. Conviene un jardín avanzado (ampliaciones y decoraciones) antes de sacarlas.
+
+| # | Archivo | Pantalla | Defines |
+|---|---------|----------|---------|
+| 1 | `jardin-dia` | Jardín de día, despejado | `HOUR=10 WEATHER=clear` |
+| 2 | `jardin-noche` | Jardín de noche: faroles y luciérnagas | `HOUR=22` |
+| 3 | `jardin-lluvia` | Jardín con lluvia en las vasijas | `HOUR=16 WEATHER=rain` |
+| 4 | `jardin-nieve` | Jardín nevado al amanecer | `HOUR=8 WEATHER=snow` |
+| 5 | `apilado` | Apilado de piedras | `GAME=stack` |
+| 6 | `arena` | Arenero con el rastrillo | `GAME=sand` |
+| 7 | `lluvia` | Lluvia en las vasijas | `GAME=rain WEATHER=rain` |
+| 8 | `matcha` | Batir el matcha | `GAME=matcha` |
+| 9 | `enso` | Ensō de un pincelazo | `GAME=enso` |
+| 10 | `linternas` | Linternas en el río | `GAME=lanterns HOUR=20` |
+
+A mano (no tienen define): las vistas del Estanque y del Bosque (deslizar), el modo Decorar y el álbum. Para que
+la captura no salga con la tarjeta de primera vez del minijuego, abrirlo una vez antes (o volver a correr esa
+captura). Ninguna debe mostrar precios de lotos (la venta está apagada).
+
+**App Store** (PNG o JPG, sin transparencia, hasta 10 por idioma; vertical):
+
+| Pantalla | Tamaño (px) | Simulador | ¿Obligatoria? |
+|----------|-------------|-----------|---------------|
+| iPhone 6.9" | 1320 × 2868 | iPhone 17 Pro Max | Sí |
+| iPhone 6.5" | 1284 × 2778 o 1242 × 2688 | iPhone 11 Pro Max / XS Max | No, si está la de 6.9" (App Store la escala) |
+| iPad 13" | 2064 × 2752 | iPad Pro 13-inch (M5) | Sí, porque la app corre en iPad |
+
+**Google Play** (PNG o JPG de 24 bits, de 2 a 8 por tipo de dispositivo, lados entre 320 y 3840 px, el largo no
+más del doble del corto):
+
+| Recurso | Tamaño (px) | De dónde |
+|---------|-------------|----------|
+| Teléfono | 1080 × 1920 (9:16, para que pueda destacarse) | `PLAY=1 tool/screenshots.sh` recorta las de 6.9" a 9:16 en `play/` |
+| Tablet 7" y 10" | Opcional | Las del iPad 13" (3:4) sirven |
+| Gráfico de funciones | 1024 × 500 | `store_feature` (Bloque 9 de `docs/prompts.md`) |
+| Ícono | 512 × 512 | `store/icon/` |
+
+Las de 6.9" sin recortar (1320 × 2868) no sirven para Play: miden más del doble de alto que de ancho.
 
 ## Declaraciones de privacidad en las consolas
 

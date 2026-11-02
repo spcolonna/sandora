@@ -19,7 +19,7 @@ class WeatherService extends ChangeNotifier {
 
   static const _api = 'https://api.met.no/weatherapi/locationforecast/2.0/compact';
   // MET Norway pide identificar la app en cada pedido.
-  static const _agent = 'Sandora/1.0 (com.oraki.sandora)';
+  static const _agent = 'Sandora/1.0 (com.oraki.sandora; orakigames.uy@gmail.com)';
 
   late WeatherRules rules;
   late SharedPreferences _prefs;

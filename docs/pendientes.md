@@ -10,7 +10,10 @@
 - [x] Ícono de la app (`flutter_launcher_icons.yaml`, original en `store/icon/`). El splash de Oraki Games ya está,
       igual que en Hexiege: `flutter_native_splash.yaml` + `lib/ui/brand_intro.dart`.
 - [x] Textos de tienda en 5 idiomas y declaraciones de privacidad (`docs/store-listing.md`), política de privacidad
-      bilingüe lista para publicar (`docs/privacy/index.html`). Falta: el contacto y publicar la página.
+      bilingüe lista para publicar (`docs/privacy/index.html`), con contacto `orakigames.uy@gmail.com`. Falta publicar
+      la página (paso del usuario, ver `docs/release-checklist.md`).
+- [x] Firma de Android con `android/key.properties` (si falta, firma con debug) y capturas con `tool/screenshots.sh`.
+      Pasos de la subida: `docs/release-checklist.md`.
 
 ## Prototipo (fase 1)
 - [ ] Medir rendimiento en un Android de gama media real.
@@ -52,9 +55,9 @@
       tocando el cartel de arriba a la derecha): clima real con ubicación aproximada y pronóstico de MET Norway.
       Regalos: agua de lluvia en las vasijas (Agua) y copos que brillan (Luz). Con lluvia suena la lluvia.
       Para probar: `flutter run --dart-define=SANDORA_WEATHER=rain` (clear, cloudy, rain, storm, fog, snow).
-- [ ] Clima, antes de publicar: poner un contacto (web o mail) en el User-Agent de MET Norway (`_agent` en
-      `weather_service.dart`), como piden sus condiciones; nombrar la ubicación y a MET Norway en la política de
-      privacidad.
+- [x] Clima, antes de publicar: contacto `orakigames.uy@gmail.com` en el User-Agent de MET Norway (`_agent` en
+      `weather_service.dart`), como piden sus condiciones; la ubicación y MET Norway ya están nombrados en la política
+      de privacidad.
 - [x] Permiso de ubicación de iOS traducido (`ios/Runner/*.lproj/InfoPlist.strings`, 5 idiomas).
 - [x] Más eventos del clima: arcoíris un rato después de la lluvia (se toca: Luz), charcos que se secan y hojas con
       viento en algunos bloques. Probar: `--dart-define=SANDORA_AFTER_RAIN=20 --dart-define=SANDORA_WEATHER=clear`.
