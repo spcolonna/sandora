@@ -352,4 +352,10 @@ const ja = <String, String>{
   'shop.decorSoon': 'レベル{n}から庭の飾りを買えます',
   'shop.placeNow': '今すぐ置く',
   'shop.inBox': '箱の中：{n}',
+  'care.grew': '留守の間に雑草が少し生えました',
+  'care.storm': '庭に嵐が来ました。片付けるものがあります',
+  'care.how.weed': '上にスワイプして抜きましょう',
+  'care.how.leaves': '指でなぞって落ち葉を掃きましょう',
+  'care.how.sand': '雨で砂が乱れました。指でなぞって整えましょう',
+  'reminder.weeds': '庭があなたを待っています。雑草が生えているかも',
 };

@@ -57,12 +57,13 @@ class Economy {
   Essence essenceOf(String game) => Essence.values.byName(balance.rewards(game).s('essence'));
 
   /// Serenidad después de [days] días sin cuidado: baja un porcentaje por día
-  /// sin pasar del piso (nunca se pierde todo).
-  int decayedSerenity(int serenity, double days) {
+  /// (más [extra] si el jardín tiene cuidados pendientes) sin pasar del piso
+  /// (nunca se pierde todo).
+  int decayedSerenity(int serenity, double days, {double extra = 0}) {
     final s = balance.serenity;
     final floor = (s.i('max') * s.d('floor')).round();
     if (serenity <= floor || days <= 0) return serenity;
-    final decayed = (serenity * pow(1 - s.d('decayPerDay'), days)).round();
+    final decayed = (serenity * pow(1 - s.d('decayPerDay') - extra, days)).round();
     return max(decayed, floor);
   }
 

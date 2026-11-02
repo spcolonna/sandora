@@ -352,4 +352,10 @@ const zh = <String, String>{
   'shop.decorSoon': '从{n}级起可以为庭院购买装饰',
   'shop.placeNow': '立即摆放',
   'shop.inBox': '盒中：{n}',
+  'care.grew': '你不在时长出了一些杂草',
+  'care.storm': '暴风雨经过了你的庭院：有些东西需要收拾',
+  'care.how.weed': '向上滑动把它拔掉',
+  'care.how.leaves': '用手指划过把落叶扫走',
+  'care.how.sand': '雨水弄乱了沙子：用手指划过把它抚平',
+  'reminder.weeds': '你的庭院想你了：也许长出了一些杂草',
 };

@@ -352,4 +352,10 @@ const en = <String, String>{
   'shop.decorSoon': 'From level {n} you can buy decorations for your garden',
   'shop.placeNow': 'Place now',
   'shop.inBox': 'In the box: {n}',
+  'care.grew': 'Some weeds grew while you were away',
+  'care.storm': 'A storm passed through your garden: some things need tidying',
+  'care.how.weed': 'Swipe up to pull it out',
+  'care.how.leaves': 'Swipe across to sweep the leaves',
+  'care.how.sand': 'The rain smudged the sand: swipe to smooth it',
+  'reminder.weeds': 'Your garden misses you: maybe some weeds have grown',
 };

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../garden/care.dart';
 import '../garden/day_cycle.dart';
 import '../garden/economy.dart';
 import '../garden/progress.dart';
@@ -106,6 +107,11 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
       setState(() {});
       _gardenSound();
       _announceUnlocks();
+      _checkCare();
+    });
+    // Después de que se abre la puerta del jardín.
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      if (mounted) _checkCare();
     });
     _gardenSound();
     // Una meditación que quedó a medias al cerrar la app se retoma.
@@ -127,7 +133,24 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) Reminders.instance.reschedule();
+    if (state == AppLifecycleState.resumed) {
+      Reminders.instance.reschedule();
+      _checkCare();
+    }
+  }
+
+  /// Lo que pasó en el jardín mientras no se miraba (maleza, hojas, lo que
+  /// tiró una tormenta), con un aviso corto si apareció algo.
+  void _checkCare() {
+    final w = WeatherService.instance;
+    final news = Progress.instance.refreshCare(
+      DateTime.now(),
+      weatherAt: w.at,
+      windy: w.rules.windy,
+      blockHours: w.rules.blockHours,
+    );
+    if (!mounted || news == CareNews.none) return;
+    showWashiToast(context, tr(news == CareNews.storm ? 'care.storm' : 'care.grew'));
   }
 
   @override

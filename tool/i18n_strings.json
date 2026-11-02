@@ -2455,5 +2455,47 @@
   "pt": "Na caixa: {n}",
   "ja": "箱の中：{n}",
   "zh": "盒中：{n}"
+ },
+ "care.grew": {
+  "es": "Mientras no estabas creció un poco de maleza",
+  "en": "Some weeds grew while you were away",
+  "pt": "Enquanto você estava fora, cresceu um pouco de mato",
+  "ja": "留守の間に雑草が少し生えました",
+  "zh": "你不在时长出了一些杂草"
+ },
+ "care.storm": {
+  "es": "Pasó una tormenta por tu jardín: hay cosas para acomodar",
+  "en": "A storm passed through your garden: some things need tidying",
+  "pt": "Passou uma tempestade pelo seu jardim: há coisas para arrumar",
+  "ja": "庭に嵐が来ました。片付けるものがあります",
+  "zh": "暴风雨经过了你的庭院：有些东西需要收拾"
+ },
+ "care.how.weed": {
+  "es": "Deslizá hacia arriba para arrancarla",
+  "en": "Swipe up to pull it out",
+  "pt": "Deslize para cima para arrancar",
+  "ja": "上にスワイプして抜きましょう",
+  "zh": "向上滑动把它拔掉"
+ },
+ "care.how.leaves": {
+  "es": "Pasá el dedo para barrer las hojas",
+  "en": "Swipe across to sweep the leaves",
+  "pt": "Passe o dedo para varrer as folhas",
+  "ja": "指でなぞって落ち葉を掃きましょう",
+  "zh": "用手指划过把落叶扫走"
+ },
+ "care.how.sand": {
+  "es": "La lluvia borró la arena: pasá el dedo para alisarla",
+  "en": "The rain smudged the sand: swipe to smooth it",
+  "pt": "A chuva apagou a areia: passe o dedo para alisá-la",
+  "ja": "雨で砂が乱れました。指でなぞって整えましょう",
+  "zh": "雨水弄乱了沙子：用手指划过把它抚平"
+ },
+ "reminder.weeds": {
+  "es": "Tu jardín te extraña: quizás creció un poco de maleza",
+  "en": "Your garden misses you: maybe some weeds have grown",
+  "pt": "Seu jardim sente sua falta: talvez tenha crescido um pouco de mato",
+  "ja": "庭があなたを待っています。雑草が生えているかも",
+  "zh": "你的庭院想你了：也许长出了一些杂草"
  }
 }

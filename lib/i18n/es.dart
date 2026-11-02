@@ -352,4 +352,10 @@ const es = <String, String>{
   'shop.decorSoon': 'Desde el nivel {n} vas a poder comprar decoraciones para tu jardín',
   'shop.placeNow': 'Poner ahora',
   'shop.inBox': 'En la caja: {n}',
+  'care.grew': 'Mientras no estabas creció un poco de maleza',
+  'care.storm': 'Pasó una tormenta por tu jardín: hay cosas para acomodar',
+  'care.how.weed': 'Deslizá hacia arriba para arrancarla',
+  'care.how.leaves': 'Pasá el dedo para barrer las hojas',
+  'care.how.sand': 'La lluvia borró la arena: pasá el dedo para alisarla',
+  'reminder.weeds': 'Tu jardín te extraña: quizás creció un poco de maleza',
 };

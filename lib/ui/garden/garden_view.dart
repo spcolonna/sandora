@@ -4,6 +4,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../garden/care.dart';
 import '../../garden/day_cycle.dart';
 import '../../garden/progress.dart';
 import '../../garden/weather.dart';
@@ -22,6 +23,7 @@ import 'garden_scene.dart';
 import 'garden_touch.dart';
 import 'tea_visit.dart';
 
+part 'garden_care.dart';
 part 'garden_gifts.dart';
 part 'garden_moment.dart';
 part 'garden_sky.dart';
@@ -220,6 +222,39 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
     });
   }
 
+  /// Cuidados recién arreglados: lo que salta en su lugar.
+  final _bursts = <(int, Offset, CareKind)>[];
+
+  void _fixCare(CareTask t, Offset at) {
+    final p = Progress.instance;
+    final gain = p.fixCare(t.id, now: widget.now);
+    SoundBoard.instance.play(switch (t.kind) {
+      CareKind.weed => Sfx.pluck,
+      CareKind.leaves || CareKind.sand => Sfx.sweep,
+      CareKind.jar => Sfx.waterDrop,
+      CareKind.stone || CareKind.decor => Sfx.stackPlace,
+    }, volume: 0.55);
+    Haptics.medium();
+    final box = context.findRenderObject() as RenderBox?;
+    if (box != null && gain > 0) {
+      RewardFlight.fly(
+        context,
+        from: box.localToGlobal(_shift + (at + _stageOrigin) * _zoom),
+        currency: 'pebbles',
+        amount: gain,
+      );
+    }
+    if (p.care.isEmpty) {
+      // El jardín quedó en orden: se festeja un poco más.
+      Future.delayed(const Duration(milliseconds: 250), () => SoundBoard.instance.play(Sfx.great, volume: 0.45));
+    }
+    final burst = (_popId++, at, t.kind);
+    setState(() => _bursts.add(burst));
+    Future.delayed(const Duration(milliseconds: 1400), () {
+      if (mounted) setState(() => _bursts.remove(burst));
+    });
+  }
+
   List<double>? _inkFlat;
   SavedInk? _ink;
 
@@ -356,7 +391,8 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
       ensoInk: _ensoInk(p.ensoInk),
       decor: [
         for (final (i, id, r) in decor)
-          if (i != _dragging) (id, r),
+          // Las tumbadas las dibuja su cuidado, inclinadas.
+          if (i != _dragging && (decorating || !p.care.any((t) => t.decor == i))) (id, r),
       ],
     );
     return [
@@ -393,6 +429,11 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
             scale: painted ? 1 / _zoom : 1,
             onTap: () => _visit(e.key, layout.places[e.key]!),
           ),
+        for (final t in p.careOn(widget.side))
+          if (_careRect(t, layout, p) case final r?)
+            _CareSpot(key: ValueKey('care${t.id}'), task: t, rect: r, onFix: (at) => _fixCare(t, at)),
+        for (final (id, at, kind) in _bursts)
+          _CareBurst(key: ValueKey('burst$id'), at: at, kind: kind, serenity: p.careRules.serenityPerFix),
         if (widget.side == 0) _TowerCollect(above: layout.places[Place.stack]!),
         if (widget.side == 0)
           for (final g in cycle.giftsAt(now, weather, afterRain: afterRain))

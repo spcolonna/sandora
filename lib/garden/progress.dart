@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../balance/balance.dart';
 import '../minigames/sand/sand_shapes.dart';
+import 'care.dart';
 import 'daily_goals.dart';
 import 'day_cycle.dart';
 import 'decor.dart';
@@ -38,6 +39,16 @@ class Progress extends ChangeNotifier {
   late DailyGoals dailyGoals;
   late TeaVisits teaVisits;
   late DecorRules decorRules;
+  late CareRules careRules;
+
+  /// Cuidados pendientes de este jardín (maleza, hojas, lo que tiró el clima).
+  List<CareTask> care = [];
+
+  /// Hasta cuándo ya se miró el clima y desde cuándo crece la maleza.
+  DateTime? _careAt, _weedAt;
+
+  /// Cuidados que ya pagaron Piedritas hoy (hay un tope por día).
+  int _careDay = -1, _carePaid = 0;
 
   int pebbles = 0;
   final essences = {for (final e in Essence.values) e: 0};
@@ -164,6 +175,9 @@ class Progress extends ChangeNotifier {
     'serenity',
     'serenityAt',
     'decor',
+    'care',
+    'care.at',
+    'care.weedAt',
   ];
 
   /// Fotos de cada jardín (la del actual puede estar vieja: manda lo vivo).
@@ -240,6 +254,7 @@ class Progress extends ChangeNotifier {
     dailyGoals = DailyGoals(balance);
     teaVisits = TeaVisits(balance);
     decorRules = DecorRules(balance);
+    careRules = CareRules(balance);
     _unlockDays = balance.section('unlocks').nums('days');
     final unlocks = balance.section('unlocks');
     _zoneOf = unlocks.has('zones') ? unlocks.sub('zones').stringMap() : {};
@@ -254,12 +269,19 @@ class Progress extends ChangeNotifier {
     for (final e in Essence.values) {
       essences[e] = _prefs.getInt('essence.${e.name}') ?? 0;
     }
+    care = [for (final t in jsonDecode(_prefs.getString('care') ?? '[]') as List) CareTask.fromJson(t as List)];
+    final careAt = _prefs.getInt('care.at'), weedAt = _prefs.getInt('care.weedAt');
+    _careAt = careAt == null ? null : DateTime.fromMillisecondsSinceEpoch(careAt);
+    _weedAt = weedAt == null ? null : DateTime.fromMillisecondsSinceEpoch(weedAt);
+    _careDay = _prefs.getInt('care.day') ?? -1;
+    _carePaid = _prefs.getInt('care.paid') ?? 0;
     final start = balance.serenity.i('start');
     final savedAt = _prefs.getInt('serenityAt');
     serenity = _prefs.getInt('serenity') ?? start;
     if (savedAt != null) {
       final days = now.difference(DateTime.fromMillisecondsSinceEpoch(savedAt)).inMinutes / (60 * 24);
-      serenity = economy.decayedSerenity(serenity, days);
+      // Con cuidados pendientes, la serenidad baja más rápido.
+      serenity = economy.decayedSerenity(serenity, days, extra: care.length * careRules.decayPerTask);
     }
     final saved = jsonDecode(_prefs.getString('tower') ?? '[]') as List;
     tower = [
@@ -630,6 +652,11 @@ class Progress extends ChangeNotifier {
   /// Vuelve a guardar en la caja la decoración [i].
   void storeDecor(int i) {
     decor[i].side = null;
+    // Guardada en la caja, ya no hay nada que levantar.
+    if (care.any((t) => t.decor == i)) {
+      care.removeWhere((t) => t.decor == i);
+      _saveCare();
+    }
     _saveDecor();
     notifyListeners();
   }
@@ -828,6 +855,98 @@ class Progress extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Para probar: `--dart-define=SANDORA_AWAY_H=30` hace como si la última
+  /// visita al jardín hubiera sido hace 30 horas (una vez por sesión).
+  static const _awayOverride = int.fromEnvironment('SANDORA_AWAY_H');
+  bool _awayUsed = false;
+
+  /// Lo que pasó en el jardín desde la última vez: maleza que creció y lo que
+  /// dejó el clima de cada bloque. Se llama al entrar y cada tanto; devuelve
+  /// qué avisar. La primera vez solo empieza a contar.
+  CareNews refreshCare(
+    DateTime now, {
+    required Weather Function(DateTime) weatherAt,
+    required bool Function(Weather, DateTime) windy,
+    required int blockHours,
+  }) {
+    if (_awayOverride > 0 && !_awayUsed) {
+      _awayUsed = true;
+      _careAt = _weedAt = now.subtract(const Duration(hours: _awayOverride));
+    }
+    if (_careAt == null || _weedAt == null) {
+      _careAt = _weedAt = now;
+      _saveCare();
+      return CareNews.none;
+    }
+    // Hasta una semana para atrás; el clima, de a bloques enteros.
+    final week = now.subtract(const Duration(days: 7));
+    if (_careAt!.isBefore(week)) _careAt = week;
+    if (_weedAt!.isBefore(week)) _weedAt = week;
+    final step = Duration(hours: blockHours);
+    final blocks = now.difference(_careAt!).inMinutes ~/ step.inMinutes;
+    final weeds = careRules.weedsSince(_weedAt!, now);
+    if (blocks == 0 && weeds == 0) return CareNews.none;
+    final to = _careAt!.add(step * blocks);
+    final (fresh, news) = careRules.spawn(
+      from: _careAt!,
+      to: to,
+      have: care,
+      weeds: weeds,
+      weatherAt: weatherAt,
+      windy: windy,
+      blockHours: blockHours,
+      decorPlaced: [
+        for (final (i, d) in decor.indexed)
+          if (d.placed) i,
+      ],
+      hasDrawing: sandDrawing.isNotEmpty,
+    );
+    _careAt = to;
+    _weedAt = _weedAt!.add(Duration(minutes: (weeds * careRules.weedEveryHours * 60).round()));
+    care.addAll(fresh);
+    _saveCare();
+    if (fresh.isNotEmpty) notifyListeners();
+    return news;
+  }
+
+  /// Los cuidados de la vista [side] (sin los de decoraciones que ya no están puestas).
+  Iterable<CareTask> careOn(int side) =>
+      care.where((t) => t.decor == null ? t.side == side : t.decor! < decor.length && decor[t.decor!].side == side);
+
+  /// Arregla el cuidado [id]: suma serenidad y, hasta el tope del día,
+  /// Piedritas. Devuelve las Piedritas ganadas.
+  int fixCare(int id, {DateTime? now}) {
+    final i = care.indexWhere((t) => t.id == id);
+    if (i < 0) return 0;
+    now ??= gardenNow();
+    care.removeAt(i);
+    serenity = min(serenity + careRules.serenityPerFix, economy.balance.serenity.i('max'));
+    final today = _dayIndex(now);
+    if (today != _careDay) {
+      _careDay = today;
+      _carePaid = 0;
+    }
+    var gain = 0;
+    if (_carePaid < careRules.rewardedPerDay) {
+      gain = careRules.pebblesPerFix;
+      _carePaid++;
+      pebbles += gain;
+      _saveWallet();
+    }
+    _prefs.setInt('care.day', _careDay);
+    _prefs.setInt('care.paid', _carePaid);
+    _saveCare();
+    _saveSerenity(now);
+    notifyListeners();
+    return gain;
+  }
+
+  void _saveCare() {
+    _prefs.setString('care', jsonEncode([for (final t in care) t.toJson()]));
+    if (_careAt != null) _prefs.setInt('care.at', _careAt!.millisecondsSinceEpoch);
+    if (_weedAt != null) _prefs.setInt('care.weedAt', _weedAt!.millisecondsSinceEpoch);
+  }
+
   static int _dayIndex(DateTime t) => DateTime.utc(t.year, t.month, t.day).millisecondsSinceEpoch ~/ 86400000;
 
   Duration meditationElapsed({DateTime? now}) {
@@ -922,6 +1041,13 @@ class Progress extends ChangeNotifier {
   Reward finishRun(String game, int stars, {bool record = false, DateTime? now}) {
     now ??= gardenNow();
     advanceGuide(1);
+    // Jugar en un lugar también lo arregla: un dibujo nuevo en la arena, la
+    // torre rearmada, las vasijas otra vez en uso.
+    final fixes = {'sand': CareKind.sand, 'stack': CareKind.stone, 'rain': CareKind.jar}[game];
+    if (fixes != null && care.any((t) => t.kind == fixes)) {
+      care.removeWhere((t) => t.kind == fixes);
+      _saveCare();
+    }
     final day = '${now.year}-${now.month}-${now.day}';
     if (day != _playsDay) {
       _playsDay = day;
