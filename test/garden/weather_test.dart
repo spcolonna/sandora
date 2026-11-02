@@ -8,6 +8,44 @@ import 'package:sandora/garden/weather_service.dart';
 import '../helpers.dart';
 
 void main() {
+  group('fundido del clima', () {
+    final t0 = DateTime(2026, 5, 1, 10);
+
+    test('la primera vez no funde', () {
+      final f = WeatherFade(const Duration(seconds: 90));
+      final b = f.at(Weather.fog, t0);
+      expect(b.fading, isFalse);
+      expect(b.amount(Weather.fog), 1);
+    });
+
+    test('un cambio entra de a poco y termina en el tiempo del fundido', () {
+      final f = WeatherFade(const Duration(seconds: 90))..at(Weather.clear, t0);
+      final start = f.at(Weather.fog, t0);
+      expect(start.amount(Weather.clear), 1);
+      final mid = f.at(Weather.fog, t0.add(const Duration(seconds: 45)));
+      expect(mid.amount(Weather.fog), closeTo(0.5, 0.01));
+      expect(mid.amount(Weather.clear), closeTo(0.5, 0.01));
+      final end = f.at(Weather.fog, t0.add(const Duration(seconds: 90)));
+      expect(end.fading, isFalse);
+      expect(end.amount(Weather.fog), 1);
+    });
+
+    test('un cambio a mitad de un fundido parte de lo que más se ve', () {
+      final f = WeatherFade(const Duration(seconds: 90))..at(Weather.clear, t0);
+      f.at(Weather.rain, t0);
+      final b = f.at(Weather.storm, t0.add(const Duration(seconds: 70)));
+      expect(b.from, Weather.rain);
+      expect(b.to, Weather.storm);
+      expect(b.k, 0);
+    });
+
+    test('mix mezcla un valor por clima', () {
+      const b = WeatherBlend(Weather.clear, Weather.rain, 0.25);
+      expect(b.mix((w) => w == Weather.rain ? 1.0 : 0.0), 0.25);
+      expect(b.main, Weather.clear);
+    });
+  });
+
   final balance = loadBalance();
   final rules = WeatherRules(balance);
   final cycle = DayCycle(balance);

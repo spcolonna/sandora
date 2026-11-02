@@ -102,7 +102,20 @@ class MarketScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         Text(tr('shop.decor'), style: text.titleSmall),
                         for (final d in decor) _DecorRow(d),
-                      ] else if (!p.decorUnlocked) ...[
+                      ] else if (!p.decorOpen) ...[
+                        if (p.tutorialDecor != null || p.decor.any((d) => !d.placed)) ...[
+                          const SizedBox(height: 14),
+                          if (p.guideStep == Guide.buy)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: Text(
+                                tr('guide.buy'),
+                                style: text.titleSmall?.copyWith(color: Palette.wood),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          const _TutorialCard(),
+                        ],
                         const SizedBox(height: 14),
                         WashiTile(
                           margin: EdgeInsets.zero,
@@ -331,6 +344,61 @@ class _DealCard extends StatelessWidget {
             )
           else
             const Icon(Icons.check_circle_rounded, color: Palette.wood),
+        ],
+      ),
+    );
+  }
+}
+
+/// La primera decoración, en el tutorial: a precio de comienzo, una sola vez,
+/// con lo que dio la primera partida. Después, a ponerla en el jardín.
+class _TutorialCard extends StatelessWidget {
+  const _TutorialCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Progress.instance;
+    final text = Theme.of(context).textTheme;
+    final d = p.tutorialDecor ?? p.decorRules.byId(p.decor.firstWhere((d) => !d.placed).id)!;
+    final bought = p.tutorialDecor == null;
+    return WashiTile(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.fromLTRB(8, 10, 12, 10),
+      border: Palette.lantern,
+      glow: p.guideStep == Guide.buy,
+      child: Row(
+        children: [
+          SizedBox(width: 84, height: 84, child: CustomPaint(painter: DecorPainter(d.id, d.aspect))),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tr('shop.tutorial'), style: text.labelLarge),
+                Text(tr('decor.${d.id}'), style: text.titleMedium),
+                const SizedBox(height: 4),
+                if (bought)
+                  Text(tr('shop.tutorialPlace'), style: text.bodySmall)
+                else
+                  Wrap(spacing: 8, children: [for (final c in p.tutorialCost.entries) CurrencyChip.of(c.key, c.value)]),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (bought)
+            const _PlaceNow()
+          else
+            InkButton.small(
+              label: tr('shop.dealBuy'),
+              onPressed: p.canBuyTutorial
+                  ? () {
+                      if (p.buyTutorialDecor()) {
+                        SoundBoard.instance.play(Sfx.good, volume: 0.5);
+                        Haptics.light();
+                      }
+                    }
+                  : null,
+            ),
         ],
       ),
     );

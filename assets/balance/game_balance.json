@@ -49,6 +49,8 @@
   "unlocks": {
     "_comment": "Día de juego (días distintos en que se abrió el jardín) en que se abre cada minijuego; los que no están, desde el día 1. Un minijuego con el id de una zona (pond) se abre al comprarla.",
     "days": { "shishi": 2, "leaves": 3, "moss": 4, "bonsai": 5 },
+    "_levels": "Los del comienzo se abren por nivel, de a uno (el tutorial los presenta): el Arenero desde el principio.",
+    "levels": { "rain": 2, "stack": 3 },
     "_zones": "Minijuegos que abre una zona cuando su id no es el de la zona.",
     "zones": { "enso": "calligraphy", "bell": "temple", "matcha": "teahouse", "flute": "bamboo", "lanterns": "river" }
   },
@@ -75,7 +77,9 @@
     "_after": "Después de la lluvia: el arcoíris se ve rainbowMinutes y los charcos tardan puddleMinutes en secarse. En windChance de los bloques despejados o nublados cruzan hojas con el viento.",
     "rainbowMinutes": 60,
     "puddleMinutes": 120,
-    "windChance": 0.3
+    "windChance": 0.3,
+    "_fade": "Cuántos segundos tarda un clima en fundirse en el siguiente (niebla que entra, lluvia que arranca).",
+    "fadeSeconds": 90
   },
   "shop": {
     "_comment": "Mercado: trueques para conseguir lo que los minijuegos no dan (hoy, Madera). daily: veces por día (sin daily, sin límite). Lotos: moneda escasa por constancia (ofrenda del día, las tres metas del día, racha de meditación; perLevel en 0 desde el rebalance v3); a futuro se podrán vender.",
@@ -346,6 +350,11 @@
     "lotus": 25,
     "minLevel": 8,
     "max": 4
+  },
+  "tutorial": {
+    "_comment": "La primera decoración, que el Mercado ofrece una sola vez antes de minLevel con lo que da la primera partida.",
+    "decor": "rocks",
+    "cost": { "pebbles": 4 }
   },
   "decor": {
     "_comment": "Decoraciones que se ponen libremente en las tres vistas (modo Decorar). Se compran desde minLevel; cada una pide su level. Cada copia más en el mismo jardín cuesta growth veces la anterior (Piedritas redondeadas de a 5). size: ancho como fracción de la vista; aspect: alto/ancho. perSide: cuántas entran por vista; perPatio: cuántas más por cada ampliación de patio. welcomeGift: la que se regala al llegar a minLevel. marketCount: cuántas ofrece el Mercado cada día (además de la oferta). Es el sumidero del final: con todas las ampliaciones compradas, sobran Piedritas.",

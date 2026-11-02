@@ -276,7 +276,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
-    final sky = _SkyState(widget.now, widget.weather);
+    final sky = _SkyState(widget.now);
     final afterRain = _afterRain;
     return LayoutBuilder(
       builder: (context, box) {
@@ -391,7 +391,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
       arc: cycle.arc(now),
       morning: now.hour < 12,
       overcast: sky.overcast,
-      snowy: weather == Weather.snow,
+      snow: sky.snow,
       wet: wet,
       streakObjects: p.streakObjects,
       ensoInk: _ensoInk(p.ensoInk),
@@ -472,9 +472,27 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
               ),
         for (final pop in _pops) _PopUp(key: ValueKey(pop.id), pop: pop),
         if (widget.side == 2) TeaSpot(layout: layout, now: now, life: _life, seconds: () => _t),
-        // Primera partida guiada: primero un lugar para jugar, después el Mercado.
-        if (widget.side == 0 && p.gardenNameOffered && p.guideStep == 0)
-          _GuideHint(key: const ValueKey('guide0'), around: layout.places[Place.sand]!, text: tr('guide.play')),
+        // La guía del comienzo marca dónde jugar: el arenero para empezar y
+        // para subir de nivel, y Gotas cuando se abre.
+        if (widget.side == 0 && p.gardenNameOffered && !decorating)
+          ?switch (p.guideStep) {
+            Guide.play => _GuideHint(
+              key: const ValueKey('guide.play'),
+              around: layout.places[Place.sand]!,
+              text: tr('guide.play'),
+            ),
+            Guide.level2 => _GuideHint(
+              key: const ValueKey('guide.level2'),
+              around: layout.places[Place.sand]!,
+              text: tr('guide.level2'),
+            ),
+            Guide.tryRain => _GuideHint(
+              key: const ValueKey('guide.rain'),
+              around: layout.places[Place.rain]!,
+              text: tr('guide.rain', {'game': tr('mg.rain.name')}),
+            ),
+            _ => null,
+          },
       ],
     ];
   }
@@ -662,31 +680,44 @@ class _GuideHintState extends State<_GuideHint> with SingleTickerProviderStateMi
   }
 }
 
-/// La luz y el clima de un momento, como los usa el dibujo.
+/// La luz y el clima de un momento, como los usa el dibujo. Mientras un
+/// clima se funde en otro, cada valor queda a mitad de camino.
 class _SkyState {
-  final double daylight, warmth, overcast, wet, rainbow;
+  final double daylight, warmth, overcast, snow, wet, rainbow;
+  final WeatherBlend blend;
 
-  factory _SkyState(DateTime now, Weather weather) {
+  static double _overcast(Weather w) => switch (w) {
+    Weather.clear => 0.0,
+    Weather.cloudy => 0.45,
+    Weather.fog => 0.55,
+    Weather.snow => 0.6,
+    Weather.rain => 0.75,
+    Weather.storm => 0.95,
+  };
+
+  factory _SkyState(DateTime now) {
     final cycle = Progress.instance.dayCycle;
     final daylight = cycle.daylight(now);
-    final overcast = switch (weather) {
-      Weather.clear => 0.0,
-      Weather.cloudy => 0.45,
-      Weather.fog => 0.55,
-      Weather.snow => 0.6,
-      Weather.rain => 0.75,
-      Weather.storm => 0.95,
-    };
+    final blend = WeatherService.instance.blend(now);
     final rules = WeatherService.instance.rules;
     final stoppedAt = WeatherService.instance.rainStoppedAt(now);
     // El arcoíris se ve de día y se va apagando a medida que pasa el rato.
-    final rainbow = _rainbowTime(now) && (weather == Weather.clear || weather == Weather.cloudy)
-        ? daylight * (1 - now.difference(stoppedAt!).inSeconds / rules.rainbowFor.inSeconds).clamp(0.0, 1.0)
+    final clearish = blend.amount(Weather.clear) + blend.amount(Weather.cloudy);
+    final rainbow = _rainbowTime(now) && clearish > 0
+        ? clearish * daylight * (1 - now.difference(stoppedAt!).inSeconds / rules.rainbowFor.inSeconds).clamp(0.0, 1.0)
         : 0.0;
-    return _SkyState._(daylight, cycle.warmth(now), overcast, rules.wetness(weather, now, stoppedAt), rainbow);
+    return _SkyState._(
+      daylight,
+      cycle.warmth(now),
+      blend.mix(_overcast),
+      blend.amount(Weather.snow),
+      blend.mix((w) => rules.wetness(w, now, stoppedAt)),
+      rainbow,
+      blend,
+    );
   }
 
-  const _SkyState._(this.daylight, this.warmth, this.overcast, this.wet, this.rainbow);
+  const _SkyState._(this.daylight, this.warmth, this.overcast, this.snow, this.wet, this.rainbow, this.blend);
 }
 
 /// El fondo lejano, uno solo detrás de las tres vistas: cielo, sol o luna,
@@ -704,7 +735,7 @@ class GardenBackdrop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
-    final sky = _SkyState(now, weather);
+    final sky = _SkyState(now);
     return LayoutBuilder(
       builder: (context, box) {
         final stage = gardenStage(box.biggest, top: top);
@@ -725,7 +756,7 @@ class GardenBackdrop extends StatelessWidget {
                 arc: p.dayCycle.arc(now),
                 morning: now.hour < 12,
                 overcast: sky.overcast,
-                snowy: weather == Weather.snow,
+                snow: sky.snow,
                 rainbow: sky.rainbow,
                 drift: drift,
                 skyTop: -stage.top,
@@ -777,7 +808,7 @@ class _GardenSkyLifeState extends State<GardenSkyLife> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    final sky = _SkyState(widget.now, widget.weather);
+    final sky = _SkyState(widget.now);
     return IgnorePointer(
       child: Stack(
         fit: StackFit.expand,
@@ -788,7 +819,7 @@ class _GardenSkyLifeState extends State<GardenSkyLife> with SingleTickerProvider
                 _life,
                 daylight: sky.daylight,
                 warmth: sky.warmth,
-                weather: widget.weather,
+                blend: sky.blend,
                 windy: WeatherService.instance.rules.windy(widget.weather, widget.now),
               ),
             ),

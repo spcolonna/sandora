@@ -100,7 +100,7 @@ void main() {
       final p = Progress.instance;
       await p.load(balance, now: DateTime(2026, 10, 27, 10));
       expect(p.daysPlayed, 1);
-      expect(p.gameUnlocked('stack'), isTrue);
+      expect(p.gameUnlocked('sand'), isTrue);
       expect(p.gameUnlocked('shishi'), isFalse);
       p.countDay(DateTime(2026, 10, 27, 22));
       expect(p.daysPlayed, 1, reason: 'el mismo día no suma');

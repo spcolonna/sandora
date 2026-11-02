@@ -300,9 +300,8 @@ class GardenPainter extends CustomPainter {
   final bool morning;
 
   /// Cuánto tapan las nubes (0 despejado, 1 tormenta): agrisa el cielo y
-  /// esconde el sol o la luna. [snowy] cubre la tierra de blanco.
-  final double overcast;
-  final bool snowy;
+  /// esconde el sol o la luna. [snow] cubre la tierra de blanco (0 a 1).
+  final double overcast, snow;
 
   /// Agua en el suelo (1 lloviendo o recién parado): charcos que se secan.
   final double wet;
@@ -342,7 +341,7 @@ class GardenPainter extends CustomPainter {
     required this.arc,
     required this.morning,
     this.overcast = 0,
-    this.snowy = false,
+    this.snow = 0,
     this.wet = 0,
     this.rainbow = 0,
     this.streakObjects = const [],
@@ -370,7 +369,7 @@ class GardenPainter extends CustomPainter {
     if (layer == GardenLayer.all) _paintHills(canvas, size.width);
     _paintGround(canvas);
     if (wet > 0) _paintPuddles(canvas);
-    if (snowy) _snow(canvas, all);
+    if (snow > 0) _snow(canvas, all);
     final at = layout.places;
     if (layout.side == 0) {
       _paintSandBed(canvas, at[Place.sand]!);
@@ -409,7 +408,7 @@ class GardenPainter extends CustomPainter {
     _courtLayer(canvas, 'bg_court_wall', 0.7);
     _courtLayer(canvas, 'bg_court_ground', 1);
     if (wet > 0) _paintPuddles(canvas);
-    if (snowy) _snow(canvas, all);
+    if (snow > 0) _snow(canvas, all);
     // Los objetos y detalles del arte, de atrás para adelante.
     final objects = [
       for (final place in [Place.board, Place.meditation, Place.rain])
@@ -519,7 +518,7 @@ class GardenPainter extends CustomPainter {
     canvas.translate(-drift * w * _hillDrift, 0);
     _paintHills(canvas, w * (1 + 2 * _hillDrift));
     canvas.restore();
-    if (snowy) _snow(canvas, all);
+    if (snow > 0) _snow(canvas, all);
     _tint(canvas, all);
     canvas.restore();
   }
@@ -527,7 +526,7 @@ class GardenPainter extends CustomPainter {
   void _snow(Canvas canvas, Rect all) => canvas.drawRect(
     all,
     Paint()
-      ..color = const Color(0xFFF4F7FA).withValues(alpha: 0.5)
+      ..color = const Color(0xFFF4F7FA).withValues(alpha: 0.5 * snow)
       ..blendMode = BlendMode.srcATop,
   );
 
@@ -1126,8 +1125,8 @@ class GardenPainter extends CustomPainter {
       (old.warmth - warmth).abs() > 0.004 ||
       (old.arc - arc).abs() > 0.002 ||
       old.morning != morning ||
-      old.overcast != overcast ||
-      old.snowy != snowy ||
+      (old.overcast - overcast).abs() > 0.004 ||
+      (old.snow - snow).abs() > 0.01 ||
       (old.wet - wet).abs() > 0.01 ||
       (old.rainbow - rainbow).abs() > 0.01 ||
       old.streakObjects.length != streakObjects.length ||

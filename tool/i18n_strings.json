@@ -1372,18 +1372,18 @@
   "zh": "开始"
  },
  "guide.play": {
-  "es": "Tocá un lugar del jardín para jugar",
-  "en": "Tap a place in the garden to play",
-  "pt": "Toque num lugar do jardim para jogar",
-  "ja": "庭の場所をタップして遊ぼう",
-  "zh": "点按花园里的地方来玩"
+  "es": "Tocá el arenero para jugar",
+  "en": "Tap the sand bed to play",
+  "pt": "Toque na caixa de areia para jogar",
+  "ja": "砂場をタップして遊ぼう",
+  "zh": "点按沙盘来玩"
  },
  "guide.market": {
-  "es": "Jugando ganás Calma para subir de nivel y monedas para el Mercado",
-  "en": "Playing earns Calm to level up and coins for the Market",
-  "pt": "Jogando você ganha Calma para subir de nível e moedas para o Mercado",
-  "ja": "遊ぶと、レベルを上げる「穏やかさ」と市場で使うコインがもらえます",
-  "zh": "游玩可获得升级用的「平和」和市集用的货币"
+  "es": "¡Ganaste piedritas! Abrí el Mercado: te espera tu primera decoración",
+  "en": "You earned pebbles! Open the Market: your first decoration is waiting",
+  "pt": "Você ganhou pedrinhas! Abra o Mercado: sua primeira decoração te espera",
+  "ja": "小石をゲット！市場を開こう。最初の飾りが待っているよ",
+  "zh": "你获得了小石子！打开市集：你的第一件装饰在等你"
  },
  "reminder.title": {
   "es": "Tu jardín",
@@ -2672,5 +2672,152 @@
   "pt": "Torre de {n} pedras",
   "ja": "{n}個の石の塔",
   "zh": "{n}块石头的塔"
+ },
+ "guide.buy": {
+  "es": "Con lo que ganaste te alcanza: comprala",
+  "en": "What you earned is enough: buy it",
+  "pt": "O que você ganhou dá: compre",
+  "ja": "手に入れた分で買えるよ",
+  "zh": "你赚到的足够了：买下它吧"
+ },
+ "guide.buyBack": {
+  "es": "Tu primera decoración te espera en el Mercado",
+  "en": "Your first decoration is waiting in the Market",
+  "pt": "Sua primeira decoração te espera no Mercado",
+  "ja": "最初の飾りが市場で待っているよ",
+  "zh": "你的第一件装饰在市集等你"
+ },
+ "guide.placeOpen": {
+  "es": "Tocá acá para ponerla en tu jardín",
+  "en": "Tap here to place it in your garden",
+  "pt": "Toque aqui para colocá-la no seu jardim",
+  "ja": "ここをタップして庭に置こう",
+  "zh": "点这里把它放进花园"
+ },
+ "guide.placeTray": {
+  "es": "Tocala abajo, en la bandeja, para ponerla",
+  "en": "Tap it in the tray below to place it",
+  "pt": "Toque nela na bandeja abaixo para colocá-la",
+  "ja": "下のトレイでタップして置こう",
+  "zh": "点按下方托盘里的它来放置"
+ },
+ "guide.placeDone": {
+  "es": "Arrastrala a donde quieras y tocá Listo",
+  "en": "Drag it wherever you like, then tap Done",
+  "pt": "Arraste para onde quiser e toque em Pronto",
+  "ja": "好きな場所へドラッグして「完了」をタップ",
+  "zh": "拖到你喜欢的地方，然后点“完成”"
+ },
+ "guide.level2": {
+  "es": "Jugá otra vez: cada partida suma Calma y te sube de nivel",
+  "en": "Play again: every round adds Calm and levels you up",
+  "pt": "Jogue de novo: cada partida soma Calma e te faz subir de nível",
+  "ja": "もう一度遊ぼう。遊ぶたびに「静けさ」がたまってレベルが上がるよ",
+  "zh": "再玩一次：每局都会增加宁静，让你升级"
+ },
+ "guide.rain": {
+  "es": "Se abrió un juego nuevo: probá {game}",
+  "en": "A new game opened: try {game}",
+  "pt": "Abriu um jogo novo: experimente {game}",
+  "ja": "新しいゲームが開いた：{game}を遊んでみよう",
+  "zh": "新游戏开放了：试试{game}"
+ },
+ "garden.opensAtLevel": {
+  "es": "Se abre en el nivel {n}",
+  "en": "Opens at level {n}",
+  "pt": "Abre no nível {n}",
+  "ja": "レベル{n}で開きます",
+  "zh": "{n}级开放"
+ },
+ "shop.tutorial": {
+  "es": "Tu primera decoración",
+  "en": "Your first decoration",
+  "pt": "Sua primeira decoração",
+  "ja": "最初の飾り",
+  "zh": "你的第一件装饰"
+ },
+ "shop.tutorialPlace": {
+  "es": "Está en tu caja: ponela en el jardín",
+  "en": "It's in your box: place it in the garden",
+  "pt": "Está na sua caixa: coloque no jardim",
+  "ja": "箱に入っているよ。庭に置こう",
+  "zh": "它在你的盒子里：放进花园吧"
+ },
+ "milestone.tap": {
+  "es": "Tocá para seguir",
+  "en": "Tap to continue",
+  "pt": "Toque para continuar",
+  "ja": "タップして続ける",
+  "zh": "点按继续"
+ },
+ "milestone.newGame": {
+  "es": "Juego nuevo: {game}",
+  "en": "New game: {game}",
+  "pt": "Jogo novo: {game}",
+  "ja": "新しいゲーム：{game}",
+  "zh": "新游戏：{game}"
+ },
+ "milestone.game": {
+  "es": "¡Se abrió un juego!",
+  "en": "A new game opened!",
+  "pt": "Um jogo novo abriu!",
+  "ja": "新しいゲームが開いた！",
+  "zh": "新游戏开放了！"
+ },
+ "milestone.place": {
+  "es": "¡Tu jardín creció!",
+  "en": "Your garden grew!",
+  "pt": "Seu jardim cresceu!",
+  "ja": "庭が広がった！",
+  "zh": "你的花园变大了！"
+ },
+ "milestone.upgrade": {
+  "es": "¡Lugar mejorado!",
+  "en": "Place upgraded!",
+  "pt": "Lugar melhorado!",
+  "ja": "場所がグレードアップ！",
+  "zh": "地点升级了！"
+ },
+ "milestone.firstDecor": {
+  "es": "¡Tu jardín ya es tuyo!",
+  "en": "Your garden is yours now!",
+  "pt": "Seu jardim agora é seu!",
+  "ja": "あなただけの庭になった！",
+  "zh": "这座花园属于你了！"
+ },
+ "milestone.firstDecor.sub": {
+  "es": "Pusiste tu primera decoración",
+  "en": "You placed your first decoration",
+  "pt": "Você colocou sua primeira decoração",
+  "ja": "最初の飾りを置いたよ",
+  "zh": "你放下了第一件装饰"
+ },
+ "milestone.firstDecor.next": {
+  "es": "Jugá para subir de nivel y abrir juegos nuevos",
+  "en": "Play to level up and open new games",
+  "pt": "Jogue para subir de nível e abrir jogos novos",
+  "ja": "遊んでレベルを上げ、新しいゲームを開こう",
+  "zh": "玩游戏来升级并开放新游戏"
+ },
+ "milestone.nextLevel": {
+  "es": "En el nivel {n}: {list}",
+  "en": "At level {n}: {list}",
+  "pt": "No nível {n}: {list}",
+  "ja": "レベル{n}で：{list}",
+  "zh": "{n}级时：{list}"
+ },
+ "milestone.decorAll": {
+  "es": "decorar todo el jardín",
+  "en": "decorate the whole garden",
+  "pt": "decorar o jardim todo",
+  "ja": "庭じゅうを飾れる",
+  "zh": "装饰整个花园"
+ },
+ "milestone.seeGarden": {
+  "es": "Volvé al jardín para ver lo nuevo",
+  "en": "Go back to the garden to see what's new",
+  "pt": "Volte ao jardim para ver o que há de novo",
+  "ja": "庭に戻って新しいものを見よう",
+  "zh": "回到花园看看新东西"
  }
 }

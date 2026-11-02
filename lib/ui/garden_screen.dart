@@ -30,6 +30,7 @@ import 'settings_sheet.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
 import 'widgets/glass.dart';
+import 'widgets/milestone_card.dart';
 import 'widgets/next_goal.dart';
 import 'widgets/washi.dart';
 
@@ -63,7 +64,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
   Future<void> _market() async {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-    Progress.instance.advanceGuide(2);
+    Progress.instance.advanceGuide(Guide.buy);
     setState(() => _panel = _Panel.none);
     // Desde el Mercado, "Poner ahora" vuelve al jardín decorando.
     if (await openMarket(context) == true && mounted) _setDecorating(true);
@@ -78,7 +79,12 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
   void _setDecorating(bool on) {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-    if (on) Progress.instance.advanceGuide(3);
+    final p = Progress.instance;
+    if (on && p.guideStep == Guide.decor) p.advanceGuide(Guide.done);
+    // Al terminar de poner la primera decoración, a subir de nivel; y el aviso
+    // de lo que cambió se ve con el jardín ya sin la bandeja.
+    if (!on && p.guideStep == Guide.place && p.decor.any((d) => d.placed)) p.advanceGuide(Guide.level2);
+    if (!on) _celebrate();
     setState(() {
       _decorating = on;
       _fresh = null;
@@ -86,7 +92,22 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     });
   }
 
-  Timer? _tick;
+  Timer? _tick, _fadeTick;
+
+  /// Mientras un clima se funde en otro, el jardín se redibuja seguido para
+  /// que entre de a poco (y no a saltos de 20 segundos).
+  void _followFade() {
+    if (_fadeTick != null || !WeatherService.instance.blend(gardenNow()).fading) return;
+    _fadeTick = Timer.periodic(const Duration(milliseconds: 500), (t) {
+      if (!mounted) return t.cancel();
+      setState(() {});
+      _gardenSound();
+      if (!WeatherService.instance.blend(gardenNow()).fading) {
+        t.cancel();
+        _fadeTick = null;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -106,6 +127,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
       Progress.instance.countDay(DateTime.now());
       setState(() {});
       _gardenSound();
+      _followFade();
       _announceUnlocks();
       _checkCare();
     });
@@ -114,6 +136,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
       if (mounted) _checkCare();
     });
     _gardenSound();
+    _followFade();
     // Una meditación que quedó a medias al cerrar la app se retoma.
     if (Progress.instance.meditationStartedAt != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _meditate());
@@ -159,6 +182,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     WidgetsBinding.instance.removeObserver(this);
     Progress.instance.removeListener(_announceGoals);
     _tick?.cancel();
+    _fadeTick?.cancel();
     _walletAuto?.cancel();
     _pages.dispose();
     _drift.dispose();
@@ -183,7 +207,11 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
           return;
         }
         SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
-        _toast(trN('garden.opensIn', p.unlockDay(m.id) - p.playDay));
+        if (p.lockedByLevel(m.id)) {
+          _toast(tr('garden.opensAtLevel', {'n': p.unlockLevel(m.id)}));
+        } else {
+          _toast(trN('garden.opensIn', p.unlockDay(m.id) - p.playDay));
+        }
     }
   }
 
@@ -206,23 +234,34 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     if (ModalRoute.of(context)?.isCurrent == false) return;
     final p = Progress.instance;
     final fresh = p.newUnlocks(minigames.map((m) => m.id));
-    if (fresh.isEmpty) return;
     p.markUnlocksSeen(fresh);
-    SoundBoard.instance.play(Sfx.good, volume: 0.4);
-    _toast(tr('level.unlocked', {'list': fresh.map((id) => tr('mg.$id.name')).join(', ')}));
+    for (final id in fresh) {
+      p.queueMilestone('game:$id');
+    }
+    _celebrate();
+  }
+
+  /// Muestra los avisos grandes que esperan (nivel nuevo, lugar nuevo,
+  /// mejora), si el jardín está a la vista.
+  void _celebrate() {
+    if (!mounted || Progress.instance.milestones.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || ModalRoute.of(context)?.isCurrent == false) return;
+      showPendingMilestones(context);
+    });
   }
 
   /// Viento de fondo y, si llueve, la lluvia.
   void _gardenSound() {
     final sound = SoundBoard.instance;
     sound.loop(Ambience.wind, volume: 0.18);
-    switch (WeatherService.instance.at(gardenNow())) {
-      case Weather.rain:
-        sound.loop(Ambience.rain, volume: 0.22);
-      case Weather.storm:
-        sound.loop(Ambience.rain, volume: 0.32);
-      default:
-        sound.stopLoop(Ambience.rain);
+    // Sube y baja con el clima que se funde.
+    final b = WeatherService.instance.blend(gardenNow());
+    final rain = 0.22 * b.amount(Weather.rain) + 0.32 * b.amount(Weather.storm);
+    if (rain > 0.01) {
+      sound.loop(Ambience.rain, volume: rain, fade: const Duration(milliseconds: 500));
+    } else {
+      sound.stopLoop(Ambience.rain);
     }
   }
 
@@ -260,6 +299,8 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
         if (mounted && _panel == _Panel.wallet) setState(() => _panel = _Panel.none);
       });
     }
+    // Después de ver llegar lo ganado, el aviso grande (si subió de nivel).
+    Future.delayed(Duration(milliseconds: wait + 500), _celebrate);
     // Después de la primera partida (no al abrir la app) se ofrecen los avisos.
     if (Progress.instance.guideStep >= 1) Reminders.instance.askOnce();
   }
@@ -268,6 +309,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     _quiet();
     await Navigator.of(context).push(calmRoute<void>(const MeditationScreen()));
     if (mounted) _gardenSound();
+    Future.delayed(const Duration(milliseconds: 600), _celebrate);
   }
 
   @override
@@ -373,18 +415,39 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                             child: switch (_panel) {
                               _Panel.wallet => _WalletPanel(onMarket: _market),
                               _Panel.level => const _LevelPanel(),
-                              _Panel.none when p.guideStep == 1 => _GuideHint(
+                              _Panel.none when p.guideStep == Guide.market => _GuideHint(
                                 text: tr('guide.market'),
                                 right: 30,
-                                onTap: () => p.advanceGuide(2),
+                                onTap: _market,
                               ),
-                              _Panel.none when p.guideStep == 2 && p.decorUnlocked => _GuideHint(
+                              _Panel.none when p.guideStep == Guide.buy => _GuideHint(
+                                text: tr('guide.buyBack'),
+                                right: 30,
+                                onTap: _market,
+                              ),
+                              _Panel.none when p.guideStep == Guide.place && p.decorUnlocked => _GuideHint(
+                                text: tr('guide.placeOpen'),
+                                right: 80,
+                                onTap: () => _setDecorating(true),
+                              ),
+                              _Panel.none when p.guideStep == Guide.decor && p.decorOpen => _GuideHint(
                                 text: tr('guide.decor'),
                                 right: 80,
                                 onTap: () => _setDecorating(true),
                               ),
                               _Panel.none => const SizedBox.shrink(),
                             },
+                          ),
+                        ),
+                      if (_decorating && p.guideStep == Guide.place)
+                        Positioned(
+                          left: 12,
+                          right: 12,
+                          top: pad.top + _hudRow + 4,
+                          child: _GuideHint(
+                            text: tr(p.decor.any((d) => d.placed) ? 'guide.placeDone' : 'guide.placeTray'),
+                            right: 0,
+                            onTap: () {},
                           ),
                         ),
                       if (!_decorating)
@@ -538,7 +601,7 @@ class _Hud extends StatelessWidget {
                     icon: Icons.local_florist_rounded,
                     tooltip: tr('decor.title'),
                     dot: p.decorNew || p.upgradeAvailable,
-                    pulse: p.guideStep == 2,
+                    pulse: p.guideStep == Guide.place || p.guideStep == Guide.decor,
                     onTap: onDecor,
                   ),
                   const SizedBox(width: 8),
@@ -547,7 +610,7 @@ class _Hud extends StatelessWidget {
                   icon: Icons.storefront_rounded,
                   tooltip: tr('shop.title'),
                   dot: p.dealNew,
-                  pulse: p.guideStep == 1,
+                  pulse: p.guideStep == Guide.market || p.guideStep == Guide.buy,
                   onTap: onMarket,
                 ),
                 const SizedBox(width: 8),

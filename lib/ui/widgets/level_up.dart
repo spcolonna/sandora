@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../fx/calm.dart';
 import '../theme/palette.dart';
@@ -8,21 +7,15 @@ import '../theme/palette.dart';
 /// Nombre de algo que se destraba por nivel ('meditation' o el id de una ampliación).
 String unlockName(String id) => id == 'meditation' ? tr('meditation.title') : tr('exp.$id.name');
 
-/// "Nivel N" y lo que se destrabó. Es la celebración más grande del juego,
-/// pero tranquila: el cartel aparece con un fundido y un halo cálido late una
-/// sola vez detrás.
+/// "Nivel N" en el resultado de la partida: lo que se destrabó se celebra en
+/// grande al volver al jardín. El cartel aparece con un fundido y un halo
+/// cálido late una sola vez detrás.
 class LevelUpBanner extends StatelessWidget {
   final int level;
   const LevelUpBanner(this.level, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    final p = Progress.instance;
-    final unlocks = p.levels.unlocksAt(level);
-    final decor = [
-      for (final d in p.decorRules.items)
-        if (d.level == level) tr('decor.${d.id}'),
-    ];
     final text = Theme.of(context).textTheme;
     return CalmAppear(
       delay: const Duration(milliseconds: 900),
@@ -51,20 +44,7 @@ class LevelUpBanner extends StatelessWidget {
           child: Column(
             children: [
               Text(tr('level.up', {'n': level}), style: text.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
-              if (unlocks.isNotEmpty)
-                Text(
-                  tr('level.unlocked', {'list': unlocks.map(unlockName).join(', ')}),
-                  style: text.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-              if (level == p.decorRules.minLevel)
-                Text(tr('level.decorOpen'), style: text.bodyMedium, textAlign: TextAlign.center),
-              if (decor.isNotEmpty)
-                Text(
-                  tr('level.newDecor', {'list': decor.join(', ')}),
-                  style: text.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
+              Text(tr('milestone.seeGarden'), style: text.bodyMedium, textAlign: TextAlign.center),
             ],
           ),
         ),

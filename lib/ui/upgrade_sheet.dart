@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
-import 'fx/sfx.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
+import 'widgets/milestone_card.dart';
 import 'widgets/washi.dart';
 
 /// Las mejoras de un lugar del jardín: sus tres niveles, qué cambia en cada
@@ -76,8 +76,10 @@ Future<void> showUpgradeSheet(BuildContext context, String game) {
                       onPressed: p.canUpgrade(game)
                           ? () {
                               if (p.buyUpgrade(game)) {
-                                SoundBoard.instance.play(Sfx.perfect, volume: 0.6);
-                                Haptics.perfect();
+                                // Se cierra la hoja para ver el jardín cambiado, con el aviso grande.
+                                final nav = Navigator.of(context);
+                                nav.pop();
+                                showPendingMilestones(nav.context);
                               }
                             }
                           : null,

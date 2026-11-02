@@ -5,9 +5,9 @@ import 'widgets/washi.dart';
 import '../garden/levels.dart';
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
-import 'fx/sfx.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
+import 'widgets/milestone_card.dart';
 
 /// Lo que trae cada nivel: ampliaciones del jardín (se compran con tokens una
 /// vez alcanzado el nivel) y el Modo meditación.
@@ -143,8 +143,10 @@ class _ExpansionRow extends StatelessWidget {
         onPressed: p.canAfford(e)
             ? () {
                 if (p.buyExpansion(e)) {
-                  SoundBoard.instance.play(Sfx.perfect, volume: 0.6);
-                  Haptics.perfect();
+                  // Se cierra la hoja para ver el jardín cambiado, con el aviso grande.
+                  final nav = Navigator.of(context);
+                  nav.pop();
+                  showPendingMilestones(nav.context);
                 }
               }
             : null,

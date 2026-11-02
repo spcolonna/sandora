@@ -42,12 +42,20 @@ class WeatherService extends ChangeNotifier {
     _realAt = at == null ? null : DateTime.fromMillisecondsSinceEpoch(at);
     final dry = _prefs.getInt('weather.dryAt');
     _realDryAt = dry == null ? null : DateTime.fromMillisecondsSinceEpoch(dry);
+    final from = weatherFromOverride;
+    if (from != null) _fade.startFrom(from, this.at(DateTime.now()), DateTime.now());
   }
 
   bool _fresh(DateTime now, Duration age) => _realAt != null && now.difference(_realAt!) < age;
 
   /// Si el clima de [now] es el real (y no el propio del jardín).
   bool isReal(DateTime now) => weatherOverride == null && useReal && _real != null && _fresh(now, rules.realMaxAge);
+
+  late final _fade = WeatherFade(rules.fade);
+
+  /// Lo que se ve de [at]: los cambios entran de a poco (con el reloj real,
+  /// aunque se fije la hora para probar).
+  WeatherBlend blend(DateTime now) => _fade.at(at(now), DateTime.now());
 
   Weather at(DateTime now) => weatherOverride ?? (isReal(now) ? _real! : rules.simulated(now));
 

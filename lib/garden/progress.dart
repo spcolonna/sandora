@@ -151,7 +151,7 @@ class Progress extends ChangeNotifier {
   /// Días distintos en que se abrió el jardín: destraban minijuegos (GDD).
   int daysPlayed = 0;
   int _lastDay = -1;
-  late Map<String, num> _unlockDays;
+  late Map<String, num> _unlockDays, _unlockLevels;
 
   /// Minijuegos que abre una zona con otro id (Ensō abre la caligrafía).
   Map<String, String> _zoneOf = {};
@@ -159,9 +159,15 @@ class Progress extends ChangeNotifier {
   /// Minijuegos destrabados que ya se anunciaron en el jardín.
   Set<String> unlocksSeen = {};
 
-  /// Primera partida guiada: 0 = señalar un lugar para jugar, 1 = después de
-  /// la primera partida, señalar el nivel y el Mercado, 2 = terminada.
-  int guideStep = 0;
+  /// En qué paso de la guía del comienzo está ([Guide]).
+  int guideStep = Guide.play;
+
+  /// Avisos grandes que esperan mostrarse en el jardín ('level:3',
+  /// 'exp:patio1', 'up:sand:2', 'decor:first'), en orden.
+  List<String> milestones = [];
+
+  /// Si ya se compró la decoración del tutorial (una sola vez).
+  bool _tutorialDecor = false;
 
   /// Si ya se regaló la decoración de bienvenida (al llegar al nivel de decorar).
   bool _decorGift = false;
@@ -297,6 +303,7 @@ class Progress extends ChangeNotifier {
     visitorRules = VisitorRules(balance);
     _unlockDays = balance.section('unlocks').nums('days');
     final unlocks = balance.section('unlocks');
+    _unlockLevels = unlocks.has('levels') ? unlocks.nums('levels') : {};
     _zoneOf = unlocks.has('zones') ? unlocks.sub('zones').stringMap() : {};
     _prefs = await SharedPreferences.getInstance();
     now ??= DateTime.now();
@@ -359,15 +366,17 @@ class Progress extends ChangeNotifier {
     gardenNameOffered = _prefs.getBool('gardenNameOffered') ?? false;
     introSeen = (_prefs.getStringList('intro.seen') ?? []).toSet();
     calm = _prefs.getInt('calm') ?? 0;
-    // Quien ya jugaba antes de la guía no la ve.
-    guideStep = _prefs.getInt('guide.step') ?? (calm > 0 ? 2 : 0);
     expansions = (_prefs.getStringList('expansions') ?? []).toSet();
+    guideStep = _prefs.getInt('guide.v2') ?? _guideFromOld(_prefs.getInt('guide.step'));
+    milestones = _prefs.getStringList('milestones') ?? [];
+    _tutorialDecor = _prefs.getBool('decor.tutorial') ?? false;
     decor = [
       for (final d in jsonDecode(_prefs.getString('decor') ?? '[]') as List)
         if (decorRules.byId((d as List)[0] as String) != null) PlacedDecor.fromJson(d),
     ];
     _decorGift = _prefs.getBool('decor.gift') ?? false;
     _decorWelcome();
+    _syncGuide();
     lotus = _prefs.getInt('lotus') ?? 0;
     _lotusDay = _prefs.getInt('lotus.day') ?? -1;
     _shopDay = _prefs.getInt('shop.day') ?? 0;
@@ -431,9 +440,46 @@ class Progress extends ChangeNotifier {
   /// Avanza la guía hasta [step] (nunca vuelve atrás).
   void advanceGuide(int step) {
     if (step <= guideStep) return;
-    guideStep = step;
-    _prefs.setInt('guide.step', step);
+    _setGuide(step);
+    _syncGuide();
     notifyListeners();
+  }
+
+  void _setGuide(int step) {
+    guideStep = step;
+    _prefs.setInt('guide.v2', step);
+  }
+
+  /// Los pasos que esperan un nivel se saltean si ya se llegó.
+  void _syncGuide() {
+    var step = guideStep;
+    if (step == Guide.level2 && level >= 2) step = Guide.tryRain;
+    if ((step == Guide.tryRain || step == Guide.level3) && decorOpen) step = Guide.decor;
+    if (step != guideStep) _setGuide(step);
+  }
+
+  /// La guía de antes tenía 4 pasos (jugar, Mercado, decorar, terminada):
+  /// quien ya jugaba sigue desde donde corresponde, sin repetir el comienzo.
+  int _guideFromOld(int? old) => switch (old) {
+    null when calm == 0 => Guide.play,
+    0 => Guide.play,
+    1 => Guide.market,
+    null || 2 => decorOpen ? Guide.decor : Guide.level3,
+    _ => Guide.done,
+  };
+
+  void queueMilestone(String m) {
+    milestones = [...milestones, m];
+    _prefs.setStringList('milestones', milestones);
+  }
+
+  /// Saca el próximo aviso grande para mostrar (null si no hay).
+  String? takeMilestone() {
+    if (milestones.isEmpty) return null;
+    final m = milestones.first;
+    milestones = milestones.sublist(1);
+    _prefs.setStringList('milestones', milestones);
+    return m;
   }
 
   void markIntroSeen(String game) {
@@ -483,17 +529,36 @@ class Progress extends ChangeNotifier {
     return levels.expansions.where((e) => e.zone && e.id == id).firstOrNull;
   }
 
+  /// Nivel en que se abre [game] (1: desde el principio). Los del comienzo
+  /// se abren por nivel, de a uno, para aprenderlos con calma.
+  int unlockLevel(String game) => (_unlockLevels[game] ?? 1).toInt();
+
+  /// Si [game] está cerrado solo por el nivel (abre el día que toca).
+  bool lockedByLevel(String game) => unlockZone(game) == null && playDay >= unlockDay(game) && !gameUnlocked(game);
+
   bool gameUnlocked(String game) {
     final zone = unlockZone(game);
     if (zone != null) return expansions.contains(zone.id) || _dayOverride >= zone.level;
-    return playDay >= unlockDay(game);
+    if (playDay < unlockDay(game)) return false;
+    // Un juego que ya se jugó no se vuelve a cerrar.
+    final need = unlockLevel(game);
+    return level >= need || _dayOverride >= need || best(game) > 0;
   }
 
   /// Minijuegos que se abrieron y todavía no se anunciaron (los del primer
-  /// día no se anuncian).
+  /// día no se anuncian; los que abre un nivel se anuncian con el nivel).
   List<String> newUnlocks(Iterable<String> games) => [
     for (final g in games)
-      if (gameUnlocked(g) && !unlocksSeen.contains(g) && (unlockDay(g) > 1 || unlockZone(g) != null)) g,
+      if (gameUnlocked(g) &&
+          !unlocksSeen.contains(g) &&
+          (unlockDay(g) > 1 || unlockZone(g) != null || unlockLevel(g) > 1))
+        g,
+  ];
+
+  /// Minijuegos que se abren justo en el nivel [n].
+  List<String> gamesAtLevel(int n) => [
+    for (final e in _unlockLevels.entries)
+      if (e.value.toInt() == n && playDay >= unlockDay(e.key)) e.key,
   ];
 
   void markUnlocksSeen(Iterable<String> games) {
@@ -513,7 +578,12 @@ class Progress extends ChangeNotifier {
     calm += amount;
     _prefs.setInt('calm', calm);
     _decorWelcome();
-    return level > before ? level : null;
+    if (level <= before) return null;
+    // Lo que abre el nivel se anuncia en su aviso grande, no aparte.
+    markUnlocksSeen([for (var n = before + 1; n <= level; n++) ...gamesAtLevel(n)]);
+    queueMilestone('level:$level');
+    _syncGuide();
+    return level;
   }
 
   bool canAfford(Expansion e) => pebbles >= e.pebbles && e.essences.entries.every((c) => essences[c.key]! >= c.value);
@@ -541,18 +611,50 @@ class Progress extends ChangeNotifier {
     }
     expansions.add(e.id);
     _prefs.setStringList('expansions', expansions.toList());
+    queueMilestone('exp:${e.id}');
     _saveWallet();
     notifyListeners();
     return true;
   }
 
-  /// Si ya se puede decorar (el botón aparece desde ese nivel).
-  bool get decorUnlocked => level >= decorRules.minLevel;
+  /// Si el catálogo de decoraciones está abierto (desde [DecorRules.minLevel]).
+  bool get decorOpen => level >= decorRules.minLevel;
+
+  /// Si se ve el botón de Decorar: con el catálogo abierto o con alguna
+  /// decoración (la del tutorial) para poner.
+  bool get decorUnlocked => decorOpen || decor.isNotEmpty;
+
+  /// La decoración que el tutorial ofrece en el Mercado antes del nivel de
+  /// decorar, a precio de comienzo y una sola vez.
+  DecorItem? get tutorialDecor =>
+      _tutorialDecor || decorOpen ? null : decorRules.byId(economy.balance.section('tutorial').s('decor'));
+
+  Map<String, int> get tutorialCost =>
+      economy.balance.section('tutorial').nums('cost').map((k, v) => MapEntry(k, v.round()));
+
+  bool get canBuyTutorial => tutorialDecor != null && tutorialCost.entries.every((c) => walletOf(c.key) >= c.value);
+
+  bool buyTutorialDecor() {
+    if (!canBuyTutorial) return false;
+    final d = tutorialDecor!;
+    for (final c in tutorialCost.entries) {
+      _addTo(c.key, -c.value);
+    }
+    decor.add(PlacedDecor(d.id));
+    _discover('decor.${d.id}');
+    _tutorialDecor = true;
+    _prefs.setBool('decor.tutorial', true);
+    _saveDecor();
+    _saveWallet();
+    advanceGuide(Guide.place);
+    notifyListeners();
+    return true;
+  }
 
   /// Al llegar al nivel de decorar se regala una decoración, que queda en la
   /// caja: así el modo Decorar se estrena sin gastar.
   void _decorWelcome() {
-    if (_decorGift || !decorUnlocked) return;
+    if (_decorGift || !decorOpen) return;
     final d = decorRules.byId(decorRules.welcomeGift);
     if (d == null) return;
     _decorGift = true;
@@ -568,7 +670,7 @@ class Progress extends ChangeNotifier {
   /// Las decoraciones del Mercado de hoy: algunas de las ya destrabadas, sin
   /// la oferta. Cambian cada día del jardín.
   List<DecorItem> marketDecor({DateTime? now}) {
-    if (!decorUnlocked) return const [];
+    if (!decorOpen) return const [];
     final deal = dealToday(now: now);
     final day = dayCycle.gardenDay(now ?? gardenNow());
     final pool = decorRules.items.where((d) => d.level <= level && d != deal).toList()
@@ -612,7 +714,7 @@ class Progress extends ChangeNotifier {
   /// descuento y una sola vez. Se elige al mirarla por primera vez en el día y
   /// queda fija aunque se suba de nivel.
   DecorItem? dealToday({DateTime? now}) {
-    if (!decorUnlocked) return null;
+    if (!decorOpen) return null;
     final today = dayCycle.gardenDay(now ?? gardenNow());
     if (_dealDay != today || decorRules.byId(_dealId ?? '') == null) {
       final pool = decorRules.items.where((d) => d.level <= level).toList();
@@ -684,6 +786,8 @@ class Progress extends ChangeNotifier {
       ..side = side
       ..x = x
       ..y = y;
+    // La primera que se pone en el tutorial se celebra al terminar de decorar.
+    if (guideStep == Guide.place && !milestones.contains('decor:first')) queueMilestone('decor:first');
     _saveDecor();
     notifyListeners();
     return i;
@@ -985,6 +1089,7 @@ class Progress extends ChangeNotifier {
       _addTo(c.key, -c.value);
     }
     upgrades[game] = upgradeTier(game) + 1;
+    queueMilestone('up:$game:${upgrades[game]}');
     if (visitorRequest?.kind == RequestKind.upgrade && _visitorAccepted) _visitorFulfilled();
     _prefs.setString('upgrades', jsonEncode(upgrades));
     _saveWallet();
@@ -1011,7 +1116,7 @@ class Progress extends ChangeNotifier {
       for (final d in decor)
         if (d.placed) d.id,
     },
-    decorUnlocked: (id) => decorUnlocked && level >= (decorRules.byId(id)?.level ?? 999),
+    decorUnlocked: (id) => decorOpen && level >= (decorRules.byId(id)?.level ?? 999),
     gameOpen: gameUnlocked,
     canEverUpgrade: upgradeRules.places.any(
       (g) =>
@@ -1250,7 +1355,8 @@ class Progress extends ChangeNotifier {
   /// del día que se cumplieron quedan en [lastRunGoals].
   Reward finishRun(String game, int stars, {bool record = false, DateTime? now}) {
     now ??= gardenNow();
-    advanceGuide(1);
+    if (guideStep == Guide.play) advanceGuide(Guide.market);
+    if (guideStep == Guide.tryRain && game == 'rain') advanceGuide(Guide.level3);
     // Jugar en un lugar también lo arregla: un dibujo nuevo en la arena, la
     // torre rearmada, las vasijas otra vez en uso.
     final req = visitorRequest;
@@ -1463,3 +1569,10 @@ class Progress extends ChangeNotifier {
 /// La casa de té: sin té, con el té servido esperando, con la visita que ya
 /// dejó su ofrenda, o con la ofrenda ya juntada hoy.
 enum TeaState { empty, served, visit, visited }
+
+/// Pasos de la guía del comienzo. Cada uno se cumple jugando: la primera
+/// partida da para la primera decoración, ponerla lleva a subir de nivel, y
+/// cada nivel abre un juego nuevo.
+abstract final class Guide {
+  static const play = 0, market = 1, buy = 2, place = 3, level2 = 4, tryRain = 5, level3 = 6, decor = 7, done = 8;
+}

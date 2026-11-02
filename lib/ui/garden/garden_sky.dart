@@ -1,27 +1,30 @@
 part of 'garden_view.dart';
 
 /// Lo vivo del cielo: nubes que pasan, estrellas que titilan de noche y el
-/// clima (lluvia, nieve, niebla, relámpagos lejanos).
+/// clima (lluvia, nieve, niebla, relámpagos lejanos). Cuando el clima
+/// cambia, lo que se va se apaga mientras lo nuevo aparece.
 class _SkyLifePainter extends CustomPainter {
   final Animation<double> life;
   final double daylight, warmth;
-  final Weather weather;
+  final WeatherBlend blend;
 
   /// Si cruzan hojas con el viento.
   final bool windy;
-  _SkyLifePainter(this.life, {required this.daylight, required this.warmth, required this.weather, this.windy = false})
+  _SkyLifePainter(this.life, {required this.daylight, required this.warmth, required this.blend, this.windy = false})
     : super(repaint: life);
 
-  bool get _wet => weather == Weather.rain || weather == Weather.storm;
+  double get _clear => blend.amount(Weather.clear);
+  double get _storm => blend.amount(Weather.storm);
+  double get _wet => blend.amount(Weather.rain) + _storm;
 
   @override
   void paint(Canvas canvas, Size size) {
     final t = life.value * 120;
     final w = size.width, h = size.height;
     final night = 1 - daylight;
-    if (night > 0.05 && (weather == Weather.clear || weather == Weather.cloudy)) {
+    final shown = _clear + blend.amount(Weather.cloudy) * 0.35;
+    if (night > 0.05 && shown > 0.01) {
       final rng = Random(21);
-      final shown = weather == Weather.clear ? 1.0 : 0.35;
       for (var i = 0; i < 34; i++) {
         final o = Offset(rng.nextDouble() * w, rng.nextDouble() * h * 0.3);
         final tw = 0.55 + 0.45 * sin(t * (0.6 + rng.nextDouble()) + i);
@@ -34,39 +37,39 @@ class _SkyLifePainter extends CustomPainter {
     }
     _paintClouds(canvas, size, t);
     if (windy) _paintWindLeaves(canvas, size, t);
-    switch (weather) {
-      case Weather.rain || Weather.storm:
-        _paintRain(canvas, size, t);
-        if (weather == Weather.storm) _paintFlash(canvas, size, t);
-      case Weather.snow:
-        _paintSnow(canvas, size, t);
-      case Weather.fog:
-        _paintFog(canvas, size, t);
-      default:
-    }
+    if (_wet > 0.01) _paintRain(canvas, size, t);
+    if (_storm > 0.01) _paintFlash(canvas, size, t);
+    final snow = blend.amount(Weather.snow);
+    if (snow > 0.01) _paintSnow(canvas, size, t, snow);
+    final fog = blend.amount(Weather.fog);
+    if (fog > 0.01) _paintFog(canvas, size, t, fog);
   }
 
   void _paintClouds(Canvas canvas, Size size, double t) {
     final w = size.width, h = size.height;
-    final grey = switch (weather) {
-      Weather.clear => 0.0,
-      Weather.cloudy || Weather.fog || Weather.snow => 0.35,
-      Weather.rain => 0.6,
-      Weather.storm => 0.8,
-    };
+    final grey = blend.mix(
+      (w) => switch (w) {
+        Weather.clear => 0.0,
+        Weather.cloudy || Weather.fog || Weather.snow => 0.35,
+        Weather.rain => 0.6,
+        Weather.storm => 0.8,
+      },
+    );
     final base = Color.lerp(Colors.white, const Color(0xFFF6D3B8), warmth * (1 - grey))!;
     final cloud = Color.lerp(base, const Color(0xFF6E7781), grey)!;
-    final a = weather == Weather.clear ? (0.08 + 0.6 * daylight).clamp(0.0, 0.7) : 0.25 + 0.55 * daylight;
-    final count = weather == Weather.clear ? 3 : 6;
-    for (var i = 0; i < count; i++) {
-      final speed = (3.0 + i * 1.6) * (_wet ? 1.6 : 1);
+    final a = _clear * (0.08 + 0.6 * daylight).clamp(0.0, 0.7) + (1 - _clear) * (0.25 + 0.55 * daylight);
+    // Despejado hay 3 nubes; las otras 3 aparecen a medida que se nubla.
+    for (var i = 0; i < 6; i++) {
+      final shown = i < 3 ? 1.0 : 1 - _clear;
+      if (shown < 0.01) continue;
+      final speed = (3.0 + i * 1.6) * (1 + 0.6 * _wet);
       final span = w + 160;
       final x = (i * 157 + t * speed) % span - 80;
       final y = h * (0.06 + 0.05 * (i % 3)) + (i >= 3 ? h * 0.02 : 0);
       final scale = 0.8 + 0.1 * (i % 3) + (i >= 3 ? 0.35 : 0);
       // Difusas, como pintadas en húmedo (círculos nítidos se ven pegados).
       final p = Paint()
-        ..color = cloud.withValues(alpha: a * 0.8)
+        ..color = cloud.withValues(alpha: a * 0.8 * shown)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, 9 * scale);
       for (final (dx, dy, r) in [(0.0, 0.0, 16.0), (18.0, -6.0, 20.0), (38.0, 0.0, 15.0), (20.0, 6.0, 16.0)]) {
         canvas.drawCircle(Offset(x + dx * scale, y + dy * scale), r * scale, p);
@@ -75,17 +78,19 @@ class _SkyLifePainter extends CustomPainter {
   }
 
   void _paintRain(Canvas canvas, Size size, double t) {
-    final storm = weather == Weather.storm;
+    // Arranca con pocas gotas y se va cargando; la tormenta trae más y más
+    // inclinadas.
+    final storm = _wet > 0 ? _storm / _wet : 0.0;
     final rng = Random(7);
-    final n = storm ? 110 : 70;
-    final len = storm ? 18.0 : 13.0;
-    final slant = storm ? 0.32 : 0.18;
+    final n = ((70 + 40 * storm) * _wet).round();
+    final len = 13.0 + 5 * storm;
+    final slant = 0.18 + 0.14 * storm;
     final paint = Paint()
-      ..color = const Color(0xFFDDE8F0).withValues(alpha: 0.34 + 0.24 * daylight)
+      ..color = const Color(0xFFDDE8F0).withValues(alpha: (0.34 + 0.24 * daylight) * (0.4 + 0.6 * _wet))
       ..strokeWidth = 1.1
       ..strokeCap = StrokeCap.round;
     for (var i = 0; i < n; i++) {
-      final speed = (storm ? 520 : 380) * (0.8 + 0.4 * rng.nextDouble());
+      final speed = (380 + 140 * storm) * (0.8 + 0.4 * rng.nextDouble());
       final y = (rng.nextDouble() * (size.height + 40) + t * speed) % (size.height + 40) - 20;
       final x = (rng.nextDouble() * (size.width + 60) + y * slant) % (size.width + 60) - 30;
       canvas.drawLine(Offset(x, y), Offset(x - len * slant, y - len), paint);
@@ -117,10 +122,10 @@ class _SkyLifePainter extends CustomPainter {
     }
   }
 
-  void _paintSnow(Canvas canvas, Size size, double t) {
+  void _paintSnow(Canvas canvas, Size size, double t, double amount) {
     final rng = Random(11);
-    final paint = Paint()..color = Colors.white.withValues(alpha: 0.85);
-    for (var i = 0; i < 70; i++) {
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.85 * (0.4 + 0.6 * amount));
+    for (var i = 0; i < (70 * amount).round(); i++) {
       final speed = 18 + 22 * rng.nextDouble();
       final r = 1.0 + 1.8 * rng.nextDouble();
       final y = (rng.nextDouble() * (size.height + 20) + t * speed) % (size.height + 20) - 10;
@@ -129,7 +134,7 @@ class _SkyLifePainter extends CustomPainter {
     }
   }
 
-  void _paintFog(Canvas canvas, Size size, double t) {
+  void _paintFog(Canvas canvas, Size size, double t, double amount) {
     final w = size.width, h = size.height;
     final fog = Color.lerp(const Color(0xFF8A93A0), const Color(0xFFF2F2EE), daylight)!;
     // Un velo parejo y bandas que se corren despacio.
@@ -139,7 +144,11 @@ class _SkyLifePainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [fog.withValues(alpha: 0), fog.withValues(alpha: 0.3), fog.withValues(alpha: 0.2)],
+          colors: [
+            fog.withValues(alpha: 0),
+            fog.withValues(alpha: 0.3 * amount),
+            fog.withValues(alpha: 0.2 * amount),
+          ],
         ).createShader(Rect.fromLTWH(0, h * 0.3, w, h * 0.7)),
     );
     for (var i = 0; i < 4; i++) {
@@ -149,7 +158,12 @@ class _SkyLifePainter extends CustomPainter {
       canvas.drawOval(
         band,
         Paint()
-          ..shader = RadialGradient(colors: [fog.withValues(alpha: 0.45), fog.withValues(alpha: 0)]).createShader(band),
+          ..shader = RadialGradient(
+            colors: [
+              fog.withValues(alpha: 0.45 * amount),
+              fog.withValues(alpha: 0),
+            ],
+          ).createShader(band),
       );
     }
   }
@@ -162,10 +176,15 @@ class _SkyLifePainter extends CustomPainter {
     final a = since < 0.1
         ? since / 0.1
         : (since < 0.2 ? 1 - (since - 0.1) / 0.1 * 0.6 : 0.4 * (1 - (since - 0.2) / 0.4));
-    canvas.drawRect(Offset.zero & size, Paint()..color = Colors.white.withValues(alpha: 0.28 * a));
+    canvas.drawRect(Offset.zero & size, Paint()..color = Colors.white.withValues(alpha: 0.28 * a * _storm));
   }
 
   @override
   bool shouldRepaint(_SkyLifePainter old) =>
-      old.daylight != daylight || old.warmth != warmth || old.weather != weather || old.windy != windy;
+      old.daylight != daylight ||
+      old.warmth != warmth ||
+      old.blend.from != blend.from ||
+      old.blend.to != blend.to ||
+      old.blend.k != blend.k ||
+      old.windy != windy;
 }

@@ -8,6 +8,12 @@ const _weatherOverride = String.fromEnvironment('SANDORA_WEATHER');
 
 Weather? get weatherOverride => Weather.values.asNameMap()[_weatherOverride];
 
+/// Para ver un cambio de clima al abrir: `--dart-define=SANDORA_WEATHER_FROM=clear`
+/// (con `SANDORA_WEATHER=fog`) arranca fundiendo de despejado a niebla.
+const _weatherFrom = String.fromEnvironment('SANDORA_WEATHER_FROM');
+
+Weather? get weatherFromOverride => Weather.values.asNameMap()[_weatherFrom];
+
 /// Para probar el arcoíris y los charcos: `--dart-define=SANDORA_AFTER_RAIN=20`
 /// hace como si la lluvia hubiera parado hace 20 minutos.
 const afterRainOverride = int.fromEnvironment('SANDORA_AFTER_RAIN');
@@ -29,6 +35,9 @@ class WeatherRules {
   final Duration rainbowFor, puddlesFor;
   final double windChance;
 
+  /// Cuánto tarda un clima en fundirse en otro.
+  final Duration fade;
+
   WeatherRules(Balance balance)
     : blockHours = balance.section('weather').i('blockHours'),
       odds = balance.section('weather').nums('odds').map((k, v) => MapEntry(Weather.values.byName(k), v.round())),
@@ -36,7 +45,8 @@ class WeatherRules {
       realMaxAge = Duration(minutes: balance.section('weather').i('realMaxAgeMinutes')),
       rainbowFor = Duration(minutes: balance.section('weather').i('rainbowMinutes')),
       puddlesFor = Duration(minutes: balance.section('weather').i('puddleMinutes')),
-      windChance = balance.section('weather').d('windChance');
+      windChance = balance.section('weather').d('windChance'),
+      fade = Duration(seconds: balance.section('weather').i('fadeSeconds'));
 
   /// Cuánta agua queda en el suelo (1 lloviendo o recién parado, 0 seco).
   double wetness(Weather w, DateTime now, DateTime? stoppedAt) {
@@ -87,6 +97,61 @@ class WeatherRules {
     h = ((h ^ (h >> 15)) * 0x85EBCA77) & 0xFFFFFFFF;
     h = ((h ^ (h >> 13)) * 0xC2B2AE3D) & 0xFFFFFFFF;
     return h ^ (h >> 16);
+  }
+}
+
+/// Lo que se ve mientras un clima se funde en otro: [from] se va y [to]
+/// llega, con [k] de 0 a 1.
+class WeatherBlend {
+  final Weather from, to;
+  final double k;
+  const WeatherBlend(this.from, this.to, this.k);
+  const WeatherBlend.still(Weather w) : from = w, to = w, k = 1;
+
+  /// Cuánto se ve [w] (0 a 1).
+  double amount(Weather w) => (from == w ? 1 - k : 0) + (to == w ? k : 0);
+
+  /// Un valor por clima, mezclado.
+  double mix(double Function(Weather w) of) => of(from) * (1 - k) + of(to) * k;
+
+  /// El que más se ve.
+  Weather get main => k < 0.5 ? from : to;
+
+  bool get fading => k < 1;
+}
+
+/// Funde los cambios de clima en [fade]: recuerda el que se ve y, cuando
+/// cambia, arranca desde lo que se estaba viendo. La primera vez no funde.
+class WeatherFade {
+  final Duration fade;
+  WeatherFade(this.fade);
+
+  Weather? _from, _to;
+  DateTime? _since;
+
+  /// Arranca fundiendo desde [from] (para probar).
+  void startFrom(Weather from, Weather to, DateTime now) {
+    _from = from;
+    _to = to;
+    _since = now;
+  }
+
+  WeatherBlend at(Weather w, DateTime now) {
+    if (_to == null) {
+      _from = _to = w;
+      _since = null;
+    } else if (w != _to) {
+      _from = _blend(now).main;
+      _to = w;
+      _since = now;
+    }
+    return _blend(now);
+  }
+
+  WeatherBlend _blend(DateTime now) {
+    if (_since == null || _from == _to) return WeatherBlend.still(_to!);
+    final v = (now.difference(_since!).inMilliseconds / fade.inMilliseconds).clamp(0.0, 1.0);
+    return WeatherBlend(_from!, _to!, v * v * (3 - 2 * v));
   }
 }
 
