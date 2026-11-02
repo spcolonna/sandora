@@ -11,7 +11,7 @@ import 'scene_art.dart';
 void paintBambooGrove(Canvas canvas, Rect r) {
   final art = SceneArt.instance['obj_bamboo_grove'];
   if (art != null) {
-    _groundShadow(canvas, r, 0.7);
+    groundShadow(canvas, r, 0.7);
     drawArtIn(canvas, art, r);
     return;
   }
@@ -63,7 +63,7 @@ void paintBambooGrove(Canvas canvas, Rect r) {
 void paintTeahouse(Canvas canvas, Rect r, Offset lamp) {
   final art = SceneArt.instance['obj_tea_house'];
   if (art != null) {
-    _groundShadow(canvas, r, 0.95);
+    groundShadow(canvas, r, 0.95);
     drawArtIn(canvas, art, r);
     _hangingLamp(canvas, lamp, r.height * 0.07);
     return;
@@ -142,7 +142,7 @@ Offset teahouseLamp(Rect r) {
 }
 
 /// Sombra apoyada en el suelo, de [width] del ancho de [r].
-void _groundShadow(Canvas canvas, Rect r, double width) {
+void groundShadow(Canvas canvas, Rect r, double width) {
   canvas.drawOval(
     Rect.fromCenter(
       center: Offset(r.center.dx, r.bottom - r.height * 0.01),
