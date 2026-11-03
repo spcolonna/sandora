@@ -26,6 +26,7 @@ import 'market_screen.dart';
 import 'widgets/daily_goals.dart';
 import 'widgets/garden_sign.dart';
 import 'meditation/meditation_screen.dart';
+import 'achievements_sheet.dart';
 import 'album_sheet.dart';
 import 'settings_sheet.dart';
 import 'theme/palette.dart';
@@ -947,6 +948,10 @@ class _MenuButton extends StatelessWidget {
                     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
                     showAlbumSheet(context);
                   }),
+                  item(Icons.emoji_events_rounded, tr('ach.title'), p.achievementsNew, () {
+                    SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+                    showAchievementsSheet(context);
+                  }),
                   item(Icons.settings_rounded, tr('settings.title'), false, () => showSettingsSheet(context)),
                 ],
               ),
@@ -959,7 +964,7 @@ class _MenuButton extends StatelessWidget {
     return GestureDetector(
       onTap: open,
       child: Badge(
-        isLabelVisible: p.albumNew,
+        isLabelVisible: p.albumNew || p.achievementsNew,
         smallSize: 10,
         backgroundColor: Palette.lantern,
         offset: const Offset(-2, 2),

@@ -59,6 +59,14 @@
 - [ ] Nube, primer build en un iPhone: Xcode tiene que sumar iCloud (Key-value storage) al App ID `com.oraki.sandora`
       (con firma automática lo hace solo; si falla, Signing & Capabilities → + iCloud → Key-value storage). Probar con
       dos aparatos o borrando y reinstalando. Android: `adb shell bmgr backupnow com.oraki.sandora` y reinstalar.
+- [x] **Logros** (`lib/garden/achievements.dart`, `lib/ui/achievements_sheet.dart`): 19 logros que salen de lo que la
+      partida ya guarda (valen hacia atrás y viajan con la nube); los ya hechos al actualizar entran sin aviso. Cada uno
+      nuevo tiene su aviso grande; menú → Logros muestra el avance. En iOS se mandan a Game Center (canal
+      `sandora/games`): entra en silencio al abrir y el inicio de sesión de Apple aparece al tocar "Ver en Game Center".
+- [ ] Game Center en App Store Connect: activar Game Center en la app y crear los 19 logros con id `sandora.<id>`
+      (firstRun, threeStars, firstDecor, level5, patio, days7, tower, meditate, three50, level10, decor20, upgradeMax,
+      shapes, gifts, visitors, allGames, days30, level20, runs500), con nombre, texto y puntos. Primer build en iPhone:
+      la capacidad Game Center (firma automática la suma). Android: Play Games queda para después.
 - [ ] **Ranking online:** el tablón muestra los récords propios y avisa que el ranking llega pronto (necesita backend).
 - [x] Más eventos del día: semillas que vuelan de día (Madera) y el último rayo del atardecer (Luz).
 - [x] **Clima** (`lib/garden/weather.dart`, `weather_service.dart`, sección `weather` del balance): despejado,

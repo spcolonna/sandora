@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'balance/balance.dart';
+import 'garden/achievements.dart';
 import 'garden/cloud_save.dart';
+import 'garden/game_center.dart';
 import 'garden/lotus_store.dart';
 import 'garden/progress.dart';
 import 'garden/reminders.dart';
@@ -31,6 +33,9 @@ Future<void> main() async {
   await CloudSave.instance.pull();
   await Progress.instance.load(Balance.instance);
   CloudSave.instance.start();
+  // Los logros miran la partida; Game Center entra en silencio si puede.
+  GameCenter.instance.start();
+  Achievements.instance.start(minigames.map((m) => m.id));
   await WeatherService.instance.load(Balance.instance);
   await Reminders.instance.load(Balance.instance);
   await SceneArt.instance.load();

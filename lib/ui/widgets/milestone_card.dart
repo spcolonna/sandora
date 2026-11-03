@@ -2,9 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../garden/achievements.dart';
 import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../minigames/catalog.dart';
+import '../achievements_sheet.dart';
 import '../fx/sfx.dart';
 import '../garden/garden_decor.dart';
 import '../theme/palette.dart';
@@ -83,6 +85,16 @@ Milestone? _cardFor(String m) {
         title: tr('milestone.upgrade'),
         lines: [tr('mg.$game.name'), tr('up.t$tier')],
         art: _GlyphSeal(minigames.where((g) => g.id == game).firstOrNull?.icon ?? Icons.auto_awesome_rounded),
+      );
+    case 'ach':
+      return Milestone(
+        title: tr('milestone.ach'),
+        lines: [
+          tr('ach.${parts[1]}'),
+          if (Achievements.all.where((a) => a.id == parts[1]).firstOrNull case final a?)
+            tr('ach.${a.id}.how', {'n': Achievements.instance.measure(a).target}),
+        ],
+        art: _GlyphSeal(achievementIcon(parts[1])),
       );
     case 'cloud':
       return Milestone(

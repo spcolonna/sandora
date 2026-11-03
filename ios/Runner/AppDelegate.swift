@@ -1,4 +1,5 @@
 import Flutter
+import GameKit
 import UIKit
 
 @main
@@ -16,6 +17,86 @@ import UIKit
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "SandoraCloud") {
       CloudStore.register(messenger: registrar.messenger())
+    }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "SandoraGames") {
+      GameCenter.register(messenger: registrar.messenger())
+    }
+  }
+}
+
+/// Game Center (`sandora/games`): entra en silencio al abrir y guarda la
+/// pantalla de inicio de sesión de Apple para cuando se toque "Game Center".
+enum GameCenter {
+  private static var channel: FlutterMethodChannel?
+  private static var login: UIViewController?
+
+  static func register(messenger: FlutterBinaryMessenger) {
+    let ch = FlutterMethodChannel(name: "sandora/games", binaryMessenger: messenger)
+    ch.setMethodCallHandler { call, result in
+      switch call.method {
+      case "auth":
+        authenticate()
+        result(nil)
+      case "report":
+        guard let args = call.arguments as? [String: Double] else { return result(false) }
+        let list = args.map { id, percent -> GKAchievement in
+          let a = GKAchievement(identifier: id)
+          a.percentComplete = percent
+          // El aviso grande es el del jardín.
+          a.showsCompletionBanner = false
+          return a
+        }
+        GKAchievement.report(list) { error in result(error == nil) }
+      case "show":
+        result(show())
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+    channel = ch
+  }
+
+  private static func authenticate() {
+    GKLocalPlayer.local.authenticateHandler = { vc, _ in
+      login = vc
+      channel?.invokeMethod("auth", arguments: GKLocalPlayer.local.isAuthenticated)
+    }
+  }
+
+  private static func show() -> Bool {
+    guard let top = topController() else { return false }
+    if GKLocalPlayer.local.isAuthenticated {
+      let gc: GKGameCenterViewController
+      if #available(iOS 14.0, *) {
+        gc = GKGameCenterViewController(state: .achievements)
+      } else {
+        gc = GKGameCenterViewController()
+        gc.viewState = .achievements
+      }
+      gc.gameCenterDelegate = Dismisser.shared
+      top.present(gc, animated: true)
+      return true
+    }
+    guard let vc = login else { return false }
+    login = nil
+    top.present(vc, animated: true)
+    return true
+  }
+
+  private static func topController() -> UIViewController? {
+    let window = UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .flatMap { $0.windows }
+      .first { $0.isKeyWindow }
+    var top = window?.rootViewController
+    while let next = top?.presentedViewController { top = next }
+    return top
+  }
+
+  private final class Dismisser: NSObject, GKGameCenterControllerDelegate {
+    static let shared = Dismisser()
+    func gameCenterViewControllerDidFinish(_ vc: GKGameCenterViewController) {
+      vc.dismiss(animated: true)
     }
   }
 }

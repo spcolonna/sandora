@@ -121,6 +121,19 @@ class Progress extends ChangeNotifier {
   SandShape? sandLastShape;
   int rainBest = 0;
 
+  /// Lo hecho desde siempre, para los logros: partidas, partidas de tres
+  /// estrellas y juegos que se probaron.
+  int runsTotal = 0, threeTotal = 0;
+  Set<String> gamesPlayed = {};
+
+  /// Logros conseguidos y cuántos se vieron (para el punto de "hay nuevo").
+  Set<String> achievements = {};
+  int _achievementsSeen = 0;
+  bool get achievementsNew => achievements.length > _achievementsSeen;
+
+  /// Si ya se miraron los logros alguna vez en esta partida.
+  bool get achievementsStarted => _prefs.containsKey('achievements');
+
   /// Nombre que el jugador le puso a su jardín; null hasta que lo elige.
   String? gardenName;
 
@@ -366,6 +379,23 @@ class Progress extends ChangeNotifier {
     final lastShape = _prefs.getInt('sandLastShape');
     sandLastShape = lastShape == null ? null : SandShape.values[lastShape];
     rainBest = _prefs.getInt('rainBest') ?? 0;
+    runsTotal = _prefs.getInt('stats.runs') ?? 0;
+    threeTotal = _prefs.getInt('stats.three') ?? 0;
+    gamesPlayed = (_prefs.getStringList('stats.games') ?? []).toSet();
+    // De antes de los logros: los juegos con récord ya se habían probado.
+    if (!_prefs.containsKey('stats.games')) {
+      gamesPlayed = {
+        for (final k in _prefs.getKeys())
+          if (k.startsWith('best.') && (_prefs.get(k) as num? ?? 0) > 0) k.substring(5),
+        if (sandFigures > 0) 'sand',
+        if (bestTower > 0) 'stack',
+        if (rainBest > 0) 'rain',
+      };
+      // Y se jugó por lo menos una partida de cada uno.
+      if (runsTotal < gamesPlayed.length) runsTotal = gamesPlayed.length;
+    }
+    achievements = (_prefs.getStringList('achievements') ?? []).toSet();
+    _achievementsSeen = _prefs.getInt('achievements.seen') ?? 0;
     _playsDay = _prefs.getString('playsDay') ?? '';
     _plays = (jsonDecode(_prefs.getString('plays') ?? '{}') as Map).map((k, v) => MapEntry(k as String, v as int));
     gardenName = _prefs.getString('gardenName');
@@ -486,6 +516,28 @@ class Progress extends ChangeNotifier {
     milestones = milestones.sublist(1);
     _prefs.setStringList('milestones', milestones);
     return m;
+  }
+
+  /// Guarda logros conseguidos; si [announce], cada uno espera su aviso
+  /// grande. Si no (los que ya estaban hechos), quedan como vistos.
+  void addAchievements(Iterable<String> ids, {bool announce = true}) {
+    final fresh = ids.where((id) => !achievements.contains(id)).toList();
+    if (fresh.isEmpty && achievementsStarted) return;
+    achievements = {...achievements, ...fresh};
+    _prefs.setStringList('achievements', achievements.toList());
+    if (announce) {
+      for (final id in fresh) {
+        queueMilestone('ach:$id');
+      }
+    } else {
+      markAchievementsSeen();
+    }
+    notifyListeners();
+  }
+
+  void markAchievementsSeen() {
+    _achievementsSeen = achievements.length;
+    _prefs.setInt('achievements.seen', _achievementsSeen);
   }
 
   void markIntroSeen(String game) {
@@ -1403,6 +1455,12 @@ class Progress extends ChangeNotifier {
       if (record) DailyKind.record: 1,
     }, game: game);
     lastRunTea = game == 'matcha' && _serveTea(stars, now);
+    runsTotal++;
+    if (stars >= 3) threeTotal++;
+    gamesPlayed.add(game);
+    _prefs.setInt('stats.runs', runsTotal);
+    _prefs.setInt('stats.three', threeTotal);
+    _prefs.setStringList('stats.games', gamesPlayed.toList());
     _prefs.setString('playsDay', _playsDay);
     _prefs.setString('plays', jsonEncode(_plays));
     _saveWallet();

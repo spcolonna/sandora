@@ -2854,5 +2854,313 @@
   "pt": "Seu jardim fica no backup do Google",
   "ja": "お庭はGoogleのバックアップに保存されます",
   "zh": "你的庭院保存在 Google 备份中"
+ },
+ "ach.title": {
+  "es": "Logros",
+  "en": "Achievements",
+  "pt": "Conquistas",
+  "ja": "実績",
+  "zh": "成就"
+ },
+ "ach.done": {
+  "es": "Conseguido",
+  "en": "Earned",
+  "pt": "Conquistado",
+  "ja": "達成",
+  "zh": "已达成"
+ },
+ "ach.gameCenter": {
+  "es": "Ver en Game Center",
+  "en": "View in Game Center",
+  "pt": "Ver no Game Center",
+  "ja": "Game Centerで見る",
+  "zh": "在 Game Center 查看"
+ },
+ "ach.gameCenterOff": {
+  "es": "Iniciá sesión en Game Center desde los Ajustes del iPhone.",
+  "en": "Sign in to Game Center in your iPhone Settings.",
+  "pt": "Entre no Game Center nos Ajustes do iPhone.",
+  "ja": "iPhoneの設定からGame Centerにサインインしてください。",
+  "zh": "请在 iPhone 设置中登录 Game Center。"
+ },
+ "milestone.ach": {
+  "es": "¡Logro conseguido!",
+  "en": "Achievement earned!",
+  "pt": "Conquista desbloqueada!",
+  "ja": "実績達成！",
+  "zh": "达成成就！"
+ },
+ "ach.firstRun": {
+  "es": "Primer paso",
+  "en": "First step",
+  "pt": "Primeiro passo",
+  "ja": "はじめの一歩",
+  "zh": "第一步"
+ },
+ "ach.firstRun.how": {
+  "es": "Terminá tu primera partida.",
+  "en": "Finish your first game.",
+  "pt": "Termine sua primeira partida.",
+  "ja": "はじめてのゲームを終える。",
+  "zh": "完成第一局游戏。"
+ },
+ "ach.threeStars": {
+  "es": "Tres faroles",
+  "en": "Three lanterns",
+  "pt": "Três lanternas",
+  "ja": "三つの灯",
+  "zh": "三盏灯"
+ },
+ "ach.threeStars.how": {
+  "es": "Ganá tres estrellas en una partida.",
+  "en": "Earn three stars in one game.",
+  "pt": "Ganhe três estrelas numa partida.",
+  "ja": "一回のゲームで星を三つ取る。",
+  "zh": "在一局中获得三颗星。"
+ },
+ "ach.firstDecor": {
+  "es": "Tu jardín",
+  "en": "Your garden",
+  "pt": "Seu jardim",
+  "ja": "あなたの庭",
+  "zh": "你的庭院"
+ },
+ "ach.firstDecor.how": {
+  "es": "Poné tu primera decoración.",
+  "en": "Place your first decoration.",
+  "pt": "Coloque sua primeira decoração.",
+  "ja": "はじめての飾りを置く。",
+  "zh": "摆放第一件装饰。"
+ },
+ "ach.level5": {
+  "es": "Brote",
+  "en": "Sprout",
+  "pt": "Broto",
+  "ja": "芽生え",
+  "zh": "萌芽"
+ },
+ "ach.level5.how": {
+  "es": "Llegá al nivel {n}.",
+  "en": "Reach level {n}.",
+  "pt": "Chegue ao nível {n}.",
+  "ja": "レベル{n}に到達する。",
+  "zh": "达到 {n} 级。"
+ },
+ "ach.level10": {
+  "es": "Raíces",
+  "en": "Roots",
+  "pt": "Raízes",
+  "ja": "根を張る",
+  "zh": "扎根"
+ },
+ "ach.level10.how": {
+  "es": "Llegá al nivel {n}.",
+  "en": "Reach level {n}.",
+  "pt": "Chegue ao nível {n}.",
+  "ja": "レベル{n}に到達する。",
+  "zh": "达到 {n} 级。"
+ },
+ "ach.level20": {
+  "es": "Árbol antiguo",
+  "en": "Ancient tree",
+  "pt": "Árvore antiga",
+  "ja": "古木",
+  "zh": "古树"
+ },
+ "ach.level20.how": {
+  "es": "Llegá al nivel {n}.",
+  "en": "Reach level {n}.",
+  "pt": "Chegue ao nível {n}.",
+  "ja": "レベル{n}に到達する。",
+  "zh": "达到 {n} 级。"
+ },
+ "ach.patio": {
+  "es": "Más lugar",
+  "en": "More room",
+  "pt": "Mais espaço",
+  "ja": "ひろがる庭",
+  "zh": "更多空间"
+ },
+ "ach.patio.how": {
+  "es": "Ampliá el patio por primera vez.",
+  "en": "Expand your courtyard for the first time.",
+  "pt": "Amplie o pátio pela primeira vez.",
+  "ja": "はじめて中庭を広げる。",
+  "zh": "第一次扩建庭院。"
+ },
+ "ach.days7": {
+  "es": "Una semana",
+  "en": "One week",
+  "pt": "Uma semana",
+  "ja": "一週間",
+  "zh": "一周"
+ },
+ "ach.days7.how": {
+  "es": "Visitá el jardín {n} días.",
+  "en": "Visit the garden on {n} days.",
+  "pt": "Visite o jardim em {n} dias.",
+  "ja": "{n}日、庭を訪れる。",
+  "zh": "在 {n} 天里来到庭院。"
+ },
+ "ach.days30": {
+  "es": "Un mes de calma",
+  "en": "A month of calm",
+  "pt": "Um mês de calma",
+  "ja": "ひと月の静けさ",
+  "zh": "一个月的宁静"
+ },
+ "ach.days30.how": {
+  "es": "Visitá el jardín {n} días.",
+  "en": "Visit the garden on {n} days.",
+  "pt": "Visite o jardim em {n} dias.",
+  "ja": "{n}日、庭を訪れる。",
+  "zh": "在 {n} 天里来到庭院。"
+ },
+ "ach.tower": {
+  "es": "Equilibrio",
+  "en": "Balance",
+  "pt": "Equilíbrio",
+  "ja": "均衡",
+  "zh": "平衡"
+ },
+ "ach.tower.how": {
+  "es": "Apilá una torre de {n} piedras.",
+  "en": "Stack a tower of {n} stones.",
+  "pt": "Empilhe uma torre de {n} pedras.",
+  "ja": "石を{n}個積み上げる。",
+  "zh": "叠起 {n} 块石头的塔。"
+ },
+ "ach.meditate": {
+  "es": "Mente quieta",
+  "en": "Still mind",
+  "pt": "Mente quieta",
+  "ja": "静かな心",
+  "zh": "静心"
+ },
+ "ach.meditate.how": {
+  "es": "Meditá {n} días seguidos.",
+  "en": "Meditate {n} days in a row.",
+  "pt": "Medite {n} dias seguidos.",
+  "ja": "{n}日続けて瞑想する。",
+  "zh": "连续冥想 {n} 天。"
+ },
+ "ach.three50": {
+  "es": "Cielo de faroles",
+  "en": "Sky of lanterns",
+  "pt": "Céu de lanternas",
+  "ja": "灯の空",
+  "zh": "满天灯火"
+ },
+ "ach.three50.how": {
+  "es": "Ganá tres estrellas en {n} partidas.",
+  "en": "Earn three stars in {n} games.",
+  "pt": "Ganhe três estrelas em {n} partidas.",
+  "ja": "{n}回、星三つを取る。",
+  "zh": "在 {n} 局中获得三颗星。"
+ },
+ "ach.decor20": {
+  "es": "Jardín vestido",
+  "en": "Dressed garden",
+  "pt": "Jardim enfeitado",
+  "ja": "彩りの庭",
+  "zh": "装点庭院"
+ },
+ "ach.decor20.how": {
+  "es": "Tené {n} decoraciones puestas.",
+  "en": "Have {n} decorations placed.",
+  "pt": "Tenha {n} decorações colocadas.",
+  "ja": "飾りを{n}個置く。",
+  "zh": "摆放 {n} 件装饰。"
+ },
+ "ach.upgradeMax": {
+  "es": "Obra maestra",
+  "en": "Masterpiece",
+  "pt": "Obra-prima",
+  "ja": "傑作",
+  "zh": "杰作"
+ },
+ "ach.upgradeMax.how": {
+  "es": "Mejorá un lugar al máximo.",
+  "en": "Fully upgrade one place.",
+  "pt": "Melhore um lugar ao máximo.",
+  "ja": "ひとつの場所を最大まで改良する。",
+  "zh": "把一处地点升到满级。"
+ },
+ "ach.shapes": {
+  "es": "Dibujante de arena",
+  "en": "Sand artist",
+  "pt": "Desenhista de areia",
+  "ja": "砂の絵師",
+  "zh": "沙画师"
+ },
+ "ach.shapes.how": {
+  "es": "Encontrá las {n} figuras de la arena.",
+  "en": "Find all {n} sand shapes.",
+  "pt": "Encontre as {n} figuras da areia.",
+  "ja": "砂の形を{n}つすべて見つける。",
+  "zh": "找到全部 {n} 种沙中图形。"
+ },
+ "ach.gifts": {
+  "es": "Regalos del día",
+  "en": "Gifts of the day",
+  "pt": "Presentes do dia",
+  "ja": "一日の贈り物",
+  "zh": "每日之礼"
+ },
+ "ach.gifts.how": {
+  "es": "Juntá los {n} regalos del jardín.",
+  "en": "Collect all {n} garden gifts.",
+  "pt": "Junte os {n} presentes do jardim.",
+  "ja": "庭の贈り物を{n}つすべて集める。",
+  "zh": "收集全部 {n} 份庭院礼物。"
+ },
+ "ach.visitors": {
+  "es": "Casa de té llena",
+  "en": "Full teahouse",
+  "pt": "Casa de chá cheia",
+  "ja": "にぎわう茶屋",
+  "zh": "茶屋满座"
+ },
+ "ach.visitors.how": {
+  "es": "Recibí a las {n} visitas de la casa de té.",
+  "en": "Welcome all {n} teahouse visitors.",
+  "pt": "Receba as {n} visitas da casa de chá.",
+  "ja": "茶屋の客{n}人すべてを迎える。",
+  "zh": "迎接全部 {n} 位茶屋访客。"
+ },
+ "ach.allGames": {
+  "es": "Curiosidad",
+  "en": "Curiosity",
+  "pt": "Curiosidade",
+  "ja": "好奇心",
+  "zh": "好奇心"
+ },
+ "ach.allGames.how": {
+  "es": "Probá los {n} juegos.",
+  "en": "Try all {n} games.",
+  "pt": "Experimente os {n} jogos.",
+  "ja": "{n}種類のゲームをすべて遊ぶ。",
+  "zh": "尝试全部 {n} 个游戏。"
+ },
+ "ach.runs500": {
+  "es": "Sin fin",
+  "en": "Endless",
+  "pt": "Sem fim",
+  "ja": "果てなく",
+  "zh": "无尽"
+ },
+ "ach.runs500.how": {
+  "es": "Jugá {n} partidas.",
+  "en": "Play {n} games.",
+  "pt": "Jogue {n} partidas.",
+  "ja": "{n}回遊ぶ。",
+  "zh": "玩 {n} 局。"
+ },
+ "ach.count": {
+  "es": "Conseguiste {n} de {t}",
+  "en": "You've earned {n} of {t}",
+  "pt": "Você conquistou {n} de {t}",
+  "ja": "{t}個中{n}個を達成",
+  "zh": "已达成 {n}/{t}"
  }
 }
