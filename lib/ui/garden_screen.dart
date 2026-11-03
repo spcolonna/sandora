@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../garden/cloud_save.dart';
 import '../garden/care.dart';
 import '../garden/day_cycle.dart';
 import '../garden/economy.dart';
@@ -117,6 +118,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     // Las metas del día cumplidas fuera de una partida se anuncian enseguida
     // (también la de una meditación que terminó con la app cerrada).
     Progress.instance.addListener(_announceGoals);
+    CloudSave.instance.restored.addListener(_celebrate);
     WidgetsBinding.instance.addPostFrameCallback((_) => _announceGoals());
     // Hoy ya se entró: los recordatorios arrancan mañana.
     Reminders.instance.reschedule();
@@ -181,6 +183,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     Progress.instance.removeListener(_announceGoals);
+    CloudSave.instance.restored.removeListener(_celebrate);
     _tick?.cancel();
     _fadeTick?.cancel();
     _walletAuto?.cancel();

@@ -2819,5 +2819,40 @@
   "pt": "Volte ao jardim para ver o que há de novo",
   "ja": "庭に戻って新しいものを見よう",
   "zh": "回到花园看看新东西"
+ },
+ "milestone.cloud": {
+  "es": "¡Tu jardín volvió!",
+  "en": "Your garden is back!",
+  "pt": "Seu jardim voltou!",
+  "ja": "お庭が戻ってきました！",
+  "zh": "你的庭院回来了！"
+ },
+ "milestone.cloud.sub": {
+  "es": "Lo trajimos desde iCloud, tal como lo dejaste.",
+  "en": "We brought it back from iCloud, just as you left it.",
+  "pt": "Trouxemos do iCloud, do jeito que você deixou.",
+  "ja": "iCloudから、残したままの姿で戻しました。",
+  "zh": "已从 iCloud 恢复，和你离开时一模一样。"
+ },
+ "settings.cloud": {
+  "es": "Tu jardín se guarda en iCloud",
+  "en": "Your garden is saved to iCloud",
+  "pt": "Seu jardim é salvo no iCloud",
+  "ja": "お庭はiCloudに保存されます",
+  "zh": "你的庭院保存在 iCloud"
+ },
+ "settings.cloudOff": {
+  "es": "Iniciá sesión en iCloud para guardar tu jardín en la nube",
+  "en": "Sign in to iCloud to save your garden to the cloud",
+  "pt": "Entre no iCloud para salvar seu jardim na nuvem",
+  "ja": "iCloudにサインインすると、お庭をクラウドに保存できます",
+  "zh": "登录 iCloud 即可将庭院保存到云端"
+ },
+ "settings.cloudAndroid": {
+  "es": "Tu jardín viaja en la copia de seguridad de Google",
+  "en": "Your garden is kept in your Google backup",
+  "pt": "Seu jardim fica no backup do Google",
+  "ja": "お庭はGoogleのバックアップに保存されます",
+  "zh": "你的庭院保存在 Google 备份中"
  }
 }

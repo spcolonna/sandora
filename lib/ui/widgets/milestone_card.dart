@@ -84,6 +84,12 @@ Milestone? _cardFor(String m) {
         lines: [tr('mg.$game.name'), tr('up.t$tier')],
         art: _GlyphSeal(minigames.where((g) => g.id == game).firstOrNull?.icon ?? Icons.auto_awesome_rounded),
       );
+    case 'cloud':
+      return Milestone(
+        title: tr('milestone.cloud'),
+        lines: [tr('milestone.cloud.sub')],
+        art: const _GlyphSeal(Icons.cloud_done_rounded),
+      );
     case 'decor':
       final d = p.decor.where((d) => d.placed).lastOrNull;
       final item = d == null ? null : p.decorRules.byId(d.id);

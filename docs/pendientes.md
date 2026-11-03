@@ -51,6 +51,14 @@
 - [x] **Día y noche** por la hora del dispositivo (`DayCycle`, sección `dayCycle` del balance): amanecer, día,
       atardecer y noche, faroles de noche. Regalos: rocío al amanecer (Agua) y luciérnagas de noche (Luz), 3 por día.
       Para probar otra hora: `flutter run --dart-define=SANDORA_HOUR=22`.
+- [x] **Guardado en la nube** (`lib/garden/cloud_save.dart`): en iOS, la partida va comprimida al almacén clave-valor
+      de iCloud (canal `sandora/cloud` en `AppDelegate.swift`, `Runner.entitlements`) unos segundos después de cada
+      cambio y al salir; al abrir, al volver y cuando otro aparato guarda, gana la copia con el reinicio más nuevo,
+      después la de más Calma y después la más nueva. Quien abre en un aparato nuevo ve "¡Tu jardín volvió!". Los
+      ajustes no viajan. En Android, Auto Backup de Google (vuelve al instalar). Ajustes muestra dónde se guarda.
+- [ ] Nube, primer build en un iPhone: Xcode tiene que sumar iCloud (Key-value storage) al App ID `com.oraki.sandora`
+      (con firma automática lo hace solo; si falla, Signing & Capabilities → + iCloud → Key-value storage). Probar con
+      dos aparatos o borrando y reinstalando. Android: `adb shell bmgr backupnow com.oraki.sandora` y reinstalar.
 - [ ] **Ranking online:** el tablón muestra los récords propios y avisa que el ranking llega pronto (necesita backend).
 - [x] Más eventos del día: semillas que vuelan de día (Madera) y el último rayo del atardecer (Luz).
 - [x] **Clima** (`lib/garden/weather.dart`, `weather_service.dart`, sección `weather` del balance): despejado,

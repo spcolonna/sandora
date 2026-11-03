@@ -406,4 +406,9 @@ const pt = <String, String>{
   'milestone.nextLevel': 'No nível {n}: {list}',
   'milestone.decorAll': 'decorar o jardim todo',
   'milestone.seeGarden': 'Volte ao jardim para ver o que há de novo',
+  'milestone.cloud': 'Seu jardim voltou!',
+  'milestone.cloud.sub': 'Trouxemos do iCloud, do jeito que você deixou.',
+  'settings.cloud': 'Seu jardim é salvo no iCloud',
+  'settings.cloudOff': 'Entre no iCloud para salvar seu jardim na nuvem',
+  'settings.cloudAndroid': 'Seu jardim fica no backup do Google',
 };

@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'widgets/washi.dart';
 
 import '../balance/balance.dart';
 import '../i18n/i18n.dart';
+import '../garden/cloud_save.dart';
 import '../garden/progress.dart';
 import '../garden/reminders.dart';
 import '../garden/weather_service.dart';
@@ -11,6 +14,7 @@ import '../settings.dart';
 import 'fx/sfx.dart';
 import 'garden/garden_gate.dart';
 import 'garden_screen.dart';
+import 'theme/palette.dart';
 import 'title_intro.dart';
 
 Future<void> showSettingsSheet(BuildContext context) {
@@ -94,6 +98,7 @@ Future<void> showSettingsSheet(BuildContext context) {
                     ],
                   ),
                   const SizedBox(height: 18),
+                  const _CloudLine(),
                   Center(
                     child: InkButton.quiet(label: tr('settings.reset'), onPressed: () => _askReset(context)),
                   ),
@@ -122,6 +127,8 @@ Future<void> _askReset(BuildContext context) async {
   if (yes != true || !context.mounted) return;
   final navigator = Navigator.of(context, rootNavigator: true);
   await Progress.instance.reset(Balance.instance);
+  // La partida nueva reemplaza también la de iCloud (y la de otros aparatos).
+  await CloudSave.instance.markReset();
   await WeatherService.instance.load(Balance.instance);
   await Reminders.instance.reschedule();
   // Sin transición: el jardín viejo se va enseguida y no convive con el nuevo
@@ -133,4 +140,42 @@ Future<void> _askReset(BuildContext context) async {
     ),
     (_) => false,
   );
+}
+
+/// Dónde queda guardado el jardín: iCloud en iOS (si hay sesión) o la copia de
+/// seguridad de Google en Android.
+class _CloudLine extends StatelessWidget {
+  const _CloudLine();
+
+  @override
+  Widget build(BuildContext context) {
+    final cloud = CloudSave.instance;
+    return ValueListenableBuilder(
+      valueListenable: cloud.available,
+      builder: (context, on, _) {
+        final key = Platform.isAndroid ? 'settings.cloudAndroid' : (on ? 'settings.cloud' : 'settings.cloudOff');
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                on || Platform.isAndroid ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+                size: 18,
+                color: Palette.ink.withValues(alpha: 0.55),
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  tr(key),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Palette.ink.withValues(alpha: 0.65)),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

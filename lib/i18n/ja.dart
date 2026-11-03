@@ -404,4 +404,9 @@ const ja = <String, String>{
   'milestone.nextLevel': 'レベル{n}で：{list}',
   'milestone.decorAll': '庭じゅうを飾れる',
   'milestone.seeGarden': '庭に戻って新しいものを見よう',
+  'milestone.cloud': 'お庭が戻ってきました！',
+  'milestone.cloud.sub': 'iCloudから、残したままの姿で戻しました。',
+  'settings.cloud': 'お庭はiCloudに保存されます',
+  'settings.cloudOff': 'iCloudにサインインすると、お庭をクラウドに保存できます',
+  'settings.cloudAndroid': 'お庭はGoogleのバックアップに保存されます',
 };

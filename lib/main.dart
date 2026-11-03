@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'balance/balance.dart';
+import 'garden/cloud_save.dart';
 import 'garden/lotus_store.dart';
 import 'garden/progress.dart';
 import 'garden/reminders.dart';
@@ -25,7 +26,11 @@ Future<void> main() async {
   Balance.instance = Balance.parse(await rootBundle.loadString('assets/balance/game_balance.json'));
   final locales = WidgetsBinding.instance.platformDispatcher.locales.map((l) => l.languageCode);
   await AppSettings.instance.load(locales);
+  // Si la copia de iCloud va más adelantada (otro aparato, reinstalación),
+  // entra antes de cargar la partida.
+  await CloudSave.instance.pull();
   await Progress.instance.load(Balance.instance);
+  CloudSave.instance.start();
   await WeatherService.instance.load(Balance.instance);
   await Reminders.instance.load(Balance.instance);
   await SceneArt.instance.load();

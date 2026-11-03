@@ -404,4 +404,9 @@ const zh = <String, String>{
   'milestone.nextLevel': '{n}级时：{list}',
   'milestone.decorAll': '装饰整个花园',
   'milestone.seeGarden': '回到花园看看新东西',
+  'milestone.cloud': '你的庭院回来了！',
+  'milestone.cloud.sub': '已从 iCloud 恢复，和你离开时一模一样。',
+  'settings.cloud': '你的庭院保存在 iCloud',
+  'settings.cloudOff': '登录 iCloud 即可将庭院保存到云端',
+  'settings.cloudAndroid': '你的庭院保存在 Google 备份中',
 };

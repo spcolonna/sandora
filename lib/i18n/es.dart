@@ -406,4 +406,9 @@ const es = <String, String>{
   'milestone.nextLevel': 'En el nivel {n}: {list}',
   'milestone.decorAll': 'decorar todo el jardín',
   'milestone.seeGarden': 'Volvé al jardín para ver lo nuevo',
+  'milestone.cloud': '¡Tu jardín volvió!',
+  'milestone.cloud.sub': 'Lo trajimos desde iCloud, tal como lo dejaste.',
+  'settings.cloud': 'Tu jardín se guarda en iCloud',
+  'settings.cloudOff': 'Iniciá sesión en iCloud para guardar tu jardín en la nube',
+  'settings.cloudAndroid': 'Tu jardín viaja en la copia de seguridad de Google',
 };
