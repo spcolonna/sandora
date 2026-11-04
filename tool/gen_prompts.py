@@ -864,6 +864,152 @@ BLOCKS = [
                       'between the stones, and a few fallen petals on the gravel. Wide and low, about five times '
                       'wider than tall.', 'about a quarter of the screen width'),
         ]),
+    dict(
+        id='18', title='Premios de la racha de meditación', folder='store/art/court/',
+        intro=('Lo que se gana meditando varios días seguidos (`streakObjects`). Hoy **no se ven en el patio pintado**: '
+               'solo existían en el jardín viejo de código. Van junto a la tarima de meditación. **Adjuntá `'
+               + COURT_REF + '`.**'),
+        images=[
+            court_obj('obj_court_zafu', 'A round Japanese meditation cushion (zafu) of deep red brocade (#9E3F38) '
+                      'with a thin golden trim and soft pleated sides, plump and slightly pressed in the middle, '
+                      'resting on a flat square indigo mat (zabuton).', 'about a tenth of the screen width'),
+            court_obj('obj_court_singing_bowl', 'A Japanese singing bowl (rin) of warm aged bronze with a soft golden '
+                      'shine on its rim, resting on a small round brocade cushion, with a short wooden striker '
+                      'lying beside it.', 'about a twelfth of the screen width'),
+            court_obj('obj_court_paper_lantern', 'A round Japanese paper lantern (chōchin) of warm off-white washi '
+                      'with thin dark bamboo ribs, a black lacquered top and bottom ring and a short cord on top to '
+                      'hang it, glowing softly amber from inside. It hangs in the air: no ground and no contact '
+                      'shadow under it.', 'about a twelfth of the screen width'),
+        ]),
+    dict(
+        id='19', title='Vista del bosque: suelo y río', folder='store/art/bg/',
+        intro=('Tercera vista del jardín (casa de té, bambú y río). Hoy el suelo es un verde liso y el río son '
+               'curvas de código. Va encima del mismo cielo y las mismas colinas. Adjuntá '
+               '`store/art/style/style_keyart.webp` y, si ya está, `bg_east_ground` para que las dos vistas combinen.'),
+        images=[
+            img('bg_forest_ground', PORTRAIT_ALPHA + ALPHA_FALLBACK,
+                f'This is the ground layer of the third garden view in {GAME}, the forest side. The game places the '
+                'tea house, the bamboo grove and the river on top of it.',
+                'A wide, continuous forest-edge meadow seen from a gentle three-quarter view from above: soft grass '
+                'and cushion moss in slightly deeper, cooler greens than an open lawn, a few fallen bamboo leaves, '
+                'small patches of bare earth and scattered tiny pebbles, nothing else.',
+                'This is NOT an island or a floating patch: the ground runs edge to edge, touching the left, right '
+                'and bottom edges of the canvas, and fills the lower 50% of the image. Its top edge is a soft, '
+                'slightly irregular horizon of grass tufts and low ferns; above it everything is fully transparent. '
+                'Even, calm lighting with no strong focal point, so objects placed anywhere on it look grounded. '
+                + CROP_NOTE,
+                f'a river, water, a path, rocks, lanterns, trees, bamboo stalks, buildings or objects; an island '
+                f'shape or visible ground edges on the sides or bottom; sky; {NO_TEXT}; people or animals; frame or '
+                f'border; {NO_STYLE}.'),
+            img('bg_forest_river', LANDSCAPE_ALPHA + ALPHA_FALLBACK,
+                f'This is the river that crosses the forest view of the garden in {GAME}. The game lays it over the '
+                'ground and floats small paper lanterns on it.',
+                'A gentle stream seen from a three-quarter view from above, flowing from left to right in a soft '
+                'S-curve: clear teal water (#5C9EA8) with light ripples and a few sparkles, edged on both banks by '
+                'small rounded river stones and tufts of moss and grass.',
+                'The stream crosses the whole canvas from the left edge to the right edge, so it can continue beyond '
+                'both sides; it fills the middle band of the image (about 25% to 80% of the height). Everything '
+                'above and below the banks is fully transparent.',
+                f'boats, lanterns, bridges or docks; large rocks in the water; trees or bamboo; ground beyond the '
+                f'banks; sky; {NO_TEXT}; people, fish or animals; frame or border; {NO_STYLE}.'),
+        ]),
+    dict(
+        id='20', title='Fondos de minijuegos que hoy son de código', folder='store/art/minigames/',
+        intro=('Seis minijuegos ya tienen sus piezas pintadas, pero el fondo sigue siendo colores lisos y rayas. Cada '
+               'fondo va de borde a borde y el juego dibuja encima. Adjuntá `store/art/style/style_keyart.webp`.'),
+        images=[
+            img('bg_leaves', PORTRAIT_OPAQUE,
+                f'This is the background of the leaves minigame in {GAME}: the player sweeps falling autumn leaves '
+                'into a pile.',
+                'A small Japanese garden path seen straight from above: a band of fine pale sand running from top to '
+                'bottom through the middle, edged by a row of small rounded stones, with soft moss on both sides.',
+                'The sand path fills the central 60% of the width and stays calm and even, so the leaves on top read '
+                'clearly. ' + CROP_NOTE,
+                f'leaves, brooms or piles; large rocks or objects on the sand; {NO_TEXT}; people or animals; frame '
+                f'or border; {NO_STYLE}.'),
+            img('bg_bonsai', PORTRAIT_OPAQUE,
+                f'This is the background of the bonsai minigame in {GAME}: the player grows and prunes a small tree '
+                'in the middle of the screen.',
+                'A quiet indoor corner: a soft, out-of-focus warm plaster wall with a faint shoji window glow on one '
+                'side, and the edge of a low dark wooden display table along the bottom 15% of the image.',
+                'The middle of the image is plain, soft and slightly lighter, like a gentle spotlight, so the tree '
+                'stands out. ' + CROP_NOTE,
+                f'trees, plants, pots or objects; {NO_TEXT}; people or animals; frame or border; {NO_STYLE}.'),
+            img('bg_shishi', PORTRAIT_OPAQUE,
+                f'This is the background of the shishi-odoshi minigame in {GAME}: a bamboo pipe fills with water and '
+                'tips over into a stone basin.',
+                'A calm corner of a Japanese garden at eye level: soft misty bamboo and maple shapes far behind, a '
+                'mossy bank with a few ferns in the lower third, and a flat weathered rest stone low in the center '
+                'where the basin will sit.',
+                'The middle band (30% to 70% of the height) is soft, misty and simple so the bamboo pipe and the '
+                'water read clearly. ' + CROP_NOTE,
+                f'bamboo pipes, basins, water spouts or posts; {NO_TEXT}; people or animals; frame or border; '
+                f'{NO_STYLE}.'),
+            img('bg_bell', PORTRAIT_OPAQUE,
+                f'This is the background of the temple bell minigame in {GAME}: a big bronze bell and a hanging log '
+                'are drawn on top, in the middle.',
+                'The inside of an open wooden bell pavilion at eye level: two thick dark wooden posts on the left and '
+                'right edges, a heavy crossbeam along the top, a worn stone floor at the bottom, and between the '
+                'posts a soft misty view of distant hills and pines.',
+                'The space between the posts is open, soft and slightly bright so the bell reads clearly. '
+                + CROP_NOTE,
+                f'the bell, the striking log, ropes or hooks; {NO_TEXT}; people or animals; frame or border; '
+                f'{NO_STYLE}.'),
+            img('bg_matcha', PORTRAIT_OPAQUE,
+                f'This is the background of the matcha minigame in {GAME}: a tea bowl and a whisk are drawn in the '
+                'middle.',
+                'A tatami mat seen straight from above, filling the whole image: fine golden-green woven straw '
+                'texture running left to right, with a dark green cloth border (heri) along the top and bottom '
+                'edges, and soft warm light.',
+                'Even and calm everywhere so the bowl on top stands out. ' + CROP_NOTE,
+                f'bowls, whisks, cups or objects; {NO_TEXT}; people or animals; frame other than the tatami border; '
+                f'{NO_STYLE}.'),
+            img('bg_flute', PORTRAIT_OPAQUE,
+                f'This is the background of the bamboo flute minigame in {GAME}: a tall flute is drawn in the middle.',
+                'A bamboo grove at eye level, soft and out of focus: tall green-gold bamboo stalks fading into a '
+                'cool misty light, a few leaves catching the sun.',
+                'Very soft and low in contrast, darker toward the edges and lighter in the middle, so the flute reads '
+                'clearly. ' + CROP_NOTE,
+                f'flutes or instruments; sharp foreground stalks in the center; {NO_TEXT}; people or animals; frame '
+                f'or border; {NO_STYLE}.'),
+            img('bg_moss', PORTRAIT_OPAQUE,
+                f'This is the background of the moss minigame in {GAME}: the player paints moss onto a few rocks '
+                'drawn on top.',
+                'Fine damp earth and pale sand of a Japanese garden seen straight from above, with a few tiny '
+                'pebbles and faint traces of moss only along the edges.',
+                'The middle 80% is plain, even and calm so the rocks on top read clearly. ' + CROP_NOTE,
+                f'rocks, moss patches in the middle, plants or objects; {NO_TEXT}; people or animals; frame or '
+                f'border; {NO_STYLE}.'),
+        ]),
+    dict(
+        id='21', title='Piezas chicas del jardín', folder='store/art/garden/',
+        intro=('Cosas que se ven en el jardín y siguen siendo dibujos de código: las tareas de cuidado, la copa y la '
+               'mesa del bonsái, el regalo de la casa de té y el toldo del Mercado. Adjuntá '
+               '`store/art/style/style_keyart.webp`.'),
+        images=[
+            obj('obj_care_weeds', 'A small clump of garden weeds: a few untidy green leaves and stems with two tiny '
+                'yellow wildflowers, clearly out of place in a tidy garden.', 'about 50 pixels tall'),
+            obj('obj_care_leaves', 'A small loose pile of fallen autumn leaves in orange, red and brown, a little '
+                'messy, as if blown in by the wind.', 'about 60 pixels wide'),
+            obj('obj_bonsai_foliage', 'One single soft cloud-shaped pad of bonsai pine foliage: a rounded, slightly '
+                'flattened mass of dense dark-green needles, lit from the upper left, with a lighter top and a '
+                'shadowed underside. No branch, no trunk.', 'about 60 pixels wide, repeated several times'),
+            obj('obj_bonsai_table', 'A low Japanese bonsai display stand of dark polished wood: a thick rectangular '
+                'top with softly rounded edges on four short, slightly curved legs.', 'about 120 pixels wide'),
+            obj('obj_tea_gift', 'A small gift wrapped in a furoshiki cloth: a soft square bundle of indigo cloth '
+                'with a pattern of small white dots, tied on top in a neat knot with two little ears.',
+                'about 40 pixels wide'),
+            img('ui_market_awning', LANDSCAPE_ALPHA + ALPHA_FALLBACK,
+                f'This is the awning at the top of the market screen in {GAME}: a small village stall where the '
+                'player buys decorations.',
+                'A cloth shop awning (noren style) seen straight from the front: wide vertical stripes of indigo '
+                '(#3F5A80) and warm off-white, with a gently scalloped bottom edge and a thin wooden pole along the '
+                'top.',
+                'The awning spans the full width of the canvas from the left edge to the right edge so it can be '
+                'stretched, and fills the top 45% of the image; everything below the scalloped edge is fully '
+                'transparent.',
+                f'{NO_TEXT}; shop signs or symbols; any background, scenery or stall; {NO_STYLE}.'),
+        ]),
 ]
 
 
@@ -1102,8 +1248,12 @@ PRIORITY = [
     ('16', 'Ya están en el juego, dibujados con código: es lo que más se nota que falta pintar.'),
     ('17', 'Se ven en cada lugar mejorado; hoy son piedras y flores de código.'),
     ('14', 'Lo que falta del bosque: batidor, flauta, linterna y el río.'),
+    ('18', 'Son premios que hoy no se ven en el patio: quien medita una semana no encuentra nada.'),
     ('12', 'El suelo de la vista del estanque. La primera salió como una isla con estanque propio: este prompt pide '
            'un prado de borde a borde, sin agua ni sendero (los dibuja el juego).'),
+    ('19', 'La vista del bosque está siempre en pantalla con suelo liso y un río de código.'),
+    ('20', 'Cada minijuego llena la pantalla: hoy seis tienen fondo de colores lisos.'),
+    ('21', 'Detalles chicos: mejoran el conjunto, pero se notan menos.'),
     ('9', 'Para la ficha de la tienda: hace falta antes de publicar.'),
     ('0', 'Opcional: el estilo ya quedó fijado por el patio pintado.'),
 ]
