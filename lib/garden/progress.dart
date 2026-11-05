@@ -457,6 +457,11 @@ class Progress extends ChangeNotifier {
     _meditationDay = _prefs.getInt('meditation.day') ?? 0;
     _meditationMinutesToday = _prefs.getInt('meditation.minutesToday') ?? 0;
     streakObjects = _prefs.getStringList('meditation.objects') ?? [];
+    // Para ver los premios de la racha: `--dart-define=SANDORA_STREAK=3` da los
+    // primeros N (no se guardan).
+    if (_streakOverride > 0 && kDebugMode) {
+      streakObjects = economy.balance.meditation.strings('streakObjects').take(_streakOverride).toList();
+    }
     final ink = _prefs.getString('enso.ink');
     ensoInk = ink == null ? null : [for (final v in jsonDecode(ink) as List) (v as num).toDouble()];
     daysPlayed = _prefs.getInt('days.played') ?? 0;
@@ -575,6 +580,7 @@ class Progress extends ChangeNotifier {
   /// Para probar: `--dart-define=SANDORA_DAY=5` juega como si fuera el día 5
   /// (y abre las zonas cuyo nivel no supere ese número).
   static const _dayOverride = int.fromEnvironment('SANDORA_DAY');
+  static const _streakOverride = int.fromEnvironment('SANDORA_STREAK');
   int get playDay => _dayOverride > 0 ? _dayOverride : daysPlayed;
 
   /// Día de juego en que se abre [game] (1: desde el principio).

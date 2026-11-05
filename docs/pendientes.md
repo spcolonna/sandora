@@ -23,8 +23,9 @@
 - [x] Meditación: notificación local con la campana final (`lib/garden/reminders.dart`), por si la app queda en
       segundo plano.
 - [x] Meditación: objetos de racha cada 7 días (`meditation.streakObjects` del balance): cuenco tibetano, cojín de
-      brocado y farol de papel que de noche se enciende, junto al cerezo. Son de la cuenta. Dibujados con código hasta
-      tener arte.
+      brocado y farol de papel que de noche se enciende. En el patio pintado van sobre la tarima (zafu en el almohadón,
+      cuenco en el rincón, farol colgado del arbolito). Son de la cuenta. Dibujados con código hasta tener arte (Bloque
+      18). Probar: `--dart-define=SANDORA_STREAK=3`.
 - [x] `store_feature` listo para Play: `store/art/brand/store_feature_play.png` (1024×500, con el logo).
 - [x] Kit de interfaz pintado (Bloque 8): paneles, tarjeta de resultado, botón principal, pausa, placa de puntaje y
       barra de Calma (`washi.dart`, nine-slice). Sin el arte vuelve a dibujarse con código.

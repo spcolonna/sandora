@@ -431,6 +431,7 @@ class GardenPainter extends CustomPainter {
         canvas.scale(-1, 1);
         drawArt(canvas, img, r);
         canvas.restore();
+        _paintCourtStreak(canvas, r);
       } else {
         drawArt(canvas, img, r);
       }
@@ -994,7 +995,7 @@ class GardenPainter extends CustomPainter {
           ..color = Palette.ink
           ..strokeWidth = 1,
       );
-      _paintPaperLantern(canvas, lantern, w * 0.05, 0);
+      _paintPaperLantern(canvas, lantern, _paperLanternSize, 0);
     }
     // Farol de piedra (tōrō).
     final lamp = layout.lanterns[0];
@@ -1045,12 +1046,89 @@ class GardenPainter extends CustomPainter {
     );
   }
 
-  /// Centro del farol de papel de la racha, colgado de la rama del cerezo.
+  /// Un punto de la tarima del patio pintado, en fracciones de su arte (que
+  /// se dibuja espejada).
+  static Offset _onDeck(Rect deck, double fx, double fy) =>
+      Offset(deck.right - deck.width * fx, deck.top + deck.height * fy);
+
+  /// Los premios de la racha sobre la tarima del patio pintado: el zafu sobre
+  /// el almohadón, el cuenco en el rincón del fondo y el farol de papel
+  /// colgado de la rama del arbolito. Con código hasta tener su arte.
+  void _paintCourtStreak(Canvas canvas, Rect deck) {
+    final w = deck.width;
+    if (streakObjects.contains('cushion')) _paintZafu(canvas, _onDeck(deck, 0.5, 0.6), w * 0.18);
+    if (streakObjects.contains('bowl')) _paintSingingBowl(canvas, _onDeck(deck, 0.09, 0.545), w * 0.5);
+    final lantern = _paperLantern;
+    if (lantern != null) {
+      canvas.drawLine(
+        _onDeck(deck, 0.6, 0.2),
+        lantern - Offset(0, _paperLanternSize),
+        Paint()
+          ..color = Palette.ink.withValues(alpha: 0.8)
+          ..strokeWidth = max(0.6, w * 0.006),
+      );
+      _paintPaperLantern(canvas, lantern, _paperLanternSize, 0);
+    }
+  }
+
+  /// Zafu redondo de brocado rojo con ribete dorado, de ancho [width], con la
+  /// base en [base].
+  void _paintZafu(Canvas canvas, Offset base, double width) {
+    final h = width * 0.5;
+    canvas.drawOval(
+      Rect.fromCenter(center: base + Offset(0, h * 0.08), width: width * 1.08, height: h * 0.5),
+      Paint()
+        ..color = const Color(0xFF32230A).withValues(alpha: 0.35)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, width * 0.05),
+    );
+    final body = Rect.fromLTRB(base.dx - width / 2, base.dy - h, base.dx + width / 2, base.dy);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(body, Radius.elliptical(width / 2, h / 2)),
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFA9483D), Color(0xFF6E2A26)],
+        ).createShader(body),
+    );
+    // Pliegues del costado.
+    final pleat = Paint()
+      ..color = const Color(0xFF6E2723).withValues(alpha: 0.5)
+      ..strokeWidth = max(0.5, width * 0.02);
+    for (var k = -2; k <= 2; k++) {
+      final x = base.dx + k * width * 0.17;
+      canvas.drawLine(Offset(x, base.dy - h * 0.45), Offset(x, base.dy - h * 0.08), pleat);
+    }
+    final top = Rect.fromCenter(center: Offset(base.dx, base.dy - h * 0.7), width: width * 0.94, height: h * 0.56);
+    canvas.drawOval(
+      top,
+      Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(-0.3, -0.4),
+          colors: [Color(0xFFC86A5A), Color(0xFF9E4238)],
+        ).createShader(top),
+    );
+    canvas.drawOval(
+      top,
+      Paint()
+        ..color = Palette.lantern
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = max(0.6, width * 0.025),
+    );
+    canvas.drawCircle(top.center, width * 0.04, Paint()..color = Palette.lantern);
+  }
+
+  /// Centro del farol de papel de la racha: colgado de la rama del cerezo o,
+  /// en el patio pintado, de la del arbolito de la tarima.
   Offset? get _paperLantern {
     final d = layout.places[Place.meditation];
-    if (d == null || layout.painted || !streakObjects.contains('lantern')) return null;
+    if (d == null || !streakObjects.contains('lantern')) return null;
+    if (layout.painted) return _onDeck(d, 0.6, 0.2) + Offset(0, d.width * 0.14);
     return Offset(d.left + d.width * 0.86, d.top + d.height * 0.34 + d.width * 0.12);
   }
+
+  /// Tamaño del farol de papel de la racha.
+  double get _paperLanternSize => layout.places[Place.meditation]!.width * (layout.painted ? 0.035 : 0.05);
 
   /// Farol de papel de tamaño [s]; [lit] (0 a 1) lo enciende.
   void _paintPaperLantern(Canvas canvas, Offset c, double s, double lit) {
@@ -1093,7 +1171,7 @@ class GardenPainter extends CustomPainter {
     // El farol de la racha se enciende encima de la penumbra.
     final paper = _paperLantern;
     if (paper != null) {
-      final r = size.width * 0.08;
+      final r = size.width * (layout.painted ? 0.035 : 0.08);
       canvas.drawCircle(
         paper,
         r,
@@ -1105,7 +1183,7 @@ class GardenPainter extends CustomPainter {
             ],
           ).createShader(Rect.fromCircle(center: paper, radius: r)),
       );
-      final s = layout.places[Place.meditation]!.width * 0.05;
+      final s = _paperLanternSize;
       canvas.saveLayer(null, Paint()..color = Colors.white.withValues(alpha: glow));
       _paintPaperLantern(canvas, paper, s, 1);
       canvas.restore();
