@@ -455,4 +455,12 @@ const en = <String, String>{
   'ach.runs500': 'Endless',
   'ach.runs500.how': 'Play {n} games.',
   'ach.count': 'You\'ve earned {n} of {t}',
+  'daily.new': 'New goals',
+  'daily.chest': 'Garden chest',
+  'daily.chestHint': 'Finish your goals on {n} more days to open it',
+  'daily.chestOne': 'One more full day and it opens!',
+  'daily.chestOpen': 'The chest opened!',
+  'milestone.chest': 'Garden chest!',
+  'milestone.chest.sub': '{n} full days tending the garden. This is for you.',
+  'milestone.chest.next': 'Each day with all three goals adds a seal toward the next one.',
 };

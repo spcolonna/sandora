@@ -3162,5 +3162,61 @@
   "pt": "Você conquistou {n} de {t}",
   "ja": "{t}個中{n}個を達成",
   "zh": "已达成 {n}/{t}"
+ },
+ "daily.new": {
+  "es": "Metas nuevas",
+  "en": "New goals",
+  "pt": "Metas novas",
+  "ja": "新しい目標",
+  "zh": "新目标"
+ },
+ "daily.chest": {
+  "es": "Cofre del jardín",
+  "en": "Garden chest",
+  "pt": "Baú do jardim",
+  "ja": "庭の宝箱",
+  "zh": "庭园宝箱"
+ },
+ "daily.chestHint": {
+  "es": "Completá las metas {n} días más para abrirlo",
+  "en": "Finish your goals on {n} more days to open it",
+  "pt": "Cumpra as metas em mais {n} dias para abri-lo",
+  "ja": "あと{n}日、目標をすべて達成すると開きます",
+  "zh": "再完成{n}天的目标即可打开"
+ },
+ "daily.chestOne": {
+  "es": "¡Un día completo más y se abre!",
+  "en": "One more full day and it opens!",
+  "pt": "Mais um dia completo e ele abre!",
+  "ja": "あと1日で開きます！",
+  "zh": "再完成一天就能打开！"
+ },
+ "daily.chestOpen": {
+  "es": "¡Se abrió el cofre!",
+  "en": "The chest opened!",
+  "pt": "O baú abriu!",
+  "ja": "宝箱が開いた！",
+  "zh": "宝箱打开了！"
+ },
+ "milestone.chest": {
+  "es": "¡Cofre del jardín!",
+  "en": "Garden chest!",
+  "pt": "Baú do jardim!",
+  "ja": "庭の宝箱！",
+  "zh": "庭园宝箱！"
+ },
+ "milestone.chest.sub": {
+  "es": "{n} días completos cuidando el jardín. Esto es para vos.",
+  "en": "{n} full days tending the garden. This is for you.",
+  "pt": "{n} dias completos cuidando do jardim. Isto é para você.",
+  "ja": "{n}日間、庭を大切にしてくれました。これはあなたへの贈り物です。",
+  "zh": "用心照料庭园整整{n}天，这是送给你的。"
+ },
+ "milestone.chest.next": {
+  "es": "Cada día con las tres metas suma un sello para el próximo.",
+  "en": "Each day with all three goals adds a seal toward the next one.",
+  "pt": "Cada dia com as três metas soma um selo para o próximo.",
+  "ja": "3つの目標を達成した日ごとに、次の宝箱への印がたまります。",
+  "zh": "每完成一天的三个目标，就为下一个宝箱积累一枚印章。"
  }
 }

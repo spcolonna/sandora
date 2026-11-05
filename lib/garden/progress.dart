@@ -104,6 +104,10 @@ class Progress extends ChangeNotifier {
   int _goalListDay = -1;
   List<String> _goalList = [];
 
+  /// Días completos (las tres metas) hacia el próximo cofre del jardín.
+  int goalSeals = 0;
+  int _goalsSeenDay = -1;
+
   /// Metas cumplidas en la última partida, para festejarlas en el resultado.
   List<GoalDef> lastRunGoals = [];
 
@@ -448,6 +452,10 @@ class Progress extends ChangeNotifier {
     _goalsPaid = (_prefs.getStringList('goals.paid') ?? []).toSet();
     _goalListDay = _prefs.getInt('goals.listDay') ?? -1;
     _goalList = _prefs.getStringList('goals.list') ?? [];
+    goalSeals = _prefs.getInt('goals.seals') ?? 0;
+    _goalsSeenDay = _prefs.getInt('goals.seen') ?? -1;
+    // Para ver el cofre: `--dart-define=SANDORA_SEALS=6` deja un día para abrirlo.
+    if (_sealsOverride > 0 && kDebugMode) goalSeals = _sealsOverride;
     final medAt = _prefs.getInt('meditation.startedAt');
     meditationStartedAt = medAt == null ? null : DateTime.fromMillisecondsSinceEpoch(medAt);
     meditationChosen = _prefs.getInt('meditation.chosen') ?? 0;
@@ -581,6 +589,7 @@ class Progress extends ChangeNotifier {
   /// (y abre las zonas cuyo nivel no supere ese número).
   static const _dayOverride = int.fromEnvironment('SANDORA_DAY');
   static const _streakOverride = int.fromEnvironment('SANDORA_STREAK');
+  static const _sealsOverride = int.fromEnvironment('SANDORA_SEALS');
   int get playDay => _dayOverride > 0 ? _dayOverride : daysPlayed;
 
   /// Día de juego en que se abre [game] (1: desde el principio).
@@ -1559,11 +1568,28 @@ class Progress extends ChangeNotifier {
     final today = dayCycle.gardenDay(now ?? gardenNow());
     if (_goalListDay != today) {
       _goalListDay = today;
-      _goalList = [for (final g in dailyGoals.forDay(today, canMeditate: meditationUnlocked)) g.id];
+      _goalList = [for (final g in dailyGoals.forDay(today, canMeditate: meditationUnlocked, games: openGames)) g.id];
       _prefs.setInt('goals.listDay', today);
       _prefs.setStringList('goals.list', _goalList);
     }
     return [for (final id in _goalList) ?dailyGoals.pool.where((g) => g.id == id).firstOrNull];
+  }
+
+  /// Minijuegos abiertos ahora (el Arenero siempre).
+  int get openGames =>
+      1 +
+      {..._unlockDays.keys, ..._unlockLevels.keys, ..._zoneOf.keys}.where((g) => g != 'sand' && gameUnlocked(g)).length;
+
+  /// Si las metas de hoy todavía no se miraron: la línea del jardín brilla.
+  bool goalsUnseen({DateTime? now}) =>
+      _goalsSeenDay != dayCycle.gardenDay(now ?? gardenNow()) && goalsDone(now: now) == 0;
+
+  void markGoalsSeen({DateTime? now}) {
+    final today = dayCycle.gardenDay(now ?? gardenNow());
+    if (_goalsSeenDay == today) return;
+    _goalsSeenDay = today;
+    _prefs.setInt('goals.seen', today);
+    notifyListeners();
   }
 
   bool _goalsFresh(DateTime now) => dayCycle.gardenDay(now) == _goalsDay;
@@ -1614,6 +1640,19 @@ class Progress extends ChangeNotifier {
         _addTo(c.key, c.value);
       }
       done.add(g);
+      // Cada día completo suma un sello; con todos se abre el cofre.
+      if (g == dailyGoals.bonus) {
+        goalSeals++;
+        if (goalSeals >= dailyGoals.chest.target) {
+          goalSeals = 0;
+          for (final c in dailyGoals.chest.give.entries) {
+            _addTo(c.key, c.value);
+          }
+          done.add(dailyGoals.chest);
+          queueMilestone('chest');
+        }
+        _prefs.setInt('goals.seals', goalSeals);
+      }
     }
     _prefs.setInt('goals.day', _goalsDay);
     _prefs.setString('goals.counts', jsonEncode(_goalCounts));

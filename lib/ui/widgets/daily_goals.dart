@@ -13,10 +13,15 @@ import 'currency.dart';
 import 'washi.dart';
 
 /// El texto de una meta del día ("Jugá 3 partidas").
-String dailyLabel(GoalDef g) => g.id == 'all' ? tr('daily.all') : tr('daily.${g.id}', {'n': g.target});
+String dailyLabel(GoalDef g) => switch (g.id) {
+  'all' => tr('daily.all'),
+  'chest' => tr('daily.chest'),
+  _ => tr('daily.${g.id}', {'n': g.target}),
+};
 
 IconData _iconOf(GoalDef g) => switch (g.kind) {
   _ when g.id == 'all' => Icons.auto_awesome_rounded,
+  _ when g.id == 'chest' => Icons.inventory_2_rounded,
   DailyKind.plays => Icons.replay_rounded,
   DailyKind.stars || DailyKind.three => Icons.star_rounded,
   DailyKind.variety => Icons.grid_view_rounded,
@@ -39,9 +44,22 @@ Widget _gives(GoalDef g, {double scale = 0.85}) => Wrap(
 );
 
 /// Las metas del día debajo de la próxima meta: tres puntos que se llenan.
-/// Se toca para verlas.
-class DailyGoalsLine extends StatelessWidget {
+/// Se toca para verlas. Si las de hoy todavía no se miraron, brilla suave.
+class DailyGoalsLine extends StatefulWidget {
   const DailyGoalsLine({super.key});
+
+  @override
+  State<DailyGoalsLine> createState() => _DailyGoalsLineState();
+}
+
+class _DailyGoalsLineState extends State<DailyGoalsLine> with SingleTickerProviderStateMixin {
+  late final _glow = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600));
+
+  @override
+  void dispose() {
+    _glow.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +67,14 @@ class DailyGoalsLine extends StatelessWidget {
     final goals = p.goalsToday();
     final done = p.goalsDone();
     final all = done == goals.length;
+    final fresh = p.goalsUnseen();
+    if (fresh && !_glow.isAnimating) {
+      _glow.repeat(reverse: true);
+    } else if (!fresh && _glow.isAnimating) {
+      _glow
+        ..stop()
+        ..value = 0;
+    }
     final style = TextStyle(fontSize: 13, color: Palette.ink.withValues(alpha: 0.7), fontWeight: FontWeight.w600);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -56,13 +82,40 @@ class DailyGoalsLine extends StatelessWidget {
         SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
         showDailyGoalsSheet(context);
       },
-      child: Padding(
-        padding: const EdgeInsets.only(top: 4),
+      child: AnimatedBuilder(
+        animation: _glow,
+        builder: (context, child) {
+          final t = Curves.easeInOut.transform(_glow.value);
+          return Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Palette.lantern.withValues(alpha: 0.22 * t),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                if (t > 0)
+                  BoxShadow(
+                    color: Palette.lantern.withValues(alpha: 0.35 * t),
+                    blurRadius: 10 * t,
+                  ),
+              ],
+            ),
+            child: child,
+          );
+        },
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.wb_twilight_rounded, size: 15, color: Palette.lantern.withValues(alpha: 0.9)),
             const SizedBox(width: 6),
-            Text(all ? tr('daily.allDone') : tr('daily.title'), style: style),
+            Text(
+              all
+                  ? tr('daily.allDone')
+                  : fresh
+                  ? tr('daily.new')
+                  : tr('daily.title'),
+              style: style,
+            ),
             const SizedBox(width: 8),
             for (final g in goals)
               AnimatedContainer(
@@ -84,6 +137,7 @@ class DailyGoalsLine extends StatelessWidget {
 }
 
 Future<void> showDailyGoalsSheet(BuildContext context) {
+  Progress.instance.markGoalsSeen();
   return showWashiSheet(
     context,
     builder: (context) => ListenableBuilder(
@@ -122,6 +176,12 @@ Future<void> showDailyGoalsSheet(BuildContext context) {
                     progress: p.goalsDone(),
                     done: p.goalsDone() == goals.length,
                   ),
+                ),
+                const SizedBox(height: 10),
+                CalmAppear(
+                  delay: const Duration(milliseconds: 340),
+                  rise: 8,
+                  child: _ChestRow(seals: p.goalSeals, chest: p.dailyGoals.chest),
                 ),
               ],
             ),
@@ -194,6 +254,78 @@ class _GoalRow extends StatelessWidget {
   }
 }
 
+/// El cofre del jardín: un sello por cada día completo y lo que da al abrirse.
+class _ChestRow extends StatelessWidget {
+  final int seals;
+  final GoalDef chest;
+  const _ChestRow({required this.seals, required this.chest});
+
+  @override
+  Widget build(BuildContext context) {
+    final left = chest.target - seals;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      decoration: BoxDecoration(
+        color: Palette.lantern.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.inventory_2_rounded, size: 20, color: Palette.wood),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(tr('daily.chest'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                    Text(
+                      tr(left == 1 ? 'daily.chestOne' : 'daily.chestHint', {'n': left}),
+                      style: TextStyle(fontSize: 12, color: Palette.ink.withValues(alpha: 0.6)),
+                    ),
+                  ],
+                ),
+              ),
+              _gives(chest, scale: 0.8),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var i = 0; i < chest.target; i++)
+                TweenAnimationBuilder<double>(
+                  tween: Tween(end: i < seals ? 1 : 0),
+                  duration: Calm.appear + Duration(milliseconds: 90 * i),
+                  curve: Curves.easeOutBack,
+                  builder: (context, v, _) => Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color.lerp(Colors.transparent, Palette.lantern, v.clamp(0, 1)),
+                      border: Border.all(color: Palette.lantern.withValues(alpha: 0.7), width: 1.5),
+                    ),
+                    child: Transform.scale(
+                      scale: 0.6 + 0.4 * v,
+                      child: Icon(
+                        i == chest.target - 1 ? Icons.inventory_2_rounded : Icons.check_rounded,
+                        size: 15,
+                        color: v > 0.5 ? Palette.paper : Palette.lantern.withValues(alpha: 0.45),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Una meta cumplida en el resultado de una partida: aparece con su nota.
 class GoalDoneRow extends StatelessWidget {
   final GoalDef goal;
@@ -201,7 +333,8 @@ class GoalDoneRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bonus = goal.id == 'all';
+    final chest = goal.id == 'chest';
+    final bonus = goal.id == 'all' || chest;
     return Container(
       margin: const EdgeInsets.only(top: 6),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -211,14 +344,18 @@ class GoalDoneRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(bonus ? Icons.auto_awesome_rounded : Icons.check_circle_rounded, color: Palette.wood, size: 20),
+          Icon(bonus ? _iconOf(goal) : Icons.check_circle_rounded, color: Palette.wood, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  bonus ? tr('daily.allDone') : tr('daily.done'),
+                  chest
+                      ? tr('daily.chestOpen')
+                      : bonus
+                      ? tr('daily.allDone')
+                      : tr('daily.done'),
                   style: TextStyle(fontSize: 11, color: Palette.ink.withValues(alpha: 0.6)),
                 ),
                 Text(dailyLabel(goal), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),

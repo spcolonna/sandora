@@ -96,6 +96,15 @@ Milestone? _cardFor(String m) {
         ],
         art: _GlyphSeal(achievementIcon(parts[1])),
       );
+    case 'chest':
+      return Milestone(
+        title: tr('milestone.chest'),
+        lines: [
+          tr('milestone.chest.sub', {'n': p.dailyGoals.chest.target}),
+        ],
+        next: tr('milestone.chest.next'),
+        art: const _GlyphSeal(Icons.inventory_2_rounded),
+      );
     case 'cloud':
       return Milestone(
         title: tr('milestone.cloud'),

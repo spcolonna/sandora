@@ -12,11 +12,11 @@ void main() {
   final cycle = DayCycle(balance);
 
   /// El primer mediodía, desde el 27/10/2026, cuyas metas (de alguien que
-  /// todavía no medita) cumplen [test].
+  /// todavía no medita y tiene un solo juego abierto) cumplen [test].
   DateTime dayWhere(bool Function(List<GoalDef>) test) {
     for (var i = 0; i < 400; i++) {
       final t = DateTime(2026, 10, 27, 12).add(Duration(days: i));
-      if (test(goals.forDay(cycle.gardenDay(t), canMeditate: false))) return t;
+      if (test(goals.forDay(cycle.gardenDay(t), canMeditate: false, games: 1))) return t;
     }
     throw StateError('ningún día cumple');
   }
@@ -33,6 +33,11 @@ void main() {
     for (var day = 0; day < 300; day++) {
       expect(goals.forDay(day, canMeditate: false).map((g) => g.kind), isNot(contains(DailyKind.meditate)));
     }
+    // Con un solo juego abierto no sale la de jugar juegos distintos.
+    for (var day = 0; day < 300; day++) {
+      expect(goals.forDay(day, games: 1).map((g) => g.kind), isNot(contains(DailyKind.variety)));
+    }
+    expect({for (var d = 0; d < 60; d++) ...goals.forDay(d, games: 2).map((g) => g.kind)}, contains(DailyKind.variety));
     // No son siempre las mismas.
     expect({for (var d = 0; d < 30; d++) goals.forDay(d).map((g) => g.id).join()}.length, greaterThan(5));
   });
@@ -78,6 +83,39 @@ void main() {
       expect(done.last, 'all');
       expect(done.where((id) => id == 'all'), hasLength(1));
       expect(p.goalsDone(now: day), goals.count);
+    });
+
+    test('cada día completo suma un sello y con todos se abre el cofre, una vez', () async {
+      final p = Progress.instance;
+      var t = DateTime(2026, 10, 27, 12);
+      await p.load(balance, now: t);
+      expect(p.goalSeals, 0);
+      expect(p.goalsUnseen(now: t), isTrue);
+      p.markGoalsSeen(now: t);
+      expect(p.goalsUnseen(now: t), isFalse);
+      var full = 0;
+      final opened = <String>[];
+      while (full < goals.chest.target) {
+        t = t.add(const Duration(days: 1));
+        if (!p.goalsToday(now: t).every((g) => g.kind.fromRun)) continue;
+        final lotus = p.lotus;
+        for (final game in ['stack', 'sand', 'rain']) {
+          p.finishRun(game, 3, record: true, now: t);
+          opened.addAll(p.lastRunGoals.map((g) => g.id).where((id) => id == 'chest'));
+        }
+        full++;
+        if (full < goals.chest.target) {
+          expect(p.goalSeals, full);
+          expect(opened, isEmpty);
+        } else {
+          expect(p.lotus - lotus, greaterThanOrEqualTo(goals.chest.give['lotus']!));
+        }
+      }
+      expect(opened, ['chest']);
+      expect(p.goalSeals, 0);
+      expect(p.milestones, contains('chest'));
+      await p.load(balance, now: t);
+      expect(p.goalSeals, 0);
     });
 
     test('meditar, un trueque o un regalo cumplen su meta fuera de una partida', () async {

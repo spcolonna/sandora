@@ -453,4 +453,12 @@ const zh = <String, String>{
   'ach.runs500': '无尽',
   'ach.runs500.how': '玩 {n} 局。',
   'ach.count': '已达成 {n}/{t}',
+  'daily.new': '新目标',
+  'daily.chest': '庭园宝箱',
+  'daily.chestHint': '再完成{n}天的目标即可打开',
+  'daily.chestOne': '再完成一天就能打开！',
+  'daily.chestOpen': '宝箱打开了！',
+  'milestone.chest': '庭园宝箱！',
+  'milestone.chest.sub': '用心照料庭园整整{n}天，这是送给你的。',
+  'milestone.chest.next': '每完成一天的三个目标，就为下一个宝箱积累一枚印章。',
 };

@@ -430,6 +430,8 @@
     "_comment": "Metas del día: cada día del jardín salen count metas del pool (siempre una que se cumple jugando, de tipos distintos). Cada una paga give al cumplirse; todas juntas dan bonus. kind: plays, stars, three, variety, record, meditate, gift, trade.",
     "count": 3,
     "bonus": { "lotus": 1, "pebbles": 30 },
+    "_chest": "Cofre del jardín: se abre con days días completos (las tres metas), no hace falta que sean seguidos.",
+    "chest": { "days": 7, "give": { "lotus": 3, "pebbles": 150, "wood": 3 } },
     "pool": [
       { "id": "plays", "kind": "plays", "target": 3, "give": { "pebbles": 25 } },
       { "id": "stars", "kind": "stars", "target": 6, "give": { "pebbles": 30 } },

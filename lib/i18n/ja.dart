@@ -453,4 +453,12 @@ const ja = <String, String>{
   'ach.runs500': '果てなく',
   'ach.runs500.how': '{n}回遊ぶ。',
   'ach.count': '{t}個中{n}個を達成',
+  'daily.new': '新しい目標',
+  'daily.chest': '庭の宝箱',
+  'daily.chestHint': 'あと{n}日、目標をすべて達成すると開きます',
+  'daily.chestOne': 'あと1日で開きます！',
+  'daily.chestOpen': '宝箱が開いた！',
+  'milestone.chest': '庭の宝箱！',
+  'milestone.chest.sub': '{n}日間、庭を大切にしてくれました。これはあなたへの贈り物です。',
+  'milestone.chest.next': '3つの目標を達成した日ごとに、次の宝箱への印がたまります。',
 };

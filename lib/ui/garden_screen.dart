@@ -648,7 +648,8 @@ class _Hud extends StatelessWidget {
 }
 
 /// El nivel en un círculo chico: el anillo se llena con la Calma. Se toca
-/// para ver el detalle (próxima meta, metas del día, Serenidad).
+/// para ver el detalle (próxima meta, metas del día, Serenidad). Un punto
+/// avisa si hay un lugar para comprar o metas nuevas sin mirar.
 class _LevelOrb extends StatelessWidget {
   final bool open;
   final VoidCallback onTap;
@@ -660,7 +661,7 @@ class _LevelOrb extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Badge(
-        isLabelVisible: p.expansionAvailable,
+        isLabelVisible: p.expansionAvailable || p.goalsUnseen(),
         smallSize: 10,
         backgroundColor: Palette.lantern,
         offset: const Offset(-2, 2),

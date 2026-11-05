@@ -61,25 +61,39 @@ class DailyGoals {
   /// El regalo por cumplir todas las del día, con id `all`.
   final GoalDef bonus;
 
-  DailyGoals._(this.count, this.pool, this.bonus);
+  /// El cofre del jardín, con id `chest`: se abre con [chest].target días
+  /// completos (no hace falta que sean seguidos).
+  final GoalDef chest;
+
+  DailyGoals._(this.count, this.pool, this.bonus, this.chest);
 
   factory DailyGoals(Balance balance) {
     final s = balance.section('dailyGoals');
     final bonus = s.nums('bonus').map((k, v) => MapEntry(k, v.round()));
     final pool = [for (final g in s.sections('pool')) GoalDef.from(g)];
     final count = s.i('count');
-    return DailyGoals._(count, pool, GoalDef('all', DailyKind.plays, count, bonus));
+    final c = s.sub('chest');
+    final chest = GoalDef('chest', DailyKind.plays, c.i('days'), c.nums('give').map((k, v) => MapEntry(k, v.round())));
+    return DailyGoals._(count, pool, GoalDef('all', DailyKind.plays, count, bonus), chest);
   }
 
+  /// Si [g] se puede cumplir hoy: sin [canMeditate] no sale la de meditar, y
+  /// la de variedad pide tener abiertos al menos tantos juegos como su meta.
+  static bool doable(GoalDef g, {bool canMeditate = true, int games = 99}) => switch (g.kind) {
+    DailyKind.meditate => canMeditate,
+    DailyKind.variety => games >= g.target,
+    _ => true,
+  };
+
   /// Las metas del día [day]: una que se cumple jugando y el resto de tipos
-  /// distintos, elegidas con el día como semilla. Sin [canMeditate] no sale
-  /// la de meditar (todavía no se puede cumplir).
-  List<GoalDef> forDay(int day, {bool canMeditate = true}) {
+  /// distintos, elegidas con el día como semilla. Solo salen las que se
+  /// pueden cumplir con lo abierto ([doable]).
+  List<GoalDef> forDay(int day, {bool canMeditate = true, int games = 99}) {
     final rng = Random(day * 7919 + 17);
-    final runs = pool.where((g) => g.kind.fromRun).toList()..shuffle(rng);
+    bool ok(GoalDef g) => doable(g, canMeditate: canMeditate, games: games);
+    final runs = pool.where((g) => g.kind.fromRun && ok(g)).toList()..shuffle(rng);
     final picked = [runs.first];
-    final rest = pool.where((g) => g != runs.first && (canMeditate || g.kind != DailyKind.meditate)).toList()
-      ..shuffle(rng);
+    final rest = pool.where((g) => g != runs.first && ok(g)).toList()..shuffle(rng);
     for (final g in rest) {
       if (picked.length >= count) break;
       if (picked.every((p) => p.kind != g.kind)) picked.add(g);

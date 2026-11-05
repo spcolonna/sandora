@@ -455,4 +455,12 @@ const pt = <String, String>{
   'ach.runs500': 'Sem fim',
   'ach.runs500.how': 'Jogue {n} partidas.',
   'ach.count': 'Você conquistou {n} de {t}',
+  'daily.new': 'Metas novas',
+  'daily.chest': 'Baú do jardim',
+  'daily.chestHint': 'Cumpra as metas em mais {n} dias para abri-lo',
+  'daily.chestOne': 'Mais um dia completo e ele abre!',
+  'daily.chestOpen': 'O baú abriu!',
+  'milestone.chest': 'Baú do jardim!',
+  'milestone.chest.sub': '{n} dias completos cuidando do jardim. Isto é para você.',
+  'milestone.chest.next': 'Cada dia com as três metas soma um selo para o próximo.',
 };
