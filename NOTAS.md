@@ -104,7 +104,7 @@ Opciones de desarrollo que quedaron sobre la mesa:
 ## Comandos útiles
 
 ```bash
-flutter run -d 430B221E-87D6-427A-B764-ADD04F743A89      # simulador "Sandora Test"
+flutter run -d <simulador>                              # ver `flutter devices`
 flutter test
 flutter analyze
 dart format -l 120 <archivos>
@@ -112,14 +112,14 @@ python3 tool/gen_audio.py [prefijos] [--preview DIR]      # audio procedural →
 python3 tool/gen_i18n.py --add nuevos.json               # textos en 5 idiomas
 python3 tool/gen_prompts.py                              # regenera docs/prompts.md
 flutter build ipa --release                              # build para App Store (necesita cuenta en Xcode)
-xcrun simctl boot 430B221E-87D6-427A-B764-ADD04F743A89 && open -a Simulator
+xcrun simctl create "Sandora Test" "iPhone 17 Pro Max"   # crear uno para probar (borrarlo al terminar)
 ```
 
 Defines de depuración (`--dart-define=NOMBRE=valor`, solo en debug): `SANDORA_SEALS` (sellos del cofre),
 `SANDORA_DAY`, `SANDORA_HOUR`, `SANDORA_WEATHER`, `SANDORA_WEATHER_FROM` (para ver un fundido de clima),
 `SANDORA_AFTER_RAIN`, `SANDORA_AWAY_H`, `SANDORA_GAME`, `SANDORA_REMINDER_MIN`, `SANDORA_STREAK`, `SANDORA_TOWER`.
 
-Simulador: "Sandora Test" (`430B221E-87D6-427A-B764-ADD04F743A89`, iOS 26.4) es el de pruebas del proyecto. Las
+Simulador: "Sandora Test" se borró el 2026-11-06; para probar, crear uno y borrarlo al terminar. Las
 capturas del simulador llegan con una acción de atraso: sacar otra para ver el estado real.
 
 ## Rutas clave
