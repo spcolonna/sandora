@@ -36,7 +36,8 @@ cámara navegable).
 
 | Commit | Qué |
 | --- | --- |
-| (este) | Build vuelta a **1.0.0+2**: en App Store Connect solo está la 1; la próxima subida es la +2. |
+| (este) | **16 imágenes integradas** (fondos de 7 minijuegos, suelos del estanque y del bosque, río, copa y mesa del bonsái, maleza, hojas, regalo del té, toldo del Mercado). IPA 1.0.0+2 generado. |
+| `14f9413` | Build vuelta a **1.0.0+2**: en App Store Connect solo está la 1; la próxima subida es la +2. |
 | `911b15e` | **Avisos de Apple 90068/90683:** pods a iOS 15 y texto de ubicación "Always". |
 | `faf8572` | **Sonido arreglado** (ver Audio: el juego sonaba mudo en el iPhone), sonidos nuevos (tijera, batidor, pájaros, grillo, pincel del musgo) y arte de los premios de la racha (zafu, cuenco, farol de papel). IPA 1.0.0+3. |
 | `3448141` | **Sonido procedural nuevo** (ver sección Audio) y música del jardín. |
@@ -130,9 +131,22 @@ simulador) está terminado. Quedan dos cosas esperando al usuario:
   3.41 y no se pueden cambiar desde el proyecto. Es solo un aviso hasta abril de 2027; actualizar Flutter antes.
 - **Aviso 90683:** `geolocator` referencia la API de ubicación "siempre", así que Apple pide
   `NSLocationAlwaysAndWhenInUseUsageDescription` aunque el juego solo pide "mientras se usa". Ya está en Info.plist.
-- **Próxima subida: 1.0.0+2** (`pubspec.yaml` ya dice +2). Las builds +3 y +4 se generaron pero **no se subieron**;
-  el usuario quiere una sola versión arriba. Antes de generar el IPA hay que integrar las imágenes nuevas que va a
-  pasar. Solo subir el número cuando el usuario suba de verdad una build.
+- **IPA 1.0.0+2 generado (2026-11-06)** en `build/ios/ipa/Sandora.ipa`: sonido, arte de la racha, las 16 imágenes
+  nuevas y los avisos de Apple. Falta que el usuario lo suba con Transporter. Las builds +3 y +4 se generaron pero
+  **no se subieron**. Solo subir el número cuando el usuario suba de verdad una build (la siguiente sería +3).
+- **16 imágenes integradas** (originales en `store/art/minigames/`, `store/art/bg/` y `store/art/garden/`). Todas
+  vuelven al dibujo de código si falta el archivo:
+  - Fondos de minijuegos con `drawArtCover`: `bg_leaves`, `bg_shishi`, `bg_moss` (east), `bg_bell` (temple),
+    `bg_matcha`, `bg_flute` (forest). `bg_bonsai` va en dos tajadas (`_paintRoom`) para que la maceta apoye en la
+    mesa pintada (al 87,5 % de la imagen).
+  - `bg_east_ground` / `bg_forest_ground`: se usa la mitad de abajo del lienzo cubriendo desde el 43 % de la
+    pantalla (`_groundArt` en `garden_scene.dart`), en lugar del verde liso con matas.
+  - `bg_forest_river` cubre el rect del río (`paintRiver`); las linternas siguen en código en `_paintedLanterns`.
+  - `obj_bonsai_foliage`: copas del minijuego (el verde claro de lo que sale de la silueta es un tinte) y del
+    bonsái del jardín. `obj_bonsai_table`: la maceta apoya al 22 % de su alto.
+  - `obj_care_weeds` / `obj_care_leaves` (`garden_care.dart`), `obj_tea_gift` (`tea_visit.dart`, sin verificar en
+    pantalla: hace falta una visita al té) y `ui_market_awning` (`market_screen.dart`).
+  - En `docs/prompts.md` solo quedan `style_stones` y `style_plants` (guía de estilo, opcionales).
 - **Arte de la racha integrado:** `obj_court_zafu`, `obj_court_singing_bowl` y `obj_court_paper_lantern` (520 px,
   `assets/images/court/`, originales en `store/art/court/`). Se dibujan en `_paintCourtStreak`; si falta el arte,
   vuelve el dibujo de código. El farol ya viene encendido y de noche solo suma el halo.

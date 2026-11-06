@@ -619,6 +619,11 @@ class GardenPainter extends CustomPainter {
 
   void _paintGround(Canvas canvas) {
     final w = size.width, h = size.height;
+    if (layout.side != 0) {
+      // Prado pintado del estanque o del bosque, de borde a borde.
+      final art = SceneArt.instance[layout.side == 1 ? 'bg_east_ground' : 'bg_forest_ground'];
+      if (art != null) return _groundArt(canvas, art, Rect.fromLTRB(0, h * 0.43, w, h));
+    }
     canvas.drawRect(Rect.fromLTRB(0, h * 0.45, w, h), Paint()..color = Palette.moss);
     // Matas de pasto.
     final tuft = Paint()
@@ -647,6 +652,20 @@ class GardenPainter extends CustomPainter {
     canvas.translate(g.left, g.top);
     canvas.drawPicture(sandTexture(g.size, seed: 11));
     canvas.restore();
+  }
+
+  /// Dibuja la mitad de abajo de un suelo pintado (lienzo 2:3 con el prado
+  /// desde el 48 % de la altura) cubriendo [dst], recortando los costados.
+  void _groundArt(Canvas canvas, ui.Image art, Rect dst) {
+    final top = art.height * 0.48, srcH = art.height - top;
+    final k = max(dst.width / art.width, dst.height / srcH);
+    final sw = dst.width / k, sh = dst.height / k;
+    canvas.drawImageRect(
+      art,
+      Rect.fromLTWH((art.width - sw) / 2, top, sw, sh),
+      dst,
+      Paint()..filterQuality = FilterQuality.medium,
+    );
   }
 
   /// Hojas de arce arriba a la izquierda y bambú abajo a la derecha, que

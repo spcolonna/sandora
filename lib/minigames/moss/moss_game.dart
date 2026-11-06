@@ -255,7 +255,12 @@ class MossGame extends FlameGame with DragCallbacks {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(Offset.zero & Size(size.x, size.y), Paint()..color = Palette.sand);
+    final bg = SceneArt.instance['bg_moss'];
+    if (bg != null) {
+      drawArtCover(canvas, bg, Offset.zero & Size(size.x, size.y));
+    } else {
+      canvas.drawRect(Offset.zero & Size(size.x, size.y), Paint()..color = Palette.sand);
+    }
     final c = _cell;
     if (_rockPaths.isEmpty) _rockPaths.addAll(_rocks.map(_rockPath));
     for (var n = 0; n < _rocks.length; n++) {

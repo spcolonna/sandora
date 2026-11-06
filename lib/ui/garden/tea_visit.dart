@@ -11,6 +11,7 @@ import '../fx/sfx.dart';
 import '../theme/palette.dart';
 import '../widgets/currency.dart';
 import 'garden_scene.dart';
+import 'scene_art.dart';
 
 /// El té servido en la tarima de la casa de té. Mientras humea espera una
 /// visita; cuando la visita pasa, queda el cuenco vacío y su ofrenda envuelta
@@ -247,6 +248,14 @@ class _TeaPainter extends CustomPainter {
       Rect.fromCenter(center: base + const Offset(0, 1), width: 24, height: 5),
       Paint()..color = Palette.ink.withValues(alpha: 0.25),
     );
+    final art = SceneArt.instance['obj_tea_gift'];
+    if (art != null) {
+      // El furoshiki pintado, apoyado sobre su sombra.
+      const w = 25.0;
+      final h = w * art.height / art.width;
+      drawArt(canvas, art, Rect.fromLTWH(base.dx - w / 2, base.dy + 2 - h, w, h));
+      return;
+    }
     // Bulto de tela atado arriba, con sus dos puntas.
     const cloth = Color(0xFFB4533C);
     final bundle = RRect.fromRectAndRadius(

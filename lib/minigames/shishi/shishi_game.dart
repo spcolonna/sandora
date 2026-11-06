@@ -278,13 +278,18 @@ class ShishiGame extends FlameGame with TapCallbacks {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(
-      Offset.zero & Size(size.x, size.y),
-      Paint()
-        ..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [const Color(0xFFD9E6DA), const Color(0xFFEDE5D0)]),
-    );
     final ground = _ground;
-    canvas.drawRect(Rect.fromLTWH(0, ground, size.x, size.y - ground), Paint()..color = Palette.moss);
+    final bg = SceneArt.instance['bg_shishi'];
+    if (bg != null) {
+      drawArtCover(canvas, bg, Offset.zero & Size(size.x, size.y));
+    } else {
+      canvas.drawRect(
+        Offset.zero & Size(size.x, size.y),
+        Paint()
+          ..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [const Color(0xFFD9E6DA), const Color(0xFFEDE5D0)]),
+      );
+      canvas.drawRect(Rect.fromLTWH(0, ground, size.x, size.y - ground), Paint()..color = Palette.moss);
+    }
     // Piedra donde apoya el extremo cerrado en reposo.
     final heel = _along(_restAngle, _len * 0.45) + const Offset(0, _thick / 2);
     final stone = Rect.fromLTRB(heel.dx - size.x * 0.11, heel.dy, heel.dx + size.x * 0.1, ground + 10);

@@ -172,6 +172,13 @@ void _hangingLamp(Canvas canvas, Offset lamp, double cord) {
 
 /// Río que cruza el bosque, con piedras en las orillas y dos linternas.
 void paintRiver(Canvas canvas, Rect r) {
+  final art = SceneArt.instance['bg_forest_river'];
+  if (art != null) {
+    // El río pintado cruza de borde a borde; si sobra, se recortan las puntas.
+    drawArtCover(canvas, art, r);
+    _riverLanterns(canvas, r, _paintedLanterns);
+    return;
+  }
   final w = r.width, h = r.height;
   // El cauce baja en curva: más alto a la izquierda.
   Path band(double grow) {
@@ -230,8 +237,16 @@ void paintRiver(Canvas canvas, Rect r) {
       stone,
     );
   }
-  // Dos linternas flotando.
-  for (final (x, y) in [(0.3, 0.36), (0.64, 0.46)]) {
+  _riverLanterns(canvas, r, const [(0.3, 0.36), (0.64, 0.46)]);
+}
+
+/// Dónde flotan las linternas sobre `bg_forest_river` (fracciones de su rect).
+const _paintedLanterns = [(0.3, 0.5), (0.65, 0.6)];
+
+/// Dos linternas flotando en [at] (fracciones de [r]).
+void _riverLanterns(Canvas canvas, Rect r, List<(double, double)> at) {
+  final w = r.width, h = r.height;
+  for (final (x, y) in at) {
     final c = Offset(r.left + w * x, r.top + h * y);
     final s = w * 0.035;
     canvas.drawRect(

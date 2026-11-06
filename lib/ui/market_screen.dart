@@ -9,6 +9,7 @@ import '../garden/shop.dart';
 import '../i18n/i18n.dart';
 import 'fx/sfx.dart';
 import 'garden/garden_decor.dart';
+import 'garden/scene_art.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
 import 'widgets/glass.dart';
@@ -179,6 +180,21 @@ class _AwningPainter extends CustomPainter {
     final bottom = size.height * 0.52;
     const stripes = 8;
     final sw = w / stripes;
+    final art = SceneArt.instance['ui_market_awning'];
+    if (art != null) {
+      // El toldo pintado, estirado a lo ancho, con su sombra debajo.
+      final dst = Rect.fromLTWH(0, 0, w, bottom + sw * 0.55);
+      drawArt(
+        canvas,
+        art,
+        dst.shift(const Offset(0, 5)),
+        paint: Paint()
+          ..colorFilter = ColorFilter.mode(Palette.ink.withValues(alpha: 0.28), BlendMode.srcIn)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+      );
+      drawArt(canvas, art, dst);
+      return;
+    }
     final shape = Path()
       ..lineTo(w, 0)
       ..lineTo(w, bottom);

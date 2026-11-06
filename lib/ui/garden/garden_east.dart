@@ -251,6 +251,21 @@ void paintBonsai(Canvas canvas, Rect r) {
   drawArt(canvas, potArt, pot);
   // Copas de musgo en las puntas de las ramas de `obj_bonsai_trunk`: nubes de
   // follaje con la textura, apagada para que no brille más que el resto.
+  final pad = art['obj_bonsai_foliage'];
+  if (pad != null) {
+    // Las copas pintadas, una por punta de rama, alternando el lado.
+    var i = 0;
+    for (final (x, y, w) in [(0.12, 0.38, 0.18), (0.38, 0.3, 0.13), (0.7, 0.12, 0.24), (0.88, 0.5, 0.18)]) {
+      final c = Offset(tree.left + tw * x, tree.top + th * y);
+      final pw = tw * w * 1.45, ph = pw * pad.height / pad.width;
+      canvas.save();
+      canvas.translate(c.dx, c.dy);
+      if ((i++).isOdd) canvas.scale(-1, 1);
+      drawArt(canvas, pad, Rect.fromCenter(center: Offset.zero, width: pw, height: ph));
+      canvas.restore();
+    }
+    return;
+  }
   final tex = art['tex_moss'];
   final leaf = Paint()
     ..color = Palette.moss
@@ -294,6 +309,14 @@ ImageShader _mossShader(ui.Image tex, double k, Offset origin) => ImageShader(
 
 /// Mesita de madera del bonsái; devuelve su tabla.
 Rect _bonsaiTable(Canvas canvas, Rect r) {
+  final art = SceneArt.instance['obj_bonsai_table'];
+  if (art != null) {
+    // La mesita pintada; la maceta se apoya en su tabla (a un 22 % de arriba).
+    final w = r.width * 0.84, h = w * art.height / art.width;
+    final dst = Rect.fromLTWH(r.center.dx - w / 2, r.bottom - r.height * 0.02 - h, w, h);
+    drawArt(canvas, art, dst);
+    return Rect.fromLTWH(dst.left, dst.top + h * 0.22, w, h * 0.1);
+  }
   final table = Rect.fromLTWH(r.left + r.width * 0.12, r.bottom - r.height * 0.18, r.width * 0.76, r.height * 0.06);
   final wood = Paint()..color = Palette.wood;
   canvas.drawRect(table, wood);

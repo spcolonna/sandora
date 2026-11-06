@@ -193,9 +193,41 @@ class BonsaiGame extends FlameGame with DragCallbacks {
     });
   }
 
+  /// El fondo pintado en dos tajadas, para que la tabla de su mesa (al 87,5 %
+  /// de la imagen) quede justo bajo la maceta: arriba la pared, abajo la mesa.
+  void _paintRoom(Canvas canvas, Image bg) {
+    final pot = SceneArt.instance['obj_bonsai_pot'];
+    final potBottom = pot == null ? size.y * 0.86 : _pot.dy + 4 + size.x * 0.5 * pot.height / pot.width;
+    final target = potBottom - 4;
+    final k = max(size.x / bg.width, size.y / bg.height);
+    final sw = size.x / k, sx = (bg.width - sw) / 2, cut = bg.height * 0.875;
+    final paint = Paint()..filterQuality = FilterQuality.medium;
+    canvas.drawImageRect(bg, Rect.fromLTWH(sx, 0, sw, cut), Rect.fromLTWH(0, 0, size.x, target), paint);
+    canvas.drawImageRect(
+      bg,
+      Rect.fromLTWH(sx, cut, sw, bg.height - cut),
+      Rect.fromLTRB(0, target, size.x, size.y),
+      paint,
+    );
+  }
+
   /// Follaje como una nube de círculos: sombra abajo, cuerpo y brillo arriba.
   /// [light] es el verde claro de lo que crece fuera de la silueta.
   void _foliage(Canvas canvas, Rect r, double alpha, int seed, {bool light = false}) {
+    final art = SceneArt.instance['obj_bonsai_foliage'];
+    if (art != null) {
+      // La nube pintada, un poco más ancha que el óvalo y espejada según la semilla.
+      final w = r.width * 1.25, h = w * art.height / art.width;
+      final paint = Paint()..color = Color.fromRGBO(255, 255, 255, alpha);
+      // Lo que crece fuera de la silueta, en un verde más claro.
+      if (light) paint.colorFilter = const ColorFilter.mode(Color(0x55E8F0A0), BlendMode.srcATop);
+      canvas.save();
+      canvas.translate(r.center.dx, r.center.dy);
+      if (seed.isOdd) canvas.scale(-1, 1);
+      drawArt(canvas, art, Rect.fromCenter(center: Offset.zero, width: w, height: h), paint: paint);
+      canvas.restore();
+      return;
+    }
     // Semilla fija: la nube crece sin cambiar de forma.
     final rng = Random(seed);
     final blobs = [
@@ -222,10 +254,15 @@ class BonsaiGame extends FlameGame with DragCallbacks {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(
-      Offset.zero & Size(size.x, size.y),
-      Paint()..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [const Color(0xFFE6EBDD), Palette.paper]),
-    );
+    final bg = SceneArt.instance['bg_bonsai'];
+    if (bg != null) {
+      _paintRoom(canvas, bg);
+    } else {
+      canvas.drawRect(
+        Offset.zero & Size(size.x, size.y),
+        Paint()..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [const Color(0xFFE6EBDD), Palette.paper]),
+      );
+    }
     // Silueta guía, punteada.
     final guide = Paint()
       ..color = Palette.moss.withValues(alpha: 0.12)

@@ -136,6 +136,8 @@ class FluteGame extends FlameGame with TapCallbacks {
 
   /// Cañas al fondo, borrosas.
   void _drawGrove(Canvas canvas) {
+    final bg = SceneArt.instance['bg_flute'];
+    if (bg != null) return drawArtCover(canvas, bg, Offset.zero & Size(size.x, size.y));
     final rng = Random(9);
     for (var i = 0; i < 14; i++) {
       final x = rng.nextDouble() * size.x, w = 10 + rng.nextDouble() * 16;

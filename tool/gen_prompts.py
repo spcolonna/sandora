@@ -1231,6 +1231,22 @@ INCLUDED = {
                                'del fondo de la tarima, 520 px.'),
     'obj_court_paper_lantern': ('assets/images/court/obj_court_paper_lantern.webp', 'Farol de papel de la racha '
                                 'colgado del arbolito, 520 px; ya viene encendido y de noche suma el halo.'),
+    'bg_leaves': ('assets/images/east/bg_leaves.webp', 'Fondo de Hojas al viento: el camino de arena va de arriba abajo (`leaves_game.dart`).'),
+    'bg_bonsai': ('assets/images/east/bg_bonsai.webp', 'Fondo de la Poda del bonsái; se dibuja en dos tajadas para que la maceta apoye en su mesa (`_paintRoom`).'),
+    'bg_shishi': ('assets/images/east/bg_shishi.webp', 'Fondo del Shishi-odoshi; el poste, la piedra de apoyo y el bambú siguen encima.'),
+    'bg_bell': ('assets/images/temple/bg_bell.webp', 'Fondo de la Campana del templo: el pabellón reemplaza las vigas de código.'),
+    'bg_matcha': ('assets/images/forest/bg_matcha.webp', 'Fondo del Matcha: el tatami bajo el cuenco.'),
+    'bg_flute': ('assets/images/forest/bg_flute.webp', 'Fondo de la Flauta de bambú: el bambusal reemplaza las cañas de código.'),
+    'bg_moss': ('assets/images/east/bg_moss.webp', 'Fondo del Musgo: la arena bajo las piedras.'),
+    'bg_east_ground': ('assets/images/east/bg_east_ground.webp', 'Suelo de la vista del estanque: se usa la mitad de abajo, cubriendo desde el 43 % de la pantalla (`_groundArt`).'),
+    'bg_forest_ground': ('assets/images/forest/bg_forest_ground.webp', 'Suelo de la vista del bosque, igual que el del estanque.'),
+    'bg_forest_river': ('assets/images/forest/bg_forest_river.webp', 'Río del bosque, 1280 px, recortado en las puntas para cubrir su lugar; las dos linternas siguen siendo código (`paintRiver`).'),
+    'obj_bonsai_foliage': ('assets/images/east/obj_bonsai_foliage.webp', 'Copa del bonsái, 360 px: en el minijuego (las copas y los mechones; el verde claro de lo que sobra es un tinte) y en el jardín.'),
+    'obj_bonsai_table': ('assets/images/east/obj_bonsai_table.webp', 'Mesita del bonsái en la vista del estanque, 520 px (`_bonsaiTable`).'),
+    'obj_care_weeds': ('assets/images/court/obj_care_weeds.webp', 'Maleza de las tareas de cuidado, 320 px; al arrancarla sube y asoman raíces de código (`garden_care.dart`).'),
+    'obj_care_leaves': ('assets/images/court/obj_care_leaves.webp', 'Hojas de las tareas de cuidado, 320 px; al barrer se corren y se apagan.'),
+    'obj_tea_gift': ('assets/images/forest/obj_tea_gift.webp', 'Regalo de la casa de té, 260 px; el brillo que late sigue siendo código (`tea_visit.dart`).'),
+    'ui_market_awning': ('assets/images/ui/ui_market_awning.webp', 'Toldo del Mercado, 1280 px, estirado a lo ancho con su sombra (`market_screen.dart`).'),
 }
 
 

@@ -122,6 +122,8 @@ class MatchaGame extends FlameGame with DragCallbacks {
 
   /// Tatami: franjas de paja.
   void _drawMat(Canvas canvas) {
+    final bg = SceneArt.instance['bg_matcha'];
+    if (bg != null) return drawArtCover(canvas, bg, Rect.fromLTWH(0, 0, size.x, size.y));
     final line = Paint()
       ..color = const Color(0xFFC4AF86)
       ..strokeWidth = 1;

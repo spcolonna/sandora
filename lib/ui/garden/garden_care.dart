@@ -160,7 +160,13 @@ class _CarePainter extends CustomPainter {
     canvas.save();
     canvas.translate(base.dx, base.dy);
     canvas.rotate(wiggle * 0.25);
-    for (var i = 0; i < 7; i++) {
+    final art = SceneArt.instance['obj_care_weeds'];
+    if (art != null) {
+      // La mata pintada, con la base de los tallos en la tierra.
+      final w = r.width * 1.05, h = w * art.height / art.width;
+      drawArt(canvas, art, Rect.fromLTWH(-w / 2, -h * 0.97, w, h));
+    }
+    for (var i = 0; i < (art == null ? 7 : 0); i++) {
       final lean = (i - 3) / 3 + (rng.nextDouble() - 0.5) * 0.3;
       final h = r.height * (0.55 + rng.nextDouble() * 0.4);
       final tip = Offset(lean * r.width * 0.45, -h);
@@ -172,7 +178,7 @@ class _CarePainter extends CustomPainter {
       canvas.drawPath(path, Paint()..color = Color.lerp(const Color(0xFF4E6B2E), const Color(0xFF8FA650), i / 6)!);
     }
     // Dos florcitas amarillas: se distingue del pasto pintado.
-    for (final (fx, fy) in [(-0.22, -0.95), (0.18, -0.8)]) {
+    for (final (fx, fy) in art == null ? const [(-0.22, -0.95), (0.18, -0.8)] : const <(double, double)>[]) {
       final at = Offset(fx * r.width, fy * r.height);
       canvas.drawLine(
         Offset.zero,
@@ -198,6 +204,23 @@ class _CarePainter extends CustomPainter {
   }
 
   void _leaves(Canvas canvas, Rect r, Random rng) {
+    final art = SceneArt.instance['obj_care_leaves'];
+    if (art != null) {
+      // El montón pintado: al barrer se corre de costado, se levanta y se apaga.
+      final w = r.width * 1.1, h = w * art.height / art.width;
+      final c = r.bottomCenter + Offset(r.width * 0.9 * done, -h * 0.45 - r.height * 0.3 * done);
+      canvas.save();
+      canvas.translate(c.dx, c.dy);
+      canvas.rotate(wiggle * 0.15 + done * 0.3);
+      drawArt(
+        canvas,
+        art,
+        Rect.fromCenter(center: Offset.zero, width: w, height: h),
+        paint: Paint()..color = Color.fromRGBO(255, 255, 255, (1 - done * 0.8).clamp(0, 1)),
+      );
+      canvas.restore();
+      return;
+    }
     const colors = [Color(0xFFC8642E), Color(0xFFD99A3A), Color(0xFF9C4A2A), Color(0xFFB9852F)];
     final push = Offset(r.width * 0.9 * done, 0);
     for (var i = 0; i < 9; i++) {

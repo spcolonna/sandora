@@ -241,27 +241,32 @@ class LeavesGame extends FlameGame with DragCallbacks {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(Offset.zero & Size(size.x, size.y), Paint()..color = Palette.moss);
-    // Camino de grava con un borde de piedritas contra el pasto.
-    final path = _path;
-    canvas.drawRect(path, Paint()..color = Palette.sand);
-    final rng = Random(2);
-    final grit = Paint()..color = Palette.sandShadow.withValues(alpha: 0.6);
-    for (var i = 0; i < 220; i++) {
-      canvas.drawCircle(
-        Offset(rng.nextDouble() * size.x, path.top + rng.nextDouble() * path.height),
-        0.8 + rng.nextDouble() * 1.4,
-        grit,
-      );
-    }
-    final edge = Paint()..color = Palette.stone;
-    final edgeDark = Paint()..color = Palette.stoneDark.withValues(alpha: 0.5);
-    for (final y in [path.top, path.bottom]) {
-      for (var x = 4.0; x < size.x; x += 13 + rng.nextDouble() * 6) {
-        final r = 5 + rng.nextDouble() * 2.5;
-        final c = Offset(x, y + rng.nextDouble() * 4 - 2);
-        canvas.drawCircle(c + const Offset(0, 1.5), r, edgeDark);
-        canvas.drawCircle(c, r, edge);
+    final bg = SceneArt.instance['bg_leaves'];
+    if (bg != null) {
+      drawArtCover(canvas, bg, Offset.zero & Size(size.x, size.y));
+    } else {
+      canvas.drawRect(Offset.zero & Size(size.x, size.y), Paint()..color = Palette.moss);
+      // Camino de grava con un borde de piedritas contra el pasto.
+      final path = _path;
+      canvas.drawRect(path, Paint()..color = Palette.sand);
+      final rng = Random(2);
+      final grit = Paint()..color = Palette.sandShadow.withValues(alpha: 0.6);
+      for (var i = 0; i < 220; i++) {
+        canvas.drawCircle(
+          Offset(rng.nextDouble() * size.x, path.top + rng.nextDouble() * path.height),
+          0.8 + rng.nextDouble() * 1.4,
+          grit,
+        );
+      }
+      final edge = Paint()..color = Palette.stone;
+      final edgeDark = Paint()..color = Palette.stoneDark.withValues(alpha: 0.5);
+      for (final y in [path.top, path.bottom]) {
+        for (var x = 4.0; x < size.x; x += 13 + rng.nextDouble() * 6) {
+          final r = 5 + rng.nextDouble() * 2.5;
+          final c = Offset(x, y + rng.nextDouble() * 4 - 2);
+          canvas.drawCircle(c + const Offset(0, 1.5), r, edgeDark);
+          canvas.drawCircle(c, r, edge);
+        }
       }
     }
     // El montón: un círculo de barrido en la grava.

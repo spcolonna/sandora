@@ -143,6 +143,8 @@ class BellGame extends FlameGame with DragCallbacks {
 
   /// Las vigas del campanario.
   void _drawFrame(Canvas canvas) {
+    final bg = SceneArt.instance['bg_bell'];
+    if (bg != null) return drawArtCover(canvas, bg, Offset.zero & Size(size.x, size.y));
     final wood = Paint()..color = Palette.wood;
     canvas.drawRect(Rect.fromLTWH(0, size.y * 0.08, size.x, 16), wood);
     for (final x in [size.x * 0.06, size.x * 0.92]) {

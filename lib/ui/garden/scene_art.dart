@@ -74,6 +74,25 @@ class SceneArt {
     'obj_moss_rock': 'east',
     'obj_bonsai_pot': 'east',
     'obj_bonsai_trunk': 'east',
+    'obj_bonsai_foliage': 'east',
+    'obj_bonsai_table': 'east',
+    // Fondos pintados de los minijuegos (de borde a borde, el juego dibuja encima).
+    'bg_leaves': 'east',
+    'bg_bonsai': 'east',
+    'bg_shishi': 'east',
+    'bg_moss': 'east',
+    'bg_bell': 'temple',
+    'bg_matcha': 'forest',
+    'bg_flute': 'forest',
+    // Suelos de las vistas del estanque y del bosque, y el río.
+    'bg_east_ground': 'east',
+    'bg_forest_ground': 'forest',
+    'bg_forest_river': 'forest',
+    // Piezas chicas del jardín.
+    'obj_care_weeds': 'court',
+    'obj_care_leaves': 'court',
+    'obj_tea_gift': 'forest',
+    'ui_market_awning': 'ui',
     // Estanque de lotos (3 en línea).
     'bg_pond_water': 'pond',
     'spr_pond_tile_lotus': 'pond',
