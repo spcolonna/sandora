@@ -134,6 +134,11 @@ simulador) está terminado. Quedan dos cosas esperando al usuario:
 - **IPA 1.0.0+2 generado (2026-11-06)** en `build/ios/ipa/Sandora.ipa`: sonido, arte de la racha, las 16 imágenes
   nuevas y los avisos de Apple. Falta que el usuario lo suba con Transporter. Las builds +3 y +4 se generaron pero
   **no se subieron**. Solo subir el número cuando el usuario suba de verdad una build (la siguiente sería +3).
+- **Error 409 "objective_c.framework ... unsupported platform" (2026-11-06):** el IPA llevó el `objective_c`
+  de **simulador**, sacado de la caché de native assets que quedó tras correr en el simulador. **Antes de cada
+  `flutter build ipa`, hacer `flutter clean`**, y revisar con
+  `vtool -show-build Payload/Runner.app/Frameworks/*.framework/*` que todas digan `platform IOS` (no `IOSSIMULATOR`).
+  El IPA +2 se regeneró limpio y ya está verificado.
 - **16 imágenes integradas** (originales en `store/art/minigames/`, `store/art/bg/` y `store/art/garden/`). Todas
   vuelven al dibujo de código si falta el archivo:
   - Fondos de minijuegos con `drawArtCover`: `bg_leaves`, `bg_shishi`, `bg_moss` (east), `bg_bell` (temple),
