@@ -36,7 +36,8 @@ cámara navegable).
 
 | Commit | Qué |
 | --- | --- |
-| (este) | **Avisos de Apple 90068/90683:** pods a iOS 15 y texto de ubicación "Always". IPA 1.0.0+4. |
+| (este) | Build vuelta a **1.0.0+2**: en App Store Connect solo está la 1; la próxima subida es la +2. |
+| `911b15e` | **Avisos de Apple 90068/90683:** pods a iOS 15 y texto de ubicación "Always". |
 | `faf8572` | **Sonido arreglado** (ver Audio: el juego sonaba mudo en el iPhone), sonidos nuevos (tijera, batidor, pájaros, grillo, pincel del musgo) y arte de los premios de la racha (zafu, cuenco, farol de papel). IPA 1.0.0+3. |
 | `3448141` | **Sonido procedural nuevo** (ver sección Audio) y música del jardín. |
 | `9c99a40` | iOS: `ITSAppUsesNonExemptEncryption = false` en `ios/Runner/Info.plist`. (Por un staging previo, también borra `tool/gen_placeholder_audio.py`, renombrado a `tool/gen_audio.py`.) |
@@ -129,8 +130,9 @@ simulador) está terminado. Quedan dos cosas esperando al usuario:
   3.41 y no se pueden cambiar desde el proyecto. Es solo un aviso hasta abril de 2027; actualizar Flutter antes.
 - **Aviso 90683:** `geolocator` referencia la API de ubicación "siempre", así que Apple pide
   `NSLocationAlwaysAndWhenInUseUsageDescription` aunque el juego solo pide "mientras se usa". Ya está en Info.plist.
-- **IPA 1.0.0+4 (2026-11-06)** en `build/ios/ipa/Sandora.ipa`: sonido arreglado, arte de la racha y avisos de Apple.
-  Falta que el usuario lo suba con Transporter. La próxima subida es `+5`.
+- **Próxima subida: 1.0.0+2** (`pubspec.yaml` ya dice +2). Las builds +3 y +4 se generaron pero **no se subieron**;
+  el usuario quiere una sola versión arriba. Antes de generar el IPA hay que integrar las imágenes nuevas que va a
+  pasar. Solo subir el número cuando el usuario suba de verdad una build.
 - **Arte de la racha integrado:** `obj_court_zafu`, `obj_court_singing_bowl` y `obj_court_paper_lantern` (520 px,
   `assets/images/court/`, originales en `store/art/court/`). Se dibujan en `_paintCourtStreak`; si falta el arte,
   vuelve el dibujo de código. El farol ya viene encendido y de noche solo suma el halo.
