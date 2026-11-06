@@ -83,6 +83,7 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
     final hit = _stoneAt(at);
     if (hit != null) {
       _stones.removeAt(hit);
+      SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
       Haptics.light();
       return;
     }

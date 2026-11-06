@@ -22,79 +22,13 @@ conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de l
 
 # Para generar ahora
 
-## Bloque 18 — Premios de la racha de meditación (3)
-
-**Por qué ahora:** Son premios que hoy no se ven en el patio: quien medita una semana no encuentra nada.
-
-Lo que se gana meditando varios días seguidos (`streakObjects`). Hoy **no se ven en el patio pintado**: solo existían en el jardín viejo de código. Van junto a la tarima de meditación. **Adjuntá `store/art/style/style_courtyard_ref.webp`.**
-
-### 1. `obj_court_zafu` ⬜
-
-Guardala como `store/art/court/obj_court_zafu.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a tenth of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
-
-SUBJECT: A round Japanese meditation cushion (zafu) of deep red brocade (#9E3F38) with a thin golden trim and soft pleated sides, plump and slightly pressed in the middle, resting on a flat square indigo mat (zabuton).
-
-STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
-
-COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 2. `obj_court_singing_bowl` ⬜
-
-Guardala como `store/art/court/obj_court_singing_bowl.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a twelfth of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
-
-SUBJECT: A Japanese singing bowl (rin) of warm aged bronze with a soft golden shine on its rim, resting on a small round brocade cushion, with a short wooden striker lying beside it.
-
-STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
-
-COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 3. `obj_court_paper_lantern` ⬜
-
-Guardala como `store/art/court/obj_court_paper_lantern.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is an object that stands in the painted courtyard on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game places it on the painted gravel and shows it fairly large (about a twelfth of the screen width), so the image must contain ONLY the object, and it must match the attached courtyard reference perfectly in perspective, light and brushwork.
-
-SUBJECT: A round Japanese paper lantern (chōchin) of warm off-white washi with thin dark bamboo ribs, a black lacquered top and bottom ring and a short cord on top to hang it, glowing softly amber from inside. It hangs in the air: no ground and no contact shadow under it.
-
-STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
-
-COMPOSITION: Camera: exactly the same as the reference image: standing in the open doorway of the house at eye level, looking straight into a walled Japanese courtyard and slightly down (about 25 degrees), one-point perspective with the vanishing point near the gate in the back wall. The object is seen from that camera (slightly from above), centered, filling about 85% of the canvas. Its base sits near the bottom of the canvas with a soft contact shadow painted right under it toward the lower right, and nothing else around. The whole object is visible, nothing is cropped. All four corners stay empty and transparent.
-
-DO NOT INCLUDE: any background, gravel bed, wall, sky or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
 ## Bloque 12 — Vista del estanque (1)
 
 **Por qué ahora:** El suelo de la vista del estanque. La primera salió como una isla con estanque propio: este prompt pide un prado de borde a borde, sin agua ni sendero (los dibuja el juego).
 
 Segunda vista del jardín (se llega deslizando). Va encima del mismo cielo y las mismas colinas que el patio. Adjuntá `store/art/style/style_keyart.webp` y `bg_base_ground`.
 
-### 4. `bg_east_ground` ⬜
+### 1. `bg_east_ground` ⬜
 
 Guardala como `store/art/bg/bg_east_ground.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -120,7 +54,7 @@ DO NOT INCLUDE: a pond, water, a path, stepping stones, rocks, lanterns, trees, 
 
 Tercera vista del jardín (casa de té, bambú y río). Hoy el suelo es un verde liso y el río son curvas de código. Va encima del mismo cielo y las mismas colinas. Adjuntá `store/art/style/style_keyart.webp` y, si ya está, `bg_east_ground` para que las dos vistas combinen.
 
-### 5. `bg_forest_ground` ⬜
+### 2. `bg_forest_ground` ⬜
 
 Guardala como `store/art/bg/bg_forest_ground.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -140,7 +74,7 @@ COMPOSITION: This is NOT an island or a floating patch: the ground runs edge to 
 DO NOT INCLUDE: a river, water, a path, rocks, lanterns, trees, bamboo stalks, buildings or objects; an island shape or visible ground edges on the sides or bottom; sky; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 6. `bg_forest_river` ⬜
+### 3. `bg_forest_river` ⬜
 
 Guardala como `store/art/bg/bg_forest_river.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -166,7 +100,7 @@ DO NOT INCLUDE: boats, lanterns, bridges or docks; large rocks in the water; tre
 
 Seis minijuegos ya tienen sus piezas pintadas, pero el fondo sigue siendo colores lisos y rayas. Cada fondo va de borde a borde y el juego dibuja encima. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 7. `bg_leaves` ⬜
+### 4. `bg_leaves` ⬜
 
 Guardala como `store/art/minigames/bg_leaves.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -186,7 +120,7 @@ COMPOSITION: The sand path fills the central 60% of the width and stays calm and
 DO NOT INCLUDE: leaves, brooms or piles; large rocks or objects on the sand; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 8. `bg_bonsai` ⬜
+### 5. `bg_bonsai` ⬜
 
 Guardala como `store/art/minigames/bg_bonsai.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -206,7 +140,7 @@ COMPOSITION: The middle of the image is plain, soft and slightly lighter, like a
 DO NOT INCLUDE: trees, plants, pots or objects; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 9. `bg_shishi` ⬜
+### 6. `bg_shishi` ⬜
 
 Guardala como `store/art/minigames/bg_shishi.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -226,7 +160,7 @@ COMPOSITION: The middle band (30% to 70% of the height) is soft, misty and simpl
 DO NOT INCLUDE: bamboo pipes, basins, water spouts or posts; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 10. `bg_bell` ⬜
+### 7. `bg_bell` ⬜
 
 Guardala como `store/art/minigames/bg_bell.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -246,7 +180,7 @@ COMPOSITION: The space between the posts is open, soft and slightly bright so th
 DO NOT INCLUDE: the bell, the striking log, ropes or hooks; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 11. `bg_matcha` ⬜
+### 8. `bg_matcha` ⬜
 
 Guardala como `store/art/minigames/bg_matcha.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -266,7 +200,7 @@ COMPOSITION: Even and calm everywhere so the bowl on top stands out. The game sh
 DO NOT INCLUDE: bowls, whisks, cups or objects; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame other than the tatami border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 12. `bg_flute` ⬜
+### 9. `bg_flute` ⬜
 
 Guardala como `store/art/minigames/bg_flute.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -286,7 +220,7 @@ COMPOSITION: Very soft and low in contrast, darker toward the edges and lighter 
 DO NOT INCLUDE: flutes or instruments; sharp foreground stalks in the center; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; people or animals; frame or border; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 13. `bg_moss` ⬜
+### 10. `bg_moss` ⬜
 
 Guardala como `store/art/minigames/bg_moss.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -312,7 +246,7 @@ DO NOT INCLUDE: rocks, moss patches in the middle, plants or objects; any text, 
 
 Cosas que se ven en el jardín y siguen siendo dibujos de código: las tareas de cuidado, la copa y la mesa del bonsái, el regalo de la casa de té y el toldo del Mercado. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 14. `obj_care_weeds` ⬜
+### 11. `obj_care_weeds` ⬜
 
 Guardala como `store/art/garden/obj_care_weeds.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -332,7 +266,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 15. `obj_care_leaves` ⬜
+### 12. `obj_care_leaves` ⬜
 
 Guardala como `store/art/garden/obj_care_leaves.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -352,7 +286,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 16. `obj_bonsai_foliage` ⬜
+### 13. `obj_bonsai_foliage` ⬜
 
 Guardala como `store/art/garden/obj_bonsai_foliage.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -372,7 +306,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 17. `obj_bonsai_table` ⬜
+### 14. `obj_bonsai_table` ⬜
 
 Guardala como `store/art/garden/obj_bonsai_table.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -392,7 +326,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 18. `obj_tea_gift` ⬜
+### 15. `obj_tea_gift` ⬜
 
 Guardala como `store/art/garden/obj_tea_gift.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -412,7 +346,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 19. `ui_market_awning` ⬜
+### 16. `ui_market_awning` ⬜
 
 Guardala como `store/art/garden/ui_market_awning.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -438,7 +372,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 
 Van primero: fijan el estilo de todo lo demás. Guardalas en `store/art/style/` y **adjuntá `store/art/style/style_keyart.webp` como referencia en cada bloque siguiente** (arrastrala a la conversación antes de pegar el prompt). Si el estilo no te convence, se cambia el párrafo STYLE en `tool/gen_prompts.py` y se regenera este archivo.
 
-### 20. `style_stones` ⬜
+### 17. `style_stones` ⬜
 
 Guardala como `store/art/style/style_stones.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -458,7 +392,7 @@ COMPOSITION: Each stone is separated from the others with generous empty paper a
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; labels; grid lines; frame or border; cast shadows on the paper; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 21. `style_plants` ⬜
+### 18. `style_plants` ⬜
 
 Guardala como `store/art/style/style_plants.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -480,7 +414,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 
 ---
 
-# Ya incluidas (115)
+# Ya incluidas (118)
 
 | Imagen | Archivo en el juego | Uso |
 |---|---|---|
@@ -599,3 +533,6 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 | `char_visitor_fisher` | `assets/images/court/char_visitor_fisher.webp` | Pescador, 480 px de alto. |
 | `obj_upgrade_border` | `assets/images/court/obj_upgrade_border.webp` | Borde de piedras de las mejoras 1 y 2, 560 px (`garden_upgrades.dart`). |
 | `obj_upgrade_bloom` | `assets/images/court/obj_upgrade_bloom.webp` | Borde con flores de la mejora 3, 560 px; el brillo sigue siendo código. |
+| `obj_court_zafu` | `assets/images/court/obj_court_zafu.webp` | Zafu de la racha sobre el almohadón de la tarima, 520 px (`_paintCourtStreak`). |
+| `obj_court_singing_bowl` | `assets/images/court/obj_court_singing_bowl.webp` | Cuenco de la racha en el rincón del fondo de la tarima, 520 px. |
+| `obj_court_paper_lantern` | `assets/images/court/obj_court_paper_lantern.webp` | Farol de papel de la racha colgado del arbolito, 520 px; ya viene encendido y de noche suma el halo. |

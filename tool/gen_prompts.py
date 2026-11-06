@@ -1225,6 +1225,12 @@ INCLUDED = {
                            '560 px (`garden_upgrades.dart`).'),
     'obj_upgrade_bloom': ('assets/images/court/obj_upgrade_bloom.webp', 'Borde con flores de la mejora 3, 560 px; '
                           'el brillo sigue siendo código.'),
+    'obj_court_zafu': ('assets/images/court/obj_court_zafu.webp', 'Zafu de la racha sobre el almohadón de la tarima, '
+                       '520 px (`_paintCourtStreak`).'),
+    'obj_court_singing_bowl': ('assets/images/court/obj_court_singing_bowl.webp', 'Cuenco de la racha en el rincón '
+                               'del fondo de la tarima, 520 px.'),
+    'obj_court_paper_lantern': ('assets/images/court/obj_court_paper_lantern.webp', 'Farol de papel de la racha '
+                                'colgado del arbolito, 520 px; ya viene encendido y de noche suma el halo.'),
 }
 
 

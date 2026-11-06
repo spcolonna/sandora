@@ -146,7 +146,7 @@ class BonsaiGame extends FlameGame with DragCallbacks {
       if (br.fall >= 0 || br.length < 6) continue;
       if (!_crosses(from, to, br)) continue;
       br.fall = 0;
-      SoundBoard.instance.play(Sfx.uiTap, volume: 0.5);
+      SoundBoard.instance.play(Sfx.snip, volume: 0.55);
       if (br.wild) {
         _wildCut++;
         // Cortar a tiempo (antes de que se salga) vale más.

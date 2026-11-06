@@ -141,7 +141,9 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     Future.delayed(const Duration(milliseconds: 1800), () {
       if (mounted) _checkCare();
     });
-    _gardenSound();
+    // El audio carga en segundo plano: la música y el viento arrancan apenas
+    // está listo, no al próximo tic.
+    SoundBoard.instance.whenReady.then((_) => _gardenSound());
     _followFade();
     // Una meditación que quedó a medias al cerrar la app se retoma.
     if (Progress.instance.meditationStartedAt != null) {
@@ -266,13 +268,32 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     sound.music();
     sound.loop(Ambience.wind, volume: 0.18);
     // Sube y baja con el clima que se funde.
-    final b = WeatherService.instance.blend(gardenNow());
+    final now = gardenNow();
+    final b = WeatherService.instance.blend(now);
     final rain = 0.22 * b.amount(Weather.rain) + 0.32 * b.amount(Weather.storm);
     if (rain > 0.01) {
       sound.loop(Ambience.rain, volume: rain, fade: const Duration(milliseconds: 500));
     } else {
       sound.stopLoop(Ambience.rain);
     }
+    _wildlife(now, rain);
+  }
+
+  final _rng = Random();
+
+  /// De vez en cuando, de lejos, un pájaro de día o un grillo de noche: el
+  /// jardín está vivo. Con lluvia se callan.
+  void _wildlife(DateTime now, double rain) {
+    if (rain > 0.05 || _rng.nextDouble() > 0.55) return;
+    final h = now.hour;
+    final night = h >= 20 || h < 5;
+    final day = h >= 6 && h < 19;
+    if (!night && !day) return;
+    // Entre 1 y 12 s después del tic, para que no caiga siempre igual.
+    Future.delayed(Duration(milliseconds: 1000 + _rng.nextInt(11000)), () {
+      if (!mounted || _away) return;
+      SoundBoard.instance.play(night ? Sfx.cricket : Sfx.bird, volume: night ? 0.22 : 0.2);
+    });
   }
 
   void _quiet() {

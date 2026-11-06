@@ -67,7 +67,7 @@ class MatchaGame extends FlameGame with DragCallbacks {
     _whisk = event.localPosition.toOffset();
     _started = true;
     _tracker.start(_whisk!.dx, _t);
-    SoundBoard.instance.loop(Ambience.rake, volume: 0.25, fade: const Duration(milliseconds: 300));
+    SoundBoard.instance.loop(Ambience.whisk, volume: 0.25, fade: const Duration(milliseconds: 300));
   }
 
   @override
@@ -91,13 +91,13 @@ class MatchaGame extends FlameGame with DragCallbacks {
   void onDragEnd(DragEndEvent event) {
     super.onDragEnd(event);
     _whisk = null;
-    SoundBoard.instance.stopLoop(Ambience.rake, fade: const Duration(milliseconds: 300));
+    SoundBoard.instance.stopLoop(Ambience.whisk, fade: const Duration(milliseconds: 300));
   }
 
   void _end() {
     _over = true;
     _whisk = null;
-    SoundBoard.instance.stopLoop(Ambience.rake);
+    SoundBoard.instance.stopLoop(Ambience.whisk);
     final foam = _foam;
     final pct = (foam * 100).round();
     final record = pct > Progress.instance.best('matcha');

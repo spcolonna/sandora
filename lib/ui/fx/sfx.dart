@@ -28,7 +28,10 @@ enum Sfx {
   leafRustle('sfx_leaf_rustle', 2),
   brush('sfx_brush', 2),
   pluck('sfx_pluck', 1),
-  sweep('sfx_sweep', 1);
+  sweep('sfx_sweep', 1),
+  snip('sfx_snip', 2),
+  bird('sfx_bird', 3),
+  cricket('sfx_night_cricket', 1);
 
   final String file;
   final int variants;
@@ -39,10 +42,15 @@ enum Sfx {
 enum Ambience {
   wind('sfx_base_wind'),
   rain('sfx_rain_ambient'),
-  rake('sfx_sand_rake');
+  rake('sfx_sand_rake'),
+  whisk('sfx_whisk');
 
   /// Ambientes que se pueden elegir para meditar.
   static const forMeditation = [wind, rain];
+
+  /// El rastrillo y el batidor son efectos de lo que hace el jugador: siguen
+  /// al interruptor de sonido, no al de música.
+  bool get isEffect => this == rake || this == whisk;
 
   final String file;
   const Ambience(this.file);
@@ -57,7 +65,12 @@ class SoundBoard {
   final _music = AudioPlayer();
   final _rng = Random();
   bool _ready = false;
+  final _loaded = Completer<void>();
   bool _hidden = false;
+
+  /// Se completa cuando el audio terminó de cargar (bien o mal). Lo que pide
+  /// sonido al abrir (la música del jardín) espera esto: antes se perdía.
+  Future<void> get whenReady => _loaded.future;
   AppLifecycleListener? _lifecycle;
 
   /// Reproductores por sonido: hasta 3 golpes iguales superpuestos.
@@ -66,23 +79,41 @@ class SoundBoard {
   Future<void> init() async {
     if (_ready) return;
     try {
-      // Se mezcla con la música del usuario y respeta el modo silencio en iOS.
+      // Suena aunque el iPhone esté en silencio (con `ambient` el juego quedaba
+      // mudo y parecía no tener sonido) y se mezcla con la música del usuario.
+      // Se apaga desde Ajustes.
       await AudioPlayer.global.setAudioContext(
-        AudioContextConfig(
-          focus: AudioContextConfigFocus.mixWithOthers,
-        ).build().copy(iOS: AudioContextIOS(category: AVAudioSessionCategory.ambient)),
+        AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers).build(),
       );
-      for (final s in Sfx.values) {
-        for (var i = 1; i <= s.variants; i++) {
-          final name = _name(s, i);
-          _pools[name] = [for (var v = 0; v < voices; v++) await _Voice.load('audio/$name.m4a')];
-        }
-      }
+    } catch (e) {
+      debugPrint('Contexto de audio: $e');
+    }
+    try {
+      // Cada sonido se carga por su cuenta y en paralelo: si uno falla, los
+      // demás suenan igual.
+      final names = [
+        for (final s in Sfx.values)
+          for (var i = 1; i <= s.variants; i++) _name(s, i),
+      ];
+      await Future.wait([
+        for (final name in names)
+          () async {
+            try {
+              _pools[name] = await Future.wait([for (var v = 0; v < voices; v++) _Voice.load('audio/$name.m4a')]);
+            } catch (e) {
+              debugPrint('Sin $name: $e');
+            }
+          }(),
+      ]);
       for (final a in Ambience.values) {
-        final p = AudioPlayer();
-        await p.setReleaseMode(ReleaseMode.loop);
-        await p.setSource(AssetSource('audio/${a.file}.m4a'));
-        _loops[a] = p;
+        try {
+          final p = AudioPlayer();
+          await p.setReleaseMode(ReleaseMode.loop);
+          await p.setSource(AssetSource('audio/${a.file}.m4a'));
+          _loops[a] = p;
+        } catch (e) {
+          debugPrint('Sin ${a.file}: $e');
+        }
       }
       await _music.setReleaseMode(ReleaseMode.stop);
       _music.onPlayerComplete.listen((_) {
@@ -107,9 +138,11 @@ class SoundBoard {
         },
       );
       _ready = true;
+      debugPrint('Audio listo: ${_pools.length} efectos, ${_loops.length} ambientes');
     } catch (e) {
       debugPrint('Audio no disponible: $e');
     }
+    if (!_loaded.isCompleted) _loaded.complete();
   }
 
   static String _name(Sfx s, int i) => s.variants > 1 ? '${s.file}_${i.toString().padLeft(2, '0')}' : s.file;
@@ -130,8 +163,9 @@ class SoundBoard {
 
   /// Arranca un ambiente subiendo el volumen de a poco: nada entra de golpe.
   void loop(Ambience a, {double volume = 0.5, Duration fade = const Duration(milliseconds: 1200)}) {
-    if (!_ready || !AppSettings.instance.music) return;
-    final p = _loops[a]!;
+    if (!_ready || !(a.isEffect ? AppSettings.instance.sound : AppSettings.instance.music)) return;
+    final p = _loops[a];
+    if (p == null) return;
     if (p.state != PlayerState.playing) {
       p.setVolume(0);
       p.resume();
@@ -141,7 +175,7 @@ class SoundBoard {
 
   /// Baja el ambiente hasta el silencio y recién ahí lo pausa.
   void stopLoop(Ambience a, {Duration fade = const Duration(milliseconds: 800)}) {
-    if (!_ready) return;
+    if (!_ready || _loops[a] == null) return;
     _fadeTo(a, 0, fade, then: () => _loops[a]!.pause());
   }
 

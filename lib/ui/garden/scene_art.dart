@@ -41,6 +41,10 @@ class SceneArt {
     'obj_court_rock': 'court',
     'obj_court_rake': 'court',
     'fg_court_doorway': 'court',
+    // Premios de la racha de meditación, sobre la tarima.
+    'obj_court_zafu': 'court',
+    'obj_court_singing_bowl': 'court',
+    'obj_court_paper_lantern': 'court',
     'bg_rain_roof': 'rain',
     'obj_rain_vessel_01': 'rain',
     'obj_rain_vessel_02': 'rain',

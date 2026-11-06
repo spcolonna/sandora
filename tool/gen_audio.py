@@ -359,6 +359,77 @@ def meow(seconds=0.6):
     return out * np.sin(np.pi * u) ** 0.7 * ramp(x, 0.03)
 
 
+def snip(f=3400.0):
+    """Tijera de podar ("pachin"): dos chasquidos metálicos muy cortos, el
+    segundo apenas más grave, y la ramita que cae entre las hojas."""
+    def click(f0, a):
+        x = t(0.09)
+        n = len(x)
+        s = np.zeros(n)
+        for ratio, amp, decay in [(1.0, 1.0, 0.012), (1.47, 0.6, 0.008), (2.18, 0.4, 0.005), (3.05, 0.2, 0.003)]:
+            s += amp * np.sin(2 * np.pi * f0 * ratio * x + rng.uniform(0, 6)) * np.exp(-x / decay)
+        tick = 0.5 * norm(hp(noise(n), 2500)) * np.exp(-x / 0.0015)
+        return a * (s + tick) * ramp(x, 0.0004)
+    leaves = lp(grains(0.22, 1100, 1500, 8000, 0.2), 7000) * 0.22
+    return mix(click(f, 1.0), at(click(f * 0.86, 0.7), 0.055), at(leaves, 0.07))
+
+
+def whisk_loop(seconds):
+    """Batidor de bambú en el matcha: un vaivén rápido (7 por segundo) de
+    espuma que chisporrotea, con burbujitas que revientan."""
+    n = int(SR * seconds)
+    x = np.arange(n) / SR
+    rate = round(7 * seconds) / seconds
+    stroke = 0.3 + 0.7 * np.abs(np.sin(np.pi * rate * x)) ** 1.5
+    out = np.zeros((2, n))
+    for c in range(2):
+        froth = norm(looped(lambda s: bp(s, 1800, 9000), noise(n)))
+        liquid = norm(looped(lambda s: bp(s, 300, 1400), pink(n)))
+        bubbles = np.zeros(n)
+        for _ in range(int(seconds * 260)):
+            b = drop(rng.uniform(2200, 5200), rng.uniform(1.2, 1.6), rng.uniform(0.002, 0.005), 0.02)
+            place(bubbles, b * rng.uniform(0.2, 1.0), int(rng.integers(n)), circular=True)
+        g = np.roll(stroke, int(SR * 0.004 * c))
+        out[c] = (0.5 * froth + 0.25 * liquid) * g + 0.9 * norm(bubbles) * g
+    return out
+
+
+def chirp(f1, f2, seconds, curve=1.0, amp=1.0):
+    """Un trino de pájaro: un silbido que se desliza de [f1] a [f2]."""
+    x = t(seconds)
+    u = (x / seconds) ** curve
+    f = f1 + (f2 - f1) * u
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    env = np.sin(np.pi * np.clip(x / seconds, 0, 1)) ** 0.8
+    return amp * (np.sin(ph) + 0.12 * np.sin(2 * ph)) * env
+
+
+def bird(kind):
+    """Pájaros del jardín, de lejos: un ruiseñor japonés ("hoo... hokekyo"),
+    un mosquitero que baja en trinos y un ojiblanco que repite dos notas."""
+    if kind == 1:
+        hold = chirp(1150, 1350, 0.75, 2.0) * (1 + 0.02 * np.sin(2 * np.pi * 9 * t(0.75)))
+        call = mix(chirp(1700, 2500, 0.12), at(chirp(2500, 1600, 0.14), 0.16), at(chirp(3000, 2300, 0.32, 0.6), 0.34))
+        return mix(hold, at(call, 0.95))
+    if kind == 2:
+        return mix(*[at(chirp(4200 - 250 * k, 3200 - 250 * k, 0.07, amp=1 - 0.08 * k), 0.11 * k) for k in range(6)])
+    note = lambda f: mix(chirp(f, f * 1.25, 0.06), at(chirp(f * 1.25, f * 1.1, 0.08), 0.06))
+    return mix(*[at(note(2900 if k % 2 == 0 else 3300), 0.17 * k) for k in range(5)])
+
+
+def cricket(seconds=1.6):
+    """Grillo campana (suzumushi) de noche: "riiin, riiin", pulsos rápidos de
+    un tono agudo, en dos ráfagas."""
+    x = t(seconds)
+    pulses = (np.sin(2 * np.pi * 38 * x) > 0.2).astype(float)
+    pulses = lp(pulses, 300)
+    bursts = np.zeros(len(x))
+    for start in [0.05, 0.75]:
+        u = np.clip((x - start) / 0.45, 0, 1)
+        bursts += np.sin(np.pi * u) ** 0.6 * (u > 0) * (u < 1)
+    tone = np.sin(2 * np.pi * 4300 * x) + 0.3 * np.sin(2 * np.pi * 4300 * 2.02 * x)
+    return tone * pulses * bursts
+
 # --------------------------------------------------------------------------
 # Ambientes en loop (todo circular: empalman sin costura)
 
@@ -602,6 +673,17 @@ def main():
     if wanted("sfx_flute_note"):
         for i, m in enumerate([67, 69, 72, 74], start=1):
             write(f"sfx_flute_note_{i:02d}", trim(verb(shakuhachi(hz(m), 1.4), GARDEN, 0.3)), 0.5)
+
+    if wanted("sfx_snip"):
+        for i, f in enumerate([3400, 3000], start=1):
+            write(f"sfx_snip_{i:02d}", trim(verb(snip(f), GARDEN, 0.1)), 0.45)
+    if wanted("sfx_whisk"):
+        write("sfx_whisk", whisk_loop(2.0), rms=0.1, fade=False)
+    if wanted("sfx_bird"):
+        for k in (1, 2, 3):
+            write(f"sfx_bird_{k:02d}", trim(verb(lp(bird(k), 7000), GARDEN, 0.35)), 0.35)
+    if wanted("sfx_night_cricket"):
+        write("sfx_night_cricket", trim(verb(cricket(), GARDEN, 0.3)), 0.25)
 
     if wanted("music_garden_01"):
         write("music_garden_01",

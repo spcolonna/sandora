@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -1053,22 +1054,52 @@ class GardenPainter extends CustomPainter {
 
   /// Los premios de la racha sobre la tarima del patio pintado: el zafu sobre
   /// el almohadón, el cuenco en el rincón del fondo y el farol de papel
-  /// colgado de la rama del arbolito. Con código hasta tener su arte.
+  /// colgado de la rama del arbolito. Con su arte pintado; si falta, con código.
   void _paintCourtStreak(Canvas canvas, Rect deck) {
     final w = deck.width;
-    if (streakObjects.contains('cushion')) _paintZafu(canvas, _onDeck(deck, 0.5, 0.6), w * 0.18);
-    if (streakObjects.contains('bowl')) _paintSingingBowl(canvas, _onDeck(deck, 0.09, 0.545), w * 0.5);
+    if (streakObjects.contains('cushion')) {
+      final base = _onDeck(deck, 0.5, 0.6);
+      if (!_courtArt(canvas, 'obj_court_zafu', base, w * 0.21)) _paintZafu(canvas, base, w * 0.18);
+    }
+    if (streakObjects.contains('bowl')) {
+      final base = _onDeck(deck, 0.09, 0.545);
+      if (!_courtArt(canvas, 'obj_court_singing_bowl', base, w * 0.1)) _paintSingingBowl(canvas, base, w * 0.5);
+    }
     final lantern = _paperLantern;
     if (lantern != null) {
+      final art = _paperLanternArt(lantern, _paperLanternSize);
       canvas.drawLine(
         _onDeck(deck, 0.6, 0.2),
-        lantern - Offset(0, _paperLanternSize),
+        art?.$2.topCenter ?? lantern - Offset(0, _paperLanternSize),
         Paint()
           ..color = Palette.ink.withValues(alpha: 0.8)
           ..strokeWidth = max(0.6, w * 0.006),
       );
-      _paintPaperLantern(canvas, lantern, _paperLanternSize, 0);
+      if (art != null) {
+        drawArt(canvas, art.$1, art.$2);
+      } else {
+        _paintPaperLantern(canvas, lantern, _paperLanternSize, 0);
+      }
     }
+  }
+
+  /// Dibuja el objeto pintado [name] de ancho [width] con la base en [base]
+  /// (su sombra de contacto ya viene en el arte). Falso si no hay arte.
+  bool _courtArt(Canvas canvas, String name, Offset base, double width) {
+    final art = SceneArt.instance[name];
+    if (art == null) return false;
+    final h = width * art.height / art.width;
+    drawArt(canvas, art, Rect.fromLTWH(base.dx - width / 2, base.dy - h * 0.94, width, h));
+    return true;
+  }
+
+  /// Arte del farol de papel y dónde va, con el cuerpo centrado en [c]; null
+  /// si falta el arte.
+  (ui.Image, Rect)? _paperLanternArt(Offset c, double s) {
+    final art = SceneArt.instance['obj_court_paper_lantern'];
+    if (art == null || !layout.painted) return null;
+    final h = s * 4.2, w = h * art.width / art.height;
+    return (art, Rect.fromLTWH(c.dx - w / 2, c.dy - h * 0.55, w, h));
   }
 
   /// Zafu redondo de brocado rojo con ribete dorado, de ancho [width], con la
@@ -1184,9 +1215,12 @@ class GardenPainter extends CustomPainter {
           ).createShader(Rect.fromCircle(center: paper, radius: r)),
       );
       final s = _paperLanternSize;
-      canvas.saveLayer(null, Paint()..color = Colors.white.withValues(alpha: glow));
-      _paintPaperLantern(canvas, paper, s, 1);
-      canvas.restore();
+      // El arte ya viene encendido: de noche solo suma el halo de arriba.
+      if (_paperLanternArt(paper, s) == null) {
+        canvas.saveLayer(null, Paint()..color = Colors.white.withValues(alpha: glow));
+        _paintPaperLantern(canvas, paper, s, 1);
+        canvas.restore();
+      }
     }
   }
 

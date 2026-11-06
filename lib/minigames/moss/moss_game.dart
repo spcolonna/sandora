@@ -175,6 +175,8 @@ class MossGame extends FlameGame with DragCallbacks {
     _last = to;
   }
 
+  DateTime _brushAt = DateTime(0);
+
   void _brush(Offset p) {
     // El pincel varía un poco: el musgo no se pinta parejo.
     final r = b.d('brush') * (0.85 + 0.3 * _rng.nextDouble());
@@ -183,6 +185,12 @@ class MossGame extends FlameGame with DragCallbacks {
     final onSand = i >= 0 && j >= 0 && i < _cols && j < _rows && _field.rock[j * _cols + i] == 0;
     if (onSand && !_onSand) Haptics.light();
     _onSand = onSand;
+    // El pincel se oye mientras pinta, sin amontonarse.
+    final now = DateTime.now();
+    if (now.difference(_brushAt) > const Duration(milliseconds: 160)) {
+      _brushAt = now;
+      SoundBoard.instance.play(Sfx.brush, volume: onSand ? 0.16 : 0.1);
+    }
     _field.paint(p.dx, p.dy, r, b.d('amount') * (0.7 + 0.6 * _rng.nextDouble()));
   }
 

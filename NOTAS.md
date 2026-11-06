@@ -36,6 +36,7 @@ cámara navegable).
 
 | Commit | Qué |
 | --- | --- |
+| (este) | **Sonido arreglado** (ver Audio: el juego sonaba mudo en el iPhone), sonidos nuevos (tijera, batidor, pájaros, grillo, pincel del musgo) y arte de los premios de la racha (zafu, cuenco, farol de papel). IPA 1.0.0+3. |
 | `3448141` | **Sonido procedural nuevo** (ver sección Audio) y música del jardín. |
 | `9c99a40` | iOS: `ITSAppUsesNonExemptEncryption = false` en `ios/Runner/Info.plist`. (Por un staging previo, también borra `tool/gen_placeholder_audio.py`, renombrado a `tool/gen_audio.py`.) |
 | `7f7e8ad` | **Metas del día:** cofre del jardín cada 7 días completos (no hace falta que sean seguidos; 3 lotos, 150 piedritas, 3 madera, aviso grande `milestone.chest`), punto en el orbe de nivel + línea "Metas nuevas" que brilla hasta abrir la hoja, y la meta de variedad solo sale con suficientes juegos abiertos. |
@@ -86,8 +87,19 @@ Estado de calidad al cierre: `flutter analyze` sin avisos, **163 tests en verde*
   del jardín (`_open` / `_meditate`), y `_gardenSound()` no hace nada si está prendida. Existe porque el reloj
   periódico del jardín (`_tick`, cada 20 s) llama a `_gardenSound()` aunque el jardín esté tapado. Antes de la
   bandera, eso **volvía a prender el viento en medio de un minijuego**, y con la música habría pasado lo mismo.
+- **Por qué el juego "no tenía sonido" (2026-11-06), arreglado:** (1) la categoría `ambient` de iOS respeta el
+  interruptor de silencio, así que con el iPhone en silencio quedaba mudo. Ahora es `playback` + `mixWithOthers`
+  (suena siempre, se mezcla con la música del usuario y se apaga desde Ajustes). (2) El jardín pedía música y viento
+  antes de que cargara el audio y se perdía hasta el próximo tic (20 s); ahora espera `SoundBoard.whenReady`.
+  (3) Si fallaba un archivo, no sonaba nada; ahora cada sonido carga por su cuenta y en paralelo. En el simulador el
+  log dice `Audio listo: 37 efectos, 4 ambientes`.
+- **Sonidos nuevos:** `sfx_snip_01/02` (tijera del bonsái, antes era un toque de interfaz), `sfx_whisk` (loop del
+  batidor de matcha, antes usaba el rastrillo), `sfx_bird_01..03` (ruiseñor, mosquitero, ojiblanco) y
+  `sfx_night_cricket` (grillo campana): el jardín los toca de lejos de vez en cuando (`_wildlife`, de día pájaros y
+  de noche grillo, callados con lluvia). El musgo suena con el pincel mientras se pinta y las piedras de los faroles
+  suenan al sacarlas. El rastrillo y el batidor siguen al interruptor de **sonido**, no al de música.
 - **Verificado:** afinación del koto (< 1 cent), picos sin recorte, loops sin costura.
-- **No verificado:** cómo suena. **Está pendiente que el usuario lo escuche** y pida ajustes (volumen de la música,
+- **No verificado:** cómo suena en el iPhone. **Está pendiente que el usuario pruebe la build 3** y pida ajustes (volumen de la música,
   reverb, brillo del koto, etc.).
 - **Regenerar:** `python3 tool/gen_audio.py [prefijos]` tarda **unos 12 s** con todo. El script antes se llamaba
   `tool/gen_placeholder_audio.py` y se renombró en esta sesión.
@@ -111,6 +123,11 @@ simulador) está terminado. Quedan dos cosas esperando al usuario:
   `pubspec.yaml` (`+2`, `+3`…).**
 - **Deployment target iOS 15.0** (Podfile y project.pbxproj): Apple lo exige desde abril de 2027 (aviso 90068 en
   la build 1). La build 1.0.0+2 ya sale con 15.0.
+- **IPA 1.0.0+3 (2026-11-06)** en `build/ios/ipa/Sandora.ipa`, con el sonido arreglado y el arte de la racha. Falta
+  que el usuario lo suba con Transporter. La próxima subida es `+4`.
+- **Arte de la racha integrado:** `obj_court_zafu`, `obj_court_singing_bowl` y `obj_court_paper_lantern` (520 px,
+  `assets/images/court/`, originales en `store/art/court/`). Se dibujan en `_paintCourtStreak`; si falta el arte,
+  vuelve el dibujo de código. El farol ya viene encendido y de noche solo suma el halo.
 - La restricción "sin pruebas en dispositivo hasta el 2026-10-30" ya venció: el usuario quiere probar en un iPhone
   real.
 
