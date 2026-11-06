@@ -31,7 +31,13 @@ enum Sfx {
   sweep('sfx_sweep', 1),
   snip('sfx_snip', 2),
   bird('sfx_bird', 3),
-  cricket('sfx_night_cricket', 1);
+  cricket('sfx_night_cricket', 1),
+  // Piedra o adorno que se apoya en la arena (no contra otra piedra).
+  stoneSand('sfx_stone_sand', 3),
+  // Pájaros que levantan vuelo al tocar el cielo.
+  wings('sfx_wings', 2),
+  // Puertas corredizas de la entrada al jardín.
+  gateOpen('sfx_gate_open', 1);
 
   final String file;
   final int variants;

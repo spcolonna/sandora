@@ -36,7 +36,10 @@ class _GardenGateState extends State<GardenGate> with SingleTickerProviderStateM
     Future.delayed(const Duration(milliseconds: 450), () {
       if (mounted) _c.forward();
     });
-    // Un golpe suave cuando las puertas se destraban.
+    // Las puertas se destraban y corren sobre el riel; un golpe suave al destrabarse.
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (mounted && !_open) SoundBoard.instance.play(Sfx.gateOpen, volume: 0.7);
+    });
     Future.delayed(const Duration(milliseconds: 1100), () {
       if (mounted && !_open) Haptics.light();
     });

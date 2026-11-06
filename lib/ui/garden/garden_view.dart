@@ -238,7 +238,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
       CareKind.weed => Sfx.pluck,
       CareKind.leaves || CareKind.sand => Sfx.sweep,
       CareKind.jar => Sfx.waterDrop,
-      CareKind.stone || CareKind.decor => Sfx.stackPlace,
+      CareKind.stone || CareKind.decor => Sfx.stoneSand,
     }, volume: 0.55);
     Haptics.medium();
     final box = context.findRenderObject() as RenderBox?;
@@ -586,7 +586,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
   void _drop(Progress p, int i, Size size) {
     final at = _dragAt;
     if (_dragging != i || at == null) return;
-    SoundBoard.instance.play(Sfx.stackPlace, volume: 0.45);
+    SoundBoard.instance.play(Sfx.stoneSand, volume: 0.65);
     p.moveDecor(i, at.dx / size.width, at.dy / size.height);
     setState(() => _dragging = null);
   }

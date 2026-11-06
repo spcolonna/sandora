@@ -59,8 +59,33 @@ class _CareSpotState extends State<_CareSpot> with SingleTickerProviderStateMixi
   CareKind get _kind => widget.task.kind;
   bool get _byGesture => _kind == CareKind.weed || _kind == CareKind.leaves || _kind == CareKind.sand;
 
+  /// Cuándo sonó el último roce (hojas, tierra), para no amontonarlos.
+  DateTime _lastRub = DateTime(0);
+  bool _raking = false;
+
+  /// Mientras se arrastra suena lo que se hace: el rastrillo en la arena
+  /// (en loop), las hojas que se juntan o la tierra que cede.
+  void _rubSound() {
+    if (_kind == CareKind.sand) {
+      if (!_raking) SoundBoard.instance.loop(Ambience.rake, volume: 0.35, fade: const Duration(milliseconds: 150));
+      _raking = true;
+      return;
+    }
+    final now = DateTime.now();
+    if (now.difference(_lastRub) < const Duration(milliseconds: 260)) return;
+    _lastRub = now;
+    SoundBoard.instance.play(_kind == CareKind.leaves ? Sfx.leafRustle : Sfx.brush, volume: 0.4);
+  }
+
+  void _stopRake() {
+    if (!_raking) return;
+    _raking = false;
+    SoundBoard.instance.stopLoop(Ambience.rake, fade: const Duration(milliseconds: 300));
+  }
+
   @override
   void dispose() {
+    _stopRake();
     _wiggle.dispose();
     super.dispose();
   }
@@ -78,6 +103,7 @@ class _CareSpotState extends State<_CareSpot> with SingleTickerProviderStateMixi
   /// Al soltar sin terminar, la maleza y las hojas vuelven (la arena queda
   /// como se la dejó).
   void _release() {
+    _stopRake();
     if (_kind != CareKind.sand && _done < 1) setState(() => _done = 0);
   }
 
@@ -90,8 +116,12 @@ class _CareSpotState extends State<_CareSpot> with SingleTickerProviderStateMixi
     };
     if (step <= 0) return;
     setState(() => _done = (_done + step).clamp(0.0, 1.0));
+    _rubSound();
     if (_kind == CareKind.sand && _rngCare.nextDouble() < 0.08) Haptics.light();
-    if (_done >= 1) _fix();
+    if (_done >= 1) {
+      _stopRake();
+      _fix();
+    }
   }
 
   @override

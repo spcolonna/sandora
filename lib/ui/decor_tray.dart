@@ -43,7 +43,7 @@ class DecorTray extends StatelessWidget {
       }
       SoundBoard.instance.play(Sfx.good, volume: 0.5);
     } else {
-      SoundBoard.instance.play(Sfx.stackPlace, volume: 0.5);
+      SoundBoard.instance.play(Sfx.stoneSand, volume: 0.7);
     }
     Haptics.light();
     // Cae cerca del centro del suelo, un poco al azar para no taparse.

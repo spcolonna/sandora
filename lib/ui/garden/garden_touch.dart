@@ -93,6 +93,11 @@ class _GardenTouchState extends State<GardenTouch> with SingleTickerProviderStat
     // Cinco notas de izquierda a derecha; el cielo suena más bajito.
     final note = (at.dx / max(width, 1) * 5).floor().clamp(0, 4) + 1;
     SoundBoard.instance.play(Sfx.rainNote, variant: note, volume: sky ? 0.16 : 0.24);
+    if (kind == _Kind.birds) {
+      // Los pájaros se van aleteando, y a veces alguno canta.
+      SoundBoard.instance.play(Sfx.wings, volume: 0.5);
+      if (_seed % 3 == 0) SoundBoard.instance.play(Sfx.bird, volume: 0.18);
+    }
     Haptics.light();
   }
 

@@ -36,7 +36,8 @@ cámara navegable).
 
 | Commit | Qué |
 | --- | --- |
-| (este) | **16 imágenes integradas** (fondos de 7 minijuegos, suelos del estanque y del bosque, río, copa y mesa del bonsái, maleza, hojas, regalo del té, toldo del Mercado). IPA 1.0.0+2 generado. |
+| (este) | **Sonidos del jardín:** puertas de la entrada, aleteo de pájaros, piedra en la arena, rastrillo, hojas y tierra al arrastrar en los cuidados. |
+| `5c4c2fd` | **16 imágenes integradas** (fondos de 7 minijuegos, suelos del estanque y del bosque, río, copa y mesa del bonsái, maleza, hojas, regalo del té, toldo del Mercado). IPA 1.0.0+2 generado. |
 | `14f9413` | Build vuelta a **1.0.0+2**: en App Store Connect solo está la 1; la próxima subida es la +2. |
 | `911b15e` | **Avisos de Apple 90068/90683:** pods a iOS 15 y texto de ubicación "Always". |
 | `faf8572` | **Sonido arreglado** (ver Audio: el juego sonaba mudo en el iPhone), sonidos nuevos (tijera, batidor, pájaros, grillo, pincel del musgo) y arte de los premios de la racha (zafu, cuenco, farol de papel). IPA 1.0.0+3. |
@@ -101,6 +102,13 @@ Estado de calidad al cierre: `flutter analyze` sin avisos, **163 tests en verde*
   `sfx_night_cricket` (grillo campana): el jardín los toca de lejos de vez en cuando (`_wildlife`, de día pájaros y
   de noche grillo, callados con lluvia). El musgo suena con el pincel mientras se pinta y las piedras de los faroles
   suenan al sacarlas. El rastrillo y el batidor siguen al interruptor de **sonido**, no al de música.
+- **Sonidos del jardín (2026-11-06, sin IPA todavía):** `sfx_gate_open` (puertas shoji que se destraban, corren y
+  topan; suena en `garden_gate.dart` al abrir la app), `sfx_wings_01/02` (aleteo al tocar el cielo, y 1 de cada 3
+  toques canta un pájaro; `garden_touch.dart`), `sfx_stone_sand_01..03` (piedra que se apoya en la arena: golpe sordo
+  y arena; reemplaza al "clac" de piedra contra piedra al poner o mover adornos y en el cuidado de piedra y adorno).
+  En los cuidados, mientras se arrastra suena el rastrillo (arena, loop), las hojas o la tierra (maleza)
+  (`_rubSound` en `garden_care.dart`). El "clac" (`stackPlace`) queda para apilar piedras, juntar piedritas y el
+  rastrillo que roza la piedrita del arenero. En el simulador cargan los 43 efectos. No se escucharon en el iPhone.
 - **Verificado:** afinación del koto (< 1 cent), picos sin recorte, loops sin costura.
 - **No verificado:** cómo suena en el iPhone. **Está pendiente que el usuario pruebe la build 3** y pida ajustes (volumen de la música,
   reverb, brillo del koto, etc.).

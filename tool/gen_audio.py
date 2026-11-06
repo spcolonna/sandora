@@ -417,6 +417,49 @@ def bird(kind):
     return mix(*[at(note(2900 if k % 2 == 0 else 3300), 0.17 * k) for k in range(5)])
 
 
+def stone_in_sand(base, seconds=0.5):
+    """Piedra que se apoya en la arena: un golpe sordo y grave (sin el "clac"
+    de piedra contra piedra) y la arena que se acomoda alrededor."""
+    x = t(seconds)
+    n = len(x)
+    body = sum(a * np.sin(2 * np.pi * base * r * x + rng.uniform(0, 6)) * np.exp(-x / d)
+               for r, a, d in [(1.0, 1.0, 0.045), (1.9, 0.35, 0.025)])
+    thud = 0.9 * norm(lp(noise(n), 320)) * np.exp(-x / 0.03)
+    crunch = 0.35 * lp(grains(0.4, 2200, 1200, 6000, 0.5, 0.7), 5500)
+    crunch = np.pad(crunch, (0, n - len(crunch)))[:n] * np.exp(-x / 0.12)
+    return (0.5 * body + thud + at(crunch, 0.012)[:n]) * ramp(x, 0.0015)
+
+
+def wings(flaps=7, rate=14.0, seconds=0.7):
+    """Pájaros que levantan vuelo: aleteos rápidos (soplos de aire) que se
+    alejan y se apagan."""
+    x = t(seconds)
+    n = len(x)
+    air = norm(bp(noise(n), 500, 3500))
+    gate = np.zeros(n)
+    for k in range(flaps):
+        c = k / rate * (1 + 0.04 * rng.standard_normal())
+        gate += (0.85 ** k) * np.exp(-((x - c) / 0.018) ** 2)
+    return air * gate * np.exp(-x / (seconds * 0.6))
+
+
+def shoji_slide(seconds=1.6):
+    """Puertas corredizas de madera: el destrabe, el roce sobre el riel (que
+    arranca, corre y frena) y un tope suave al final."""
+    x = t(seconds)
+    n = len(x)
+    move = np.clip(x / 0.15, 0, 1) * np.clip((seconds - 0.12 - x) / 0.6, 0, 1) ** 1.5
+    wobble = 1 + 0.25 * np.sin(2 * np.pi * 17 * x) * np.sin(2 * np.pi * 3.1 * x)
+    rub = norm(bp(pink(n), 180, 1600)) * 0.8 + 0.25 * norm(bp(noise(n), 1800, 4500))
+    slide = rub * move * wobble
+    latch = 0.7 * np.pad(bamboo(520, 0.25), (0, n))[:n]
+    stop = np.zeros(n)
+    k = int(SR * (seconds - 0.18))
+    tok = stone(140, 0.18, 0.2)
+    stop[k:k + len(tok)] = tok[:n - k] * 0.5
+    return latch + at(slide, 0.08)[:n] * 0.55 + stop
+
+
 def cricket(seconds=1.6):
     """Grillo campana (suzumushi) de noche: "riiin, riiin", pulsos rápidos de
     un tono agudo, en dos ráfagas."""
@@ -682,6 +725,14 @@ def main():
     if wanted("sfx_bird"):
         for k in (1, 2, 3):
             write(f"sfx_bird_{k:02d}", trim(verb(lp(bird(k), 7000), GARDEN, 0.35)), 0.35)
+    if wanted("sfx_stone_sand"):
+        for i, f in enumerate([95, 115, 135], start=1):
+            write(f"sfx_stone_sand_{i:02d}", trim(verb(stone_in_sand(f), GARDEN, 0.1)), 0.7)
+    if wanted("sfx_wings"):
+        for i, (fl, r) in enumerate([(7, 14.0), (9, 17.0)], start=1):
+            write(f"sfx_wings_{i:02d}", lp(wings(fl, r), 6000), 0.4)
+    if wanted("sfx_gate_open"):
+        write("sfx_gate_open", trim(verb(shoji_slide(), HALL, 0.18)), 0.55)
     if wanted("sfx_night_cricket"):
         write("sfx_night_cricket", trim(verb(cricket(), GARDEN, 0.3)), 0.25)
 
