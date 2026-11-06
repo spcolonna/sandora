@@ -104,11 +104,13 @@ simulador) está terminado. Quedan dos cosas esperando al usuario:
   escucharlo hay que crear un simulador, hacer `flutter run` y ajustar según lo que diga.
 
 - **Build de iOS para TestFlight (2026-11-06): ya se generó.** El usuario cargó su cuenta en Xcode y
-  `flutter build ipa --release` produjo `build/ios/ipa/Sandora.ipa` (1.0.0+1, 43 MB). Está firmado con Apple
+  `flutter build ipa --release` produjo `build/ios/ipa/Sandora.ipa` (1.0.0+1, 43 MB; ya subido). Está firmado con Apple
   Distribution RZGQPAGH53 y tiene los entitlements de Game Center, iCloud KV y `beta-reports-active`. Falta que el
   usuario cree la app en App Store Connect (nombre principal en inglés "Sandora: Zen Garden", más es, pt-BR, ja y
   zh-Hans) y suba el IPA con Transporter. **Para cada subida nueva hay que subir el número de build en
   `pubspec.yaml` (`+2`, `+3`…).**
+- **Deployment target iOS 15.0** (Podfile y project.pbxproj): Apple lo exige desde abril de 2027 (aviso 90068 en
+  la build 1). La build 1.0.0+2 ya sale con 15.0.
 - La restricción "sin pruebas en dispositivo hasta el 2026-10-30" ya venció: el usuario quiere probar en un iPhone
   real.
 
