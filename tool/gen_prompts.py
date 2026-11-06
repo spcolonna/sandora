@@ -1010,6 +1010,110 @@ BLOCKS = [
                 'transparent.',
                 f'{NO_TEXT}; shop signs or symbols; any background, scenery or stall; {NO_STYLE}.'),
         ]),
+    dict(
+        id='22', title='Lo que más se ve y sigue siendo código', folder='store/art/garden/',
+        intro=('Piezas grandes que hoy son formas de código: las puertas de la entrada (se ven en cada arranque), el '
+               'sol, la luna y las nubes del cielo, los pájaros, y las piezas sueltas del Shishi-odoshi y de las '
+               'Linternas. Adjuntá `store/art/style/style_keyart.webp`.'),
+        images=[
+            img('obj_gate_shoji', PORTRAIT_ALPHA + ALPHA_FALLBACK,
+                f'This is ONE sliding shoji door panel of the house entrance in {GAME}. Every time the app opens, '
+                'two of these panels (one mirrored) cover the screen and slide apart to reveal the garden.',
+                'A traditional Japanese shoji door seen straight from the front: a frame of warm honey-colored wood, '
+                'a fine lattice of thin wooden kumiko bars in a regular grid, and translucent cream washi paper '
+                'glowing softly with morning light from behind. A small round recessed hand pull near the right '
+                'edge at middle height. Slight paper texture and gentle wear.',
+                'The door panel fills the whole canvas edge to edge (its frame touches all four edges), seen '
+                'perfectly flat and frontal, no perspective. Nothing outside the door.',
+                f'{NO_TEXT}; walls, floor, room or garden; people or shadows of people; a second door; {NO_STYLE}.'),
+            obj('spr_sun', 'A soft morning sun: a warm glowing disk of pale gold with a gentle painted halo fading '
+                'outward, no face.', 'about 70 pixels wide, high in the sky', ', clouds, rays drawn as lines'),
+            obj('spr_moon', 'A calm full moon: a pale cream-white disk with very soft grey-blue maria and a faint '
+                'cool glow around it, no face.', 'about 60 pixels wide, high in the night sky', ', stars, clouds'),
+            obj('spr_cloud_01', 'One soft, fluffy, sunlit cumulus cloud, wider than tall, with a warm cream top and '
+                'a cool lavender-grey underside, painted with loose watercolor edges.', 'about 180 pixels wide, '
+                'drifting slowly', ', sky color, other clouds'),
+            obj('spr_cloud_02', 'One long, thin, wispy cloud streak, very light and airy, warm white with faint '
+                'peach tones, painted with loose watercolor edges.', 'about 220 pixels wide, drifting slowly',
+                ', sky color, other clouds'),
+            obj('spr_bird', 'One small songbird (a Japanese white-eye, olive-green with a white eye ring) in flight '
+                'seen from the side, wings raised mid-flap.', 'about 24 pixels wide, several flying away together',
+                ', branches, other birds'),
+            obj('obj_shishi_post', 'A forked support post made of two thick bamboo poles crossed in an X near the '
+                'top and tied with dark rope, its feet set in the ground. This holds a seesaw bamboo spout.',
+                'about 160 pixels tall', ', the moving bamboo spout itself, water'),
+            obj('obj_shishi_stone', 'A flat, rounded grey river stone with a little moss on one edge, the kind a '
+                'bamboo deer-scarer strikes when it tips back.', 'about 80 pixels wide'),
+            obj('obj_shishi_feed', 'A thin horizontal bamboo water pipe (kakei) resting on two small crossed bamboo '
+                'sticks tied with rope, its open end cut at an angle on the right.', 'about 200 pixels wide',
+                ', water stream'),
+            img('obj_lantern_dock', LANDSCAPE_ALPHA + ALPHA_FALLBACK,
+                f'This is the small wooden dock at the bottom of the river lanterns minigame in {GAME}: the player '
+                'launches paper lanterns from here.',
+                'A short Japanese wooden dock seen from above at a steep angle: weathered grey-brown planks laid '
+                'side by side with a few dark nail marks, two thick round posts at the front corners, a faint wet '
+                'darkening along the edge that touches the water.',
+                'The dock spans the full width of the canvas and fills the bottom 55% of it; everything above the '
+                'dock is fully transparent.',
+                f'{NO_TEXT}; water, river, lanterns, people, boats; {NO_STYLE}.'),
+        ]),
+    dict(
+        id='23', title='Íconos pintados de la interfaz', folder='store/art/icons/',
+        intro=('Hoy los botones del jardín y los sellos de cada minijuego usan íconos genéricos de Material (se ven '
+               'de app de oficina). Van chiquitos (28 a 40 px) dentro de botones redondos de papel. Además de la '
+               'referencia de cada uno, conviene adjuntar `assets/images/icons/icon_lotus.webp` para que sigan el '
+               'mismo trazo que las monedas.'),
+        images=[
+            icon('icon_btn_decor', 'A small bonsai pine in a shallow pot, symbolizing "decorate the garden".'),
+            icon('icon_btn_market', 'A small indigo cloth bundle (furoshiki) tied on top, symbolizing "the shop".'),
+            icon('icon_btn_menu', 'A rolled bamboo scroll with a red cord, symbolizing "the menu".'),
+            icon('icon_btn_album', 'A small stitched Japanese book with a plain indigo cover, symbolizing "album".'),
+            icon('icon_btn_settings', 'A small round bronze temple bell seen from the front, symbolizing settings '
+                 'and sound.'),
+            icon('icon_game_stack', 'Three smooth stones balanced on top of each other.'),
+            icon('icon_game_sand', 'A small wooden rake on a patch of raked sand with curved lines.'),
+            icon('icon_game_rain', 'One clear blue water drop falling into a small clay jar.'),
+            icon('icon_game_pond', 'One pink lotus flower open on a green lily pad.'),
+            icon('icon_game_shishi', 'A short bamboo deer-scarer spout tipped down, pouring a little water.'),
+            icon('icon_game_leaves', 'One orange maple leaf drifting in the wind.'),
+            icon('icon_game_moss', 'A rounded grey stone half covered in soft green moss.'),
+            icon('icon_game_bonsai', 'A small pair of bonsai pruning scissors over a pine twig.'),
+            icon('icon_game_enso', 'A single black ink brush circle (enso) with a dry-brush gap.'),
+            icon('icon_game_bell', 'A wooden striking log in front of a bronze temple bell.'),
+            icon('icon_game_matcha', 'A small tea bowl of frothy green matcha with a bamboo whisk.'),
+            icon('icon_game_flute', 'A short bamboo flute with three finger holes, lying diagonally.'),
+            icon('icon_game_lanterns', 'One glowing paper lantern floating on a small ripple of water.'),
+        ]),
+    dict(
+        id='24', title='Detalles que siguen siendo código', folder='store/art/garden/',
+        intro=('Cosas chicas que se ven menos: los regalos del día, los cuidados que faltan pintar, la escoba del '
+               'camino de hojas, el farolito de la casa de té y el sello del Ensō. Adjuntá '
+               '`store/art/style/style_keyart.webp`.'),
+        images=[
+            obj('obj_care_marks', 'A small patch of raked sand messed up by footprints and scuffs, the rake lines '
+                'broken, seen from slightly above.', 'about 70 pixels wide'),
+            obj('obj_care_jar', 'A small brown clay water jar tipped over on its side with a little water spilled '
+                'in front of its mouth.', 'about 50 pixels wide'),
+            obj('obj_east_broom', 'A traditional Japanese bamboo garden broom (takebouki): a long thin bamboo '
+                'handle and a wide fan of fine twigs, leaning slightly.', 'about 110 pixels tall'),
+            obj('obj_tea_lamp', 'A small hanging paper lantern (chochin) of warm cream paper with thin bamboo ribs, '
+                'glowing softly from inside, hanging from a short dark cord.', 'about 30 pixels tall'),
+            obj('obj_enso_seal', 'A red cinnabar artist seal stamp impression (hanko) as a soft-edged square, '
+                'carved with an abstract swirl of a pebble and raked lines, slightly uneven ink like a real stamp '
+                'on paper.', 'about 40 pixels wide', ', the carved stone seal itself'),
+            obj('spr_gift_dew', 'One perfectly round, sparkling dewdrop resting on a small green leaf.',
+                'about 36 pixels wide'),
+            obj('spr_gift_firefly', 'One small firefly with a soft warm yellow-green glowing tail.',
+                'about 36 pixels wide'),
+            obj('spr_gift_snowflake', 'One delicate six-pointed snowflake of pale icy blue, softly glowing.',
+                'about 36 pixels wide'),
+            obj('spr_gift_rainbow_drop', 'One water drop holding a tiny rainbow inside, iridescent and luminous.',
+                'about 36 pixels wide'),
+            obj('spr_gift_seed', 'One dandelion seed (pappus) floating, its fine white umbrella of hairs lit by the '
+                'sun.', 'about 36 pixels wide'),
+            obj('spr_gift_sunray', 'One small golden sunbeam crystal: a soft glowing shard of warm light.',
+                'about 36 pixels wide'),
+        ]),
 ]
 
 
@@ -1267,6 +1371,9 @@ def image_text(i, im):
 
 # Orden en que conviene generarlas: lo que más se ve en el juego primero. Cada uno con por qué va ahí.
 PRIORITY = [
+    ('22', 'Lo más visible que queda en código: las puertas se ven en cada arranque, el cielo siempre.'),
+    ('23', 'Los botones del jardín y los sellos de los minijuegos usan íconos genéricos de Material.'),
+    ('24', 'Detalles chicos: los regalos del día, dos cuidados, la escoba, el farolito y el sello del Ensō.'),
     ('16', 'Ya están en el juego, dibujados con código: es lo que más se nota que falta pintar.'),
     ('17', 'Se ven en cada lugar mejorado; hoy son piedras y flores de código.'),
     ('14', 'Lo que falta del bosque: batidor, flauta, linterna y el río.'),
