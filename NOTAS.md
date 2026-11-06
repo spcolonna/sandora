@@ -48,6 +48,23 @@ cámara navegable).
 
 Estado de calidad al cierre: `flutter analyze` sin avisos, **163 tests en verde**.
 
+## Metas del día y cofre (mecánica exacta)
+
+- Cada día salen 3 metas (`lib/garden/daily_goals.dart`, `DailyGoals.forDay`), elegidas con el día como semilla.
+  Solo salen las cumplibles (`DailyGoals.doable`): la de meditar pide poder meditar y la de variedad pide tener
+  abiertos al menos tantos juegos como su meta (`Progress.openGames`).
+- Al cumplir las 3 paga el bonus `all` y, en ese momento (`Progress._goalEvent`), se suma **1 sello**
+  (`goalSeals`, guardado en prefs `goals.seals`).
+- Con `chest.target` = 7 sellos (no hace falta que sean días seguidos) el cofre se abre: paga `chest.give`, los
+  sellos **vuelven a 0**, el cofre entra en `done` y se encola el aviso grande `queueMilestone('chest')`.
+- Valor exacto en `assets/balance/game_balance.json`:
+  `"chest": { "days": 7, "give": { "lotus": 3, "pebbles": 150, "wood": 3 } }` (dentro de `dailyGoals`).
+- Aviso de metas nuevas: `goalsUnseen()` (el día visto, en prefs `goals.seen`, no es hoy y no hay metas hechas).
+  Muestra un punto en el orbe de nivel y la línea "Metas nuevas" con brillo. `markGoalsSeen()` se llama al abrir la
+  hoja.
+- Para depurar: `--dart-define=SANDORA_SEALS=6`. Lo cubre `test/garden/daily_goals_test.dart`. La apertura del
+  cofre en pantalla no se vio en el simulador; solo la cubre el test.
+
 ## Audio (decisiones y estado)
 
 - **Decisión:** todo el audio es procedural, generado por `tool/gen_audio.py` (numpy + scipy + ffmpeg). Sin
@@ -64,15 +81,27 @@ Estado de calidad al cierre: `flutter analyze` sin avisos, **163 tests en verde*
 - **Música:** `music_garden_01` (koto, ~114 s) y `music_garden_02` (flauta, ~131 s). Terminan en silencio y se
   alternan con 8 a 18 s de pausa. API en `lib/ui/fx/sfx.dart`: `SoundBoard.music({volume: 0.28})`, `stopMusic()`;
   `stopAllLoops()` también corta la música. El jardín la arranca en `_gardenSound()` y la corta al entrar a un
-  minijuego o a meditar (`_away` en `lib/ui/garden_screen.dart`, que además evita que el reloj de 20 s vuelva a
-  prender el viento en un minijuego). Se apaga con el interruptor "Música" de Ajustes.
+  minijuego o a meditar. Se apaga con el interruptor "Música" de Ajustes.
+- **Bandera `_away`** (`lib/ui/garden_screen.dart`): vale `true` mientras hay un minijuego o una meditación encima
+  del jardín (`_open` / `_meditate`), y `_gardenSound()` no hace nada si está prendida. Existe porque el reloj
+  periódico del jardín (`_tick`, cada 20 s) llama a `_gardenSound()` aunque el jardín esté tapado. Antes de la
+  bandera, eso **volvía a prender el viento en medio de un minijuego**, y con la música habría pasado lo mismo.
 - **Verificado:** afinación del koto (< 1 cent), picos sin recorte, loops sin costura.
 - **No verificado:** cómo suena. **Está pendiente que el usuario lo escuche** y pida ajustes (volumen de la música,
-  reverb, brillo del koto, etc.). Regenerar: `python3 tool/gen_audio.py [prefijos]`, unos 12 s.
+  reverb, brillo del koto, etc.).
+- **Regenerar:** `python3 tool/gen_audio.py [prefijos]` tarda **unos 12 s** con todo. El script antes se llamaba
+  `tool/gen_placeholder_audio.py` y se renombró en esta sesión.
 - Idea no hecha: silenciar nuestra música cuando el usuario ya está escuchando la suya (hoy se mezclan:
   `AVAudioSessionCategory.ambient` + `mixWithOthers`).
 
 ## Estado actual / en curso
+
+**Qué sigue ahora (al 2026-11-06):** no hay tarea de código en curso. El último pedido (NOTAS.md + borrar el
+simulador) está terminado. Quedan dos cosas esperando al usuario:
+- **No entró todavía a Xcode** con su cuenta, así que el build de TestFlight sigue frenado (detalle abajo). Cuando
+  avise, el próximo paso es correr `flutter build ipa --release` y subirlo.
+- **No escuchó todavía** el sonido nuevo ni la música: el simulador se apagó antes y después se borró. Para
+  escucharlo hay que crear un simulador, hacer `flutter run` y ajustar según lo que diga.
 
 - **Build de iOS para TestFlight: bloqueado del lado del usuario.** `flutter build ipa --release` falla con
   "No Accounts" y perfiles sin Game Center ni iCloud. Hay certificados "Apple Distribution: Sebastian Perez
