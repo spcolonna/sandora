@@ -103,14 +103,12 @@ simulador) está terminado. Quedan dos cosas esperando al usuario:
 - **No escuchó todavía** el sonido nuevo ni la música: el simulador se apagó antes y después se borró. Para
   escucharlo hay que crear un simulador, hacer `flutter run` y ajustar según lo que diga.
 
-- **Build de iOS para TestFlight: bloqueado del lado del usuario.** `flutter build ipa --release` falla con
-  "No Accounts" y perfiles sin Game Center ni iCloud. Hay certificados "Apple Distribution: Sebastian Perez
-  (RZGQPAGH53)" en el llavero. Falta:
-  1. Xcode → Settings → Accounts → + Apple ID del equipo `RZGQPAGH53`.
-  2. App Store Connect → crear la app con bundle `com.oraki.sandora` (si no existe).
-  3. Después: `flutter build ipa --release` (la firma automática suma Game Center e iCloud al App ID) y subirlo
-     (Transporter, Organizer de Xcode o `xcodebuild -exportArchive` con destino upload).
-  Versión actual en `pubspec.yaml`: `1.0.0+1`.
+- **Build de iOS para TestFlight (2026-11-06): ya se generó.** El usuario cargó su cuenta en Xcode y
+  `flutter build ipa --release` produjo `build/ios/ipa/Sandora.ipa` (1.0.0+1, 43 MB). Está firmado con Apple
+  Distribution RZGQPAGH53 y tiene los entitlements de Game Center, iCloud KV y `beta-reports-active`. Falta que el
+  usuario cree la app en App Store Connect (nombre principal en inglés "Sandora: Zen Garden", más es, pt-BR, ja y
+  zh-Hans) y suba el IPA con Transporter. **Para cada subida nueva hay que subir el número de build en
+  `pubspec.yaml` (`+2`, `+3`…).**
 - La restricción "sin pruebas en dispositivo hasta el 2026-10-30" ya venció: el usuario quiere probar en un iPhone
   real.
 
