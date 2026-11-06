@@ -36,7 +36,8 @@ cámara navegable).
 
 | Commit | Qué |
 | --- | --- |
-| (este) | **Sonido arreglado** (ver Audio: el juego sonaba mudo en el iPhone), sonidos nuevos (tijera, batidor, pájaros, grillo, pincel del musgo) y arte de los premios de la racha (zafu, cuenco, farol de papel). IPA 1.0.0+3. |
+| (este) | **Avisos de Apple 90068/90683:** pods a iOS 15 y texto de ubicación "Always". IPA 1.0.0+4. |
+| `faf8572` | **Sonido arreglado** (ver Audio: el juego sonaba mudo en el iPhone), sonidos nuevos (tijera, batidor, pájaros, grillo, pincel del musgo) y arte de los premios de la racha (zafu, cuenco, farol de papel). IPA 1.0.0+3. |
 | `3448141` | **Sonido procedural nuevo** (ver sección Audio) y música del jardín. |
 | `9c99a40` | iOS: `ITSAppUsesNonExemptEncryption = false` en `ios/Runner/Info.plist`. (Por un staging previo, también borra `tool/gen_placeholder_audio.py`, renombrado a `tool/gen_audio.py`.) |
 | `7f7e8ad` | **Metas del día:** cofre del jardín cada 7 días completos (no hace falta que sean seguidos; 3 lotos, 150 piedritas, 3 madera, aviso grande `milestone.chest`), punto en el orbe de nivel + línea "Metas nuevas" que brilla hasta abrir la hoja, y la meta de variedad solo sale con suficientes juegos abiertos. |
@@ -123,8 +124,13 @@ simulador) está terminado. Quedan dos cosas esperando al usuario:
   `pubspec.yaml` (`+2`, `+3`…).**
 - **Deployment target iOS 15.0** (Podfile y project.pbxproj): Apple lo exige desde abril de 2027 (aviso 90068 en
   la build 1). La build 1.0.0+2 ya sale con 15.0.
-- **IPA 1.0.0+3 (2026-11-06)** en `build/ios/ipa/Sandora.ipa`, con el sonido arreglado y el arte de la racha. Falta
-  que el usuario lo suba con Transporter. La próxima subida es `+4`.
+  El aviso 90068 siguió en la build 3 porque los pods compilaban con 13.0. Ahora el `post_install` del Podfile los
+  fuerza a 15.0. Siguen en 13.0 `App.framework`, `Flutter.framework` y `objective_c.framework`: los arma Flutter
+  3.41 y no se pueden cambiar desde el proyecto. Es solo un aviso hasta abril de 2027; actualizar Flutter antes.
+- **Aviso 90683:** `geolocator` referencia la API de ubicación "siempre", así que Apple pide
+  `NSLocationAlwaysAndWhenInUseUsageDescription` aunque el juego solo pide "mientras se usa". Ya está en Info.plist.
+- **IPA 1.0.0+4 (2026-11-06)** en `build/ios/ipa/Sandora.ipa`: sonido arreglado, arte de la racha y avisos de Apple.
+  Falta que el usuario lo suba con Transporter. La próxima subida es `+5`.
 - **Arte de la racha integrado:** `obj_court_zafu`, `obj_court_singing_bowl` y `obj_court_paper_lantern` (520 px,
   `assets/images/court/`, originales en `store/art/court/`). Se dibujan en `_paintCourtStreak`; si falta el arte,
   vuelve el dibujo de código. El farol ya viene encendido y de noche solo suma el halo.
