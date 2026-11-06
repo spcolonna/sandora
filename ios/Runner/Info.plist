@@ -16,6 +16,8 @@
 			<string>ja</string>
 			<string>zh-Hans</string>
 		</array>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 		<key>CFBundleDisplayName</key>
 		<string>Sandora</string>
 		<key>CFBundleExecutable</key>
