@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../settings.dart';
 
-/// Efectos (placeholders de `tool/gen_placeholder_audio.py`). Los que tienen
+/// Efectos (síntesis procedural de `tool/gen_audio.py`). Los que tienen
 /// variantes se alternan al azar; además cada golpe varía un poco el volumen
 /// para que no suene repetido (GDD, Audio).
 enum Sfx {
@@ -54,6 +54,7 @@ class SoundBoard {
 
   final _pools = <String, List<_Voice>>{};
   final _loops = <Ambience, AudioPlayer>{};
+  final _music = AudioPlayer();
   final _rng = Random();
   bool _ready = false;
   bool _hidden = false;
@@ -83,14 +84,27 @@ class SoundBoard {
         await p.setSource(AssetSource('audio/${a.file}.m4a'));
         _loops[a] = p;
       }
+      await _music.setReleaseMode(ReleaseMode.stop);
+      _music.onPlayerComplete.listen((_) {
+        if (_musicOn) _musicGap = Timer(Duration(seconds: 8 + _rng.nextInt(10)), _nextTrack);
+      });
       _lifecycle ??= AppLifecycleListener(
         onHide: () {
           _hidden = true;
           for (final p in _loops.values) {
             p.pause();
           }
+          if (_music.state == PlayerState.playing) _music.pause();
         },
-        onShow: () => _hidden = false,
+        onShow: () {
+          _hidden = false;
+          if (!_musicOn) return;
+          if (_music.state == PlayerState.paused) {
+            _music.resume();
+          } else if (_music.state != PlayerState.playing && !(_musicGap?.isActive ?? false)) {
+            _musicGap = Timer(const Duration(seconds: 3), _nextTrack);
+          }
+        },
       );
       _ready = true;
     } catch (e) {
@@ -112,7 +126,7 @@ class SoundBoard {
     voice?.play(v).ignore();
   }
 
-  final _fades = <Ambience, Timer>{};
+  final _fades = <Object, Timer>{};
 
   /// Arranca un ambiente subiendo el volumen de a poco: nada entra de golpe.
   void loop(Ambience a, {double volume = 0.5, Duration fade = const Duration(milliseconds: 1200)}) {
@@ -131,27 +145,79 @@ class SoundBoard {
     _fadeTo(a, 0, fade, then: () => _loops[a]!.pause());
   }
 
+  /// Corta ambientes y música (al entrar a un minijuego o a meditar).
   void stopAllLoops({Duration fade = const Duration(milliseconds: 800)}) {
     for (final a in Ambience.values) {
       stopLoop(a, fade: fade);
     }
+    stopMusic(fade: fade);
   }
 
-  void _fadeTo(Ambience a, double target, Duration fade, {VoidCallback? then}) {
-    final p = _loops[a]!;
-    _fades.remove(a)?.cancel();
+  /// Piezas de música del jardín (`tool/gen_audio.py`): terminan en silencio y
+  /// se alternan, con un respiro entre una y otra.
+  static const _tracks = ['music_garden_01', 'music_garden_02'];
+  bool _musicOn = false;
+  double _musicVolume = 0.28;
+  int _track = 0;
+  Timer? _musicGap;
+
+  /// Arranca la música del jardín, o le cambia el volumen si ya suena.
+  void music({double volume = 0.28}) {
+    if (!_ready || !AppSettings.instance.music) return;
+    _musicVolume = volume;
+    if (_musicOn) return;
+    _musicOn = true;
+    // Si se estaba apagando, vuelve a subir sin cortar la pieza.
+    if (_music.state == PlayerState.playing) {
+      _fadeTo('music', volume, const Duration(milliseconds: 1500));
+      return;
+    }
+    _musicGap?.cancel();
+    _musicGap = Timer(const Duration(seconds: 3), _nextTrack);
+  }
+
+  Future<void> _nextTrack() async {
+    if (!_musicOn || _hidden) return;
+    try {
+      await _music.play(AssetSource('audio/${_tracks[_track]}.m4a'), volume: _musicVolume);
+      _track = (_track + 1) % _tracks.length;
+    } catch (_) {
+      // Sin música se juega igual.
+    }
+  }
+
+  /// Baja la música hasta el silencio y la detiene.
+  void stopMusic({Duration fade = const Duration(milliseconds: 1500)}) {
+    if (!_ready) return;
+    _musicOn = false;
+    _musicGap?.cancel();
+    if (_music.state != PlayerState.playing) return;
+    _fadeTo(
+      'music',
+      0,
+      fade,
+      then: () {
+        if (!_musicOn) _music.stop();
+      },
+    );
+  }
+
+  /// [key] es un [Ambience] o `'music'`.
+  void _fadeTo(Object key, double target, Duration fade, {VoidCallback? then}) {
+    final p = key is Ambience ? _loops[key]! : _music;
+    _fades.remove(key)?.cancel();
     final from = p.volume;
     const step = Duration(milliseconds: 50);
     final steps = max(1, fade.inMilliseconds ~/ step.inMilliseconds);
     var i = 0;
-    _fades[a] = Timer.periodic(step, (t) {
+    _fades[key] = Timer.periodic(step, (t) {
       i++;
       // Curva suave (coseno): sin escalones audibles al principio ni al final.
       final k = 0.5 - cos(pi * i / steps) / 2;
       p.setVolume(from + (target - from) * k);
       if (i >= steps) {
         t.cancel();
-        _fades.remove(a);
+        _fades.remove(key);
         then?.call();
       }
     });

@@ -45,7 +45,12 @@ Future<void> showSettingsSheet(BuildContext context) {
                     value: s.music,
                     onChanged: (v) {
                       s.setMusic(v);
-                      v ? SoundBoard.instance.loop(Ambience.wind, volume: 0.18) : SoundBoard.instance.stopAllLoops();
+                      if (v) {
+                        SoundBoard.instance.loop(Ambience.wind, volume: 0.18);
+                        SoundBoard.instance.music();
+                      } else {
+                        SoundBoard.instance.stopAllLoops();
+                      }
                     },
                   ),
                   InkToggleRow(title: tr('settings.haptics'), value: s.haptics, onChanged: s.setHaptics),

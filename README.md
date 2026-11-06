@@ -28,7 +28,7 @@ flutter run                          # simulador o dispositivo
 flutter test                         # lógica pura: economía, partituras, puntaje del arenero, i18n
 python3 tool/gen_i18n.py             # regenera lib/i18n/*.dart desde tool/i18n_strings.json
 python3 tool/gen_prompts.py          # regenera docs/prompts.md (prompts de arte para ChatGPT)
-python3 tool/gen_placeholder_audio.py  # regenera los sonidos placeholder (necesita numpy y ffmpeg)
+python3 tool/gen_audio.py  # regenera efectos, ambientes y música procedurales (numpy, scipy y ffmpeg)
 ```
 
 ## Estructura

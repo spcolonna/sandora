@@ -1,13 +1,17 @@
-"""Genera los sonidos placeholder del prototipo (fase 1).
+"""Genera todo el audio del juego de forma procedural: efectos, ambientes y música.
 
-Son sintéticos: sirven para validar timing y sensación al tacto hasta tener
-grabaciones reales (ver GDD, "Audio"). Uso:
+Sin grabaciones ni servicios externos: cada sonido sale de síntesis (modal,
+Karplus-Strong, soplido, ruido granular) pasada por una reverb de jardín, así
+que es todo nuestro y no hay licencias que cuidar. Uso:
 
-    python3 tool/gen_placeholder_audio.py               # todos
-    python3 tool/gen_placeholder_audio.py sfx_miss ...  # solo esos (prefijo del nombre)
+    python3 tool/gen_audio.py                   # todo
+    python3 tool/gen_audio.py sfx_miss music    # solo esos (prefijo del nombre)
+    python3 tool/gen_audio.py --preview DIR     # además deja los .wav en DIR
 
-Escribe .wav temporales y los convierte a .m4a (AAC) con ffmpeg en
-assets/audio/.
+Escribe .m4a (AAC) con ffmpeg en assets/audio/.
+
+Todo suena en la pentatónica de Do (Do Re Mi Sol La): la música, las gotas,
+las celebraciones y la flauta nunca chocan entre sí, suene lo que suene junto.
 """
 
 import os
@@ -17,182 +21,596 @@ import tempfile
 import wave
 
 import numpy as np
+from scipy.signal import butter, fftconvolve, lfilter, sosfilt
 
 SR = 44100
 OUT = os.path.join(os.path.dirname(__file__), "..", "assets", "audio")
-rng = np.random.default_rng(7)
+
+_args = sys.argv[1:]
+PREVIEW = None
+if "--preview" in _args:
+    _i = _args.index("--preview")
+    PREVIEW = _args[_i + 1]
+    del _args[_i:_i + 2]
 # Prefijos pedidos por línea de comandos: si hay, solo se escriben esos.
-ONLY = sys.argv[1:]
+ONLY = _args
+
+rng = np.random.default_rng(7)
+
+# --------------------------------------------------------------------------
+# Básicos
+
+
+def hz(midi):
+    return 440.0 * 2 ** ((midi - 69) / 12)
+
+
+PENTA = {0, 2, 4, 7, 9}
+
+
+def scale(lo, hi):
+    """Notas MIDI de la pentatónica de Do entre [lo] y [hi]."""
+    return [m for m in range(lo, hi + 1) if m % 12 in PENTA]
 
 
 def t(seconds):
     return np.arange(int(SR * seconds)) / SR
 
 
-def env(n, attack=0.005, decay=0.4):
+def ramp(x, seconds):
+    """Subida suave (seno²) en los primeros [seconds]."""
+    return np.sin(np.pi / 2 * np.clip(x / seconds, 0, 1)) ** 2
+
+
+def noise(n):
+    return rng.standard_normal(n)
+
+
+def lp(x, f, order=2):
+    return sosfilt(butter(order, f, "lowpass", fs=SR, output="sos"), x)
+
+
+def hp(x, f, order=2):
+    return sosfilt(butter(order, f, "highpass", fs=SR, output="sos"), x)
+
+
+def bp(x, lo, hi, order=2):
+    return sosfilt(butter(order, [lo, hi], "bandpass", fs=SR, output="sos"), x)
+
+
+def norm(x):
+    return x / (np.std(x) or 1)
+
+
+def pink(n):
+    """Ruido rosa armado en frecuencia: es periódico, así que loopea perfecto."""
+    spec = np.fft.rfft(rng.standard_normal(n))
+    f = np.fft.rfftfreq(n, 1 / SR)
+    f[0] = f[1]
+    return norm(np.fft.irfft(spec / np.sqrt(f), n))
+
+
+def looped(fn, x):
+    """Aplica el filtro [fn] a una señal periódica sin costura: filtra dos
+    vueltas y se queda con la segunda, cuando el filtro ya se asentó."""
+    n = len(x)
+    return fn(np.concatenate([x, x]))[n:]
+
+
+def slow(n, seconds, count, k_max):
+    """Movimiento lento que vuelve exacto al principio (frecuencias múltiplo de
+    1/[seconds]): ráfagas de viento, olas de lluvia."""
     x = np.arange(n) / SR
-    a = np.clip(x / attack, 0, 1)
-    return a * np.exp(-x / decay)
+    s = np.zeros(n)
+    for _ in range(count):
+        k = rng.integers(1, k_max + 1)
+        s += np.sin(2 * np.pi * k / seconds * x + rng.uniform(0, 2 * np.pi)) / k ** 0.5
+    return s / (np.max(np.abs(s)) or 1)
 
 
-def lowpass(x, alpha):
-    y = np.zeros_like(x)
-    acc = 0.0
-    for i, v in enumerate(x):
-        acc += alpha * (v - acc)
-        y[i] = acc
-    return y
+def stereo(x, pan=0.0):
+    """Mono a estéreo con paneo de igual potencia (-1 izquierda, 1 derecha)."""
+    a = (pan + 1) * np.pi / 4
+    return np.vstack([x * np.cos(a), x * np.sin(a)])
 
 
-def bell(freq, seconds=1.6, decay=0.55):
-    x = t(seconds)
-    s = (np.sin(2 * np.pi * freq * x)
-         + 0.35 * np.sin(2 * np.pi * freq * 2.0 * x) * np.exp(-x / 0.25)
-         + 0.08 * np.sin(2 * np.pi * freq * 3.01 * x) * np.exp(-x / 0.12))
-    # Ataque de 12 ms: suena a campanita de madera, no a click.
-    return s * env(len(x), 0.012, decay)
+def place(buf, sig, start, circular=False):
+    """Suma [sig] en [buf] desde la muestra [start]."""
+    sig = np.atleast_2d(sig)
+    n = buf.shape[-1]
+    if circular:
+        idx = (start + np.arange(sig.shape[-1])) % n
+        np.add.at(buf, (slice(None), idx) if buf.ndim == 2 else idx, sig if buf.ndim == 2 else sig[0])
+        return
+    j = min(n, start + sig.shape[-1])
+    if j <= start:
+        return
+    if buf.ndim == 2:
+        buf[:, start:j] += sig[:, :j - start]
+    else:
+        buf[start:j] += sig[0, :j - start]
 
 
-def singing_bowl(freq=220.0, seconds=6.0):
-    """Cuenco tibetano: parciales inarmónicos, decaimiento largo y batido lento."""
-    x = t(seconds)
-    s = np.zeros_like(x)
-    for ratio, amp, decay in [(1.0, 1.0, 2.6), (2.71, 0.45, 1.6), (5.15, 0.2, 0.9), (8.2, 0.08, 0.5)]:
-        beat = 1 + 0.12 * np.sin(2 * np.pi * 0.9 * ratio * x)
-        s += amp * beat * np.sin(2 * np.pi * freq * ratio * x) * np.exp(-x / decay)
-    return s * env(len(x), 0.015, 10.0)
-
-
-def stone_click(base, seconds=0.35):
-    """Un "toc" de piedra sobre piedra: grave, redondo y con muy poco ruido."""
-    x = t(seconds)
-    noise = lowpass(rng.standard_normal(len(x)), 0.1) * np.exp(-x / 0.015)
-    body = (np.sin(2 * np.pi * base * x) + 0.3 * np.sin(2 * np.pi * base * 2.4 * x) * np.exp(-x / 0.04)) \
-        * np.exp(-x / 0.09)
-    return (0.25 * noise + body) * env(len(x), 0.005, 10.0)
-
-
-def noise_loop(seconds, alpha, mod_hz=0.0, mod_depth=0.0):
-    x = t(seconds)
-    n = lowpass(rng.standard_normal(len(x)), alpha)
-    if mod_hz:
-        n *= 1 - mod_depth + mod_depth * np.sin(2 * np.pi * mod_hz * x) ** 2
-    # Fundido cruzado de la cola sobre el principio: el loop empalma sin click
-    # ni bajón de volumen.
-    fade = int(SR * 0.5)
-    k = np.sin(np.linspace(0, np.pi / 2, fade)) ** 2
-    head = n[:fade] * k + n[-fade:] * (1 - k)
-    return np.concatenate([head, n[fade:-fade]])
-
-
-def arpeggio(freqs, step, decay):
-    total = int(SR * (1.2 + step * len(freqs)))
-    out = np.zeros(total)
-    for k, f in enumerate(freqs):
-        note = bell(f, 1.2, decay)
-        start = int(SR * step * k)
-        out[start:start + len(note)] += note
+def mix(*sigs):
+    """Suma señales de distinto largo (mono o estéreo)."""
+    st = any(np.ndim(s) == 2 for s in sigs)
+    n = max(np.shape(s)[-1] for s in sigs)
+    out = np.zeros((2, n)) if st else np.zeros(n)
+    for s in sigs:
+        if st and np.ndim(s) == 1:
+            s = stereo(s)
+        place(out, s, 0)
     return out
 
 
-def sweep_tone(f0, f1, seconds, decay):
-    """Tono que se desliza de f0 a f1 (una gota que cae al agua)."""
+def at(sig, seconds):
+    """[sig] corrido [seconds] hacia adelante."""
+    pad = int(SR * seconds)
+    if np.ndim(sig) == 2:
+        return np.pad(sig, ((0, 0), (pad, 0)))
+    return np.pad(sig, (pad, 0))
+
+
+# --------------------------------------------------------------------------
+# Reverb: respuestas al impulso sintéticas (ruido que se apaga, con las
+# frecuencias altas muriendo antes, como en un patio de madera y piedra).
+
+
+def make_ir(seconds, decay, damp_hz, seed):
+    r = np.random.default_rng(seed)
     x = t(seconds)
-    f = f0 + (f1 - f0) * np.clip(x / (seconds * 0.35), 0, 1)
-    phase = 2 * np.pi * np.cumsum(f) / SR
-    return np.sin(phase) * env(len(x), 0.002, decay)
+    ir = np.zeros((2, len(x)))
+    for c in range(2):
+        n = r.standard_normal(len(x))
+        ir[c] = 0.4 * n * np.exp(-x / (decay * 0.3)) + lp(n, damp_hz) * np.exp(-x / decay)
+        for d, a in [(0.009, 0.6), (0.017, 0.45), (0.029, 0.35), (0.041, 0.25), (0.058, 0.18)]:
+            ir[c, int(SR * (d + 0.0023 * c * (1 + d * 40)))] += a * r.choice([-1, 1]) * 3
+    ir = np.pad(ir, ((0, 0), (int(SR * 0.01), 0)))[:, :len(x)]
+    ir *= ramp(x, 0.004)
+    return ir / np.sqrt(np.sum(ir ** 2, axis=1, keepdims=True))
 
 
-def swish(seconds, a0, a1, attack):
-    """Ruido que se abre y se cierra: hojas, escoba, pincel."""
+GARDEN = make_ir(1.6, 0.32, 3800, 1)
+HALL = make_ir(5.0, 1.2, 2600, 2)
+TEMPLE = make_ir(6.0, 1.6, 2200, 3)
+
+
+def verb(x, ir, wet):
+    """Seco al centro más la cola en estéreo."""
+    if x.ndim == 1:
+        x = stereo(x)
+    tail = np.vstack([fftconvolve(x[c], ir[c]) for c in range(2)])
+    return mix(x * (1 - 0.3 * wet), tail * wet)
+
+
+def verb_loop(x, ir, wet):
+    """Reverb circular: la cola del final cae sobre el principio y el loop no
+    tiene costura."""
+    n = x.shape[-1]
+    tail = np.vstack([np.fft.irfft(np.fft.rfft(x[c]) * np.fft.rfft(ir[c], n), n) for c in range(2)])
+    return x * (1 - 0.3 * wet) + tail * wet
+
+
+def trim(x, db=-62):
+    """Corta el silencio del final, con un fundido corto."""
+    a = np.max(np.abs(np.atleast_2d(x)), axis=0)
+    loud = np.nonzero(a > a.max() * 10 ** (db / 20))[0]
+    end = min(a.size, (loud[-1] if loud.size else a.size) + int(SR * 0.02))
+    x = x[..., :end].copy()
+    k = min(end, int(SR * 0.03))
+    x[..., end - k:] *= np.linspace(1, 0, k)
+    return x
+
+
+# --------------------------------------------------------------------------
+# Instrumentos
+
+
+def kalimba(f, seconds=1.8, decay=0.9, bright=1.0):
+    """Lengüeta metálica suave: fundamental con un batido lento, un octavo que
+    se apaga rápido y el "ping" inarmónico de la púa."""
     x = t(seconds)
-    n = rng.standard_normal(len(x))
-    y = np.zeros_like(n)
-    acc = 0.0
-    alphas = np.linspace(a0, a1, len(n))
-    for i, v in enumerate(n):
-        acc += alphas[i] * (v - acc)
-        y[i] = acc
-    # Sin graves: se resta una versión más lenta.
-    y -= lowpass(y, 0.02)
-    shape = np.sin(np.pi * np.clip(x / seconds, 0, 1)) ** 2
-    return y * shape * env(len(x), attack, 10.0)
+    s = np.sin(2 * np.pi * f * x) * np.exp(-x / decay)
+    s += 0.5 * np.sin(2 * np.pi * f * 1.0018 * x + 1.3) * np.exp(-x / (decay * 0.8))
+    s += 0.16 * bright * np.sin(2 * np.pi * f * 2 * x) * np.exp(-x / (decay * 0.35))
+    s += 0.10 * bright * np.sin(2 * np.pi * f * 5.93 * x) * np.exp(-x / 0.05)
+    click = 0.08 * bright * hp(noise(len(x)), 2500) * np.exp(-x / 0.0015)
+    return (s + click) * ramp(x, 0.0015)
 
 
-def write(name, samples, gain=0.8):
+def koto(f, seconds=3.0, t60=2.0, bright=0.5, pos=0.2):
+    """Cuerda pulsada (Karplus-Strong con retardo fraccional): una vuelta de
+    ruido que se filtra a sí misma hasta sonar como una cuerda de seda."""
+    n = int(SR * seconds)
+    d = SR / f - 0.5
+    ni = int(d)
+    fr = d - ni
+    g = 10 ** (-3 / (f * t60))
+    a = np.zeros(ni + 3)
+    a[0] = 1
+    a[ni] -= g * 0.5 * (1 - fr)
+    a[ni + 1] -= g * 0.5
+    a[ni + 2] -= g * 0.5 * fr
+    burst = lp(noise(ni + 1), 1200 + 7000 * bright)
+    k = max(1, int(pos * ni))
+    burst = burst - np.concatenate([np.zeros(k), burst[:-k]])
+    exc = np.zeros(n)
+    exc[:len(burst)] = burst
+    y = lfilter([1.0], a, exc)
+    # La uña sobre la cuerda y la caja de madera.
+    x = t(seconds)
+    y += 0.15 * bright * norm(hp(noise(n), 3000)) * np.exp(-x / 0.003) * np.std(y[:ni * 4])
+    y += 0.35 * bp(y, 160, 420) + 0.18 * bp(y, 650, 1400)
+    y *= 1 - ramp(x - (seconds - 0.08), 0.08)
+    return y / (np.max(np.abs(y)) or 1)
+
+
+def shakuhachi(f, seconds, breath=0.2, vib=0.006):
+    """Flauta de bambú: entra subiendo desde abajo, el vibrato llega tarde y el
+    soplido se oye todo el tiempo."""
+    x = t(seconds)
+    n = len(x)
+    glide = 1 - 0.03 * np.exp(-x / 0.09)
+    wobble = 1 + vib * np.clip((x - 0.35) / 0.6, 0, 1) * np.sin(2 * np.pi * 5.0 * x + rng.uniform(0, 6))
+    drift = 1 + 0.0015 * norm(lp(noise(n), 4))
+    ph = 2 * np.pi * np.cumsum(f * glide * wobble * drift) / SR
+    tone = np.sin(ph) + 0.28 * np.sin(2 * ph) + 0.12 * np.sin(3 * ph) + 0.05 * np.sin(4 * ph)
+    amp = ramp(x, 0.16) * (1 - ramp(x - (seconds - 0.45), 0.45))
+    amp *= 1 + 0.08 * norm(lp(noise(n), 2))
+    air = norm(bp(noise(n), f * 0.9, min(f * 4, 16000))) * breath
+    chiff = norm(bp(noise(n), f * 2, min(f * 6, 18000))) * np.exp(-x / 0.035) * 0.5
+    return lp((tone / 1.3 + air) * amp + chiff * ramp(x, 0.01), 5500)
+
+
+def pad(freqs, seconds, attack=3.5, release=4.0, air=0.15):
+    """Colchón: cada nota son tres voces apenas desafinadas que respiran."""
+    x = t(seconds)
+    out = np.zeros((2, len(x)))
+    for f in freqs:
+        for det, pan in [(-0.0035, -0.7), (0.0, 0.0), (0.0035, 0.7)]:
+            ph = rng.uniform(0, 2 * np.pi)
+            lfo = 1 + 0.18 * np.sin(2 * np.pi * rng.uniform(0.04, 0.11) * x + rng.uniform(0, 6))
+            ff = f * (1 + det)
+            s = np.sin(2 * np.pi * ff * x + ph) + 0.16 * np.sin(4 * np.pi * ff * x + ph) \
+                + 0.05 * np.sin(6 * np.pi * ff * x + ph)
+            out += stereo(s * lfo, pan)
+    # Un poco de aire filtrado para que no suene a órgano.
+    out += np.vstack([air * 0.4 * norm(bp(noise(len(x)), 300, 1800)) for _ in range(2)])
+    shape = ramp(x, attack) * (1 - ramp(x - (seconds - release), release))
+    return out * shape / (len(freqs) * 3)
+
+
+def bowl(f=220.0, seconds=8.0):
+    """Cuenco: parciales inarmónicos en pares apenas separados, que baten."""
+    x = t(seconds)
+    s = np.zeros(len(x))
+    for ratio, amp, decay in [(1.0, 1.0, 3.4), (2.71, 0.5, 2.1), (5.15, 0.22, 1.2), (8.25, 0.09, 0.6),
+                              (11.9, 0.04, 0.35)]:
+        beat = 0.5 + ratio * 0.3
+        s += amp * 0.55 * (np.sin(2 * np.pi * f * ratio * x)
+                           + 0.8 * np.sin(2 * np.pi * (f * ratio + beat) * x + 0.6)) * np.exp(-x / decay)
+    strike = 0.35 * norm(lp(noise(len(x)), 1400)) * np.exp(-x / 0.008)
+    return (s + strike * 0.3) * ramp(x, 0.004)
+
+
+def stone(base, seconds=0.45, hard=1.0):
+    """Piedra contra piedra: modos inarmónicos cortos, el roce del contacto y
+    un golpe sordo debajo."""
+    x = t(seconds)
+    n = len(x)
+    s = np.zeros(n)
+    for ratio, amp, decay in [(1.0, 1.0, 0.07), (2.32, 0.5, 0.04), (3.91, 0.3, 0.022), (5.6, 0.16, 0.012)]:
+        s += amp * np.sin(2 * np.pi * base * ratio * x + rng.uniform(0, 6)) * np.exp(-x / decay)
+    contact = 0.35 * hard * norm(bp(noise(n), 900, 6000)) * np.exp(-x / 0.0025)
+    thump = 0.6 * norm(lp(noise(n), 260)) * np.exp(-x / 0.025)
+    return (s + contact + thump) * ramp(x, 0.0008)
+
+
+def bamboo(f=410.0, seconds=0.45):
+    """Toc de caña hueca: modos de tubo y un poco de ruido que resuena adentro."""
+    x = t(seconds)
+    n = len(x)
+    s = np.zeros(n)
+    for ratio, amp, decay in [(1.0, 1.0, 0.08), (2.48, 0.55, 0.035), (4.1, 0.25, 0.015)]:
+        s += amp * np.sin(2 * np.pi * f * ratio * x) * np.exp(-x / decay)
+    hollow = 0.5 * norm(bp(noise(n), f * 0.92, f * 1.08, 2)) * np.exp(-x / 0.05)
+    hit = 0.4 * norm(hp(noise(n), 2000)) * np.exp(-x / 0.002)
+    return (s + hollow + hit) * ramp(x, 0.0006)
+
+
+def drop(f0, rise=2.0, decay=0.045, seconds=0.3):
+    """Gota en el agua: la burbuja que se cierra sube de tono de golpe."""
+    x = t(seconds)
+    f = f0 * np.exp(np.log(rise) * np.clip(x / 0.07, 0, 1))
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    s = np.sin(ph) * np.exp(-x / decay) * ramp(x, 0.001)
+    splash = 0.1 * norm(hp(noise(len(x)), 3500)) * np.exp(-x / 0.004)
+    return s + splash * ramp(x, 0.0008)
+
+
+def grains(seconds, density, lo, hi, bed=0.3, shape_pow=1.5):
+    """Textura granular: cientos de chasquidos chiquitos (hojas, cerdas,
+    arena) sobre un soplo suave."""
+    x = t(seconds)
+    n = len(x)
+    imp = (rng.random(n) < density / SR) * rng.lognormal(0, 0.7, n) * rng.choice([-1, 1], n)
+    crackle = norm(bp(imp, lo, min(hi, 20000)))
+    soft = norm(bp(noise(n), lo * 0.6, min(hi * 0.8, 20000)))
+    shape = np.sin(np.pi * np.clip(x / seconds, 0, 1)) ** shape_pow
+    return (crackle + bed * soft) * shape
+
+
+def meow(seconds=0.6):
+    """Maullido corto: una voz armónica que sube y baja, y una boca que se abre
+    (los formantes se mueven) en "mi-a-u"."""
+    x = t(seconds)
+    n = len(x)
+    u = x / seconds
+    f = 560 + 280 * np.sin(np.pi * np.clip(u * 1.4, 0, 1)) - 140 * u
+    f *= 1 + 0.01 * np.sin(2 * np.pi * 7 * x)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    src = sum(np.sin(k * ph) / k for k in range(1, 12))
+    mouth = 700 + 800 * np.sin(np.pi * np.clip(u * 1.2, 0, 1))
+    out = np.zeros(n)
+    for b in [650, 950, 1300, 1700]:
+        w = np.exp(-((np.log2(mouth / b)) / 0.3) ** 2)
+        out += w * bp(src, b * 0.85, b * 1.15)
+    out += 0.3 * bp(src, 2700, 3500)
+    return out * np.sin(np.pi * u) ** 0.7 * ramp(x, 0.03)
+
+
+# --------------------------------------------------------------------------
+# Ambientes en loop (todo circular: empalman sin costura)
+
+
+def wind_loop(seconds):
+    n = int(SR * seconds)
+    gust = 0.55 + 0.45 * slow(n, seconds, 4, 3)
+    center = 520 * 2 ** (0.9 * slow(n, seconds, 3, 4))
+    out = np.zeros((2, n))
+    for c in range(2):
+        base = pink(n)
+        bed = looped(lambda s: lp(s, 1100), base)
+        whistle = np.zeros(n)
+        for b in [260, 360, 500, 700, 980, 1380]:
+            w = np.exp(-((np.log2(center / b)) / 0.35) ** 2)
+            whistle += w * norm(looped(lambda s, b=b: bp(s, b * 0.93, b * 1.07), base))
+        g = np.roll(gust, int(SR * 0.15 * c))
+        out[c] = norm(bed) * g + 0.35 * whistle * g ** 2
+    return out
+
+
+def rain_loop(seconds):
+    n = int(SR * seconds)
+    swell = 0.8 + 0.2 * slow(n, seconds, 3, 3)
+    out = np.zeros((2, n))
+    rumble = norm(looped(lambda s: lp(s, 200), pink(n)))
+    for c in range(2):
+        bed = norm(looped(lambda s: bp(s, 600, 7000), pink(n)))
+        ch = np.zeros(n)
+        # Miles de gotitas finas.
+        imp = (rng.random(n) < 1100 / SR) * rng.lognormal(-0.5, 0.8, n)
+        tick = hp(noise(300), 2500) * np.exp(-np.arange(300) / (SR * 0.0012))
+        ch += norm(np.fft.irfft(np.fft.rfft(imp) * np.fft.rfft(tick, n), n)) * 0.6
+        # Gotas grandes que pegan en hojas y charcos.
+        for _ in range(int(seconds * 5)):
+            d = drop(rng.uniform(900, 2600), rng.uniform(1.4, 2.2), rng.uniform(0.01, 0.025), 0.08)
+            buf = np.zeros(n)
+            place(buf, d * rng.uniform(0.2, 1.0), int(rng.integers(n)), circular=True)
+            ch += buf * 2.2
+        out[c] = (0.6 * bed + ch) * swell + 0.35 * rumble
+    return verb_loop(out, GARDEN, 0.25)
+
+
+def rake_loop(seconds):
+    n = int(SR * seconds)
+    x = np.arange(n) / SR
+    stroke = 0.35 + 0.65 * np.sin(np.pi * x / seconds) ** 2
+    imp = (rng.random(n) < 2600 / SR) * rng.lognormal(0, 0.6, n) * rng.choice([-1, 1], n)
+    crunch = norm(looped(lambda s: bp(s, 1300, 6500), imp))
+    soft = norm(looped(lambda s: bp(s, 500, 3000), pink(n)))
+    return (crunch + 0.6 * soft) * stroke
+
+
+# --------------------------------------------------------------------------
+# Música del jardín: piezas tranquilas de un minuto y medio que terminan en
+# silencio; el juego las alterna con una pausa entre una y otra.
+
+
+def music(seed, chords, per, repeats, lead):
+    global rng
+    rng = np.random.default_rng(seed)
+    prog = chords * repeats + [chords[0]]
+    length = per * len(prog)
+    n = int(SR * (length + 8))
+    dry = np.zeros((2, n))
+    send = np.zeros((2, n))
+
+    def add(sig, start, pan=0.0, wet=0.35, vol=1.0):
+        s = sig if sig.ndim == 2 else stereo(sig, pan)
+        i = int(start * SR)
+        place(dry, s * vol, i)
+        place(send, s * vol * wet, i)
+
+    def chord_at(sec):
+        return prog[min(int(sec // per), len(prog) - 1)]
+
+    def snap(notes, idx, sec):
+        """Lleva la última nota de una frase a una del acorde que suena."""
+        pcs = {m % 12 for m in chord_at(sec)}
+        best = min((i for i in range(len(notes)) if notes[i] % 12 in pcs), key=lambda i: abs(i - idx), default=idx)
+        return best
+
+    # Colchón: cada acorde entra y sale despacio, encimado con el siguiente.
+    for k, ch in enumerate(prog):
+        last = k == len(prog) - 1
+        start = max(0, k * per - 2)
+        dur = per + (4 if k else 2) + (3 if last else 0)
+        add(pad([hz(m) for m in ch], dur, attack=3.5, release=6 if last else 4), start, wet=0.3, vol=0.9)
+        # Un bajo pulsado marca cada cambio de acorde.
+        if lead == "koto" or k % 2 == 0:
+            add(koto(hz(ch[0] + 12), 4.5, t60=3.2, bright=0.2) * 0.32, k * per + 0.1, pan=-0.15, wet=0.3)
+
+    if lead == "koto":
+        notes = scale(60, 81)
+        sec = rng.uniform(3, 4.5)
+        while sec < length - 6:
+            count = int(rng.integers(3, 7))
+            idx = int(rng.integers(3, len(notes) - 3))
+            step = rng.choice([0.38, 0.44, 0.5])
+            tt = sec
+            for j in range(count):
+                last = j == count - 1
+                if last:
+                    idx = snap(notes, idx, tt)
+                vel = rng.uniform(0.5, 0.9) * (1.0 if j == 0 else 0.85)
+                add(koto(hz(notes[idx]), 4.0 if last else 2.6, t60=2.2 if last else 1.5, bright=0.3 + 0.4 * vel)
+                    * vel * 0.55, tt, pan=rng.uniform(-0.35, 0.35), wet=0.38)
+                tt += step * rng.choice([1, 1, 1, 2, 0.5], p=[0.45, 0.15, 0.1, 0.2, 0.1]) + rng.normal(0, 0.02)
+                idx = int(np.clip(idx + rng.choice([-2, -1, -1, 1, 1, 2]), 0, len(notes) - 1))
+            sec = tt + rng.uniform(4, 8)
+    else:
+        notes = scale(62, 79)
+        sec = rng.uniform(4, 6)
+        while sec < length - 9:
+            count = int(rng.integers(2, 5))
+            idx = int(rng.integers(2, len(notes) - 2))
+            tt = sec
+            for j in range(count):
+                last = j == count - 1
+                if last:
+                    idx = snap(notes, idx, tt)
+                dur = rng.uniform(1.4, 2.4) * (1.5 if last else 1)
+                add(shakuhachi(hz(notes[idx]), dur) * 0.42, tt, pan=0.12, wet=0.5)
+                tt += dur + rng.uniform(0.08, 0.35)
+                idx = int(np.clip(idx + rng.choice([-2, -1, 1, 1, 2]), 0, len(notes) - 1))
+            sec = tt + rng.uniform(6, 11)
+
+    # Alguna campanita alta, lejos.
+    sec = rng.uniform(8, 12)
+    while sec < length - 4:
+        m = rng.choice(scale(84, 93))
+        add(kalimba(hz(m), 2.5, 1.2, 0.6) * 0.16, sec, pan=rng.uniform(-0.6, 0.6), wet=0.6)
+        sec += rng.uniform(9, 17)
+
+    wet = np.vstack([fftconvolve(send[c], HALL[c]) for c in range(2)])
+    out = mix(dry, wet * 0.55)
+    x = np.arange(out.shape[1]) / SR
+    out *= 1 - ramp(x - (length + 1), 5)
+    return trim(out, -70)
+
+
+# --------------------------------------------------------------------------
+# Escritura
+
+
+def write(name, x, gain=0.8, rms=None, kbps=96, fade=True):
     if ONLY and not any(name.startswith(o) for o in ONLY):
         return
-    samples = samples / (np.max(np.abs(samples)) or 1) * gain
-    pcm = (samples * 32767).astype(np.int16)
+    x = np.atleast_2d(np.asarray(x, dtype=float))
+    if rms:
+        x = x * (rms / (np.sqrt(np.mean(x ** 2)) or 1))
+        x = np.tanh(x / 0.95) * 0.95
+    else:
+        x = x / (np.max(np.abs(x)) or 1) * gain
+    if fade:
+        k = int(SR * 0.008)
+        x[:, -k:] *= np.linspace(1, 0, k)
+    pcm = (np.clip(x, -1, 1).T * 32767).astype("<i2")
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
         path = f.name
     with wave.open(path, "wb") as w:
-        w.setnchannels(1)
+        w.setnchannels(x.shape[0])
         w.setsampwidth(2)
         w.setframerate(SR)
         w.writeframes(pcm.tobytes())
     dst = os.path.join(OUT, f"{name}.m4a")
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", path,
-                    "-c:a", "aac", "-b:a", "96k", dst], check=True)
-    os.remove(path)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", path, "-c:a", "aac", "-b:a", f"{kbps}k", dst],
+                   check=True)
+    if PREVIEW:
+        os.makedirs(PREVIEW, exist_ok=True)
+        os.replace(path, os.path.join(PREVIEW, f"{name}.wav"))
+    else:
+        os.remove(path)
     print("ok", dst)
+
+
+def wanted(*prefixes):
+    return not ONLY or any(p.startswith(o) or o.startswith(p) for p in prefixes for o in ONLY)
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    # Pentatónica mayor de Do: cualquier secuencia suena bien.
-    for i, f in enumerate([523.25, 587.33, 659.25, 783.99, 880.00], start=1):
-        write(f"sfx_rain_note_{i:02d}", bell(f))
-    for i, f in enumerate([140, 165, 190], start=1):
-        write(f"sfx_stack_place_{i:02d}", stone_click(f))
-    # La torre que cae: tres "toc" graves que se alejan y un susurro de arena.
-    # Se cuenta con calma, no como un choque (GDD, pilar 8).
-    fall = np.zeros(int(SR * 1.6))
-    for k, (f, amp) in enumerate([(110, 1.0), (96, 0.6), (84, 0.35)]):
-        knock = stone_click(f, 0.6) * amp
-        start = int(SR * 0.22 * k)
-        fall[start:start + len(knock)] += knock
-    x = t(1.6)
-    fall += 0.12 * lowpass(rng.standard_normal(len(x)), 0.04) * np.exp(-x / 0.5) * env(len(x), 0.2, 10.0)
-    write("sfx_stack_fall", fall, 0.6)
-    write("sfx_sand_rake", noise_loop(2.0, 0.06, 0.8, 0.4), 0.45)
-    write("sfx_base_wind", noise_loop(6.0, 0.02, 0.15, 0.7), 0.55)
-    write("sfx_rain_ambient", noise_loop(8.0, 0.15, 0.1, 0.25), 0.35)
-    write("sfx_ui_tap", stone_click(300, 0.15), 0.35)
-    # Celebraciones en la pentatónica, en registro medio y sin prisa.
-    write("sfx_ui_good", bell(523.25, 0.9, 0.3), 0.45)
-    write("sfx_ui_great", arpeggio([523.25, 659.25], 0.11, 0.35), 0.5)
-    write("sfx_ui_perfect", arpeggio([392.0, 523.25, 659.25, 783.99], 0.11, 0.45), 0.55)
-    write("sfx_meditation_bell", singing_bowl(), 0.7)
-    write("sfx_cat_meow", bell(700, 0.5, 0.15) * np.sin(2 * np.pi * 6 * t(0.5)) ** 2, 0.4)
-    # Error: dos tonos de madera apagados que bajan. Avisa sin retar.
-    miss = np.zeros(int(SR * 0.6))
-    for k, f in enumerate([330.0, 262.0]):
-        note = bell(f, 0.45, 0.09) * 0.9 ** k
-        start = int(SR * 0.09 * k)
-        miss[start:start + len(note)] += note
-    write("sfx_miss", lowpass(miss, 0.25), 0.3)
-    # Cierre de partida: campanitas que bajan y un cuenco suave debajo.
-    finish = arpeggio([783.99, 659.25, 523.25, 392.0], 0.16, 0.7)
-    bowl = singing_bowl(196.0, len(finish) / SR) * 0.35
-    write("sfx_finish", finish + bowl[:len(finish)], 0.5)
-    # Toc de bambú: hueco, con la caña que resuena un instante.
-    x = t(0.4)
-    tok = (np.sin(2 * np.pi * 410 * x) * np.exp(-x / 0.07)
-           + 0.5 * np.sin(2 * np.pi * 1030 * x) * np.exp(-x / 0.025)
-           + 0.3 * lowpass(rng.standard_normal(len(x)), 0.3) * np.exp(-x / 0.006))
-    write("sfx_bamboo_tok", tok * env(len(x), 0.001, 10.0), 0.6)
-    for i, (f0, f1) in enumerate([(700, 1500), (600, 1300), (820, 1700)], start=1):
-        write(f"sfx_water_drop_{i:02d}", sweep_tone(f0, f1, 0.25, 0.07), 0.45)
-    for i, (a0, a1) in enumerate([(0.15, 0.5), (0.3, 0.7)], start=1):
-        write(f"sfx_leaf_rustle_{i:02d}", swish(0.35, a0, a1, 0.04), 0.35)
-    for i, (a0, a1) in enumerate([(0.08, 0.2), (0.1, 0.25)], start=1):
-        write(f"sfx_brush_{i:02d}", swish(0.28, a0, a1, 0.05), 0.3)
-    # Arrancar maleza: un "pop" de tierra que cede.
-    x = t(0.25)
-    pluck = sweep_tone(220, 120, 0.25, 0.05) + 0.4 * lowpass(rng.standard_normal(len(x)), 0.2) * np.exp(-x / 0.03)
-    write("sfx_pluck", pluck, 0.45)
-    write("sfx_sweep", swish(0.45, 0.2, 0.6, 0.08), 0.4)
+
+    if wanted("sfx_rain_note"):
+        # Do Re Mi Sol La: cualquier secuencia suena bien.
+        for i, m in enumerate([72, 74, 76, 79, 81], start=1):
+            write(f"sfx_rain_note_{i:02d}", verb(kalimba(hz(m)), GARDEN, 0.22), 0.8)
+    if wanted("sfx_ui"):
+        write("sfx_ui_tap", stone(900, 0.12, 0.6), 0.35)
+        write("sfx_ui_good", verb(kalimba(hz(72), 1.4, 0.6), GARDEN, 0.2), 0.45)
+        write("sfx_ui_great", verb(mix(kalimba(hz(72), 1.4, 0.6), at(kalimba(hz(76), 1.6, 0.7), 0.11)), GARDEN, 0.22),
+              0.5)
+        perfect = mix(*[at(kalimba(hz(m), 1.8, 0.8) * (0.85 + 0.05 * k), 0.11 * k)
+                        for k, m in enumerate([67, 72, 76, 79])], at(kalimba(hz(84), 2.2, 1.0, 0.5) * 0.35, 0.5))
+        write("sfx_ui_perfect", verb(perfect, GARDEN, 0.28), 0.55)
+    if wanted("sfx_stack"):
+        for i, f in enumerate([210, 240, 275], start=1):
+            write(f"sfx_stack_place_{i:02d}", verb(stone(f), GARDEN, 0.12), 0.8)
+        # La torre que cae: tres "toc" que se alejan y un hilo de arena. Se
+        # cuenta con calma, no como un choque (GDD, pilar 8).
+        fall = mix(*[at(stone(f, 0.6) * a, 0.22 * k) for k, (f, a) in enumerate([(190, 1.0), (170, 0.6), (150, 0.35)])],
+                   at(lp(grains(1.3, 1400, 1500, 6000, 0.5, 0.6), 5000) * 0.12 * np.exp(-t(1.3) / 0.6), 0.1))
+        write("sfx_stack_fall", verb(fall, GARDEN, 0.2), 0.6)
+    if wanted("sfx_sand_rake"):
+        write("sfx_sand_rake", np.vstack([rake_loop(2.0), rake_loop(2.0)]), rms=0.12, fade=False)
+    if wanted("sfx_base_wind"):
+        write("sfx_base_wind", wind_loop(8.0), rms=0.13, fade=False)
+    if wanted("sfx_rain_ambient"):
+        write("sfx_rain_ambient", rain_loop(8.0), rms=0.11, fade=False)
+    if wanted("sfx_meditation_bell"):
+        write("sfx_meditation_bell", trim(verb(bowl(220.0, 8.0), TEMPLE, 0.35)), 0.7)
+    if wanted("sfx_cat_meow"):
+        write("sfx_cat_meow", verb(meow(), GARDEN, 0.15), 0.4)
+    if wanted("sfx_miss"):
+        # Error: dos notas de cuerda apagadas que bajan. Avisa sin retar.
+        miss = mix(koto(hz(64), 0.5, 0.18, 0.15), at(koto(hz(60), 0.55, 0.2, 0.12) * 0.85, 0.1))
+        write("sfx_miss", verb(lp(miss, 2500), GARDEN, 0.15), 0.3)
+    if wanted("sfx_finish"):
+        # Cierre de partida: campanitas que bajan y un cuenco suave debajo.
+        bells = mix(*[at(kalimba(hz(m), 2.0, 0.9), 0.16 * k) for k, m in enumerate([79, 76, 72, 67])])
+        write("sfx_finish", trim(verb(mix(bells, bowl(196.0, 4.0) * 0.3), GARDEN, 0.3)), 0.5)
+    if wanted("sfx_bamboo_tok"):
+        write("sfx_bamboo_tok", verb(bamboo(), GARDEN, 0.18), 0.6)
+    if wanted("sfx_water_drop"):
+        for i, (f0, r) in enumerate([(620, 2.1), (540, 2.3), (720, 1.9)], start=1):
+            write(f"sfx_water_drop_{i:02d}", trim(verb(drop(f0, r), GARDEN, 0.3)), 0.45)
+    if wanted("sfx_leaf_rustle"):
+        for i, d in enumerate([900, 1400], start=1):
+            write(f"sfx_leaf_rustle_{i:02d}", grains(0.38, d, 1800, 9000, 0.25), 0.35)
+    if wanted("sfx_brush"):
+        for i, d in enumerate([300, 450], start=1):
+            write(f"sfx_brush_{i:02d}", grains(0.3, d, 900, 4500, 0.9, 1.2), 0.3)
+    if wanted("sfx_pluck"):
+        # Arrancar maleza: la tierra que cede, un "pop" grave y migas que caen.
+        x = t(0.35)
+        pop = np.sin(2 * np.pi * np.cumsum(220 * np.exp(-x / 0.08) + 90) / SR) * np.exp(-x / 0.05)
+        dirt = grains(0.3, 1800, 400, 2500, 0.4, 0.8) * 0.5
+        write("sfx_pluck", verb(mix(pop * ramp(x, 0.002), at(dirt, 0.03)), GARDEN, 0.12), 0.45)
+    if wanted("sfx_sweep"):
+        write("sfx_sweep", grains(0.5, 2600, 1500, 9500, 0.6, 1.0), 0.4)
+    if wanted("sfx_flute_note"):
+        for i, m in enumerate([67, 69, 72, 74], start=1):
+            write(f"sfx_flute_note_{i:02d}", trim(verb(shakuhachi(hz(m), 1.4), GARDEN, 0.3)), 0.5)
+
+    if wanted("music_garden_01"):
+        write("music_garden_01",
+              music(11, [[48, 55, 62, 64], [45, 52, 60, 67], [41, 53, 57, 64, 67], [43, 50, 57, 62]], 12, 2, "koto"),
+              0.75, kbps=128)
+    if wanted("music_garden_02"):
+        write("music_garden_02",
+              music(23, [[45, 52, 60, 67], [41, 48, 57, 64], [40, 48, 55, 64], [43, 50, 55, 64]], 14, 2, "flute"),
+              0.75, kbps=128)
 
 
 if __name__ == "__main__":

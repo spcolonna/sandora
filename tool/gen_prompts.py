@@ -1305,7 +1305,7 @@ que todavía falta, de lo más importante a lo opcional. **Generado por `tool/ge
 - **Integrar** es siempre: pasar el PNG a `.webp` en `assets/images/`, usarlo en el juego donde va y sumarlo a
   `INCLUDED` en este script. Así sale de la lista y queda en "Ya incluidas", al final.
 
-**Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_placeholder_audio.py`; los finales
+**Fuera de este archivo:** los sonidos (los placeholders salen de `tool/gen_audio.py`; los finales
 conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de la arena y las animaciones Rive
 (`char_*.riv`, se arman en Rive a partir de las imágenes del Bloque 5).
 

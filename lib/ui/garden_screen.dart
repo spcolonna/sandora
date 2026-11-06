@@ -96,6 +96,9 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
   Timer? _tick, _fadeTick;
 
+  /// En un minijuego o meditando: el jardín no suena.
+  bool _away = false;
+
   /// Mientras un clima se funde en otro, el jardín se redibuja seguido para
   /// que entre de a poco (y no a saltos de 20 segundos).
   void _followFade() {
@@ -255,9 +258,12 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     });
   }
 
-  /// Viento de fondo y, si llueve, la lluvia.
+  /// Música, viento de fondo y, si llueve, la lluvia. Solo con el jardín a la
+  /// vista: el reloj de 20 s no tiene que traerlos de vuelta en un minijuego.
   void _gardenSound() {
+    if (!mounted || _away) return;
     final sound = SoundBoard.instance;
+    sound.music();
     sound.loop(Ambience.wind, volume: 0.18);
     // Sube y baja con el clima que se funde.
     final b = WeatherService.instance.blend(gardenNow());
@@ -272,6 +278,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
   void _quiet() {
     SoundBoard.instance.stopLoop(Ambience.wind);
     SoundBoard.instance.stopLoop(Ambience.rain);
+    SoundBoard.instance.stopMusic();
   }
 
   Future<void> _open(MinigameInfo m) async {
@@ -280,7 +287,9 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     final p = Progress.instance;
     final keys = ['pebbles', for (final e in Essence.values) e.name, 'lotus'];
     final before = {for (final k in keys) k: p.walletOf(k)};
+    _away = true;
     await Navigator.of(context).push(calmRoute<void>(m.screen()));
+    _away = false;
     if (!mounted) return;
     _gardenSound();
     // Lo ganado en las partidas vuela a sus contadores al volver: la
@@ -311,7 +320,9 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
   Future<void> _meditate() async {
     _quiet();
+    _away = true;
     await Navigator.of(context).push(calmRoute<void>(const MeditationScreen()));
+    _away = false;
     if (mounted) _gardenSound();
     Future.delayed(const Duration(milliseconds: 600), _celebrate);
   }

@@ -93,7 +93,7 @@
 - [x] **Visitantes con pedidos** (`lib/garden/visitors.dart`, balance `visitors`): desde el día 3, en la entrada del
       patio. Dibujados con código; falta su arte (sumar prompts).
 - [x] Minijuegos: sonido de error suave, cierre de partida, pincel del Ensō y sonidos propios (placeholders de
-      `tool/gen_placeholder_audio.py`).
+      `tool/gen_audio.py`).
 
 ## Minijuegos (2026-10-28)
 - [x] **Apilado nuevo:** sin Forge2D; bolsa de 12 piedras por partida (6 tipos) que se suman a la torre guardada.
