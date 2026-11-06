@@ -249,6 +249,20 @@ void _riverLanterns(Canvas canvas, Rect r, List<(double, double)> at) {
   for (final (x, y) in at) {
     final c = Offset(r.left + w * x, r.top + h * y);
     final s = w * 0.035;
+    final art = SceneArt.instance['obj_river_lantern'];
+    if (art != null) {
+      // Halo cálido sobre el agua y la linterna pintada encima.
+      canvas.drawCircle(
+        c,
+        s * 1.6,
+        Paint()
+          ..color = const Color(0xFFFFD27A).withValues(alpha: 0.3)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, s * 0.6),
+      );
+      final aw = s * 2.2, ah = aw * art.height / art.width;
+      drawArt(canvas, art, Rect.fromCenter(center: c, width: aw, height: ah));
+      continue;
+    }
     canvas.drawRect(
       Rect.fromCenter(center: c + Offset(0, s * 0.7), width: s * 1.8, height: s * 0.4),
       Paint()..color = Palette.wood,

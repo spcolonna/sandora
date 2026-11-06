@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 import 'widgets/washi.dart';
@@ -9,6 +11,7 @@ import 'fx/calm.dart';
 import 'fx/sfx.dart';
 import 'garden/garden_decor.dart';
 import 'garden/garden_view.dart';
+import 'garden/scene_art.dart';
 import 'theme/palette.dart';
 
 /// Una cosa del álbum: si ya se tiene, cómo se dibuja, cómo se llama y cómo
@@ -189,7 +192,7 @@ List<(String, List<_Item>)> _sections(Progress p) {
             owned: p.found.contains('visitor.${v.id}'),
             name: tr('album.visitor.${v.id}'),
             how: tr('album.how.visitor'),
-            art: Icon(_visitorIcon(v.id), size: 30, color: Palette.ink),
+            art: _art('char_visitor_${v.id}', Icon(_visitorIcon(v.id), size: 30, color: Palette.ink)),
           ),
       ],
     ),
@@ -201,7 +204,7 @@ List<(String, List<_Item>)> _sections(Progress p) {
             owned: p.streakObjects.contains(o),
             name: tr('album.object.$o'),
             how: tr('album.how.object', {'n': every * (i + 1)}),
-            art: Icon(_objectIcon(o), size: 30, color: Palette.wood),
+            art: _art(_objectArt(o), Icon(_objectIcon(o), size: 30, color: Palette.wood)),
           ),
       ],
     ),
@@ -227,6 +230,19 @@ IconData _visitorIcon(String id) => switch (id) {
   'gardener' => Icons.yard_rounded,
   'fisher' => Icons.phishing_rounded,
   _ => Icons.person_rounded,
+};
+
+/// El arte pintado [name] dentro de la casilla; si falta, [fallback].
+Widget _art(String name, Widget fallback) {
+  final img = SceneArt.instance[name];
+  return img == null ? fallback : CustomPaint(painter: _ArtPainter(img));
+}
+
+String _objectArt(String id) => switch (id) {
+  'bowl' => 'obj_court_singing_bowl',
+  'cushion' => 'obj_court_zafu',
+  'lantern' => 'obj_court_paper_lantern',
+  _ => '',
 };
 
 IconData _objectIcon(String id) => switch (id) {
@@ -307,6 +323,13 @@ class _ShapePainter extends CustomPainter {
       RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(8)),
       Paint()..color = Palette.sand,
     );
+    final sand = SceneArt.instance['tex_sand_base'];
+    if (sand != null) {
+      canvas.save();
+      canvas.clipRRect(RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(8)));
+      drawArtCover(canvas, sand, Offset.zero & size);
+      canvas.restore();
+    }
     final pts = shapePoints(shape);
     final path = Path();
     for (final (i, q) in pts.indexed) {
@@ -326,4 +349,20 @@ class _ShapePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ShapePainter old) => old.shape != shape;
+}
+
+/// Una imagen pintada, lo más grande posible sin deformarla.
+class _ArtPainter extends CustomPainter {
+  final ui.Image img;
+  _ArtPainter(this.img);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = artRectIn(img, Offset.zero & size);
+    // Centrada también en alto (artRectIn la apoya abajo).
+    drawArt(canvas, img, r.translate(0, -(size.height - r.height) / 2));
+  }
+
+  @override
+  bool shouldRepaint(_ArtPainter old) => old.img != img;
 }

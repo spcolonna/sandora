@@ -190,7 +190,12 @@ class FluteGame extends FlameGame with TapCallbacks {
         canvas.save();
         canvas.translate(head, y);
         canvas.rotate(-0.4 + sin(_t * 3 + i) * 0.2);
-        canvas.drawOval(const Rect.fromLTWH(-12, -4, 18, 8), Paint()..color = const Color(0xFF6C9450));
+        final leaf = SceneArt.instance['spr_leaf_0${i % 4 + 1}'];
+        if (leaf != null) {
+          drawArt(canvas, leaf, const Rect.fromLTWH(-14, -14, 28, 28));
+        } else {
+          canvas.drawOval(const Rect.fromLTWH(-12, -4, 18, 8), Paint()..color = const Color(0xFF6C9450));
+        }
         canvas.restore();
       }
     }

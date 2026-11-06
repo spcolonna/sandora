@@ -192,6 +192,27 @@ class _TeaPainter extends CustomPainter {
       Rect.fromCenter(center: base + const Offset(0, 1), width: 26, height: 5),
       Paint()..color = Palette.ink.withValues(alpha: 0.25),
     );
+    final art = SceneArt.instance['obj_tea_bowl'];
+    if (art != null) {
+      // Cuenco pintado (visto desde arriba); el té llena su boca.
+      const w = 24.0;
+      final h = w * art.height / art.width;
+      final box = Rect.fromLTWH(base.dx - w * 0.519, base.dy - h, w, h);
+      drawArt(canvas, art, box);
+      final mouth = Offset(box.left + w * 0.519, box.top + h * 0.429);
+      if (full) {
+        canvas.drawOval(
+          Rect.fromCenter(center: mouth, width: w * 0.403 * 1.7, height: h * 0.357 * 1.7),
+          Paint()..color = const Color(0xFF8DB04A),
+        );
+        canvas.drawOval(
+          Rect.fromCenter(center: mouth - const Offset(2, 1), width: w * 0.3, height: h * 0.18),
+          Paint()..color = const Color(0xFFC4DB86),
+        );
+        _steam(canvas, mouth.dx, box.top + 2);
+      }
+      return;
+    }
     // Cuenco de cerámica oscura, con el borde de arriba como una elipse.
     final top = base.dy - 11;
     final body = Path()
@@ -209,24 +230,28 @@ class _TeaPainter extends CustomPainter {
         Rect.fromCenter(center: Offset(base.dx - 2, top - 0.5), width: 10, height: 2.4),
         Paint()..color = const Color(0xFFC4DB86),
       );
-      // Vapor: dos hilos que suben ondulando y se desvanecen.
-      for (var i = 0; i < 2; i++) {
-        final k = (t * 0.35 + i * 0.5) % 1;
-        final steam = Path();
-        for (var j = 0; j <= 10; j++) {
-          final y = top - 3 - j * 2.0 - k * 6;
-          final x = base.dx + (i == 0 ? -4 : 4) + 2.5 * sin(j * 0.7 + t * 1.5 + i * 2);
-          j == 0 ? steam.moveTo(x, y) : steam.lineTo(x, y);
-        }
-        canvas.drawPath(
-          steam,
-          Paint()
-            ..color = Colors.white.withValues(alpha: 0.55 * (1 - k))
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.6
-            ..strokeCap = StrokeCap.round,
-        );
+      _steam(canvas, base.dx, top);
+    }
+  }
+
+  /// Vapor: dos hilos que suben ondulando desde ([x0], [top]) y se desvanecen.
+  void _steam(Canvas canvas, double x0, double top) {
+    for (var i = 0; i < 2; i++) {
+      final k = (t * 0.35 + i * 0.5) % 1;
+      final steam = Path();
+      for (var j = 0; j <= 10; j++) {
+        final y = top - 3 - j * 2.0 - k * 6;
+        final x = x0 + (i == 0 ? -4 : 4) + 2.5 * sin(j * 0.7 + t * 1.5 + i * 2);
+        j == 0 ? steam.moveTo(x, y) : steam.lineTo(x, y);
       }
+      canvas.drawPath(
+        steam,
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.55 * (1 - k))
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6
+          ..strokeCap = StrokeCap.round,
+      );
     }
   }
 

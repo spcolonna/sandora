@@ -256,9 +256,16 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
   }
 
   void _drawStones(Canvas canvas) {
+    final art = SceneArt.instance['obj_moss_rock'];
     for (final s in _stones) {
       final c = _toScreen(s);
       canvas.drawCircle(c + const Offset(2, 3), _stoneR, Paint()..color = Palette.ink.withValues(alpha: 0.25));
+      if (art != null) {
+        // La piedra pintada, algo más ancha que su radio de choque.
+        final w = _stoneR * 2.4, h = w * art.height / art.width;
+        drawArt(canvas, art, Rect.fromCenter(center: c, width: w, height: h));
+        continue;
+      }
       canvas.drawCircle(c, _stoneR, Paint()..color = Palette.stone);
       canvas.drawCircle(c - Offset(_stoneR * 0.3, _stoneR * 0.3), _stoneR * 0.35, Paint()..color = Palette.stoneLight);
     }

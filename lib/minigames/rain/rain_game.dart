@@ -457,10 +457,18 @@ class RainGame extends FlameGame with TapCallbacks {
     final art = SceneArt.instance['char_meditator'];
     if (SceneArt.instance['bg_rain_roof'] != null) {
       // Sobre el piso de la galería: solo un almohadón.
-      canvas.drawOval(
-        Rect.fromCenter(center: Offset(cx, base), width: 190, height: 34),
-        Paint()..color = const Color(0xFF3A4660),
-      );
+      final zafu = SceneArt.instance['obj_court_zafu'];
+      if (zafu != null) {
+        // El zafu pintado: la persona se sienta sobre su tapa, a un tercio de alto.
+        const w = 200.0;
+        final h = w * zafu.height / zafu.width;
+        drawArt(canvas, zafu, Rect.fromLTWH(cx - w / 2, base - h * 0.32, w, h));
+      } else {
+        canvas.drawOval(
+          Rect.fromCenter(center: Offset(cx, base), width: 190, height: 34),
+          Paint()..color = const Color(0xFF3A4660),
+        );
+      }
     } else {
       canvas.drawRect(Rect.fromLTWH(0, base, size.x, size.y * 0.3), Paint()..color = const Color(0xFF4A3426));
     }
