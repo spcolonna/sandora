@@ -20,7 +20,6 @@ import '../rest_sheet.dart';
 import '../theme/palette.dart';
 import '../widgets/currency.dart';
 import '../widgets/glass.dart';
-import '../upgrade_sheet.dart';
 import '../visitor_sheet.dart';
 import '../widgets/washi.dart';
 import 'garden_decor.dart';
@@ -32,6 +31,7 @@ import 'tea_visit.dart';
 part 'garden_care.dart';
 part 'garden_gifts.dart';
 part 'garden_moment.dart';
+part 'garden_model_table.dart';
 part 'garden_sky.dart';
 part 'garden_upgrades.dart';
 part 'garden_visitor.dart';
@@ -55,11 +55,12 @@ class GardenView extends StatefulWidget {
   /// 0 el patio, 1 el estanque, 2 el bosque.
   final int side;
 
-  /// Modo Decorar: los lugares no se tocan; las decoraciones se arrastran.
-  final bool decorating;
+  /// Abre la Maqueta (la mesa del patio).
+  final VoidCallback? onModel;
 
-  /// La decoración recién puesta desde la bandeja, para destacarla.
-  final int? fresh;
+  /// La decoración que se pidió ver desde la Maqueta (índice y un número que
+  /// cambia en cada pedido): la cámara se acerca y se marca un rato.
+  final (int, int)? focus;
 
   /// Lo que ocupan arriba y abajo los controles que flotan sobre el jardín.
   final double top, bottom;
@@ -71,8 +72,8 @@ class GardenView extends StatefulWidget {
     required this.now,
     required this.weather,
     this.side = 0,
-    this.decorating = false,
-    this.fresh,
+    this.onModel,
+    this.focus,
     this.top = 0,
     this.bottom = 0,
   });
@@ -93,21 +94,33 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
 
   double get _t => _life.value * 120;
 
-  /// En el modo Decorar: la decoración elegida y, mientras se arrastra, dónde
-  /// está su pie.
-  int? _picked, _dragging;
-  Offset? _dragAt;
+  /// La decoración marcada después de pedirla desde la Maqueta.
+  int? _marked;
+  Timer? _markEnd;
+
+  /// Dónde quedó cada decoración en el último dibujo (para acercar la cámara).
+  final _decorRects = <int, Rect>{};
 
   @override
   void didUpdateWidget(GardenView old) {
     super.didUpdateWidget(old);
-    if (!widget.decorating) _picked = _dragging = null;
-    if (widget.fresh != old.fresh && widget.fresh != null) _picked = widget.fresh;
-    if (widget.decorating && !old.decorating && _zoom > 1) {
-      _cam.stop();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _setCam(1, Offset.zero);
-      });
+    if (widget.focus != null && widget.focus != old.focus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _showDecor(widget.focus!.$1));
+    }
+  }
+
+  /// Se acerca a la decoración [i] y la marca unos segundos.
+  Future<void> _showDecor(int i) async {
+    if (!mounted) return;
+    setState(() => _marked = i);
+    _markEnd?.cancel();
+    _markEnd = Timer(const Duration(seconds: 4), () {
+      if (mounted) setState(() => _marked = null);
+    });
+    final r = _decorRects[i];
+    if (_painted && r != null) {
+      final c = (r.center + _stageOrigin) * _visitZoom;
+      await _glide(_visitZoom, _box.center(Offset.zero) - c);
     }
   }
 
@@ -115,6 +128,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
   void dispose() {
     _life.dispose();
     _cam.dispose();
+    _markEnd?.cancel();
     super.dispose();
   }
 
@@ -185,7 +199,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
 
   void _fingerMove(PointerMoveEvent e) {
     final before = _fingers[e.pointer];
-    if (widget.decorating || before == null) return;
+    if (before == null) return;
     if (_fingers.length >= 2) {
       final other = _fingers.entries.firstWhere((f) => f.key != e.pointer).value;
       final d0 = (before - other).distance, d1 = (e.localPosition - other).distance;
@@ -291,21 +305,15 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
             ? GardenLayout.court(stage.size)
             : GardenLayout(stage.size, p.patioSize, side: widget.side, bottom: widget.bottom);
         final size = layout.size;
-        if ((_picked ?? -1) >= p.decor.length) _picked = _dragging = null;
         final decor = [
           for (final (i, d) in p.decor.indexed)
             if (d.side == widget.side)
               if (p.decorRules.byId(d.id) case final item?)
-                (
-                  i,
-                  d.id,
-                  decorRect(
-                    item,
-                    clampFoot(i == _dragging ? _dragAt! : Offset(d.x * size.width, d.y * size.height), layout),
-                    layout,
-                  ),
-                ),
+                (i, d.id, decorRect(item, clampFoot(Offset(d.x * size.width, d.y * size.height), layout), layout)),
         ];
+        _decorRects
+          ..clear()
+          ..addEntries([for (final (i, _, r) in decor) MapEntry(i, r)]);
         final world = Stack(
           children: [
             Positioned.fromRect(
@@ -335,7 +343,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
                 right: 18,
                 bottom: widget.bottom + 6,
                 child: AnimatedScale(
-                  scale: _zoom > 1.01 && !widget.decorating ? 1 : 0,
+                  scale: _zoom > 1.01 ? 1 : 0,
                   duration: Calm.appear,
                   curve: Calm.curve,
                   child: GestureDetector(
@@ -376,7 +384,6 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
     final cycle = p.dayCycle;
     final now = widget.now, weather = widget.weather;
     final daylight = sky.daylight, wet = sky.wet;
-    final decorating = widget.decorating;
     final painted = layout.painted;
     final painter = GardenPainter(
       layer: GardenLayer.land,
@@ -400,7 +407,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
       decor: [
         for (final (i, id, r) in decor)
           // Las tumbadas las dibuja su cuidado, inclinadas.
-          if (i != _dragging && (decorating || !p.care.any((t) => t.decor == i))) (id, r),
+          if (!p.care.any((t) => t.decor == i)) (id, r),
       ],
     );
     return [
@@ -422,21 +429,11 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
       for (final e in layout.places.entries)
         if (p.upgradeTier(e.key.name) > 0)
           _UpgradeDeco(place: e.value, tier: p.upgradeTier(e.key.name), daylight: daylight),
-      if (decorating) ..._decorHandles(p, layout, decor),
-      if (decorating)
-        for (final e in layout.labels.entries)
-          if (p.upgradeRules.places.contains(e.key.name) && p.gameUnlocked(e.key.name))
-            _UpgradeBadge(
-              at: e.value - Offset(0, 34 / (painted ? _zoom : 1)),
-              game: e.key.name,
-              scale: painted ? 1 / _zoom : 1,
-            ),
       // Fuera de los lugares, el jardín responde al toque.
-      if (!decorating)
-        Positioned.fill(
-          child: GardenTouch(groundTop: layout.ground.top, daylight: daylight, weather: weather, wet: wet > 0.3),
-        ),
-      if (!decorating) ...[
+      Positioned.fill(
+        child: GardenTouch(groundTop: layout.ground.top, daylight: daylight, weather: weather, wet: wet > 0.3),
+      ),
+      ...[
         for (final e in layout.places.entries)
           Positioned.fromRect(
             rect: e.value,
@@ -479,7 +476,12 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
         if (widget.side == 2) TeaSpot(layout: layout, now: now, life: _life, seconds: () => _t),
         // La guía del comienzo marca dónde jugar: el arenero para empezar y
         // para subir de nivel, y Gotas cuando se abre.
-        if (widget.side == 0 && p.gardenNameOffered && !decorating)
+        // La mesa de la Maqueta, en el patio.
+        if (widget.side == 0 && p.decorUnlocked && widget.onModel != null)
+          _ModelTable(rect: _tableRect(p, layout), daylight: daylight, onTap: widget.onModel!),
+        for (final (i, _, r) in decor)
+          if (i == _marked) _DecorMark(key: ValueKey('mark$i'), around: r),
+        if (widget.side == 0 && p.gardenNameOffered)
           ?switch (p.guideStep) {
             Guide.play => _GuideHint(
               key: const ValueKey('guide.play'),
@@ -490,6 +492,11 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
               key: const ValueKey('guide.level2'),
               around: layout.places[Place.sand]!,
               text: tr('guide.level2'),
+            ),
+            Guide.place || Guide.decor when p.decorUnlocked && widget.onModel != null => _GuideHint(
+              key: ValueKey('guide.model${p.guideStep}'),
+              around: _tableRect(p, layout),
+              text: tr(p.guideStep == Guide.place ? 'guide.placeOpen' : 'guide.decor'),
             ),
             Guide.tryRain => _GuideHint(
               key: const ValueKey('guide.rain'),
@@ -502,115 +509,13 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
     ];
   }
 
-  /// Lo que se toca en el modo Decorar: el suelo marcado, cada decoración (se
-  /// elige con un toque y se arrastra) y, sobre la elegida, el botón para
-  /// guardarla en la caja.
-  List<Widget> _decorHandles(Progress p, GardenLayout layout, List<(int, String, Rect)> decor) {
+  /// Dónde va la mesa de la Maqueta en el patio.
+  Rect _tableRect(Progress p, GardenLayout layout) {
+    final (w, x, bottom) = p.modelRules.table;
     final size = layout.size;
-    final picked = [
-      for (final d in decor)
-        if (d.$1 == _picked) d,
-    ].firstOrNull;
-    return [
-      Positioned.fromRect(
-        rect: Rect.fromLTRB(
-          size.width * 0.03,
-          layout.ground.top + layout.ground.height * 0.02,
-          size.width * 0.97,
-          size.height - 4,
-        ),
-        child: IgnorePointer(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Palette.paper.withValues(alpha: 0.7), width: 1.5),
-              color: Palette.paper.withValues(alpha: 0.08),
-            ),
-          ),
-        ),
-      ),
-      // De atrás hacia adelante, así se agarra la de adelante.
-      for (final (i, id, r) in [...decor]..sort((a, b) => a.$3.bottom.compareTo(b.$3.bottom)))
-        Positioned.fromRect(
-          key: ValueKey('decor$i'),
-          rect: r.inflate(10),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              SoundBoard.instance.play(Sfx.uiTap, volume: 0.35);
-              setState(() => _picked = _picked == i ? null : i);
-            },
-            onPanStart: (_) {
-              final d = p.decor[i];
-              Haptics.light();
-              setState(() {
-                _picked = _dragging = i;
-                _dragAt = clampFoot(Offset(d.x * size.width, d.y * size.height), layout);
-              });
-            },
-            onPanUpdate: (e) => setState(() => _dragAt = clampFoot(_dragAt! + e.delta, layout)),
-            onPanEnd: (_) => _drop(p, i, size),
-            onPanCancel: () => _drop(p, i, size),
-            child: Stack(
-              children: [
-                if (i == _picked)
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Palette.lantern.withValues(alpha: 0.14),
-                        border: Border.all(color: Palette.lantern, width: 2),
-                      ),
-                    ),
-                  ),
-                if (i == _dragging) Positioned.fill(child: CustomPaint(painter: _LiftedDecor(id))),
-              ],
-            ),
-          ),
-        ),
-      if (picked != null && _dragging == null)
-        Positioned(
-          left: (picked.$3.center.dx - 80).clamp(4.0, size.width - 164),
-          top: (picked.$3.top - 46).clamp(4.0, size.height - 40),
-          width: 160,
-          child: Center(
-            child: InkButton.paper(
-              label: tr('decor.store'),
-              height: 38,
-              onPressed: () {
-                SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-                p.storeDecor(picked.$1);
-                setState(() => _picked = null);
-              },
-            ),
-          ),
-        ),
-    ];
+    final tw = size.width * w, th = tw * 0.8;
+    return Rect.fromLTWH(size.width * x - tw / 2, size.height * bottom - th, tw, th);
   }
-
-  void _drop(Progress p, int i, Size size) {
-    final at = _dragAt;
-    if (_dragging != i || at == null) return;
-    SoundBoard.instance.play(Sfx.stoneSand, volume: 0.65);
-    p.moveDecor(i, at.dx / size.width, at.dy / size.height);
-    setState(() => _dragging = null);
-  }
-}
-
-/// La decoración que se está arrastrando, un poco levantada (dentro de su
-/// zona tocable, que tiene 10 de margen).
-class _LiftedDecor extends CustomPainter {
-  final String id;
-  _LiftedDecor(this.id);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final r = (Offset.zero & size).deflate(10);
-    paintDecor(canvas, id, r.shift(Offset(0, -r.height * 0.06)));
-  }
-
-  @override
-  bool shouldRepaint(_LiftedDecor old) => old.id != id;
 }
 
 /// Un brillo que late alrededor de un lugar y una burbuja que dice qué hacer.

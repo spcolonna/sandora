@@ -1,55 +1,20 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import '../garden/decor.dart';
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
-import 'fx/sfx.dart';
 import 'garden/garden_decor.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
-import 'widgets/washi.dart';
 
-/// La bandeja del modo Decorar: todo el catálogo. Lo que está en la caja se
-/// pone con un toque en la vista [side]; lo demás se compra y se pone con el
-/// mismo toque. Después se arrastra en el jardín.
+/// El cajón de la Maqueta: todo el catálogo. Lo que está en la caja se elige
+/// con un toque (o se arrastra a una parcela); lo demás se compra con el
+/// mismo toque. [selected] es la que está elegida para poner.
 class DecorTray extends StatelessWidget {
-  final int side;
+  final String? selected;
+  final void Function(DecorItem item) onTap;
 
-  /// Avisa qué decoración se acaba de poner (su índice), para destacarla.
-  final void Function(int index) onPlaced;
-
-  const DecorTray({super.key, required this.side, required this.onPlaced});
-
-  static final _rng = Random();
-
-  void _tap(BuildContext context, DecorItem d) {
-    final p = Progress.instance;
-    void tell(String text) => showWashiToast(context, text, duration: const Duration(seconds: 2));
-
-    if (p.decorOn(side) >= p.decorCapacity) {
-      SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
-      return tell(tr('decor.full'));
-    }
-    if (p.decorStored(d.id) == 0) {
-      if (p.level < d.level) {
-        SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
-        return tell(tr('decor.needLevel', {'n': d.level}));
-      }
-      if (!p.buyDecor(d)) {
-        SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
-        return tell(tr('decor.needMore'));
-      }
-      SoundBoard.instance.play(Sfx.good, volume: 0.5);
-    } else {
-      SoundBoard.instance.play(Sfx.stoneSand, volume: 0.7);
-    }
-    Haptics.light();
-    // Cae cerca del centro del suelo, un poco al azar para no taparse.
-    final i = p.placeDecor(d.id, side, 0.3 + 0.4 * _rng.nextDouble(), 0.74 + 0.12 * _rng.nextDouble());
-    if (i != null) onPlaced(i);
-  }
+  const DecorTray({super.key, this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +28,15 @@ class DecorTray extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final d = p.decorRules.items[i];
-          return _Card(d, onTap: () => _tap(context, d));
+          final card = _Card(d, selected: d.id == selected, onTap: () => onTap(d));
+          if (p.decorStored(d.id) == 0) return card;
+          return LongPressDraggable<String>(
+            data: d.id,
+            delay: const Duration(milliseconds: 250),
+            feedback: SizedBox.square(dimension: 84, child: CustomPaint(painter: DecorPainter(d.id, d.aspect))),
+            childWhenDragging: Opacity(opacity: 0.5, child: card),
+            child: card,
+          );
         },
       ),
     );
@@ -72,14 +45,15 @@ class DecorTray extends StatelessWidget {
 
 class _Card extends StatelessWidget {
   final DecorItem item;
+  final bool selected;
   final VoidCallback onTap;
-  const _Card(this.item, {required this.onTap});
+  const _Card(this.item, {required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
     final stored = p.decorStored(item.id);
-    final locked = p.level < item.level;
+    final locked = stored == 0 && p.level < item.level;
     final can = stored > 0 || p.canBuyDecor(item);
     return Semantics(
       button: true,
@@ -96,8 +70,12 @@ class _Card extends StatelessWidget {
               color: Palette.paper,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: stored > 0 ? Palette.lantern : Palette.sandShadow.withValues(alpha: 0.6),
-                width: stored > 0 ? 2 : 1,
+                color: selected
+                    ? Palette.ink
+                    : stored > 0
+                    ? Palette.lantern
+                    : Palette.sandShadow.withValues(alpha: 0.6),
+                width: selected ? 3 : (stored > 0 ? 2 : 1),
               ),
             ),
             child: Column(

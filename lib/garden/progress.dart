@@ -41,6 +41,7 @@ class Progress extends ChangeNotifier {
   late DailyGoals dailyGoals;
   late TeaVisits teaVisits;
   late DecorRules decorRules;
+  late ModelRules modelRules;
   late CareRules careRules;
   late UpgradeRules upgradeRules;
   late VisitorRules visitorRules;
@@ -222,6 +223,7 @@ class Progress extends ChangeNotifier {
     'serenity',
     'serenityAt',
     'decor',
+    'model.cells',
     'care',
     'care.at',
     'care.weedAt',
@@ -332,6 +334,7 @@ class Progress extends ChangeNotifier {
     dailyGoals = DailyGoals(balance);
     teaVisits = TeaVisits(balance);
     decorRules = DecorRules(balance);
+    modelRules = ModelRules(balance);
     careRules = CareRules(balance);
     upgradeRules = UpgradeRules(balance);
     visitorRules = VisitorRules(balance);
@@ -426,6 +429,7 @@ class Progress extends ChangeNotifier {
       for (final d in jsonDecode(_prefs.getString('decor') ?? '[]') as List)
         if (decorRules.byId((d as List)[0] as String) != null) PlacedDecor.fromJson(d),
     ];
+    _loadParcels();
     _decorGift = _prefs.getBool('decor.gift') ?? false;
     _decorWelcome();
     _syncGuide();
@@ -706,7 +710,7 @@ class Progress extends ChangeNotifier {
   /// Si el catálogo de decoraciones está abierto (desde [DecorRules.minLevel]).
   bool get decorOpen => level >= decorRules.minLevel;
 
-  /// Si se ve el botón de Decorar: con el catálogo abierto o con alguna
+  /// Si se ve la mesa de la Maqueta: con el catálogo abierto o con alguna
   /// decoración (la del tutorial) para poner.
   bool get decorUnlocked => decorOpen || decor.isNotEmpty;
 
@@ -738,7 +742,7 @@ class Progress extends ChangeNotifier {
   }
 
   /// Al llegar al nivel de decorar se regala una decoración, que queda en la
-  /// caja: así el modo Decorar se estrena sin gastar.
+  /// caja: así la Maqueta se estrena sin gastar.
   void _decorWelcome() {
     if (_decorGift || !decorOpen) return;
     final d = decorRules.byId(decorRules.welcomeGift);
@@ -749,9 +753,6 @@ class Progress extends ChangeNotifier {
     _discover('decor.${d.id}');
     _saveDecor();
   }
-
-  /// Cuántas decoraciones entran en cada vista: cada patio suma lugar.
-  int get decorCapacity => decorRules.perSide + patioSize * decorRules.perPatio;
 
   /// Las decoraciones del Mercado de hoy: algunas de las ya destrabadas, sin
   /// la oferta. Cambian cada día del jardín.
@@ -764,7 +765,7 @@ class Progress extends ChangeNotifier {
     return pool.take(decorRules.marketCount).toList();
   }
 
-  /// Hay algo para hacer en el modo Decorar: una decoración en la caja o una
+  /// Hay algo para hacer en la Maqueta: una decoración en la caja o una
   /// que todavía no se tiene y ya se puede comprar.
   bool get decorNew =>
       decor.any((d) => !d.placed) || decorRules.items.any((d) => decorCount(d.id) == 0 && canBuyDecor(d));
@@ -863,15 +864,94 @@ class Progress extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Saca de la caja una copia de [id] y la pone en la vista [side]. Devuelve
-  /// su índice, o null si no hay en la caja o la vista está llena.
-  int? placeDecor(String id, int side, double x, double y) {
-    final i = decor.indexWhere((d) => d.id == id && !d.placed);
-    if (i < 0 || decorOn(side) >= decorCapacity) return null;
-    decor[i]
+  // --- La Maqueta: parcelas de cada vista ---------------------------------
+
+  /// Las parcelas abiertas de cada vista, en este jardín.
+  List<Set<int>> parcels = [];
+
+  void _loadParcels() {
+    final saved = jsonDecode(_prefs.getString('model.cells') ?? 'null');
+    parcels = [
+      for (var side = 0; side < ModelRules.sides; side++)
+        saved is List && side < saved.length
+            ? {for (final c in saved[side] as List) c as int}
+            : modelRules.start.toSet(),
+    ];
+    // Lo puesto antes de la Maqueta va a la parcela libre más cercana; si no
+    // queda ninguna abierta, se abre la más cercana sin cobrar (lo ya armado
+    // no se pierde).
+    var moved = false;
+    for (final d in decor) {
+      if (!d.placed || (d.cell != null && decorAt(d.side!, d.cell!) == decor.indexOf(d))) continue;
+      final side = d.side!.clamp(0, ModelRules.sides - 1);
+      final taken = {
+        for (final o in decor)
+          if (o != d && o.side == side && o.cell != null) o.cell!,
+      };
+      final open = parcels[side].difference(taken);
+      final free = open.isNotEmpty ? open : {for (var c = 0; c < modelRules.cells; c++) c}.difference(taken);
+      if (free.isEmpty) {
+        d.side = d.cell = null;
+      } else {
+        final c = modelRules.nearest(side, d.x, d.y, free);
+        parcels[side].add(c);
+        _setCell(d, side, c);
+      }
+      moved = true;
+    }
+    if (moved) {
+      _saveDecor();
+      _saveParcels();
+    }
+  }
+
+  void _saveParcels() => _prefs.setString('model.cells', jsonEncode([for (final s in parcels) s.toList()..sort()]));
+
+  void _setCell(PlacedDecor d, int side, int cell) {
+    final (x, y) = modelRules.foot(side, cell);
+    d
       ..side = side
+      ..cell = cell
       ..x = x
       ..y = y;
+  }
+
+  bool parcelOpen(int side, int cell) => parcels[side].contains(cell);
+
+  /// Cuántas parcelas se compraron en este jardín (las del comienzo no cuentan).
+  int get parcelsBought => parcels.fold(0, (n, s) => n + s.difference(modelRules.start.toSet()).length);
+
+  Map<String, int> parcelCost(int side) => modelRules.cost(parcelsBought, modelRules.cells - parcels[side].length);
+
+  bool canBuyParcel(int side, int cell) =>
+      !parcelOpen(side, cell) && parcelCost(side).entries.every((c) => walletOf(c.key) >= c.value);
+
+  /// Abre la parcela [cell] de la vista [side], pagándola.
+  bool buyParcel(int side, int cell) {
+    if (!canBuyParcel(side, cell)) return false;
+    for (final c in parcelCost(side).entries) {
+      _addTo(c.key, -c.value);
+    }
+    parcels[side].add(cell);
+    _saveParcels();
+    _saveWallet();
+    notifyListeners();
+    return true;
+  }
+
+  /// La decoración puesta en [cell] de [side] (su índice), o null si está libre.
+  int? decorAt(int side, int cell) {
+    final i = decor.indexWhere((d) => d.side == side && d.cell == cell);
+    return i < 0 ? null : i;
+  }
+
+  /// Saca de la caja una copia de [id] y la pone en la parcela [cell] de la
+  /// vista [side]. Devuelve su índice, o null si no hay en la caja o la
+  /// parcela está cerrada u ocupada.
+  int? placeDecor(String id, int side, int cell) {
+    final i = decor.indexWhere((d) => d.id == id && !d.placed);
+    if (i < 0 || !parcelOpen(side, cell) || decorAt(side, cell) != null) return null;
+    _setCell(decor[i], side, cell);
     // La primera que se pone en el tutorial se celebra al terminar de decorar.
     if (guideStep == Guide.place && !milestones.contains('decor:first')) queueMilestone('decor:first');
     _saveDecor();
@@ -879,18 +959,24 @@ class Progress extends ChangeNotifier {
     return i;
   }
 
-  /// Mueve la decoración [i] (ya puesta) a ([x], [y]).
-  void moveDecor(int i, double x, double y) {
-    decor[i]
-      ..x = x
-      ..y = y;
+  /// Mueve la decoración [i] (ya puesta) a la parcela [cell] de su vista; si
+  /// ahí hay otra, cambian de lugar.
+  bool moveDecor(int i, int cell) {
+    final d = decor[i];
+    if (!d.placed || !parcelOpen(d.side!, cell) || d.cell == cell) return false;
+    final from = d.cell!, other = decorAt(d.side!, cell);
+    if (other != null) _setCell(decor[other], d.side!, from);
+    _setCell(d, d.side!, cell);
     _saveDecor();
     notifyListeners();
+    return true;
   }
 
   /// Vuelve a guardar en la caja la decoración [i].
   void storeDecor(int i) {
-    decor[i].side = null;
+    decor[i]
+      ..side = null
+      ..cell = null;
     // Guardada en la caja, ya no hay nada que levantar.
     if (care.any((t) => t.decor == i)) {
       care.removeWhere((t) => t.decor == i);
@@ -1166,7 +1252,7 @@ class Progress extends ChangeNotifier {
         upgradeCost(game).entries.every((c) => walletOf(c.key) >= c.value);
   }
 
-  /// Hay algún lugar que ya se puede mejorar (para avisarlo en el modo Decorar).
+  /// Hay algún lugar que ya se puede mejorar (para avisarlo en la Maqueta).
   bool get upgradeAvailable => upgradeRules.places.any(canUpgrade);
 
   bool buyUpgrade(String game) {

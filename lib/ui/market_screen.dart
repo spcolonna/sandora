@@ -19,7 +19,7 @@ import 'widgets/washi.dart';
 /// monedas comunes tienen límite diario; los de lotos, no (el loto ya es escaso).
 /// Es una vista aparte que entra deslizando desde el costado (y se vuelve
 /// deslizando hacia el otro lado). Devuelve true si se eligió "Poner ahora":
-/// el jardín entra al modo Decorar.
+/// se abre la Maqueta.
 Future<bool?> openMarket(BuildContext context) {
   Progress.instance.markDealSeen();
   return Navigator.of(context).push(CupertinoPageRoute<bool>(builder: (_) => const MarketScreen()));
@@ -283,7 +283,7 @@ class _OfferRow extends StatelessWidget {
 }
 
 /// La oferta del día: una decoración con descuento, una sola vez. Va a la caja
-/// del jardín y se pone desde el modo Decorar.
+/// del jardín y se pone desde la Maqueta.
 class _DealCard extends StatelessWidget {
   final DecorItem d;
   const _DealCard(this.d);
@@ -421,7 +421,7 @@ class _TutorialCard extends StatelessWidget {
   }
 }
 
-/// Vuelve al jardín en modo Decorar, con lo comprado listo en la caja.
+/// Abre la Maqueta, con lo comprado listo en la caja.
 class _PlaceNow extends StatelessWidget {
   const _PlaceNow();
 

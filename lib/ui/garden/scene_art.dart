@@ -138,6 +138,11 @@ class SceneArt {
     'obj_decor_pagoda': 'decor',
     'obj_decor_maple': 'decor',
     'obj_decor_sakura': 'decor',
+    // La Maqueta (`model_screen.dart`, `garden_model_table.dart`): sin arte, se pinta con código.
+    'obj_model_table': 'court',
+    'model_tray_patio': 'decor',
+    'model_tray_pond': 'decor',
+    'model_tray_forest': 'decor',
   };
 
   final _images = <String, ui.Image>{};

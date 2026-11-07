@@ -36,7 +36,8 @@ cámara navegable).
 
 | Commit | Qué |
 | --- | --- |
-| (este) | **Ajustes tras jugar:** meditación de 1 min (cuenta para la racha); **meditación guiada** con frases + campana (`meditation_guide.dart`), se desbloquea una vez por 5 lotos (`meditation.guided.lotus`); **Lluvia** sin gotas simultáneas: los pares llegan con `pairGap` 0,25 s, `minGap` 0,22 s y como mucho 2 en `pairWindow` 0,6 s; vaciar vasija muestra «+60» y el primer toque sobre una que rebalsa ya no suena a fallo; **descanso** de 30 min del Arenero y las Piedras después de jugar (balance `rest`, saltar = 1 loto, no aplica durante la guía; esos dos ya no usan la regla de premio a la mitad). |
+| (este) | **Maqueta** (`model_screen.dart`): la decoración sale de las vistas. Una mesa en el patio (`garden_model_table.dart`, balance `model.table`) abre la pantalla con las 3 zonas en grilla 4×3; las parcelas `start` vienen abiertas y las demás cuestan Piedritas (40 × 1,15^compradas, de a 5) y las últimas 2 de cada zona 1 loto. Se elige del cajón y se toca una parcela (o se arrastra); tocar una puesta deja moverla/intercambiarla, guardarla o «Ver en el jardín» (la cámara se acerca y la marca). Las **Mejoras** pasaron a un botón de la maqueta. Se quitó el modo Decorar, el botón del HUD y `perSide`/`perPatio`. `PlacedDecor.cell` + pref `model.cells` por jardín; lo guardado antes migra a la parcela libre más cercana (abre gratis las que falten). Guía: la mesa marca el paso de poner y de decorar. Arte pedido en el bloque 25 de prompts (`obj_model_table`, `model_tray_*`); mientras, código. |
+| `7d30c3c` | **Ajustes tras jugar:** meditación de 1 min (cuenta para la racha); **meditación guiada** con frases + campana (`meditation_guide.dart`), se desbloquea una vez por 5 lotos (`meditation.guided.lotus`); **Lluvia** sin gotas simultáneas: los pares llegan con `pairGap` 0,25 s, `minGap` 0,22 s y como mucho 2 en `pairWindow` 0,6 s; vaciar vasija muestra «+60» y el primer toque sobre una que rebalsa ya no suena a fallo; **descanso** de 30 min del Arenero y las Piedras después de jugar (balance `rest`, saltar = 1 loto, no aplica durante la guía; esos dos ya no usan la regla de premio a la mitad). |
 | `d1295dc`/`7df64b1` | 41 prompts nuevos; arte existente en lugar de código (linternas del río, cuenco de té, zafu, piedras, hoja de la Flauta, álbum). |
 | `37e274b` | **Sonidos del jardín:** puertas de la entrada, aleteo de pájaros, piedra en la arena, rastrillo, hojas y tierra al arrastrar en los cuidados. |
 | `5c4c2fd` | **16 imágenes integradas** (fondos de 7 minijuegos, suelos del estanque y del bosque, río, copa y mesa del bonsái, maleza, hojas, regalo del té, toldo del Mercado). IPA 1.0.0+2 generado. |
@@ -178,7 +179,7 @@ Del usuario:
 - Capacidades iCloud y Game Center en el primer build (la firma automática debería sumarlas).
 - Búsqueda de marca "Sandora" (USPTO, EUIPO, MIEM; clases 9 y 41).
 
-Fase 2 decidida con el usuario (2026-11-07): **Maqueta** para decorar. Un objeto en el patio (mesa con maqueta) abre una ruta propia, con el jardín visto desde arriba y parcelas que se desbloquean con monedas; las vistas de actividades quedan limpias; después, tour en primera persona. Necesita arte nuevo (se suma a `tool/gen_prompts.py`). Diseñar con plan propio.
+Maqueta (hecha, ver arriba). Sigue: ajustar con capturas dónde cae cada parcela en las vistas (`model.colX/rowY`; en el patio algunas tapan la torre o las vasijas), piezas grandes de 2×2, rotar, y el recorrido en primera persona. `test/sim/economy_sim.dart` no compra parcelas ni simula el descanso.
 
 Opciones de desarrollo que quedaron sobre la mesa:
 - Mejoras visibles en el álbum.

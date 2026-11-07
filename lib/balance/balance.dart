@@ -41,6 +41,7 @@ class BalanceSection {
     for (final v in _m[key] as List) BalanceSection(v as Map<String, dynamic>),
   ];
   bool has(String key) => _m.containsKey(key);
+  Object? raw(String key) => _m[key];
   bool flag(String key, {bool orElse = false}) => (_m[key] as bool?) ?? orElse;
   Map<String, String> stringMap() =>
       _m.map((k, v) => MapEntry(k, v as String))..removeWhere((k, _) => k.startsWith('_'));

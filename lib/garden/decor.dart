@@ -2,8 +2,8 @@ import 'dart:math';
 
 import '../balance/balance.dart';
 
-/// Una decoración del catálogo: se compra en el modo Decorar con Piedritas y
-/// esencias y se pone donde uno quiera en cualquiera de las tres vistas.
+/// Una decoración del catálogo: se compra con Piedritas y esencias y se pone
+/// desde la Maqueta en una parcela de cualquiera de las tres vistas.
 class DecorItem {
   final String id;
   final int level;
@@ -26,22 +26,88 @@ class DecorItem {
 }
 
 /// Una decoración del jardín: guardada en la caja ([side] null) o puesta en
-/// una vista, con el pie en ([x], [y]) como fracción del tamaño de la vista.
+/// la parcela [cell] de una vista, con el pie en ([x], [y]) como fracción del
+/// tamaño de la vista (sale de la parcela).
 class PlacedDecor {
   final String id;
-  int? side;
+  int? side, cell;
   double x, y;
 
-  PlacedDecor(this.id, {this.side, this.x = 0.5, this.y = 0.8});
+  PlacedDecor(this.id, {this.side, this.cell, this.x = 0.5, this.y = 0.8});
 
   bool get placed => side != null;
 
-  List<Object> toJson() => [id, side ?? -1, (x * 1000).round(), (y * 1000).round()];
+  List<Object> toJson() => [id, side ?? -1, (x * 1000).round(), (y * 1000).round(), cell ?? -1];
 
+  /// Las guardadas antes de la Maqueta no traen parcela: se les busca una al cargar.
   factory PlacedDecor.fromJson(List<dynamic> j) {
-    final side = j[1] as int;
-    return PlacedDecor(j[0] as String, side: side < 0 ? null : side, x: (j[2] as num) / 1000, y: (j[3] as num) / 1000);
+    final side = j[1] as int, cell = j.length > 4 ? j[4] as int : -1;
+    return PlacedDecor(
+      j[0] as String,
+      side: side < 0 ? null : side,
+      cell: side < 0 || cell < 0 ? null : cell,
+      x: (j[2] as num) / 1000,
+      y: (j[3] as num) / 1000,
+    );
   }
+}
+
+/// La Maqueta: cada vista es una grilla de parcelas. Las de [start] vienen
+/// abiertas; las demás se compran. Dart puro.
+class ModelRules {
+  final int cols, rows;
+  final List<int> start;
+  final int pebbles, lotusLast, lotus;
+  final double growth;
+  final List<List<double>> colX, rowY;
+
+  /// La mesa en el patio pintado: ancho, centro x y base y.
+  final (double, double, double) table;
+
+  ModelRules(Balance balance)
+    : cols = balance.section('model').i('cols'),
+      rows = balance.section('model').i('rows'),
+      start = [for (final c in balance.section('model').list('start')) c.round()],
+      pebbles = balance.section('model').i('pebbles'),
+      growth = balance.section('model').d('growth'),
+      lotusLast = balance.section('model').i('lotusLast'),
+      lotus = balance.section('model').i('lotus'),
+      colX = _grid(balance, 'colX'),
+      rowY = _grid(balance, 'rowY'),
+      table = switch (balance.section('model').list('table')) {
+        [final w, final x, final y] => (w, x, y),
+        _ => (0.15, 0.15, 0.9),
+      };
+
+  static List<List<double>> _grid(Balance balance, String key) => [
+    for (final row in (balance.section('model').raw(key) as List)) [for (final v in row as List) (v as num).toDouble()],
+  ];
+
+  static const sides = 3;
+
+  int get cells => cols * rows;
+
+  int col(int cell) => cell % cols;
+  int row(int cell) => cell ~/ cols;
+
+  /// Dónde queda el pie de lo puesto en [cell] de la vista [side].
+  (double, double) foot(int side, int cell) => (colX[side][col(cell)], rowY[side][row(cell)]);
+
+  /// La parcela de [side] más cerca de ([x], [y]) entre [among].
+  int nearest(int side, double x, double y, Iterable<int> among) {
+    double dist(int c) {
+      final (fx, fy) = foot(side, c);
+      return (fx - x) * (fx - x) + (fy - y) * (fy - y);
+    }
+
+    return among.reduce((a, b) => dist(b) < dist(a) ? b : a);
+  }
+
+  /// Precio de una parcela: Piedritas que suben con cada una comprada en el
+  /// jardín ([bought]), de a 5; las últimas [lotusLast] cerradas de una vista
+  /// ([lockedHere] cuenta cuántas quedan cerradas ahí), lotos.
+  Map<String, int> cost(int bought, int lockedHere) =>
+      lockedHere <= lotusLast ? {'lotus': lotus} : {'pebbles': ((pebbles * pow(growth, bought)) / 5).round() * 5};
 }
 
 /// El catálogo y sus precios. Dart puro.
@@ -51,15 +117,9 @@ class DecorRules {
   /// Cuánto sube el precio con cada copia que ya se tiene.
   final double growth;
 
-  /// Cuántas decoraciones entran en cada vista.
-  final int perSide;
-
-  /// Cuántas más entran por cada ampliación de patio.
-  final int perPatio;
-
   final int minLevel;
 
-  /// La que se regala al llegar a [minLevel], para estrenar el modo Decorar.
+  /// La que se regala al llegar a [minLevel], para estrenar la Maqueta.
   final String welcomeGift;
 
   /// Cuántas ofrece el Mercado cada día, además de la oferta.
@@ -68,8 +128,6 @@ class DecorRules {
   DecorRules(Balance balance)
     : items = [for (final s in balance.section('decor').sections('items')) DecorItem.from(s)],
       growth = balance.section('decor').d('growth'),
-      perSide = balance.section('decor').i('perSide'),
-      perPatio = balance.section('decor').i('perPatio'),
       minLevel = balance.section('decor').i('minLevel'),
       welcomeGift = balance.section('decor').s('welcomeGift'),
       marketCount = balance.section('decor').i('marketCount');

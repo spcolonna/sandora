@@ -51,7 +51,7 @@ void main() {
     expect(p.guideStep, Guide.place);
     expect(p.decorUnlocked, isTrue);
     expect(p.decorOpen, isFalse);
-    expect(p.placeDecor(p.decor.first.id, 0, 0.5, 0.8), isNotNull);
+    expect(p.placeDecor(p.decor.first.id, 0, p.modelRules.start.first), isNotNull);
     expect(p.milestones, contains('decor:first'));
     p.advanceGuide(Guide.level2);
     // Sube al nivel 2: a probar Gotas.

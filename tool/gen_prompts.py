@@ -1114,6 +1114,53 @@ BLOCKS = [
             obj('spr_gift_sunray', 'One small golden sunbeam crystal: a soft glowing shard of warm light.',
                 'about 36 pixels wide'),
         ]),
+    dict(
+        id='25', title='La Maqueta', folder='store/art/model/',
+        intro=('La mesa con el jardín en miniatura donde se decora: el objeto en el patio y el suelo de cada zona '
+               'visto desde arriba (la grilla de parcelas la dibuja el juego). Adjuntá '
+               '`store/art/style/style_courtyard_ref.webp` para la mesa y `store/art/style/style_keyart.webp` para '
+               'los suelos. En el juego van como `assets/images/court/obj_model_table.webp` y '
+               '`assets/images/decor/model_tray_<zona>.webp`.'),
+        images=[
+            img('obj_model_table', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This object sits in the painted courtyard of {GAME}; tapping it opens the decorating screen. The '
+                'game draws it about 150 pixels wide on top of the raked gravel.',
+                'A low, simple Japanese wooden table of warm, worn cedar on four short legs, holding a shallow wooden '
+                'tray with a tiny model of a zen garden: raked pale sand, three miniature stones, a little moss mound '
+                'and a tiny stone lantern. Cozy and handmade, like a craftsman\'s model.',
+                'Seen from the front and slightly above (about 25 degrees), perfectly centered, filling about 80% of '
+                'the canvas width. The feet of the table sit on an imaginary ground line near the bottom. Nothing '
+                'cropped, all four corners empty and transparent.',
+                f'any background, ground, cast shadow, people, animals, chairs, cushions, {NO_TEXT}, {NO_STYLE}.',
+                style=COURT_STYLE),
+            img('model_tray_patio', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This is the ground of one zone of the miniature model garden in {GAME}: the player arranges tiny '
+                'decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.',
+                'Pale beige raked sand with fine parallel rake lines, a few scattered tiny pebbles and one or two soft moss specks near the edges.',
+                'Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole '
+                'canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on '
+                'it. Details stay small and spread evenly; the far edge may be a little softer.',
+                f'objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, '
+                f'{NO_TEXT}, {NO_STYLE}.'),
+            img('model_tray_pond', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This is the ground of one zone of the miniature model garden in {GAME}: the player arranges tiny '
+                'decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.',
+                'Soft green-grey ground of short moss and fine gravel, with a strip of calm blue-green pond water along the far edge and a few smooth wet stones at its border.',
+                'Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole '
+                'canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on '
+                'it. Details stay small and spread evenly; the far edge may be a little softer.',
+                f'objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, '
+                f'{NO_TEXT}, {NO_STYLE}.'),
+            img('model_tray_forest', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This is the ground of one zone of the miniature model garden in {GAME}: the player arranges tiny '
+                'decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.',
+                'Shaded forest floor of soft moss, fallen bamboo leaves and a few fern sprigs, with dappled light.',
+                'Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole '
+                'canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on '
+                'it. Details stay small and spread evenly; the far edge may be a little softer.',
+                f'objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, '
+                f'{NO_TEXT}, {NO_STYLE}.'),
+        ]),
 ]
 
 

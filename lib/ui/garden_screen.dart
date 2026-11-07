@@ -15,7 +15,6 @@ import '../garden/weather_service.dart';
 import '../i18n/i18n.dart';
 import '../minigames/catalog.dart';
 import 'board_sheet.dart';
-import 'decor_tray.dart';
 import 'expansions_sheet.dart';
 import 'fx/calm.dart';
 import 'fx/reward_flight.dart';
@@ -23,6 +22,7 @@ import 'fx/sfx.dart';
 import 'garden/garden_scene.dart';
 import 'garden/garden_view.dart';
 import 'market_screen.dart';
+import 'model_screen.dart';
 import 'rest_sheet.dart';
 import 'widgets/daily_goals.dart';
 import 'widgets/garden_sign.dart';
@@ -69,30 +69,34 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
     Progress.instance.advanceGuide(Guide.buy);
     setState(() => _panel = _Panel.none);
-    // Desde el Mercado, "Poner ahora" vuelve al jardín decorando.
-    if (await openMarket(context) == true && mounted) _setDecorating(true);
+    // Desde el Mercado, "Poner ahora" abre la Maqueta.
+    if (await openMarket(context) == true && mounted) await _model();
   }
-
-  /// Modo Decorar, y la decoración recién puesta desde la bandeja.
-  bool _decorating = false;
 
   /// El patio pintado está acercado: deslizar mueve la cámara, no la vista.
   bool _zoomed = false;
-  int? _fresh;
 
-  void _setDecorating(bool on) {
-    SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+  /// La decoración que se pidió ver desde la Maqueta (índice, pedido).
+  (int, int)? _focus;
+  var _focusAsks = 0;
+
+  /// Abre la Maqueta; al volver, si se pidió ver una decoración, va a su vista.
+  Future<void> _model() async {
     final p = Progress.instance;
-    if (on && p.guideStep == Guide.decor) p.advanceGuide(Guide.done);
-    // Al terminar de poner la primera decoración, a subir de nivel; y el aviso
-    // de lo que cambió se ve con el jardín ya sin la bandeja.
-    if (!on && p.guideStep == Guide.place && p.decor.any((d) => d.placed)) p.advanceGuide(Guide.level2);
-    if (!on) _celebrate();
-    setState(() {
-      _decorating = on;
-      _fresh = null;
-      _panel = _Panel.none;
-    });
+    if (p.guideStep == Guide.decor) p.advanceGuide(Guide.done);
+    setState(() => _panel = _Panel.none);
+    final focus = await openModel(context, side: _page);
+    if (!mounted) return;
+    // Al poner la primera decoración, a subir de nivel; el aviso de lo que
+    // cambió se ve ya en el jardín.
+    if (p.guideStep == Guide.place && p.decor.any((d) => d.placed)) p.advanceGuide(Guide.level2);
+    _celebrate();
+    if (focus == null) return;
+    if (focus.side != _page) {
+      await _pages.animateToPage(focus.side, duration: _pageTurn, curve: Calm.curve);
+      if (!mounted) return;
+    }
+    setState(() => _focus = (focus.index, ++_focusAsks));
   }
 
   Timer? _tick, _fadeTick;
@@ -389,10 +393,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                       Positioned.fill(
                         child: PageView(
                           controller: _pages,
-                          // Decorando, se arrastran las decoraciones: las vistas se cambian con los puntos.
-                          physics: _decorating || _zoomed
-                              ? const NeverScrollableScrollPhysics()
-                              : const _QuickPagePhysics(),
+                          physics: _zoomed ? const NeverScrollableScrollPhysics() : const _QuickPagePhysics(),
                           onPageChanged: (i) => setState(() => _page = i),
                           children: [
                             for (final side in [0, 1, 2])
@@ -402,10 +403,10 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                                 weather: weather,
                                 onPlace: _enter,
                                 onZoom: side == 0 ? (z) => setState(() => _zoomed = z) : null,
-                                decorating: _decorating,
-                                fresh: side == _page ? _fresh : null,
+                                onModel: side == 0 ? _model : null,
+                                focus: side == _page ? _focus : null,
                                 top: top,
-                                bottom: _decorating ? 8 : bottom,
+                                bottom: bottom,
                               ),
                           ],
                         ),
@@ -429,111 +430,63 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                           bottom: false,
                           child: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 250),
-                            child: _decorating
-                                ? _DecorBar(onDone: () => _setDecorating(false))
-                                : _Hud(
-                                    now: now,
-                                    weather: weather,
-                                    panel: _panel,
-                                    onPanel: _toggle,
-                                    onMarket: _market,
-                                    onDecor: () => _setDecorating(true),
-                                  ),
+                            child: _Hud(now: now, weather: weather, panel: _panel, onPanel: _toggle, onMarket: _market),
                           ),
                         ),
                       ),
-                      if (!_decorating)
-                        Positioned(
-                          left: 12,
-                          right: 12,
-                          top: pad.top + _hudRow + 4,
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 260),
-                            transitionBuilder: (child, a) => FadeTransition(
-                              opacity: a,
-                              child: SlideTransition(
-                                position: Tween(begin: const Offset(0, -0.04), end: Offset.zero).animate(a),
-                                child: child,
-                              ),
-                            ),
-                            child: switch (_panel) {
-                              _Panel.wallet => _WalletPanel(onMarket: _market),
-                              _Panel.level => const _LevelPanel(),
-                              _Panel.none when p.guideStep == Guide.market => _GuideHint(
-                                text: tr('guide.market'),
-                                right: 30,
-                                onTap: _market,
-                              ),
-                              _Panel.none when p.guideStep == Guide.buy => _GuideHint(
-                                text: tr('guide.buyBack'),
-                                right: 30,
-                                onTap: _market,
-                              ),
-                              _Panel.none when p.guideStep == Guide.place && p.decorUnlocked => _GuideHint(
-                                text: tr('guide.placeOpen'),
-                                right: 80,
-                                onTap: () => _setDecorating(true),
-                              ),
-                              _Panel.none when p.guideStep == Guide.decor && p.decorOpen => _GuideHint(
-                                text: tr('guide.decor'),
-                                right: 80,
-                                onTap: () => _setDecorating(true),
-                              ),
-                              _Panel.none => const SizedBox.shrink(),
-                            },
-                          ),
-                        ),
-                      if (_decorating && p.guideStep == Guide.place)
-                        Positioned(
-                          left: 12,
-                          right: 12,
-                          top: pad.top + _hudRow + 4,
-                          child: _GuideHint(
-                            text: tr(p.decor.any((d) => d.placed) ? 'guide.placeDone' : 'guide.placeTray'),
-                            right: 0,
-                            onTap: () {},
-                          ),
-                        ),
-                      if (!_decorating)
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: pad.bottom + 10,
-                          child: Center(
-                            child: _SideDots(
-                              page: _page,
-                              onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
+                      Positioned(
+                        left: 12,
+                        right: 12,
+                        top: pad.top + _hudRow + 4,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 260),
+                          transitionBuilder: (child, a) => FadeTransition(
+                            opacity: a,
+                            child: SlideTransition(
+                              position: Tween(begin: const Offset(0, -0.04), end: Offset.zero).animate(a),
+                              child: child,
                             ),
                           ),
+                          child: switch (_panel) {
+                            _Panel.wallet => _WalletPanel(onMarket: _market),
+                            _Panel.level => const _LevelPanel(),
+                            _Panel.none when p.guideStep == Guide.market => _GuideHint(
+                              text: tr('guide.market'),
+                              right: 30,
+                              onTap: _market,
+                            ),
+                            _Panel.none when p.guideStep == Guide.buy => _GuideHint(
+                              text: tr('guide.buyBack'),
+                              right: 30,
+                              onTap: _market,
+                            ),
+                            // La guía de decorar marca la mesa, en el patio; desde otra vista, lo dice acá.
+                            _Panel.none
+                                when (p.guideStep == Guide.place || p.guideStep == Guide.decor) &&
+                                    p.decorUnlocked &&
+                                    _page != 0 =>
+                              _GuideHint(
+                                text: tr('guide.modelBack'),
+                                right: 0,
+                                onTap: () => _pages.animateToPage(0, duration: _pageTurn, curve: Calm.curve),
+                              ),
+                            _Panel.none => const SizedBox.shrink(),
+                          },
                         ),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: pad.bottom + 10,
+                        child: Center(
+                          child: _SideDots(
+                            page: _page,
+                            onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                ),
-                // Decorando, la bandeja empuja el jardín hacia arriba.
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Calm.curve,
-                  child: _decorating
-                      ? ColoredBox(
-                          color: Palette.paper,
-                          child: SafeArea(
-                            top: false,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-                              child: Column(
-                                children: [
-                                  _SideDots(
-                                    page: _page,
-                                    onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
-                                    flat: true,
-                                  ),
-                                  DecorTray(side: _page, onPlaced: (i) => setState(() => _fresh = i)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                      : const SizedBox(width: double.infinity),
                 ),
               ],
             ),
@@ -563,50 +516,6 @@ class _QuickPagePhysics extends PageScrollPhysics {
   SpringDescription get spring => SpringDescription.withDampingRatio(mass: 0.5, stiffness: 420, ratio: 1.1);
 }
 
-/// Arriba, mientras se decora: qué se puede hacer y el botón para terminar.
-class _DecorBar extends StatelessWidget {
-  final VoidCallback onDone;
-  const _DecorBar({required this.onDone});
-
-  @override
-  Widget build(BuildContext context) {
-    final p = Progress.instance;
-    final text = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
-      child: Glass(
-        opacity: 0.8,
-        padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(tr('decor.title'), style: text.titleMedium),
-                  Text(tr('decor.hint'), style: text.bodySmall?.copyWith(color: Palette.ink.withValues(alpha: 0.65))),
-                  const SizedBox(height: 6),
-                  // Lo que se tiene, para saber qué alcanza.
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 4,
-                    children: [
-                      CurrencyChip.pebbles(p.pebbles),
-                      for (final e in Essence.values) CurrencyChip.essence(e, p.essences[e]!),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            InkButton.small(label: tr('decor.done'), onPressed: onDone),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// Lo de arriba, liviano para no tapar el jardín: el nivel, la billetera, el
 /// Mercado y el menú; debajo, el cartel con el nombre y el clima.
 class _Hud extends StatelessWidget {
@@ -614,14 +523,13 @@ class _Hud extends StatelessWidget {
   final Weather weather;
   final _Panel panel;
   final void Function(_Panel) onPanel;
-  final VoidCallback onMarket, onDecor;
+  final VoidCallback onMarket;
   const _Hud({
     required this.now,
     required this.weather,
     required this.panel,
     required this.onPanel,
     required this.onMarket,
-    required this.onDecor,
   });
 
   @override
@@ -640,16 +548,6 @@ class _Hud extends StatelessWidget {
                 const SizedBox(width: 8),
                 _WalletPill(open: panel == _Panel.wallet, onTap: () => onPanel(_Panel.wallet)),
                 const Spacer(),
-                if (p.decorUnlocked) ...[
-                  _RoundButton(
-                    icon: Icons.local_florist_rounded,
-                    tooltip: tr('decor.title'),
-                    dot: p.decorNew || p.upgradeAvailable,
-                    pulse: p.guideStep == Guide.place || p.guideStep == Guide.decor,
-                    onTap: onDecor,
-                  ),
-                  const SizedBox(width: 8),
-                ],
                 _RoundButton(
                   icon: Icons.storefront_rounded,
                   tooltip: tr('shop.title'),
@@ -1060,12 +958,11 @@ class _GuideHint extends StatelessWidget {
 }
 
 /// Las tres vistas (el patio, el estanque y el bosque) en una pastilla de
-/// vidrio abajo; [flat] sin vidrio, sobre la bandeja de decorar.
+/// vidrio abajo.
 class _SideDots extends StatelessWidget {
   final int page;
   final void Function(int) onTap;
-  final bool flat;
-  const _SideDots({required this.page, required this.onTap, this.flat = false});
+  const _SideDots({required this.page, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1109,7 +1006,6 @@ class _SideDots extends StatelessWidget {
           ),
       ],
     );
-    if (flat) return dots;
     return Glass(padding: const EdgeInsets.symmetric(horizontal: 6), child: dots);
   }
 }

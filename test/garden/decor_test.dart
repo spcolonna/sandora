@@ -60,46 +60,33 @@ void main() {
     expect(p.decor, isEmpty);
   });
 
-  test('se pone, se mueve, se guarda y todo queda guardado', () async {
+  test('se pone en una parcela, se mueve, se guarda y todo queda guardado', () async {
     final p = await rich();
     final d = p.decorRules.items[3];
     p.buyDecor(d);
-    final i = p.placeDecor(d.id, 1, 0.3, 0.8)!;
+    final i = p.placeDecor(d.id, 1, 5)!;
     expect(p.decorStored(d.id), 0);
     expect(p.decorOn(1), 1);
-    expect(p.placeDecor(d.id, 1, 0.5, 0.8), isNull, reason: 'no queda otra en la caja');
-    p.moveDecor(i, 0.62, 0.9);
+    expect(p.decorAt(1, 5), i);
+    expect(p.placeDecor(d.id, 1, 6), isNull, reason: 'no queda otra en la caja');
+    expect(p.moveDecor(i, 10), isTrue);
     await p.load(balance);
     expect(p.decor.single.side, 1);
-    expect(p.decor.single.x, closeTo(0.62, 0.001));
-    expect(p.decor.single.y, closeTo(0.9, 0.001));
+    expect(p.decor.single.cell, 10);
+    final (x, y) = p.modelRules.foot(1, 10);
+    expect(p.decor.single.x, closeTo(x, 0.001));
+    expect(p.decor.single.y, closeTo(y, 0.001));
     p.storeDecor(0);
     expect(p.decorStored(d.id), 1);
+    expect(p.decor.single.cell, isNull);
     expect(p.decorNew, isTrue, reason: 'hay algo en la caja');
-  });
-
-  test('cada vista tiene un límite', () async {
-    final p = await rich();
-    final d = p.decorRules.items.first;
-    for (var i = 0; i <= p.decorRules.perSide; i++) {
-      p.pebbles = 1 << 40;
-      for (final e in p.essences.keys) {
-        p.essences[e] = 1 << 30;
-      }
-      expect(p.buyDecor(d), isTrue);
-    }
-    for (var i = 0; i < p.decorRules.perSide; i++) {
-      expect(p.placeDecor(d.id, 2, 0.5, 0.8), isNotNull);
-    }
-    expect(p.placeDecor(d.id, 2, 0.5, 0.8), isNull);
-    expect(p.placeDecor(d.id, 0, 0.5, 0.8), isNotNull, reason: 'en otra vista sí entra');
   });
 
   test('las decoraciones son de cada jardín', () async {
     final p = await rich();
     final d = p.decorRules.items.first;
     p.buyDecor(d);
-    p.placeDecor(d.id, 0, 0.4, 0.8);
+    p.placeDecor(d.id, 0, 5);
     p.lotus = p.gardenCost;
     expect(await p.buyGarden(), isTrue);
     expect(p.decor, isEmpty);
@@ -165,14 +152,5 @@ void main() {
     expect(list.every((d) => d.level <= 8), isTrue);
     expect(list, isNot(contains(p.dealToday(now: day))));
     expect(p.marketDecor(now: day).map((d) => d.id), list.map((d) => d.id));
-  });
-
-  test('cada ampliación de patio suma lugar para decorar', () async {
-    final p = await rich();
-    final base = p.decorCapacity;
-    expect(base, p.decorRules.perSide);
-    final patio = p.levels.expansions.firstWhere((e) => !e.zone);
-    expect(p.buyExpansion(patio), isTrue);
-    expect(p.decorCapacity, base + p.decorRules.perPatio);
   });
 }

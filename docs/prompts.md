@@ -866,6 +866,90 @@ COMPOSITION: Each plant is separated from the others with generous empty paper a
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; labels; grid lines; frame or border; cast shadows on the paper; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
+## Bloque 25 — La Maqueta (4)
+
+La mesa con el jardín en miniatura donde se decora: el objeto en el patio y el suelo de cada zona visto desde arriba (la grilla de parcelas la dibuja el juego). Adjuntá `store/art/style/style_courtyard_ref.webp` para la mesa y `store/art/style/style_keyart.webp` para los suelos. En el juego van como `assets/images/court/obj_model_table.webp` y `assets/images/decor/model_tray_<zona>.webp`.
+
+### 42. `obj_model_table` ⬜
+
+Guardala como `store/art/model/obj_model_table.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object sits in the painted courtyard of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars); tapping it opens the decorating screen. The game draws it about 150 pixels wide on top of the raked gravel.
+
+SUBJECT: A low, simple Japanese wooden table of warm, worn cedar on four short legs, holding a shallow wooden tray with a tiny model of a zen garden: raked pale sand, three miniature stones, a little moss mound and a tiny stone lantern. Cozy and handmade, like a craftsman's model.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen from the front and slightly above (about 25 degrees), perfectly centered, filling about 80% of the canvas width. The feet of the table sit on an imaginary ground line near the bottom. Nothing cropped, all four corners empty and transparent.
+
+DO NOT INCLUDE: any background, ground, cast shadow, people, animals, chairs, cushions, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 43. `model_tray_patio` ⬜
+
+Guardala como `store/art/model/model_tray_patio.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is the ground of one zone of the miniature model garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player arranges tiny decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.
+
+SUBJECT: Pale beige raked sand with fine parallel rake lines, a few scattered tiny pebbles and one or two soft moss specks near the edges.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on it. Details stay small and spread evenly; the far edge may be a little softer.
+
+DO NOT INCLUDE: objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 44. `model_tray_pond` ⬜
+
+Guardala como `store/art/model/model_tray_pond.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is the ground of one zone of the miniature model garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player arranges tiny decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.
+
+SUBJECT: Soft green-grey ground of short moss and fine gravel, with a strip of calm blue-green pond water along the far edge and a few smooth wet stones at its border.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on it. Details stay small and spread evenly; the far edge may be a little softer.
+
+DO NOT INCLUDE: objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 45. `model_tray_forest` ⬜
+
+Guardala como `store/art/model/model_tray_forest.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is the ground of one zone of the miniature model garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player arranges tiny decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.
+
+SUBJECT: Shaded forest floor of soft moss, fallen bamboo leaves and a few fern sprigs, with dappled light.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on it. Details stay small and spread evenly; the far edge may be a little softer.
+
+DO NOT INCLUDE: objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
 ---
 
 # Ya incluidas (134)

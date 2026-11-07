@@ -2176,27 +2176,6 @@
   "ja": "提灯",
   "zh": "纸灯笼"
  },
- "decor.title": {
-  "es": "Decorar",
-  "en": "Decorate",
-  "pt": "Decorar",
-  "ja": "飾りつけ",
-  "zh": "装饰"
- },
- "decor.hint": {
-  "es": "Tocá algo de abajo para ponerlo y arrastralo a su lugar. El martillo mejora cada lugar",
-  "en": "Tap something below to place it, then drag it into position. The hammer improves each place",
-  "pt": "Toque em algo abaixo para colocá-lo e arraste até o lugar. O martelo melhora cada lugar",
-  "ja": "下から選んで置き、ドラッグで位置を決めます。ハンマーで場所を改良できます",
-  "zh": "点下方物品放置，再拖到合适位置。锤子可以改良每个地点"
- },
- "decor.done": {
-  "es": "Listo",
-  "en": "Done",
-  "pt": "Pronto",
-  "ja": "完了",
-  "zh": "完成"
- },
  "decor.store": {
   "es": "Guardar",
   "en": "Put away",
@@ -2210,13 +2189,6 @@
   "pt": "Colocar",
   "ja": "置く",
   "zh": "放置"
- },
- "decor.full": {
-  "es": "Esta vista ya está llena: guardá algo para hacer lugar",
-  "en": "This view is full: put something away to make room",
-  "pt": "Esta vista está cheia: guarde algo para abrir espaço",
-  "ja": "ここはいっぱいです。何かしまって場所をあけよう",
-  "zh": "这里已经满了：收起一些物品腾出空间"
  },
  "decor.needLevel": {
   "es": "Se abre en el nivel {n}",
@@ -2408,11 +2380,11 @@
   "zh": "前往"
  },
  "guide.decor": {
-  "es": "¡Ya podés decorar! Tocá acá: te regalamos unos escalones",
-  "en": "You can decorate now! Tap here: we left you some stepping stones",
-  "pt": "Agora você pode decorar! Toque aqui: deixamos uns degraus de presente",
-  "ja": "飾り付けができるようになりました！ここをタップ。飛び石をプレゼント",
-  "zh": "现在可以装饰了！点这里：送你一些踏脚石"
+  "es": "¡Ya podés decorar! Tocá la maqueta: te regalamos unos escalones",
+  "en": "You can decorate now! Tap the model: we left you some stepping stones",
+  "pt": "Agora você pode decorar! Toque na maquete: deixamos uns degraus para você",
+  "ja": "飾り付けができるようになりました！箱庭をタップ。飛び石をプレゼント",
+  "zh": "可以装饰啦！点沙盘：送你几块踏脚石"
  },
  "level.newDecor": {
   "es": "Nuevas decoraciones: {list}",
@@ -2688,25 +2660,18 @@
   "zh": "你的第一件装饰在市集等你"
  },
  "guide.placeOpen": {
-  "es": "Tocá acá para ponerla en tu jardín",
-  "en": "Tap here to place it in your garden",
-  "pt": "Toque aqui para colocá-la no seu jardim",
-  "ja": "ここをタップして庭に置こう",
-  "zh": "点这里把它放进花园"
- },
- "guide.placeTray": {
-  "es": "Tocala abajo, en la bandeja, para ponerla",
-  "en": "Tap it in the tray below to place it",
-  "pt": "Toque nela na bandeja abaixo para colocá-la",
-  "ja": "下のトレイでタップして置こう",
-  "zh": "点按下方托盘里的它来放置"
+  "es": "Tocá la maqueta para ponerla en tu jardín",
+  "en": "Tap the model to place it in your garden",
+  "pt": "Toque na maquete para colocá-la no seu jardim",
+  "ja": "箱庭をタップして庭に置こう",
+  "zh": "点沙盘，把它摆进花园"
  },
  "guide.placeDone": {
-  "es": "Arrastrala a donde quieras y tocá Listo",
-  "en": "Drag it wherever you like, then tap Done",
-  "pt": "Arraste para onde quiser e toque em Pronto",
-  "ja": "好きな場所へドラッグして「完了」をタップ",
-  "zh": "拖到你喜欢的地方，然后点“完成”"
+  "es": "¡Quedó! Volvé al jardín para verla",
+  "en": "Done! Go back to the garden to see it",
+  "pt": "Pronto! Volte ao jardim para vê-la",
+  "ja": "できた！庭に戻って見てみよう",
+  "zh": "好了！回花园看看吧"
  },
  "guide.level2": {
   "es": "Jugá otra vez: cada partida suma Calma y te sube de nivel",
@@ -3365,5 +3330,89 @@
   "pt": "Volto depois",
   "ja": "あとで",
   "zh": "稍后再来"
+ },
+ "model.title": {
+  "es": "Maqueta",
+  "en": "Model garden",
+  "pt": "Maquete",
+  "ja": "箱庭",
+  "zh": "沙盘"
+ },
+ "model.hint": {
+  "es": "Elegí algo de abajo y tocá una parcela libre. Tocá algo puesto para moverlo",
+  "en": "Pick something below and tap a free plot. Tap a placed piece to move it",
+  "pt": "Escolha algo abaixo e toque num lote livre. Toque numa peça para movê-la",
+  "ja": "下から選んで空いている区画をタップ。置いたものをタップすると動かせます",
+  "zh": "从下方选一件，再点空地块。点已摆放的物品可以移动"
+ },
+ "model.hintPlace": {
+  "es": "Tocá una parcela libre para ponerla (o arrastrala)",
+  "en": "Tap a free plot to place it (or drag it there)",
+  "pt": "Toque num lote livre para colocá-la (ou arraste)",
+  "ja": "空いている区画をタップして置こう（ドラッグでもOK）",
+  "zh": "点空地块摆放（也可以拖过去）"
+ },
+ "model.full": {
+  "es": "No quedan parcelas libres en esta zona: abrí otra o guardá algo",
+  "en": "No free plots here: open another or put something away",
+  "pt": "Não há lotes livres aqui: abra outro ou guarde algo",
+  "ja": "ここに空き区画がありません。区画を開くか、何かしまおう",
+  "zh": "这里没有空地块了：开一块新的或收起一些物品"
+ },
+ "model.parcelTitle": {
+  "es": "¿Abrir esta parcela?",
+  "en": "Open this plot?",
+  "pt": "Abrir este lote?",
+  "ja": "この区画を開く？",
+  "zh": "开放这块地？"
+ },
+ "model.parcelBuy": {
+  "es": "Abrir",
+  "en": "Open",
+  "pt": "Abrir",
+  "ja": "開く",
+  "zh": "开放"
+ },
+ "model.see": {
+  "es": "Ver en el jardín",
+  "en": "See in garden",
+  "pt": "Ver no jardim",
+  "ja": "庭で見る",
+  "zh": "在花园里看"
+ },
+ "model.free": {
+  "es": "Parcela libre",
+  "en": "Free plot",
+  "pt": "Lote livre",
+  "ja": "空き区画",
+  "zh": "空地块"
+ },
+ "model.locked": {
+  "es": "Parcela cerrada",
+  "en": "Locked plot",
+  "pt": "Lote fechado",
+  "ja": "未開放の区画",
+  "zh": "未开放的地块"
+ },
+ "model.upgrades": {
+  "es": "Mejoras",
+  "en": "Upgrades",
+  "pt": "Melhorias",
+  "ja": "改良",
+  "zh": "升级"
+ },
+ "model.upgradesDesc": {
+  "es": "Cada lugar se puede mejorar: da más y se ve más lindo",
+  "en": "Every place can be upgraded: it gives more and looks nicer",
+  "pt": "Cada lugar pode ser melhorado: rende mais e fica mais bonito",
+  "ja": "どの場所も改良できます。報酬が増えて見た目も良くなります",
+  "zh": "每个地点都能升级：收获更多，也更好看"
+ },
+ "guide.modelBack": {
+  "es": "Volvé al patio: la maqueta está en la mesa",
+  "en": "Go back to the courtyard: the model is on the table",
+  "pt": "Volte ao pátio: a maquete está na mesa",
+  "ja": "中庭に戻ろう。箱庭はテーブルの上です",
+  "zh": "回到庭院：沙盘在桌子上"
  }
 }
