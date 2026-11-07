@@ -55,6 +55,15 @@ void main() {
     expect(med.reward(10, 10, 20).pebbles, 0);
   });
 
+  test('meditar 1 minuto: completa, paga menos que 3 y cuenta para la racha', () {
+    final one = med.reward(1, 1, 0), three = med.reward(3, 3, 0);
+    expect(med.durations.first, 1);
+    expect(one.complete, isTrue);
+    expect(one.pebbles, greaterThan(0));
+    expect(one.pebbles, lessThan(three.pebbles));
+    expect(balance.meditation.i('streakMinMinutes'), 1);
+  });
+
   test('racha de meditación: perdona un día por semana', () {
     var s = med.nextStreak(today: 100, lastDay: 99, streak: 3, graceDay: null);
     expect(s.streak, 4);

@@ -36,7 +36,9 @@ cámara navegable).
 
 | Commit | Qué |
 | --- | --- |
-| (este) | **Sonidos del jardín:** puertas de la entrada, aleteo de pájaros, piedra en la arena, rastrillo, hojas y tierra al arrastrar en los cuidados. |
+| (este) | **Ajustes tras jugar:** meditación de 1 min (cuenta para la racha); **meditación guiada** con frases + campana (`meditation_guide.dart`), se desbloquea una vez por 5 lotos (`meditation.guided.lotus`); **Lluvia** sin gotas simultáneas: los pares llegan con `pairGap` 0,25 s, `minGap` 0,22 s y como mucho 2 en `pairWindow` 0,6 s; vaciar vasija muestra «+60» y el primer toque sobre una que rebalsa ya no suena a fallo; **descanso** de 30 min del Arenero y las Piedras después de jugar (balance `rest`, saltar = 1 loto, no aplica durante la guía; esos dos ya no usan la regla de premio a la mitad). |
+| `d1295dc`/`7df64b1` | 41 prompts nuevos; arte existente en lugar de código (linternas del río, cuenco de té, zafu, piedras, hoja de la Flauta, álbum). |
+| `37e274b` | **Sonidos del jardín:** puertas de la entrada, aleteo de pájaros, piedra en la arena, rastrillo, hojas y tierra al arrastrar en los cuidados. |
 | `5c4c2fd` | **16 imágenes integradas** (fondos de 7 minijuegos, suelos del estanque y del bosque, río, copa y mesa del bonsái, maleza, hojas, regalo del té, toldo del Mercado). IPA 1.0.0+2 generado. |
 | `14f9413` | Build vuelta a **1.0.0+2**: en App Store Connect solo está la 1; la próxima subida es la +2. |
 | `911b15e` | **Avisos de Apple 90068/90683:** pods a iOS 15 y texto de ubicación "Always". |
@@ -175,6 +177,8 @@ Del usuario:
 - App Store Connect: activar Game Center y crear los 19 logros `sandora.<id>` (lista en `docs/pendientes.md`).
 - Capacidades iCloud y Game Center en el primer build (la firma automática debería sumarlas).
 - Búsqueda de marca "Sandora" (USPTO, EUIPO, MIEM; clases 9 y 41).
+
+Fase 2 decidida con el usuario (2026-11-07): **Maqueta** para decorar. Un objeto en el patio (mesa con maqueta) abre una ruta propia, con el jardín visto desde arriba y parcelas que se desbloquean con monedas; las vistas de actividades quedan limpias; después, tour en primera persona. Necesita arte nuevo (se suma a `tool/gen_prompts.py`). Diseñar con plan propio.
 
 Opciones de desarrollo que quedaron sobre la mesa:
 - Mejoras visibles en el álbum.

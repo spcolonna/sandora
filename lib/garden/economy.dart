@@ -45,7 +45,8 @@ class Economy {
   Reward reward(String game, int stars, int runToday) {
     final r = balance.rewards(game);
     final rep = balance.repeats;
-    final tired = runToday > rep.i('fullRuns');
+    // Los lugares que descansan entre partidas no se cansan además.
+    final tired = runToday > rep.i('fullRuns') && !balance.section('rest').strings('games').contains(game);
     final factor = tired ? rep.d('factorAfter') : 1.0;
     final pebbles = ((r.i('pebblesBase') + r.i('pebblesPerStar') * stars) * factor).round();
     final essence = ((r.i('essencePerStar') * stars) * factor).round();

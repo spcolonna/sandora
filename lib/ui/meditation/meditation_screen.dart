@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../../garden/economy.dart';
+import '../../garden/meditation_guide.dart';
 import '../../garden/meditation_rules.dart';
 import '../../garden/progress.dart';
 import '../../garden/reminders.dart';
@@ -37,6 +38,8 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
   bool _intervalBell = false;
   Timer? _tick;
   int _bellsRung = 0;
+  late bool _guided = p.guidedOn;
+  int? _phrase;
   ({MeditationReward reward, int? newLevel, int lotus, String? object})? _result;
 
   /// Reloj de cuadro a cuadro: el patio y el ensō respiran suave, no a saltos.
@@ -81,6 +84,11 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
       final bells = elapsed.inMinutes ~/ every;
       if (_intervalBell && bells > _bellsRung) SoundBoard.instance.play(Sfx.bell, volume: 0.4);
       _bellsRung = bells;
+      if (_guided) {
+        final phrase = MeditationGuide.phraseAt(elapsed.inMilliseconds / 1000, p.meditationChosen);
+        if (phrase != null && phrase != _phrase) SoundBoard.instance.play(Sfx.bell, volume: 0.25);
+        _phrase = phrase;
+      }
       setState(() {});
     });
   }
@@ -239,6 +247,7 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
           value: _intervalBell,
           onChanged: (v) => setState(() => _intervalBell = v),
         ),
+        _guidedRow(context, text),
         const SizedBox(height: 8),
         Text(
           left > 0 ? tr('meditation.left', {'n': left}) : tr('meditation.capReached'),
@@ -251,6 +260,45 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
         InkButton(label: tr('meditation.start'), glyph: InkGlyph.play, onPressed: _start),
       ],
     );
+  }
+
+  /// Prender la guía, o desbloquearla con lotos si todavía no se tiene.
+  Widget _guidedRow(BuildContext context, TextTheme text) {
+    if (p.guidedUnlocked) {
+      return InkToggleRow(
+        title: tr('meditation.guided'),
+        subtitle: tr('meditation.guidedDesc'),
+        value: _guided,
+        onChanged: (v) => setState(() => p.guidedOn = _guided = v),
+      );
+    }
+    final cost = p.guidedCost;
+    return InkToggleRow(
+      title:
+          '${tr('meditation.guided')} · ${tr(p.canUnlockGuided ? 'meditation.guidedBuy' : 'meditation.guidedNoLotus', {'n': cost})}',
+      subtitle: tr('meditation.guidedDesc'),
+      value: false,
+      onChanged: p.canUnlockGuided ? (_) => _unlockGuided(context) : null,
+    );
+  }
+
+  Future<void> _unlockGuided(BuildContext context) async {
+    final yes = await showWashiDialog<bool>(
+      context,
+      title: tr('meditation.guidedConfirm', {'n': p.guidedCost}),
+      actions: [
+        InkButton(
+          label: tr('meditation.guidedBuy', {'n': p.guidedCost}),
+          onPressed: () => Navigator.of(context, rootNavigator: true).pop(true),
+        ),
+        InkButton.quiet(label: tr('common.cancel'), onPressed: () => Navigator.of(context, rootNavigator: true).pop()),
+      ],
+    );
+    if (yes != true || !mounted) return;
+    if (p.unlockGuided()) {
+      SoundBoard.instance.play(Sfx.bell, volume: 0.5);
+      setState(() => p.guidedOn = _guided = true);
+    }
   }
 
   Widget _session(BuildContext context) {
@@ -297,6 +345,29 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
                     ),
                   );
                 },
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        // La frase de la guía aparece y se va despacio, debajo del ensō.
+        SizedBox(
+          height: 72,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 36),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 1400),
+              child: Text(
+                _guided && _phrase != null ? tr('meditation.guide.$_phrase') : '',
+                key: ValueKey(_guided ? _phrase : null),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  height: 1.4,
+                  fontWeight: FontWeight.w300,
+                  color: _light.withValues(alpha: 0.9),
+                  shadows: _shadow,
+                ),
               ),
             ),
           ),

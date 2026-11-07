@@ -24,13 +24,23 @@ void main() {
       expect(a.where((n) => n.time > half).length, greaterThan(a.where((n) => n.time <= half).length));
     });
 
-    test('las gotas dobles caen en vasijas distintas', () {
-      for (var seed = 0; seed < 20; seed++) {
-        final chart = buildRainChart(b, vessels: 3, seed: seed);
-        for (var i = 1; i < chart.length; i++) {
-          if (chart[i].time == chart[i - 1].time) expect(chart[i].vessel, isNot(chart[i - 1].vessel));
+    test('nunca dos gotas a la vez, ni más de dos muy juntas; los pares van a vasijas distintas', () {
+      var pairs = 0;
+      for (var seed = 0; seed < 40; seed++) {
+        for (final vessels in [3, 5]) {
+          final chart = buildRainChart(b, vessels: vessels, seed: seed);
+          for (var i = 1; i < chart.length; i++) {
+            final gap = chart[i].time - chart[i - 1].time;
+            expect(gap, greaterThanOrEqualTo(b.d('minGap') - 1e-9), reason: 'seed $seed, gota $i');
+            if (i >= 2) expect(chart[i].time - chart[i - 2].time, greaterThanOrEqualTo(b.d('pairWindow') - 1e-9));
+            if (chart[i].wind == 0 && (gap - b.d('pairGap')).abs() < 1e-9) {
+              pairs++;
+              expect(chart[i].vessel, isNot(chart[i - 1].vessel));
+            }
+          }
         }
       }
+      expect(pairs, greaterThan(0), reason: 'sigue habiendo pares');
     });
 
     test('con ráfagas las gotas caen en diagonal, cerca del pulso y siguen en orden', () {
@@ -45,8 +55,9 @@ void main() {
           windy++;
           expect(n.wind.abs(), lessThanOrEqualTo(1));
           final grid = b.d('beatSeconds') / 2;
-          final off = ((n.time - 2.0) / grid - ((n.time - 2.0) / grid).round()).abs() * grid;
-          expect(off, lessThanOrEqualTo(b.d('windShift') + 1e-9));
+          double off(double t) => ((t - 2.0) / grid - ((t - 2.0) / grid).round()).abs() * grid;
+          // La segunda de un par llega pairGap después del pulso.
+          expect(min(off(n.time), off(n.time - b.d('pairGap'))), lessThanOrEqualTo(b.d('windShift') + 1e-9));
           expect(gusts.any((g) => n.time >= g.start - 0.2 && n.time <= g.start + g.length + 0.2), isTrue);
         }
       }

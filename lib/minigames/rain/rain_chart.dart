@@ -39,7 +39,10 @@ List<RainGust> rainGusts(BalanceSection b, {required int seed, double leadIn = 2
 }
 
 /// Genera la partitura de una partida: gotas sobre una grilla de pulsos, cada
-/// vez más densa, con gotas dobles en la segunda mitad. Las vasijas siguen un
+/// vez más densa, con pares de gotas en la segunda mitad. Nunca hay dos gotas
+/// a la vez: el celular no distingue dos toques simultáneos, así que la
+/// segunda del par llega `pairGap` s después, entre gotas hay al menos
+/// `minGap` s y en `pairWindow` s caben como mucho dos. Las vasijas siguen un
 /// paseo de vecinos para que la secuencia suene a melodía. Como la lluvia de
 /// verdad, viene en chubascos (la densidad sube y baja) y con las ráfagas las
 /// gotas caen en diagonal y algunas se adelantan o se atrasan un poco.
@@ -71,10 +74,18 @@ List<RainNote> buildRainChart(BalanceSection b, {required int vessels, required 
     notes.add(RainNote(t + shift, current, wind: wind));
     if (progress >= b.d('doubleFrom') && onBeat && rng.nextDouble() < b.d('doubleChance')) {
       final other = (current + 1 + rng.nextInt(vessels - 1)) % vessels;
-      notes.add(RainNote(t + shift, other, wind: wind));
+      notes.add(RainNote(t + shift + b.d('pairGap'), other, wind: wind));
     }
   }
-  return notes..sort((a, c) => a.time.compareTo(c.time));
+  notes.sort((a, c) => a.time.compareTo(c.time));
+  // Se sacan las que quedarían pegadas (o una tercera muy cerca de un par).
+  final kept = <RainNote>[];
+  for (final n in notes) {
+    if (kept.isNotEmpty && n.time - kept.last.time < b.d('minGap')) continue;
+    if (kept.length >= 2 && n.time - kept[kept.length - 2].time < b.d('pairWindow')) continue;
+    kept.add(n);
+  }
+  return kept;
 }
 
 /// Juzga los toques contra el reloj del juego (no el del audio). La ventana es

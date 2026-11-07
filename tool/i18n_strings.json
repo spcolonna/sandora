@@ -91,11 +91,11 @@
   "zh": "雨落陶罐"
  },
  "mg.rain.desc": {
-  "es": "Tocá la vasija cuando llega la gota",
-  "en": "Tap the jar when the drop arrives",
-  "pt": "Toque o vaso quando a gota chegar",
-  "ja": "しずくが届いたら壺をタップ",
-  "zh": "雨滴落下时点击陶罐"
+  "es": "Tocá la vasija cuando llega la gota. Si rebalsa, dos toques la vacían y suman puntos",
+  "en": "Tap the jar when the drop arrives. If one overflows, double-tap to empty it for bonus points",
+  "pt": "Toque o vaso quando a gota chegar. Se transbordar, dois toques esvaziam e somam pontos",
+  "ja": "しずくが届いたら壺をタップ。あふれたらダブルタップで空にしてボーナス",
+  "zh": "雨滴落下时点击陶罐。溢出时双击倒空，可得额外分数"
  },
  "grade.good": {
   "es": "Bien",
@@ -1512,11 +1512,11 @@
   "zh": "点按最后一缕阳光来收集光。"
  },
  "rain.overflow": {
-  "es": "¡Rebalsa! Tocá dos veces la vasija para vaciarla",
-  "en": "It's overflowing! Double-tap the jar to empty it",
-  "pt": "Transbordou! Toque duas vezes no vaso para esvaziar",
-  "ja": "あふれています！甕をダブルタップして空にしましょう",
-  "zh": "溢出来了！双击陶罐把它倒空"
+  "es": "¡Rebalsa! Tocá dos veces la vasija para vaciarla: +60 y vuelve a sonar",
+  "en": "It's overflowing! Double-tap the jar to empty it: +60 and it rings again",
+  "pt": "Transbordou! Toque duas vezes no vaso para esvaziar: +60 e volta a soar",
+  "ja": "あふれています！壺をダブルタップで空に：+60、音も戻ります",
+  "zh": "溢出来了！双击陶罐倒空：+60，声音也会恢复"
  },
  "mg.enso.name": {
   "es": "Ensō",
@@ -3218,5 +3218,152 @@
   "pt": "Cada dia com as três metas soma um selo para o próximo.",
   "ja": "3つの目標を達成した日ごとに、次の宝箱への印がたまります。",
   "zh": "每完成一天的三个目标，就为下一个宝箱积累一枚印章。"
+ },
+ "meditation.guided": {
+  "es": "Guiada",
+  "en": "Guided",
+  "pt": "Guiada",
+  "ja": "ガイド付き",
+  "zh": "引导"
+ },
+ "meditation.guidedDesc": {
+  "es": "Frases suaves que te acompañan mientras respirás",
+  "en": "Gentle phrases to keep you company as you breathe",
+  "pt": "Frases suaves que te acompanham enquanto respira",
+  "ja": "呼吸に寄りそうやさしい言葉",
+  "zh": "温柔的话语陪伴你呼吸"
+ },
+ "meditation.guidedBuy": {
+  "es": "Desbloquear por {n} lotos",
+  "en": "Unlock for {n} lotus",
+  "pt": "Desbloquear por {n} lótus",
+  "ja": "蓮{n}つで解放",
+  "zh": "用{n}朵莲花解锁"
+ },
+ "meditation.guidedConfirm": {
+  "es": "¿Desbloquear la meditación guiada por {n} lotos? Queda para siempre.",
+  "en": "Unlock guided meditation for {n} lotus? It's yours for good.",
+  "pt": "Desbloquear a meditação guiada por {n} lótus? Fica para sempre.",
+  "ja": "蓮{n}つでガイド付き瞑想を解放しますか？ずっと使えます。",
+  "zh": "用{n}朵莲花解锁引导冥想？永久有效。"
+ },
+ "meditation.guidedNoLotus": {
+  "es": "Te faltan lotos ({n})",
+  "en": "Not enough lotus ({n})",
+  "pt": "Faltam lótus ({n})",
+  "ja": "蓮が足りません（{n}）",
+  "zh": "莲花不足（{n}）"
+ },
+ "meditation.guide.0": {
+  "es": "Llegá. Acomodate y dejá que el cuerpo pese.",
+  "en": "Arrive. Settle in and let your body feel heavy.",
+  "pt": "Chegue. Acomode-se e deixe o corpo pesar.",
+  "ja": "ここに来ました。楽な姿勢で、体の重さをゆだねて。",
+  "zh": "来到这里。坐稳，让身体自然下沉。"
+ },
+ "meditation.guide.1": {
+  "es": "No hay nada que hacer ahora. Solo estar.",
+  "en": "There's nothing to do now. Just be.",
+  "pt": "Não há nada a fazer agora. Só estar.",
+  "ja": "今は何もしなくていい。ただ、ここにいる。",
+  "zh": "此刻无事可做，只需存在。"
+ },
+ "meditation.guide.2": {
+  "es": "Seguí el aire: entra fresco, sale tibio.",
+  "en": "Follow the air: cool coming in, warm going out.",
+  "pt": "Siga o ar: entra fresco, sai morno.",
+  "ja": "息を感じて。入る息は涼しく、出る息は温かく。",
+  "zh": "跟随气息：吸入清凉，呼出温暖。"
+ },
+ "meditation.guide.3": {
+  "es": "Dejá que la exhalación sea un poco más larga.",
+  "en": "Let each breath out be a little longer.",
+  "pt": "Deixe a expiração um pouco mais longa.",
+  "ja": "吐く息を、少しだけ長く。",
+  "zh": "让呼气稍微长一点。"
+ },
+ "meditation.guide.4": {
+  "es": "Si la mente se va, volvé a la respiración. Sin apuro.",
+  "en": "If your mind wanders, come back to the breath. No rush.",
+  "pt": "Se a mente se for, volte à respiração. Sem pressa.",
+  "ja": "心がそれたら、また呼吸へ。急がずに。",
+  "zh": "若思绪飘走，就回到呼吸。不急。"
+ },
+ "meditation.guide.5": {
+  "es": "Aflojá la frente y la mandíbula.",
+  "en": "Soften your forehead and your jaw.",
+  "pt": "Solte a testa e a mandíbula.",
+  "ja": "額とあごの力をぬいて。",
+  "zh": "放松额头和下巴。"
+ },
+ "meditation.guide.6": {
+  "es": "Bajá los hombros. Soltá las manos.",
+  "en": "Drop your shoulders. Let your hands rest.",
+  "pt": "Baixe os ombros. Solte as mãos.",
+  "ja": "肩を下ろして。手をゆるめて。",
+  "zh": "沉下肩膀，松开双手。"
+ },
+ "meditation.guide.7": {
+  "es": "Sentí dónde el cuerpo toca el suelo.",
+  "en": "Feel where your body meets the ground.",
+  "pt": "Sinta onde o corpo toca o chão.",
+  "ja": "体が床にふれているところを感じて。",
+  "zh": "感受身体与地面接触的地方。"
+ },
+ "meditation.guide.8": {
+  "es": "Cada pensamiento pasa como una nube.",
+  "en": "Each thought drifts by like a cloud.",
+  "pt": "Cada pensamento passa como uma nuvem.",
+  "ja": "考えは雲のように流れていく。",
+  "zh": "每个念头都像云一样飘过。"
+ },
+ "meditation.guide.9": {
+  "es": "Escuchá el jardín un momento.",
+  "en": "Listen to the garden for a moment.",
+  "pt": "Escute o jardim por um momento.",
+  "ja": "しばらく庭の音に耳をすませて。",
+  "zh": "静听花园片刻。"
+ },
+ "meditation.guide.10": {
+  "es": "Empezá a volver, despacio.",
+  "en": "Slowly begin to come back.",
+  "pt": "Comece a voltar, devagar.",
+  "ja": "ゆっくりと戻ってきましょう。",
+  "zh": "慢慢地回来。"
+ },
+ "meditation.guide.11": {
+  "es": "Llevate esta calma con vos.",
+  "en": "Take this calm with you.",
+  "pt": "Leve esta calma com você.",
+  "ja": "この静けさを持ち帰って。",
+  "zh": "带着这份宁静离开。"
+ },
+ "rest.title": {
+  "es": "Este rincón descansa",
+  "en": "This corner is resting",
+  "pt": "Este canto está descansando",
+  "ja": "この場所はひと休み中",
+  "zh": "这个角落在休息"
+ },
+ "rest.desc": {
+  "es": "Vuelve a estar listo en {t}. Mientras, otros rincones te esperan.",
+  "en": "Ready again in {t}. Meanwhile, other corners await.",
+  "pt": "Fica pronto de novo em {t}. Enquanto isso, outros cantos te esperam.",
+  "ja": "あと{t}で再開できます。そのあいだに他の場所へ。",
+  "zh": "{t}后再次就绪。其他角落正等着你。"
+ },
+ "rest.skip": {
+  "es": "Seguir ya",
+  "en": "Play now",
+  "pt": "Jogar já",
+  "ja": "今すぐ遊ぶ",
+  "zh": "立即游玩"
+ },
+ "rest.later": {
+  "es": "Vuelvo luego",
+  "en": "Come back later",
+  "pt": "Volto depois",
+  "ja": "あとで",
+  "zh": "稍后再来"
  }
 }

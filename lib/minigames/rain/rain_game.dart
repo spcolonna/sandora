@@ -185,6 +185,7 @@ class RainGame extends FlameGame with TapCallbacks {
       _lastTap.remove(i);
       SoundBoard.instance.play(Sfx.good, volume: 0.4);
       _splash(Vector2(vesselX(i), mouthY(i)), Grade.perfect);
+      _bonusLabel(Vector2(vesselX(i), mouthY(i)), '+${judge.emptyBonus}');
       return;
     }
     final spilling = judge.overflowing[i];
@@ -192,7 +193,8 @@ class RainGame extends FlameGame with TapCallbacks {
     _wobble[i] = 1;
     if (!spilling && judge.overflowing[i]) _overflowHintAt ??= _t;
     if (note == null) {
-      missCue(volume: 0.2);
+      // Sobre una vasija que rebalsa puede ser el primer toque para vaciarla.
+      if (!spilling) missCue(volume: 0.2);
       return;
     }
     // Rebalsando, la nota suena apagada.
@@ -201,6 +203,35 @@ class RainGame extends FlameGame with TapCallbacks {
     final at = Vector2(vesselX(i), mouthY(i));
     _splash(at, note.grade!);
     celebrate(world, at, note.grade!, sound: false);
+  }
+
+  /// El bonus de vaciar: un número que sube desde la boca y se apaga.
+  void _bonusLabel(Vector2 at, String text) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: Palette.lantern,
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+          shadows: [Shadow(color: Palette.ink.withValues(alpha: 0.5), blurRadius: 6)],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    world.add(
+      ParticleSystemComponent(
+        position: at,
+        particle: ComputedParticle(
+          lifespan: 1.1,
+          renderer: (canvas, p) {
+            canvas.saveLayer(null, Paint()..color = Color.fromRGBO(0, 0, 0, 1 - pow(p.progress, 2).toDouble()));
+            tp.paint(canvas, Offset(-tp.width / 2, -vesselR - 30 - 50 * p.progress));
+            canvas.restore();
+          },
+        ),
+      ),
+    );
   }
 
   void _splash(Vector2 at, Grade g) {

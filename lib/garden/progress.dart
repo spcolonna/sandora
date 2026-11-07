@@ -155,6 +155,13 @@ class Progress extends ChangeNotifier {
   DateTime? meditationStartedAt;
   int meditationChosen = 0;
   int meditationStreak = 0;
+
+  /// La meditación guiada (frases sobre el anillo) ya se compró.
+  bool guidedUnlocked = false;
+
+  /// La guía está prendida (se recuerda la última elección).
+  bool get guidedOn => guidedUnlocked && (_prefs.getBool('meditation.guidedOn') ?? true);
+  set guidedOn(bool v) => _prefs.setBool('meditation.guidedOn', v);
   int? _meditationLastDay, _meditationGraceDay;
   int _meditationDay = 0, _meditationMinutesToday = 0;
 
@@ -164,6 +171,9 @@ class Progress extends ChangeNotifier {
 
   String _playsDay = '';
   Map<String, int> _plays = {};
+
+  /// Hasta cuándo descansa cada lugar (epoch ms), después de jugarlo.
+  Map<String, int> _restUntil = {};
 
   /// Días distintos en que se abrió el jardín: destraban minijuegos (GDD).
   int daysPlayed = 0;
@@ -216,6 +226,7 @@ class Progress extends ChangeNotifier {
     'care.at',
     'care.weedAt',
     'upgrades',
+    'rest',
   ];
 
   /// Fotos de cada jardín (la del actual puede estar vieja: manda lo vivo).
@@ -402,6 +413,7 @@ class Progress extends ChangeNotifier {
     _achievementsSeen = _prefs.getInt('achievements.seen') ?? 0;
     _playsDay = _prefs.getString('playsDay') ?? '';
     _plays = (jsonDecode(_prefs.getString('plays') ?? '{}') as Map).map((k, v) => MapEntry(k as String, v as int));
+    _restUntil = (jsonDecode(_prefs.getString('rest') ?? '{}') as Map).map((k, v) => MapEntry(k as String, v as int));
     gardenName = _prefs.getString('gardenName');
     gardenNameOffered = _prefs.getBool('gardenNameOffered') ?? false;
     introSeen = (_prefs.getStringList('intro.seen') ?? []).toSet();
@@ -460,6 +472,7 @@ class Progress extends ChangeNotifier {
     meditationStartedAt = medAt == null ? null : DateTime.fromMillisecondsSinceEpoch(medAt);
     meditationChosen = _prefs.getInt('meditation.chosen') ?? 0;
     meditationStreak = _prefs.getInt('meditation.streak') ?? 0;
+    guidedUnlocked = _prefs.getBool('meditation.guided') ?? false;
     _meditationLastDay = _prefs.getInt('meditation.lastDay');
     _meditationGraceDay = _prefs.getInt('meditation.graceDay');
     _meditationDay = _prefs.getInt('meditation.day') ?? 0;
@@ -1361,6 +1374,20 @@ class Progress extends ChangeNotifier {
     _prefs.setInt('meditation.chosen', minutes);
   }
 
+  int get guidedCost => economy.balance.meditation.sub('guided').i('lotus');
+  bool get canUnlockGuided => !guidedUnlocked && lotus >= guidedCost;
+
+  /// Compra la meditación guiada con lotos (una sola vez).
+  bool unlockGuided() {
+    if (!canUnlockGuided) return false;
+    lotus -= guidedCost;
+    guidedUnlocked = true;
+    _prefs.setBool('meditation.guided', true);
+    _saveWallet();
+    notifyListeners();
+    return true;
+  }
+
   /// Termina la sesión (completa o cortada) y paga con el reloj real.
   ({MeditationReward reward, int? newLevel, int lotus, String? object}) finishMeditation({DateTime? now}) {
     now ??= DateTime.now();
@@ -1427,6 +1454,11 @@ class Progress extends ChangeNotifier {
   /// Registra una partida terminada de [game] y paga la recompensa. Las metas
   /// del día que se cumplieron quedan en [lastRunGoals].
   Reward finishRun(String game, int stars, {bool record = false, DateTime? now}) {
+    // Durante la guía del comienzo se juega seguido: el descanso empieza después.
+    if (restsAfterPlay(game) && guideStep >= Guide.decor) {
+      _restUntil[game] = (now ?? DateTime.now()).add(Duration(minutes: _rest.i('minutes'))).millisecondsSinceEpoch;
+      _prefs.setString('rest', jsonEncode(_restUntil));
+    }
     now ??= gardenNow();
     if (guideStep == Guide.play) advanceGuide(Guide.market);
     if (guideStep == Guide.tryRain && game == 'rain') advanceGuide(Guide.level3);
@@ -1482,6 +1514,33 @@ class Progress extends ChangeNotifier {
     _saveSerenity(now);
     notifyListeners();
     return reward.withCalm(gained, newLevel, lotus: lotusGain);
+  }
+
+  BalanceSection get _rest => economy.balance.section('rest');
+
+  /// [game] descansa un rato después de cada partida.
+  bool restsAfterPlay(String game) => _rest.strings('games').contains(game);
+
+  /// Cuánto le falta a [game] para poder jugarse de nuevo (cero si ya está).
+  Duration restLeft(String game, {DateTime? now}) {
+    final until = _restUntil[game];
+    if (until == null) return Duration.zero;
+    final d = DateTime.fromMillisecondsSinceEpoch(until).difference(now ?? DateTime.now());
+    return d.isNegative ? Duration.zero : d;
+  }
+
+  int get restSkipCost => _rest.i('skipLotus');
+  bool canSkipRest(String game, {DateTime? now}) => restLeft(game, now: now) > Duration.zero && lotus >= restSkipCost;
+
+  /// Termina el descanso de [game] pagando lotos.
+  bool skipRest(String game, {DateTime? now}) {
+    if (!canSkipRest(game, now: now)) return false;
+    lotus -= restSkipCost;
+    _restUntil.remove(game);
+    _prefs.setString('rest', jsonEncode(_restUntil));
+    _saveWallet();
+    notifyListeners();
+    return true;
   }
 
   /// La torre como quedó después de una partida; lo juntado hasta ahora se cobra.

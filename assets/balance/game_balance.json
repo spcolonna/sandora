@@ -13,6 +13,12 @@
     "fullRuns": 3,
     "factorAfter": 0.5
   },
+  "rest": {
+    "_comment": "Después de cada partida estos lugares descansan `minutes` minutos (sin la regla de repeats); seguir ya cuesta skipLotus lotos.",
+    "games": ["sand", "stack"],
+    "minutes": 30,
+    "skipLotus": 1
+  },
   "rewards": {
     "stack": { "essence": "sand", "pebblesBase": 4, "pebblesPerStar": 4, "essencePerStar": 2 },
     "sand": { "essence": "sand", "pebblesBase": 4, "pebblesPerStar": 4, "essencePerStar": 2 },
@@ -108,22 +114,24 @@
   "meditation": {
     "_comment": "rewards: sesión completa de esa duración. perMinute: sesión cortada o duración a medida, sin bonus. Pasado dailyCapMinutes en el día no paga. Cada streakObjectEvery días de racha se gana el siguiente de streakObjects (queda en el jardín, junto al cerezo).",
     "unlockLevel": 5,
-    "durations": [3, 5, 10, 15, 20],
+    "durations": [1, 3, 5, 10, 15, 20],
     "dailyCapMinutes": 20,
-    "streakMinMinutes": 3,
+    "streakMinMinutes": 1,
     "streakObjectEvery": 7,
     "streakObjects": ["bowl", "cushion", "lantern"],
     "intervalBellMinutes": 5,
     "breathIn": 4,
     "breathOut": 6,
     "rewards": {
+      "1": { "pebbles": 5, "light": 0, "calm": 5, "serenity": 7 },
       "3": { "pebbles": 15, "light": 1, "calm": 15, "serenity": 20 },
       "5": { "pebbles": 30, "light": 2, "calm": 25, "serenity": 35 },
       "10": { "pebbles": 70, "light": 4, "calm": 45, "serenity": 60 },
       "15": { "pebbles": 110, "light": 6, "calm": 60, "serenity": 80 },
       "20": { "pebbles": 150, "light": 8, "calm": 75, "serenity": 100 }
     },
-    "perMinute": { "pebbles": 5, "light": 0.34, "calm": 4, "serenity": 5 }
+    "perMinute": { "pebbles": 5, "light": 0.34, "calm": 4, "serenity": 5 },
+    "guided": { "_comment": "Meditación guiada (frases sobre el anillo): se desbloquea una vez pagando lotus.", "lotus": 5 }
   },
   "stack": {
     "_comment": "Cada partida trae una bolsa de piedras que se suman a la torre guardada. No hay física exacta: al apoyar una piedra se mide qué tan corrida quedó (offRatio: 0 centro, 1 borde). Hasta safeRatio * estabilidad es firme; más allá sube la probabilidad de que ceda (fallScale * severidad^fallExponent, segura desde sureFall). Si cede, caen lossScale * altura^lossExponent * (0.2..0.9 según severidad) * azar. heightRiskAt: altura con el máximo riesgo por altura.",
@@ -261,6 +269,10 @@
     "densityEnd": 0.9,
     "doubleFrom": 0.5,
     "doubleChance": 0.15,
+    "_pairs": "Nunca dos gotas a la vez: la segunda del par llega pairGap s después, entre gotas hay al menos minGap s y en pairWindow s caben como mucho dos.",
+    "pairGap": 0.25,
+    "minGap": 0.22,
+    "pairWindow": 0.6,
     "stars": [0.6, 0.8, 0.92],
     "_burst": "Chubascos: la densidad sube y baja hasta burstAmp (fracción) con un período de burstPeriod segundos.",
     "burstAmp": 0.35,

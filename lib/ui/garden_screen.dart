@@ -23,6 +23,7 @@ import 'fx/sfx.dart';
 import 'garden/garden_scene.dart';
 import 'garden/garden_view.dart';
 import 'market_screen.dart';
+import 'rest_sheet.dart';
 import 'widgets/daily_goals.dart';
 import 'widgets/garden_sign.dart';
 import 'meditation/meditation_screen.dart';
@@ -209,7 +210,14 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
         final m = minigames.where((m) => m.id == place.name).firstOrNull;
         if (m == null) return;
         final p = Progress.instance;
-        if (p.gameUnlocked(m.id)) return _open(m);
+        if (p.gameUnlocked(m.id)) {
+          // Recién jugado, el lugar descansa: se espera o se sigue con lotos.
+          if (p.restLeft(m.id) > Duration.zero) {
+            SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+            if (!await showRestSheet(context, m.id) || !mounted) return;
+          }
+          return _open(m);
+        }
         if (p.unlockZone(m.id) != null) {
           await showExpansionsSheet(context);
           if (mounted) _announceUnlocks();

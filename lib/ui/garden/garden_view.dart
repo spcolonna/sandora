@@ -1,5 +1,6 @@
+import 'dart:async';
 import 'dart:math';
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show FontFeature, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import '../../minigames/enso/enso_ink.dart';
 import '../fx/calm.dart';
 import '../fx/reward_flight.dart';
 import '../fx/sfx.dart';
+import '../rest_sheet.dart';
 import '../theme/palette.dart';
 import '../widgets/currency.dart';
 import '../widgets/glass.dart';
@@ -455,6 +457,9 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
         if (widget.side == 0 && p.visitorState != VisitorState.none)
           _VisitorSpot(layout: layout, life: _life, seconds: () => _t),
         if (widget.side == 0) _TowerCollect(above: layout.places[Place.stack]!),
+        for (final place in [Place.sand, Place.stack])
+          if (layout.places[place] case final r? when p.restLeft(place.name) > Duration.zero)
+            _RestBadge(key: ValueKey('rest${place.name}'), game: place.name, under: r),
         if (widget.side == 0)
           for (final g in cycle.giftsAt(now, weather, afterRain: afterRain))
             for (final i in [
@@ -1010,6 +1015,72 @@ class _LabelLayout extends SingleChildLayoutDelegate {
 }
 
 /// Lo que la torre juntó: aparece arriba de ella para cobrarlo con un toque.
+/// Sello chico sobre un lugar que descansa: cuánto falta. No tapa el toque.
+class _RestBadge extends StatefulWidget {
+  final String game;
+  final Rect under;
+  const _RestBadge({super.key, required this.game, required this.under});
+
+  @override
+  State<_RestBadge> createState() => _RestBadgeState();
+}
+
+class _RestBadgeState extends State<_RestBadge> {
+  late final Timer _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tick.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final left = Progress.instance.restLeft(widget.game);
+    // Al terminar el descanso el sello se va solo.
+    if (left == Duration.zero) return const SizedBox.shrink();
+    return Positioned(
+      left: widget.under.center.dx,
+      top: widget.under.bottom,
+      child: IgnorePointer(
+        child: FractionalTranslation(
+          translation: const Offset(-0.5, -1.2),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Palette.paper.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Palette.ink.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.hourglass_bottom_rounded, size: 14, color: Palette.ink.withValues(alpha: 0.7)),
+                const SizedBox(width: 4),
+                Text(
+                  restClock(left),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Palette.ink.withValues(alpha: 0.8),
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _TowerCollect extends StatelessWidget {
   final Rect above;
   const _TowerCollect({required this.above});
