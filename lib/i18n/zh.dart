@@ -489,4 +489,9 @@ const zh = <String, String>{
   'model.upgrades': '升级',
   'model.upgradesDesc': '每个地点都能升级：收获更多，也更好看',
   'guide.modelBack': '回到庭院：沙盘在桌子上',
+  'model.walk': '漫步',
+  'walk.end': '轻触结束漫步',
+  'walk.decor': '你的装饰',
+  'walk.place': '花园一角',
+  'model.flip': '翻转',
 };

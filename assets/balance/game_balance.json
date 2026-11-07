@@ -394,7 +394,7 @@
     ]
   },
   "model": {
-    "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. colX/rowY: dónde queda el pie de cada columna y fila, en fracción de la vista. table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo).",
+    "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. feet: dónde queda el pie de cada parcela (x, y) en cada vista, en fracción de la vista (el patio pintado, del lienzo); elegidos a mano para no tapar los lugares. table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo).",
     "cols": 4,
     "rows": 3,
     "start": [5, 6, 9, 10],
@@ -402,12 +402,15 @@
     "growth": 1.15,
     "lotusLast": 2,
     "lotus": 1,
-    "colX": [[0.2, 0.4, 0.6, 0.8], [0.15, 0.38, 0.62, 0.85], [0.15, 0.38, 0.62, 0.85]],
-    "rowY": [[0.6, 0.77, 0.94], [0.72, 0.83, 0.94], [0.74, 0.84, 0.94]],
-    "table": [0.14, 0.7, 0.725]
+    "feet": [
+      [[0.23, 0.625], [0.44, 0.606], [0.562, 0.604], [0.789, 0.668], [0.242, 0.761], [0.428, 0.806], [0.556, 0.823], [0.737, 0.73], [0.23, 0.905], [0.405, 0.893], [0.574, 0.893], [0.772, 0.905]],
+      [[0.08, 0.622], [0.27, 0.622], [0.47, 0.622], [0.66, 0.622], [0.12, 0.75], [0.36, 0.75], [0.6, 0.75], [0.84, 0.75], [0.1, 0.875], [0.36, 0.875], [0.62, 0.875], [0.88, 0.875]],
+      [[0.1, 0.665], [0.42, 0.63], [0.62, 0.68], [0.9, 0.665], [0.12, 0.85], [0.37, 0.85], [0.62, 0.85], [0.87, 0.85], [0.1, 0.905], [0.36, 0.905], [0.62, 0.905], [0.9, 0.905]]
+    ],
+    "table": [0.12, 0.696, 0.625]
   },
   "upgrades": {
-    "_comment": "Mejoras de los lugares con minijuego (desde el modo Decorar). Cada lugar tiene estos niveles en orden: se compran con Piedritas y essence de la esencia de ese minijuego, desde el nivel del jugador level. bonus: cuánto más rinden en Piedritas sus partidas. Cada nivel se ve en el jardín (borde de piedras, farolito, brillo). places: los lugares que se mejoran (ids de minijuego).",
+    "_comment": "Mejoras de los lugares con minijuego (desde la Maqueta). Cada lugar tiene estos niveles en orden: se compran con Piedritas y essence de la esencia de ese minijuego, desde el nivel del jugador level. bonus: cuánto más rinden en Piedritas sus partidas. Cada nivel se ve en el jardín (borde de piedras, farolito, brillo). places: los lugares que se mejoran (ids de minijuego).",
     "places": ["sand", "stack", "rain", "pond", "shishi", "leaves", "moss", "bonsai", "enso", "bell", "matcha", "flute", "lanterns"],
     "tiers": [
       { "level": 4, "pebbles": 150, "essence": 10, "bonus": 0.05 },

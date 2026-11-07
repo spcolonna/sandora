@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -92,11 +93,53 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     if (p.guideStep == Guide.place && p.decor.any((d) => d.placed)) p.advanceGuide(Guide.level2);
     _celebrate();
     if (focus == null) return;
+    final index = focus.index;
+    if (index == null) return _walk(focus.side);
     if (focus.side != _page) {
       await _pages.animateToPage(focus.side, duration: _pageTurn, curve: Calm.curve);
       if (!mounted) return;
     }
-    setState(() => _focus = (focus.index, ++_focusAsks));
+    setState(() => _focus = (index, ++_focusAsks));
+  }
+
+  /// El paseo en primera persona: la vista en que camina la cámara y su
+  /// pedido (null, sin paseo), y en qué se paró.
+  int _walkSide = 0;
+  int? _walkAsk;
+  var _walkAsks = 0;
+  (String, String)? _walkStop;
+  Completer<void>? _walkSideDone;
+
+  bool get _walking => _walkAsk != null;
+
+  /// Pasea desde la vista [from] hasta el bosque; se termina tocando.
+  Future<void> _walk(int from) async {
+    setState(() => _panel = _Panel.none);
+    for (var side = from; side < 3; side++) {
+      if (side != _page) {
+        setState(() => _walkStop = null);
+        await _pages.animateToPage(side, duration: const Duration(milliseconds: 900), curve: Curves.easeInOutSine);
+        if (!mounted || (side != from && !_walking)) return;
+      }
+      final done = _walkSideDone = Completer<void>();
+      setState(() {
+        _walkSide = side;
+        _walkAsk = ++_walkAsks;
+      });
+      await done.future;
+      if (!mounted || !_walking) return;
+    }
+    _endWalk();
+  }
+
+  void _endWalk() {
+    if (!_walking) return;
+    if (_walkSideDone case final d? when !d.isCompleted) d.complete();
+    SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+    setState(() {
+      _walkAsk = null;
+      _walkStop = null;
+    });
   }
 
   Timer? _tick, _fadeTick;
@@ -129,6 +172,12 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     Progress.instance.addListener(_announceGoals);
     CloudSave.instance.restored.addListener(_celebrate);
     WidgetsBinding.instance.addPostFrameCallback((_) => _announceGoals());
+    // Para ver el paseo sin tocar nada: `--dart-define=SANDORA_WALK=true`.
+    if (_autoWalk && kDebugMode) {
+      Future<void>.delayed(const Duration(seconds: 4), () {
+        if (mounted) _walk(0);
+      });
+    }
     // Hoy ya se entró: los recordatorios arrancan mañana.
     Reminders.instance.reschedule();
     // La torre junta Piedritas y la luz del día y el clima cambian en tiempo
@@ -393,7 +442,9 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                       Positioned.fill(
                         child: PageView(
                           controller: _pages,
-                          physics: _zoomed ? const NeverScrollableScrollPhysics() : const _QuickPagePhysics(),
+                          physics: _zoomed || _walking
+                              ? const NeverScrollableScrollPhysics()
+                              : const _QuickPagePhysics(),
                           onPageChanged: (i) => setState(() => _page = i),
                           children: [
                             for (final side in [0, 1, 2])
@@ -405,6 +456,9 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                                 onZoom: side == 0 ? (z) => setState(() => _zoomed = z) : null,
                                 onModel: side == 0 ? _model : null,
                                 focus: side == _page ? _focus : null,
+                                walk: side == _walkSide ? _walkAsk : null,
+                                onWalkStop: (name, kind) => setState(() => _walkStop = (name, kind)),
+                                onWalkDone: () => _walkSideDone?.complete(),
                                 top: top,
                                 bottom: bottom,
                               ),
@@ -428,9 +482,18 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                         top: 0,
                         child: SafeArea(
                           bottom: false,
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 250),
-                            child: _Hud(now: now, weather: weather, panel: _panel, onPanel: _toggle, onMarket: _market),
+                          child: _Hidden(
+                            hidden: _walking,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 250),
+                              child: _Hud(
+                                now: now,
+                                weather: weather,
+                                panel: _panel,
+                                onPanel: _toggle,
+                                onMarket: _market,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -448,6 +511,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                             ),
                           ),
                           child: switch (_panel) {
+                            _ when _walking => const SizedBox.shrink(),
                             _Panel.wallet => _WalletPanel(onMarket: _market),
                             _Panel.level => const _LevelPanel(),
                             _Panel.none when p.guideStep == Guide.market => _GuideHint(
@@ -479,12 +543,26 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                         right: 0,
                         bottom: pad.bottom + 10,
                         child: Center(
-                          child: _SideDots(
-                            page: _page,
-                            onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
+                          child: _Hidden(
+                            hidden: _walking,
+                            child: _SideDots(
+                              page: _page,
+                              onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
+                            ),
                           ),
                         ),
                       ),
+                      // Paseando: franjas de cine, lo que se está mirando y,
+                      // tocando en cualquier lado, se termina.
+                      if (_walking)
+                        Positioned.fill(
+                          child: GestureDetector(
+                            key: const ValueKey('walkEnd'),
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _endWalk,
+                          ),
+                        ),
+                      _WalkFrame(on: _walking, stop: _walkStop),
                     ],
                   ),
                 ),
@@ -499,12 +577,93 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
 enum _Panel { none, wallet, level }
 
+/// Algo de la pantalla que se esconde (y no se toca) durante el paseo.
+class _Hidden extends StatelessWidget {
+  final bool hidden;
+  final Widget child;
+  const _Hidden({required this.hidden, required this.child});
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    ignoring: hidden,
+    child: AnimatedOpacity(opacity: hidden ? 0 : 1, duration: Calm.appear, curve: Calm.curve, child: child),
+  );
+}
+
+/// El marco del paseo: franjas arriba y abajo, como en el cine, y abajo el
+/// nombre de lo que se está mirando.
+class _WalkFrame extends StatelessWidget {
+  final bool on;
+  final (String, String)? stop;
+  const _WalkFrame({required this.on, required this.stop});
+
+  @override
+  Widget build(BuildContext context) {
+    final pad = MediaQuery.paddingOf(context);
+    final text = Theme.of(context).textTheme;
+    const dur = Duration(milliseconds: 700);
+    final bar = Palette.ink.withValues(alpha: 0.82);
+    final topH = pad.top + 36, bottomH = pad.bottom + 92;
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          AnimatedPositioned(
+            duration: dur,
+            curve: Calm.curve,
+            left: 0,
+            right: 0,
+            top: on ? 0 : -topH,
+            height: topH,
+            child: ColoredBox(color: bar),
+          ),
+          AnimatedPositioned(
+            duration: dur,
+            curve: Calm.curve,
+            left: 0,
+            right: 0,
+            bottom: on ? 0 : -bottomH,
+            height: bottomH,
+            child: Container(
+              color: bar,
+              alignment: Alignment.topCenter,
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: Column(
+                  key: ValueKey(stop),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      stop?.$1 ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.titleMedium?.copyWith(color: Palette.paper, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      stop == null ? tr('walk.end') : '${stop!.$2} · ${tr('walk.end')}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.bodySmall?.copyWith(color: Palette.paper.withValues(alpha: 0.65)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Alto de la fila de arriba y a qué tamaño va el cartel del jardín.
 const _hudRow = 56.0, _signScale = 0.78;
 
 /// Mientras la página se mueve, el PageView no deja tocar los lugares (el
 /// primer toque solo la frena): se asienta rápido para que eso casi no pase.
 const _pageTurn = Duration(milliseconds: 300);
+const _autoWalk = bool.fromEnvironment('SANDORA_WALK');
 
 class _QuickPagePhysics extends PageScrollPhysics {
   const _QuickPagePhysics({super.parent});

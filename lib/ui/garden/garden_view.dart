@@ -35,6 +35,7 @@ part 'garden_model_table.dart';
 part 'garden_sky.dart';
 part 'garden_upgrades.dart';
 part 'garden_visitor.dart';
+part 'garden_walk.dart';
 
 /// El jardín es el menú: cada lugar se toca para entrar (minijuegos, Mercado,
 /// tablón, meditación). Cambia con la hora del dispositivo y el clima y, según
@@ -62,6 +63,14 @@ class GardenView extends StatefulWidget {
   /// cambia en cada pedido): la cámara se acerca y se marca un rato.
   final (int, int)? focus;
 
+  /// Un paseo por esta vista (un número que cambia en cada pedido; null, sin
+  /// paseo): la cámara camina de lo de adelante a lo del fondo, parándose en
+  /// cada lugar y decoración. [onWalkStop] dice en qué se paró (nombre y qué
+  /// es) y [onWalkDone], que terminó la vista.
+  final int? walk;
+  final void Function(String name, String kind)? onWalkStop;
+  final VoidCallback? onWalkDone;
+
   /// Lo que ocupan arriba y abajo los controles que flotan sobre el jardín.
   final double top, bottom;
 
@@ -74,6 +83,9 @@ class GardenView extends StatefulWidget {
     this.side = 0,
     this.onModel,
     this.focus,
+    this.walk,
+    this.onWalkStop,
+    this.onWalkDone,
     this.top = 0,
     this.bottom = 0,
   });
@@ -107,6 +119,13 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
     if (widget.focus != null && widget.focus != old.focus) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _showDecor(widget.focus!.$1));
     }
+    if (widget.walk != old.walk) {
+      if (widget.walk case final id?) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _startWalk(id));
+      } else {
+        _stopWalk();
+      }
+    }
   }
 
   /// Se acerca a la decoración [i] y la marca unos segundos.
@@ -118,9 +137,13 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
       if (mounted) setState(() => _marked = null);
     });
     final r = _decorRects[i];
-    if (_painted && r != null) {
-      final c = (r.center + _stageOrigin) * _visitZoom;
-      await _glide(_visitZoom, _box.center(Offset.zero) - c);
+    if (r == null) return;
+    final c = (r.center + _stageOrigin) * _visitZoom;
+    await _glide(_visitZoom, _box.center(Offset.zero) - c);
+    // Fuera del patio pintado la cámara no se maneja con los dedos: vuelve sola.
+    if (!_painted && mounted && _walking == null) {
+      await Future<void>.delayed(const Duration(milliseconds: 2600));
+      if (mounted && _walking == null) await _glide(1, Offset.zero);
     }
   }
 
@@ -146,10 +169,14 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
 
   bool get _painted => widget.side == 0 && GardenLayout.hasCourtArt;
 
+  /// Hasta dónde llega la cámara: el lienzo del patio pintado o, en las otras
+  /// vistas, la pantalla.
+  Rect get _camBounds => _painted ? _stageRect : Offset.zero & _box;
+
   /// Sin salirse del jardín: siempre cubre toda la vista (si el arte es más
   /// ancho o más alto que la vista, se puede recorrer lo que sobra).
   Offset _clampShift(Offset s, double z) {
-    final r = _stageRect;
+    final r = _camBounds;
     return Offset(
       s.dx.clamp(min(_box.width - r.right * z, -r.left * z), -r.left * z),
       s.dy.clamp(min(_box.height - r.bottom * z, -r.top * z), -r.top * z),
@@ -166,11 +193,26 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
     if ((_zoom > 1.01) != was) widget.onZoom?.call(!was);
   }
 
-  Future<void> _glide(double z, Offset s) async {
+  /// Lleva la cámara a acercamiento [z] y corrimiento [s]. Con [steps], va
+  /// caminando: se mece un poco y suenan los pasos.
+  Future<void> _glide(double z, Offset s, {int ms = 520, int steps = 0}) async {
     final z0 = _zoom, s0 = _shift, s1 = _clampShift(s, z.clamp(1.0, _maxZoom));
+    _cam.duration = Duration(milliseconds: ms);
+    var stepped = 0;
     void step() {
-      final t = Curves.easeInOutCubic.transform(_cam.value);
-      _setCam(lerpDouble(z0, z, t)!, Offset.lerp(s0, s1, t)!);
+      final v = _cam.value;
+      final t = (steps > 0 ? Curves.easeInOutSine : Curves.easeInOutCubic).transform(v);
+      var bob = Offset.zero;
+      if (steps > 0) {
+        // Cada paso, la vista baja y sube un poquito.
+        bob = Offset(0, -sin(v * steps * pi).abs() * 4.0);
+        final n = (v * steps).floor();
+        if (n > stepped && n < steps) {
+          stepped = n;
+          SoundBoard.instance.play(Sfx.stoneSand, volume: 0.08);
+        }
+      }
+      _setCam(lerpDouble(z0, z, t)!, Offset.lerp(s0, s1, t)! + bob);
     }
 
     if (_camStep != null) _cam.removeListener(_camStep!);
@@ -181,6 +223,12 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
       // Lo frenó un dedo u otro viaje.
     }
   }
+
+  /// La vista de la última vez que se dibujó (para el paseo).
+  GardenLayout? _layout;
+
+  /// El paseo en curso (su número), si hay uno.
+  int? _walking;
 
   /// Tocar un lugar: la cámara se acerca a él, se entra y, al volver, se
   /// aleja hasta ver todo el jardín.
@@ -304,6 +352,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
         final layout = painted
             ? GardenLayout.court(stage.size)
             : GardenLayout(stage.size, p.patioSize, side: widget.side, bottom: widget.bottom);
+        _layout = layout;
         final size = layout.size;
         final decor = [
           for (final (i, d) in p.decor.indexed)
@@ -322,7 +371,16 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
             ),
           ],
         );
-        if (!painted) return world;
+        // Fuera del patio pintado, la cámara solo se mueve sola (paseo, ver
+        // una decoración).
+        if (!painted) {
+          return ClipRect(
+            child: Transform(
+              transform: Matrix4.diagonal3Values(_zoom, _zoom, 1)..setTranslationRaw(_shift.dx, _shift.dy, 0),
+              child: world,
+            ),
+          );
+        }
         return Listener(
           onPointerDown: _fingerDown,
           onPointerMove: _fingerMove,
@@ -343,7 +401,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
                 right: 18,
                 bottom: widget.bottom + 6,
                 child: AnimatedScale(
-                  scale: _zoom > 1.01 ? 1 : 0,
+                  scale: _zoom > 1.01 && _walking == null ? 1 : 0,
                   duration: Calm.appear,
                   curve: Calm.curve,
                   child: GestureDetector(
@@ -407,7 +465,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
       decor: [
         for (final (i, id, r) in decor)
           // Las tumbadas las dibuja su cuidado, inclinadas.
-          if (!p.care.any((t) => t.decor == i)) (id, r),
+          if (!p.care.any((t) => t.decor == i)) (id, r, p.decor[i].flip),
       ],
     );
     return [
@@ -439,13 +497,10 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
             rect: e.value,
             child: _PlaceArea(onTap: () => _visit(e.key, e.value)),
           ),
-        for (final e in layout.labels.entries)
-          _Label(
-            at: e.value,
-            place: e.key,
-            scale: painted ? 1 / _zoom : 1,
-            onTap: () => _visit(e.key, layout.places[e.key]!),
-          ),
+        // Paseando, el nombre va abajo, en el marco: los cartelitos se esconden.
+        if (_walking == null)
+          for (final e in layout.labels.entries)
+            _Label(at: e.value, place: e.key, scale: 1 / _zoom, onTap: () => _visit(e.key, layout.places[e.key]!)),
         for (final t in p.careOn(widget.side))
           if (_careRect(t, layout, p) case final r?)
             _CareSpot(key: ValueKey('care${t.id}'), task: t, rect: r, onFix: (at) => _fixCare(t, at)),

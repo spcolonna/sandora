@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandora/balance/balance.dart';
 import 'package:sandora/garden/daily_goals.dart';
+import 'package:sandora/garden/decor.dart';
 import 'package:sandora/garden/levels.dart';
 import 'package:sandora/garden/progress.dart';
 import 'package:sandora/garden/weather.dart';
@@ -93,7 +94,7 @@ class SimResult {
 
   /// Decoraciones compradas (día de la primera y total) y Piedritas gastadas en ellas.
   int? firstDecorDay;
-  int decorBought = 0, decorPebbles = 0;
+  int decorBought = 0, decorPebbles = 0, parcelsBought = 0, parcelPebbles = 0;
   late Map<String, int> end;
   late int level;
 
@@ -179,6 +180,31 @@ Future<SimResult> simulate(Balance balance, Profile profile, {int days = 60, int
     }
   }
 
+  /// La pone en la Maqueta: en la primera parcela libre o, si no queda
+  /// ninguna, abre una con Piedritas si alcanza sin tocar lo guardado.
+  void place(String id, Map<String, int> keep) {
+    final m = p.modelRules;
+    for (var side = 0; side < ModelRules.sides; side++) {
+      for (var c = 0; c < m.cells; c++) {
+        if (p.parcelOpen(side, c) && p.decorAt(side, c) == null) {
+          p.placeDecor(id, side, c);
+          return;
+        }
+      }
+    }
+    for (var side = 0; side < ModelRules.sides; side++) {
+      final cost = p.parcelCost(side);
+      final pebbles = cost['pebbles'];
+      if (pebbles == null || p.pebbles - pebbles < (keep['pebbles'] ?? 0)) continue;
+      final c = [for (var c = 0; c < m.cells; c++) c].firstWhere((c) => !p.parcelOpen(side, c));
+      if (!p.buyParcel(side, c)) continue;
+      r.parcelsBought++;
+      r.parcelPebbles += pebbles;
+      p.placeDecor(id, side, c);
+      return;
+    }
+  }
+
   /// Con lo que sobra después de guardar para la próxima ampliación, compra
   /// la decoración más barata que alcance, de a una por sesión.
   void decorate(int day) {
@@ -198,6 +224,7 @@ Future<SimResult> simulate(Balance balance, Profile profile, {int days = 60, int
     r.firstDecorDay ??= day + 1;
     r.decorBought++;
     r.decorPebbles += cost;
+    place(d.id, keep);
   }
 
   for (var day = 0; day < days; day++) {
@@ -322,6 +349,9 @@ String report(Balance balance, List<List<SimResult>> runs) {
     '${'decoraciones'.padRight(16)}${[for (final rs in runs) cell(median(rs.map((r) => r.decorBought))).padLeft(10)].join()}',
   );
   b.writeln(
+    '${'parcelas'.padRight(16)}${[for (final rs in runs) cell(median(rs.map((r) => r.parcelsBought))).padLeft(10)].join()}',
+  );
+  b.writeln(
     '${'nivel final'.padRight(16)}${[for (final rs in runs) cell(median(rs.map((r) => r.level))).padLeft(10)].join()}',
   );
 
@@ -338,7 +368,7 @@ String report(Balance balance, List<List<SimResult>> runs) {
     }
     b.writeln(
       '  Al final: ${[for (final k in wallet) '$k ${r.end[k]}'].join(', ')}; lotos gastados ${r.lotusSpent}; '
-      'en decoraciones ${r.decorPebbles} piedritas',
+      'en decoraciones ${r.decorPebbles} piedritas, en ${r.parcelsBought} parcelas ${r.parcelPebbles}',
     );
     if (r.blockedBy.isNotEmpty) {
       b.writeln('  Días con el nivel pero sin la plata:');

@@ -25,16 +25,17 @@ void main() {
 
   test('las reglas de la maqueta son coherentes', () {
     final m = ModelRules(balance);
-    expect(m.colX.length, ModelRules.sides);
-    expect(m.rowY.length, ModelRules.sides);
+    expect(m.feet.length, ModelRules.sides);
     for (var s = 0; s < ModelRules.sides; s++) {
-      expect(m.colX[s].length, m.cols);
-      expect(m.rowY[s].length, m.rows);
-      for (var r = 1; r < m.rows; r++) {
-        expect(m.rowY[s][r], greaterThan(m.rowY[s][r - 1]), reason: 'la fila 0 es la del fondo');
+      expect(m.feet[s].length, m.cells);
+      for (var c = m.cols; c < m.cells; c++) {
+        expect(m.foot(s, c).$2, greaterThan(m.foot(s, c - m.cols).$2), reason: 'la fila 0 es la del fondo ($s, $c)');
       }
-      for (final v in [...m.colX[s], ...m.rowY[s]]) {
-        expect(v, inInclusiveRange(0.05, 0.97), reason: 'el pie queda dentro de la vista');
+      for (var c = 0; c < m.cells; c++) {
+        final (x, y) = m.foot(s, c);
+        expect(x, inInclusiveRange(0.05, 0.95), reason: 'el pie queda dentro de la vista');
+        expect(y, inInclusiveRange(0.55, 0.95));
+        if (m.col(c) > 0) expect(x, greaterThan(m.foot(s, c - 1).$1), reason: 'la columna 0 es la de la izquierda');
       }
     }
     expect(m.start.every((c) => c >= 0 && c < m.cells), isTrue);
@@ -139,5 +140,20 @@ void main() {
     final cells = [for (final d in p.decor) d.cell];
     await p.load(balance);
     expect([for (final d in p.decor) d.cell], cells);
+  });
+
+  test('una pieza se da vuelta y queda así al volver a abrir', () async {
+    final p = await rich();
+    final a = p.decorRules.items[0];
+    p.buyDecor(a);
+    final i = p.placeDecor(a.id, 0, p.modelRules.start.first)!;
+    expect(p.decor[i].flip, isFalse);
+    p.flipDecor(i);
+    expect(p.decor[i].flip, isTrue);
+    await p.load(balance);
+    expect(p.decor[i].flip, isTrue, reason: 'se guarda');
+    p.flipDecor(i);
+    await p.load(balance);
+    expect(p.decor[i].flip, isFalse);
   });
 }

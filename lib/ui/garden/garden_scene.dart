@@ -317,7 +317,7 @@ class GardenPainter extends CustomPainter {
   final SavedInk? ensoInk;
 
   /// Decoraciones puestas en esta vista y dónde va cada una.
-  final List<(String, Rect)> decor;
+  final List<(String, Rect, bool)> decor;
 
   final GardenLayer layer;
 
@@ -1270,7 +1270,7 @@ class GardenPainter extends CustomPainter {
       !_sameDecor(old.decor, decor);
 }
 
-bool _sameDecor(List<(String, Rect)> a, List<(String, Rect)> b) {
+bool _sameDecor(List<(String, Rect, bool)> a, List<(String, Rect, bool)> b) {
   if (a.length != b.length) return false;
   for (var i = 0; i < a.length; i++) {
     if (a[i] != b[i]) return false;

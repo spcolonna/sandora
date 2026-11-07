@@ -8,14 +8,19 @@ import 'garden_scene.dart';
 import 'scene_art.dart';
 
 /// Dónde se dibuja una decoración con el pie en [foot]: las del fondo de la
-/// vista se ven más chicas.
+/// vista se ven más chicas. El lienzo del patio pintado es más ancho que la
+/// pantalla (se recorta a los lados), así que ahí van más chicas para verse
+/// del mismo tamaño que en las otras vistas.
 Rect decorRect(DecorItem d, Offset foot, GardenLayout layout) {
   final g = layout.ground;
   final depth = ((foot.dy - g.top) / g.height).clamp(0.0, 1.0);
-  final w = d.size * layout.size.width * (0.9 + 0.5 * depth);
+  final w = d.size * layout.size.width * (0.9 + 0.5 * depth) * (layout.painted ? courtDecorScale : 1);
   final h = w * d.aspect;
   return Rect.fromLTWH(foot.dx - w / 2, foot.dy - h, w, h);
 }
+
+/// Cuánto más chicas van las decoraciones en el patio pintado.
+const courtDecorScale = 0.7;
 
 /// Dónde puede ir el pie de una decoración: sobre el suelo de la vista.
 Offset clampFoot(Offset foot, GardenLayout layout) {
@@ -28,7 +33,19 @@ Offset clampFoot(Offset foot, GardenLayout layout) {
 
 /// Una decoración en [r] (apoyada en su borde de abajo), con su sombra. Usa
 /// el arte `obj_decor_<id>` si está; si no, una versión pintada.
-void paintDecor(Canvas canvas, String id, Rect r) {
+void paintDecor(Canvas canvas, String id, Rect r, {bool flip = false}) {
+  if (flip) {
+    canvas.save();
+    canvas.translate(r.center.dx * 2, 0);
+    canvas.scale(-1, 1);
+    _paintDecor(canvas, id, r);
+    canvas.restore();
+  } else {
+    _paintDecor(canvas, id, r);
+  }
+}
+
+void _paintDecor(Canvas canvas, String id, Rect r) {
   canvas.drawOval(
     Rect.fromCenter(center: r.bottomCenter, width: r.width * 0.9, height: r.width * 0.16),
     Paint()..color = Palette.ink.withValues(alpha: 0.16),
@@ -242,9 +259,9 @@ void paintDecor(Canvas canvas, String id, Rect r) {
 }
 
 /// Las decoraciones de una vista, de atrás hacia adelante.
-void paintDecorations(Canvas canvas, List<(String, Rect)> decor) {
-  for (final (id, r) in [...decor]..sort((a, b) => a.$2.bottom.compareTo(b.$2.bottom))) {
-    paintDecor(canvas, id, r);
+void paintDecorations(Canvas canvas, List<(String, Rect, bool)> decor) {
+  for (final (id, r, flip) in [...decor]..sort((a, b) => a.$2.bottom.compareTo(b.$2.bottom))) {
+    paintDecor(canvas, id, r, flip: flip);
   }
 }
 

@@ -33,11 +33,14 @@ class PlacedDecor {
   int? side, cell;
   double x, y;
 
-  PlacedDecor(this.id, {this.side, this.cell, this.x = 0.5, this.y = 0.8});
+  /// Espejada: mira para el otro lado.
+  bool flip;
+
+  PlacedDecor(this.id, {this.side, this.cell, this.x = 0.5, this.y = 0.8, this.flip = false});
 
   bool get placed => side != null;
 
-  List<Object> toJson() => [id, side ?? -1, (x * 1000).round(), (y * 1000).round(), cell ?? -1];
+  List<Object> toJson() => [id, side ?? -1, (x * 1000).round(), (y * 1000).round(), cell ?? -1, if (flip) 1];
 
   /// Las guardadas antes de la Maqueta no traen parcela: se les busca una al cargar.
   factory PlacedDecor.fromJson(List<dynamic> j) {
@@ -48,6 +51,7 @@ class PlacedDecor {
       cell: side < 0 || cell < 0 ? null : cell,
       x: (j[2] as num) / 1000,
       y: (j[3] as num) / 1000,
+      flip: j.length > 5 && j[5] == 1,
     );
   }
 }
@@ -59,7 +63,9 @@ class ModelRules {
   final List<int> start;
   final int pebbles, lotusLast, lotus;
   final double growth;
-  final List<List<double>> colX, rowY;
+
+  /// Dónde queda el pie de cada parcela (x, y) en cada vista.
+  final List<List<(double, double)>> feet;
 
   /// La mesa en el patio pintado: ancho, centro x y base y.
   final (double, double, double) table;
@@ -72,16 +78,17 @@ class ModelRules {
       growth = balance.section('model').d('growth'),
       lotusLast = balance.section('model').i('lotusLast'),
       lotus = balance.section('model').i('lotus'),
-      colX = _grid(balance, 'colX'),
-      rowY = _grid(balance, 'rowY'),
+      feet = [
+        for (final side in (balance.section('model').raw('feet') as List))
+          [
+            for (final f in side as List)
+              if (f case [final num x, final num y]) (x.toDouble(), y.toDouble()) else (0.5, 0.8),
+          ],
+      ],
       table = switch (balance.section('model').list('table')) {
         [final w, final x, final y] => (w, x, y),
         _ => (0.15, 0.15, 0.9),
       };
-
-  static List<List<double>> _grid(Balance balance, String key) => [
-    for (final row in (balance.section('model').raw(key) as List)) [for (final v in row as List) (v as num).toDouble()],
-  ];
 
   static const sides = 3;
 
@@ -91,7 +98,7 @@ class ModelRules {
   int row(int cell) => cell ~/ cols;
 
   /// Dónde queda el pie de lo puesto en [cell] de la vista [side].
-  (double, double) foot(int side, int cell) => (colX[side][col(cell)], rowY[side][row(cell)]);
+  (double, double) foot(int side, int cell) => feet[side][cell];
 
   /// La parcela de [side] más cerca de ([x], [y]) entre [among].
   int nearest(int side, double x, double y, Iterable<int> among) {

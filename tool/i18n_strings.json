@@ -3414,5 +3414,40 @@
   "pt": "Volte ao pátio: a maquete está na mesa",
   "ja": "中庭に戻ろう。箱庭はテーブルの上です",
   "zh": "回到庭院：沙盘在桌子上"
+ },
+ "model.walk": {
+  "es": "Recorrer",
+  "en": "Walk",
+  "pt": "Passear",
+  "ja": "散策",
+  "zh": "漫步"
+ },
+ "walk.end": {
+  "es": "Tocá para terminar el paseo",
+  "en": "Tap to end the walk",
+  "pt": "Toque para terminar o passeio",
+  "ja": "タップで散策を終える",
+  "zh": "轻触结束漫步"
+ },
+ "walk.decor": {
+  "es": "Tu decoración",
+  "en": "Your decoration",
+  "pt": "Sua decoração",
+  "ja": "あなたの飾り",
+  "zh": "你的装饰"
+ },
+ "walk.place": {
+  "es": "Lugar del jardín",
+  "en": "Garden spot",
+  "pt": "Lugar do jardim",
+  "ja": "庭の場所",
+  "zh": "花园一角"
+ },
+ "model.flip": {
+  "es": "Dar vuelta",
+  "en": "Flip",
+  "pt": "Virar",
+  "ja": "向きを変える",
+  "zh": "翻转"
  }
 }

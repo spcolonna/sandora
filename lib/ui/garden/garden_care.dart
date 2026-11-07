@@ -351,7 +351,8 @@ class _CarePainter extends CustomPainter {
     canvas.translate(r.bottomCenter.dx, r.bottom);
     canvas.rotate(0.42 + wiggle * 0.15);
     canvas.translate(-r.bottomCenter.dx, -r.bottom);
-    paintDecor(canvas, Progress.instance.decor[task.decor!].id, r);
+    final d = Progress.instance.decor[task.decor!];
+    paintDecor(canvas, d.id, r, flip: d.flip);
     canvas.restore();
   }
 

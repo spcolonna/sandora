@@ -17,8 +17,9 @@ import 'widgets/currency.dart';
 import 'widgets/glass.dart';
 import 'widgets/washi.dart';
 
-/// Lo que pidió ver la Maqueta al cerrarse: la decoración [index] en la vista [side].
-typedef ModelFocus = ({int side, int index});
+/// Lo que pidió ver la Maqueta al cerrarse: la decoración [index] en la vista
+/// [side] o, sin [index], un paseo por el jardín desde esa vista.
+typedef ModelFocus = ({int side, int? index});
 
 /// La Maqueta: el jardín en miniatura sobre una mesa. Cada vista (patio,
 /// estanque, bosque) es una grilla de parcelas; se compran parcelas y se pone
@@ -156,11 +157,24 @@ class _ModelScreenState extends State<ModelScreen> {
     setState(() => _picked = null);
   }
 
+  void _flip() {
+    final i = _picked;
+    if (i == null) return;
+    SoundBoard.instance.play(Sfx.stoneSand, volume: 0.4);
+    p.flipDecor(i);
+  }
+
   void _seeInGarden() {
     final i = _picked;
     if (i == null) return;
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
     Navigator.of(context).pop<ModelFocus>((side: _side, index: i));
+  }
+
+  /// Pasear por el jardín, empezando por la zona que se está viendo.
+  void _walk() {
+    SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+    Navigator.of(context).pop<ModelFocus>((side: _side, index: null));
   }
 
   Future<void> _upgrades() async {
@@ -206,13 +220,16 @@ class _ModelScreenState extends State<ModelScreen> {
                           style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ),
-                      if (upgrades)
+                      InkButton.small(label: tr('model.walk'), onPressed: _walk),
+                      if (upgrades) ...[
+                        const SizedBox(width: 8),
                         Badge(
                           isLabelVisible: p.upgradeAvailable,
                           smallSize: 10,
                           backgroundColor: Palette.lantern,
                           child: InkButton.small(label: tr('model.upgrades'), onPressed: _upgrades),
                         ),
+                      ],
                     ],
                   ),
                 ),
@@ -254,7 +271,15 @@ class _ModelScreenState extends State<ModelScreen> {
                               Expanded(
                                 child: InkButton.small(label: tr('decor.store'), onPressed: _store),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 8),
+                              InkIconButton(
+                                key: const ValueKey('flip'),
+                                glyph: InkGlyph.replay,
+                                size: 40,
+                                tooltip: tr('model.flip'),
+                                onPressed: _flip,
+                              ),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: InkButton.small(label: tr('model.see'), onPressed: _seeInGarden),
                               ),
@@ -483,7 +508,9 @@ class _Cell extends StatelessWidget {
                     width: fw,
                     height: fh,
                     child: IgnorePointer(
-                      child: CustomPaint(painter: _Figure(item.id, lifted: picked)),
+                      child: CustomPaint(
+                        painter: _Figure(item.id, lifted: picked, flip: p.decor[decor!].flip),
+                      ),
                     ),
                   ),
                 ],
@@ -573,7 +600,8 @@ class _CostLine extends StatelessWidget {
 class _Figure extends CustomPainter {
   final String id;
   final bool lifted;
-  _Figure(this.id, {required this.lifted});
+  final bool flip;
+  _Figure(this.id, {required this.lifted, this.flip = false});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -588,11 +616,11 @@ class _Figure extends CustomPainter {
       );
       r = r.shift(Offset(0, -size.height * 0.08));
     }
-    paintDecor(canvas, id, r);
+    paintDecor(canvas, id, r, flip: flip);
   }
 
   @override
-  bool shouldRepaint(_Figure old) => old.id != id || old.lifted != lifted;
+  bool shouldRepaint(_Figure old) => old.id != id || old.lifted != lifted || old.flip != flip;
 }
 
 /// La bandeja de madera con el suelo de cada vista (arena rastrillada, el

@@ -499,6 +499,34 @@ class Progress extends ChangeNotifier {
       finishMeditation(now: now);
     }
     _saveSerenity(now);
+    // Para probar la Maqueta y el paseo: `--dart-define=SANDORA_DEMO=true`
+    // arma, una sola vez, un jardín avanzado con decoraciones en las tres vistas.
+    if (_demo && kDebugMode && !_prefs.containsKey('demo.seeded')) _seedDemo();
+  }
+
+  static const _demo = bool.fromEnvironment('SANDORA_DEMO');
+
+  void _seedDemo() {
+    _prefs.setBool('demo.seeded', true);
+    markGardenNameOffered();
+    calm = levels.calmToReach(12);
+    advanceGuide(Guide.done);
+    pebbles = 5000;
+    lotus = 20;
+    for (final e in essences.keys) {
+      essences[e] = 500;
+    }
+    final items = decorRules.items;
+    for (var side = 0; side < ModelRules.sides; side++) {
+      for (final (k, cell) in modelRules.start.indexed) {
+        final item = items[(side * 4 + k) % items.length];
+        if (buyDecor(item)) placeDecor(item.id, side, cell);
+      }
+    }
+    pebbles = 5000;
+    _prefs.setInt('calm', calm);
+    markUnlocksSeen([for (var n = 1; n <= level; n++) ...gamesAtLevel(n)]);
+    _saveWallet();
   }
 
   static const gardenNameMax = 24;
@@ -973,6 +1001,13 @@ class Progress extends ChangeNotifier {
   }
 
   /// Vuelve a guardar en la caja la decoración [i].
+  /// Espeja la decoración [i] (mira para el otro lado).
+  void flipDecor(int i) {
+    decor[i].flip = !decor[i].flip;
+    _saveDecor();
+    notifyListeners();
+  }
+
   void storeDecor(int i) {
     decor[i]
       ..side = null

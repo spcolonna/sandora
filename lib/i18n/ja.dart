@@ -489,4 +489,9 @@ const ja = <String, String>{
   'model.upgrades': '改良',
   'model.upgradesDesc': 'どの場所も改良できます。報酬が増えて見た目も良くなります',
   'guide.modelBack': '中庭に戻ろう。箱庭はテーブルの上です',
+  'model.walk': '散策',
+  'walk.end': 'タップで散策を終える',
+  'walk.decor': 'あなたの飾り',
+  'walk.place': '庭の場所',
+  'model.flip': '向きを変える',
 };
