@@ -22,13 +22,639 @@ conviene grabarlos), los shaders (`shd_*`, son código), el mapa de alturas de l
 
 # Para generar ahora
 
+## Bloque 26 — El Sendero (31)
+
+**Por qué ahora:** El Sendero es el jardín principal: hoy cielo, suelo, piedras, portones y carteles son de código.
+
+El jardín principal: un camino que se recorre en primera persona, con bifurcaciones hacia los juegos, portones entre zonas, carteles y huecos para decorar. Todo se ve **de frente, a la altura de los ojos** (no en la perspectiva desde arriba del patio). Los textos de carteles los escribe el juego: las tablas van vacías. **Estaciones que reusan arte que ya existe** (no hace falta pedirlas): Apilar `stack_pedestal`, Lluvia `obj_rain_vessel_03`, Shishi `obj_shishi_basin`, Musgo `obj_moss_rock`, Bonsái `obj_bonsai_table` + `obj_bonsai_pot`, Ensō `obj_callig_hall`, Campana `obj_temple_belltower`, Té `obj_tea_house`, Flauta `obj_bamboo_flute`, Linternas `obj_river_lantern`, tablón `obj_court_board`. Los visitantes reusan `char_visitor_*`. **Adjuntá `store/art/style/style_courtyard_ref.webp`.** En el juego van en `assets/images/path/`.
+
+### 1. `bg_path_hills_far` ⬜
+
+Guardala como `store/art/path/bg_path_hills_far.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a LANDSCAPE image with a 3:2 aspect ratio (1536×1024, not square, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a distant background band behind the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game repeats it side by side and slides it slowly as the player turns, so it must tile horizontally without a visible seam.
+
+SUBJECT: A soft range of distant blue-grey mountains with gentle peaks, washed in morning mist, very light and airy like the far mountains in the reference.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Frontal view at eye level. The band occupies the lower 45% of the canvas; everything above it is fully transparent (the game paints the sky). The bottom of the band is flat and fades softly into mist. Seamless horizontally: the left edge continues exactly into the right edge.
+
+DO NOT INCLUDE: sky, sun, clouds, buildings, paths, people, animals, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 2. `bg_path_hills_near` ⬜
+
+Guardala como `store/art/path/bg_path_hills_near.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a LANDSCAPE image with a 3:2 aspect ratio (1536×1024, not square, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a distant background band behind the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game repeats it side by side and slides it slowly as the player turns, so it must tile horizontally without a visible seam.
+
+SUBJECT: Closer rolling green hills with rounded clumps of pine, maple and cedar trees, a little darker and more saturated than the far mountains, still softened by haze.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Frontal view at eye level. The band occupies the lower 35% of the canvas; everything above it is fully transparent (the game paints the sky). The bottom of the band is flat and fades softly into mist. Seamless horizontally: the left edge continues exactly into the right edge.
+
+DO NOT INCLUDE: sky, sun, clouds, buildings, paths, people, animals, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 3. `tile_path_sand` ⬜
+
+Guardala como `store/art/path/tile_path_sand.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), fully opaque, with NO transparency.
+
+PURPOSE: This is a seamless ground texture for the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game repeats it in a grid and lays it flat in perspective toward the horizon, so it must tile perfectly in both directions.
+
+SUBJECT: Pale beige finely raked gravel of a zen courtyard, with soft parallel rake lines running across and a few tiny scattered pebbles.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen straight from above (top-down, 90 degrees), evenly lit with no directional shadows, filling the whole canvas edge to edge. Seamless: the left edge continues exactly into the right edge and the top into the bottom. Details stay small and spread evenly, with no single feature that would repeat visibly.
+
+DO NOT INCLUDE: objects, stones larger than a fist, plants taller than grass, people, animals, borders, vignette, light spots, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 4. `tile_path_moss` ⬜
+
+Guardala como `store/art/path/tile_path_moss.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), fully opaque, with NO transparency.
+
+PURPOSE: This is a seamless ground texture for the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game repeats it in a grid and lays it flat in perspective toward the horizon, so it must tile perfectly in both directions.
+
+SUBJECT: Soft short green moss mixed with patches of fine grey gravel and a few tiny clover leaves, like the ground around a garden pond.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen straight from above (top-down, 90 degrees), evenly lit with no directional shadows, filling the whole canvas edge to edge. Seamless: the left edge continues exactly into the right edge and the top into the bottom. Details stay small and spread evenly, with no single feature that would repeat visibly.
+
+DO NOT INCLUDE: objects, stones larger than a fist, plants taller than grass, people, animals, borders, vignette, light spots, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 5. `tile_path_forest` ⬜
+
+Guardala como `store/art/path/tile_path_forest.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), fully opaque, with NO transparency.
+
+PURPOSE: This is a seamless ground texture for the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game repeats it in a grid and lays it flat in perspective toward the horizon, so it must tile perfectly in both directions.
+
+SUBJECT: Shaded forest floor: dark soft earth covered with fallen bamboo and maple leaves in browns and dull greens, a few small fern sprigs and moss specks.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen straight from above (top-down, 90 degrees), evenly lit with no directional shadows, filling the whole canvas edge to edge. Seamless: the left edge continues exactly into the right edge and the top into the bottom. Details stay small and spread evenly, with no single feature that would repeat visibly.
+
+DO NOT INCLUDE: objects, stones larger than a fist, plants taller than grass, people, animals, borders, vignette, light spots, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 6. `tile_path_water` ⬜
+
+Guardala como `store/art/path/tile_path_water.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), fully opaque, with NO transparency.
+
+PURPOSE: This is a seamless ground texture for the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game repeats it in a grid and lays it flat in perspective toward the horizon, so it must tile perfectly in both directions.
+
+SUBJECT: Calm blue-green pond water seen from above, with soft painterly ripples, faint reflections of light and a hint of depth; no fish, no lily pads.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen straight from above (top-down, 90 degrees), evenly lit with no directional shadows, filling the whole canvas edge to edge. Seamless: the left edge continues exactly into the right edge and the top into the bottom. Details stay small and spread evenly, with no single feature that would repeat visibly.
+
+DO NOT INCLUDE: objects, stones larger than a fist, plants taller than grass, people, animals, borders, vignette, light spots, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 7. `obj_path_stone_01` ⬜
+
+Guardala como `store/art/path/obj_path_stone_01.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is one stepping stone of the garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game lays many of them flat along the path, in perspective, so the image is the stone seen from straight above.
+
+SUBJECT: One flat, slightly irregular rounded granite stepping stone, grey with warm undertones, a lightly worn top and a thin ring of moss around its edge.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen straight from above (top-down), centered, filling about 85% of the canvas width, wider than deep (about 3:2). Evenly lit. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel, grass, cast shadow, other stones, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 8. `obj_path_stone_02` ⬜
+
+Guardala como `store/art/path/obj_path_stone_02.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is one stepping stone of the garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). The game lays many of them flat along the path, in perspective, alternating with another stone, so the image is the stone seen from straight above.
+
+SUBJECT: One flat, more oval and slightly smaller granite stepping stone, a bit lighter and bluer grey, with a small chip on one side and a few moss specks.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen straight from above (top-down), centered, filling about 80% of the canvas width, wider than deep (about 3:2). Evenly lit. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, gravel, grass, cast shadow, other stones, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 9. `obj_path_gate` ⬜
+
+Guardala como `store/art/path/obj_path_gate.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. The player walks through it to enter the next zone. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to the full screen height), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: An open wooden gate between two zones of the garden: a simple torii-like frame of two round posts and a double lintel in weathered vermilion-red lacquer with dark grey caps, standing over the path so the player walks through the middle. Nothing inside the opening.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 10. `obj_path_gate_closed` ⬜
+
+Guardala como `store/art/path/obj_path_gate_closed.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. It blocks the way to a zone the player has not opened yet. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to the full screen height), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: Exactly the same vermilion torii-like gate, now closed: a thick twisted straw shimenawa rope hangs across the opening at chest height with white zigzag paper streamers, and a small round wooden plaque hangs from its middle (blank, the game draws a lock on it).
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 11. `obj_path_signpost` ⬜
+
+Guardala como `store/art/path/obj_path_signpost.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. It stands at a fork and tells where each branch leads. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to half the screen height), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A wooden garden signpost: one weathered cedar post with a small roof cap and two blank planks shaped like arrows, one pointing left and one pointing right, at slightly different heights. The planks are empty and smooth so the game can write on them.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 12. `obj_path_sign_soon` ⬜
+
+Guardala como `store/art/path/obj_path_sign_soon.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. It marks a part of the garden that will open later. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to a third of the screen height), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A small blank wooden tablet hanging by two cords from a short wooden crossbar on a single post, with a tiny roof on top. The tablet face is empty and smooth so the game can write on it.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 13. `obj_path_fence_closed` ⬜
+
+Guardala como `store/art/path/obj_path_fence_closed.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. It closes a branch of the path that leads to an activity not open yet. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to two thirds of the screen width), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A low closed bamboo fence across a narrow garden path: tied vertical bamboo poles with black twine knots, and in the middle a short indigo noren curtain hanging closed, a little faded. Wide, about twice as wide as tall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 14. `obj_station_sand` ⬜
+
+Guardala como `store/art/path/obj_station_sand.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. Tapping it opens the sand raking game. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to half the screen width), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A small rectangular raked-sand garden in a low wooden frame: pale sand with concentric rake lines around two small stones, and a wooden rake leaning on the frame. Wider than tall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 15. `obj_station_pond` ⬜
+
+Guardala como `store/art/path/obj_station_pond.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. Tapping it opens the koi pond game. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to half the screen width), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: The near edge of a small garden pond: a crescent of smooth wet stones and ferns framing a patch of blue-green water where two orange and white koi swim. Wider than tall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 16. `obj_station_leaves` ⬜
+
+Guardala como `store/art/path/obj_station_leaves.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. Tapping it opens the leaf sweeping game. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to half the screen height), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A small Japanese maple tree with red and orange leaves, a few leaves falling, and a soft pile of fallen leaves at its foot with a bamboo broom leaning on the trunk.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 17. `obj_station_meditation` ⬜
+
+Guardala como `store/art/path/obj_station_meditation.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. Tapping it starts a meditation. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to half the screen width), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A low square wooden meditation platform with a round dark-blue zafu cushion in the middle and a tiny incense holder with a thin wisp of smoke at one corner.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 18. `obj_path_pine` ⬜
+
+Guardala como `store/art/path/obj_path_pine.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to the full screen height), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A Japanese black pine with a gently leaning trunk and cloud-shaped layers of dark green needles, carefully pruned.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 19. `obj_path_maple` ⬜
+
+Guardala como `store/art/path/obj_path_maple.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to the full screen height), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A Japanese maple with a slender trunk and a soft rounded crown of small green leaves turning orange at the tips.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 20. `obj_path_bush` ⬜
+
+Guardala como `store/art/path/obj_path_bush.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to a third of the screen width), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A rounded clipped azalea bush, dense deep green with a few small pink flowers. Wider than tall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 21. `obj_path_grass` ⬜
+
+Guardala como `store/art/path/obj_path_grass.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to a fifth of the screen width), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A small clump of soft ornamental grass (hakone grass) with arching yellow-green blades. Wider than tall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 22. `obj_path_moss_rock` ⬜
+
+Guardala como `store/art/path/obj_path_moss_rock.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to a third of the screen width), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A low rounded garden rock covered on top with thick green moss, with a few small ferns at its base. Wider than tall.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 23. `obj_path_lantern_stone` ⬜
+
+Guardala como `store/art/path/obj_path_lantern_stone.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This object stands beside the path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars), which the player walks in first person. It lights the path at dusk. The game draws the ground, fog and distance itself and scales the object as the player walks closer (up to half the screen height), so the image must contain ONLY the object, matching the attached courtyard reference in light and brushwork.
+
+SUBJECT: A small stone lantern (a low yukimi-style lantern) of weathered grey granite with moss on its wide cap, its window glowing softly warm.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the object a few steps away: a frontal, almost horizontal view with only a very slight look down (about 5 degrees), no strong perspective distortion. The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette that still reads when it is small in the distance.
+
+DO NOT INCLUDE: any background, ground patch, sky, path or scenery behind the object; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 24. `spr_path_slot` ⬜
+
+Guardala como `store/art/path/spr_path_slot.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This marks a free spot beside the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars) where the player can place a decoration. The game lays it flat on the ground in perspective and makes it pulse softly.
+
+SUBJECT: A soft circle of tiny pale pebbles on the ground with a faint warm glow in the middle, like an invitation, very light and delicate.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen straight from above (top-down), centered, filling about 85% of the canvas. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, objects, plants, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 25. `spr_path_slot_locked` ⬜
+
+Guardala como `store/art/path/spr_path_slot_locked.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This marks a spot beside the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars) that is still closed; the player can pay to open it. The game lays it flat on the ground in perspective.
+
+SUBJECT: A small square of rough unraked earth bordered by four little wooden stakes joined by a thin straw rope.
+
+STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like the attached reference image of the courtyard: rich but soft, natural proportions and believable materials (weathered granite, deep green moss, finely raked pale gravel, aged warm wood, clay plaster). Atmospheric perspective: the distance is lighter, bluer and misty. Warm soft morning light from the upper left with gentle cast shadows toward the lower right. Subtle paper grain and visible soft brush texture, no harsh outlines.
+
+COMPOSITION: Seen straight from above (top-down), centered, filling about 85% of the canvas. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, plants, padlock, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 26. `ui_path_arrow` ⬜
+
+Guardala como `store/art/path/ui_path_arrow.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a turn arrow painted on the ground at a fork of the first-person garden path of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars); the player taps it to choose a branch. The game mirrors it for the other side.
+
+SUBJECT: A gentle curved arrow made of small pale stones and a few white petals, curving from the bottom toward the upper right, softly glowing.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Seen straight from above (top-down), centered, filling about 80% of the canvas. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, ground, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 27. `icon_btn_aerial` ⬜
+
+Guardala como `store/art/path/icon_btn_aerial.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a round button icon on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown about 44 pixels wide over the garden scene, so it must read instantly at that size.
+
+SUBJECT: A tiny folded paper map of a garden with a winding path drawn in ink, seen slightly from above, in warm washi colors.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: One single simple object or symbol, perfectly centered, filling about 75% of the canvas. Very bold shape, strong value contrast, a soft light rim so it reads on light and dark scenery. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, circle, button frame, badge; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 28. `icon_btn_quick` ⬜
+
+Guardala como `store/art/path/icon_btn_quick.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a round button icon on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown about 44 pixels wide over the garden scene, so it must read instantly at that size.
+
+SUBJECT: A small bamboo signpost with three short arrow planks pointing different ways, in warm wood and green.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: One single simple object or symbol, perfectly centered, filling about 75% of the canvas. Very bold shape, strong value contrast, a soft light rim so it reads on light and dark scenery. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, circle, button frame, badge; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 29. `icon_btn_path` ⬜
+
+Guardala como `store/art/path/icon_btn_path.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a round button icon on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown about 44 pixels wide over the garden scene, so it must read instantly at that size.
+
+SUBJECT: A short winding path of three stepping stones leading toward a small red torii gate, seen from the front.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: One single simple object or symbol, perfectly centered, filling about 75% of the canvas. Very bold shape, strong value contrast, a soft light rim so it reads on light and dark scenery. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, circle, button frame, badge; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 30. `icon_btn_classic` ⬜
+
+Guardala como `store/art/path/icon_btn_classic.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
+
+PURPOSE: This is a round button icon on the main screen of a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars). It is shown about 44 pixels wide over the garden scene, so it must read instantly at that size.
+
+SUBJECT: A small hanging scroll showing a tiny painted garden scene, in warm paper and wood tones.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: One single simple object or symbol, perfectly centered, filling about 75% of the canvas. Very bold shape, strong value contrast, a soft light rim so it reads on light and dark scenery. All four corners stay empty and transparent.
+
+DO NOT INCLUDE: any background, circle, button frame, badge; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
+### 31. `bg_path_aerial_paper` ⬜
+
+Guardala como `store/art/path/bg_path_aerial_paper.png`. Adjuntá `store/art/style/style_keyart.webp`.
+
+```
+Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
+
+Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), fully opaque, with NO transparency.
+
+PURPOSE: This is the paper on which a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars) draws the garden plan seen from above, where the player arranges decorations. The game draws the path, places and pieces on top and repeats the paper.
+
+SUBJECT: Warm off-white handmade washi paper with soft visible fibers, very faint pale green and beige washes and an almost invisible grid of pale ink lines.
+
+STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
+
+COMPOSITION: Flat, evenly lit, filling the whole canvas edge to edge, seamless in both directions, with no strong features.
+
+DO NOT INCLUDE: drawings, maps, objects, stains, folds, borders, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
+```
+
 ## Bloque 22 — Lo que más se ve y sigue siendo código (10)
 
 **Por qué ahora:** Lo más visible que queda en código: las puertas se ven en cada arranque, el cielo siempre.
 
 Piezas grandes que hoy son formas de código: las puertas de la entrada (se ven en cada arranque), el sol, la luna y las nubes del cielo, los pájaros, y las piezas sueltas del Shishi-odoshi y de las Linternas. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 1. `obj_gate_shoji` ⬜
+### 32. `obj_gate_shoji` ⬜
 
 Guardala como `store/art/garden/obj_gate_shoji.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -48,7 +674,7 @@ COMPOSITION: The door panel fills the whole canvas edge to edge (its frame touch
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; walls, floor, room or garden; people or shadows of people; a second door; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 2. `spr_sun` ⬜
+### 33. `spr_sun` ⬜
 
 Guardala como `store/art/garden/spr_sun.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -68,7 +694,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style, clouds, rays drawn as lines.
 ```
 
-### 3. `spr_moon` ⬜
+### 34. `spr_moon` ⬜
 
 Guardala como `store/art/garden/spr_moon.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -88,7 +714,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style, stars, clouds.
 ```
 
-### 4. `spr_cloud_01` ⬜
+### 35. `spr_cloud_01` ⬜
 
 Guardala como `store/art/garden/spr_cloud_01.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -108,7 +734,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style, sky color, other clouds.
 ```
 
-### 5. `spr_cloud_02` ⬜
+### 36. `spr_cloud_02` ⬜
 
 Guardala como `store/art/garden/spr_cloud_02.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -128,7 +754,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style, sky color, other clouds.
 ```
 
-### 6. `spr_bird` ⬜
+### 37. `spr_bird` ⬜
 
 Guardala como `store/art/garden/spr_bird.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -148,7 +774,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style, branches, other birds.
 ```
 
-### 7. `obj_shishi_post` ⬜
+### 38. `obj_shishi_post` ⬜
 
 Guardala como `store/art/garden/obj_shishi_post.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -168,7 +794,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style, the moving bamboo spout itself, water.
 ```
 
-### 8. `obj_shishi_stone` ⬜
+### 39. `obj_shishi_stone` ⬜
 
 Guardala como `store/art/garden/obj_shishi_stone.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -188,7 +814,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 9. `obj_shishi_feed` ⬜
+### 40. `obj_shishi_feed` ⬜
 
 Guardala como `store/art/garden/obj_shishi_feed.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -208,7 +834,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style, water stream.
 ```
 
-### 10. `obj_lantern_dock` ⬜
+### 41. `obj_lantern_dock` ⬜
 
 Guardala como `store/art/garden/obj_lantern_dock.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -234,7 +860,7 @@ DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or 
 
 Hoy los botones del jardín y los sellos de cada minijuego usan íconos genéricos de Material (se ven de app de oficina). Van chiquitos (28 a 40 px) dentro de botones redondos de papel. Además de la referencia de cada uno, conviene adjuntar `assets/images/icons/icon_lotus.webp` para que sigan el mismo trazo que las monedas.
 
-### 11. `icon_btn_decor` ⬜
+### 42. `icon_btn_decor` ⬜
 
 Guardala como `store/art/icons/icon_btn_decor.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -254,7 +880,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 12. `icon_btn_market` ⬜
+### 43. `icon_btn_market` ⬜
 
 Guardala como `store/art/icons/icon_btn_market.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -274,7 +900,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 13. `icon_btn_menu` ⬜
+### 44. `icon_btn_menu` ⬜
 
 Guardala como `store/art/icons/icon_btn_menu.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -294,7 +920,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 14. `icon_btn_album` ⬜
+### 45. `icon_btn_album` ⬜
 
 Guardala como `store/art/icons/icon_btn_album.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -314,7 +940,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 15. `icon_btn_settings` ⬜
+### 46. `icon_btn_settings` ⬜
 
 Guardala como `store/art/icons/icon_btn_settings.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -334,7 +960,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 16. `icon_game_stack` ⬜
+### 47. `icon_game_stack` ⬜
 
 Guardala como `store/art/icons/icon_game_stack.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -354,7 +980,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 17. `icon_game_sand` ⬜
+### 48. `icon_game_sand` ⬜
 
 Guardala como `store/art/icons/icon_game_sand.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -374,7 +1000,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 18. `icon_game_rain` ⬜
+### 49. `icon_game_rain` ⬜
 
 Guardala como `store/art/icons/icon_game_rain.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -394,7 +1020,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 19. `icon_game_pond` ⬜
+### 50. `icon_game_pond` ⬜
 
 Guardala como `store/art/icons/icon_game_pond.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -414,7 +1040,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 20. `icon_game_shishi` ⬜
+### 51. `icon_game_shishi` ⬜
 
 Guardala como `store/art/icons/icon_game_shishi.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -434,7 +1060,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 21. `icon_game_leaves` ⬜
+### 52. `icon_game_leaves` ⬜
 
 Guardala como `store/art/icons/icon_game_leaves.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -454,7 +1080,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 22. `icon_game_moss` ⬜
+### 53. `icon_game_moss` ⬜
 
 Guardala como `store/art/icons/icon_game_moss.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -474,7 +1100,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 23. `icon_game_bonsai` ⬜
+### 54. `icon_game_bonsai` ⬜
 
 Guardala como `store/art/icons/icon_game_bonsai.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -494,7 +1120,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 24. `icon_game_enso` ⬜
+### 55. `icon_game_enso` ⬜
 
 Guardala como `store/art/icons/icon_game_enso.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -514,7 +1140,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 25. `icon_game_bell` ⬜
+### 56. `icon_game_bell` ⬜
 
 Guardala como `store/art/icons/icon_game_bell.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -534,7 +1160,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 26. `icon_game_matcha` ⬜
+### 57. `icon_game_matcha` ⬜
 
 Guardala como `store/art/icons/icon_game_matcha.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -554,7 +1180,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 27. `icon_game_flute` ⬜
+### 58. `icon_game_flute` ⬜
 
 Guardala como `store/art/icons/icon_game_flute.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -574,7 +1200,7 @@ COMPOSITION: One single object, perfectly centered, filling about 80% of the can
 DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; extra objects; fine detail that disappears at small size; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 28. `icon_game_lanterns` ⬜
+### 59. `icon_game_lanterns` ⬜
 
 Guardala como `store/art/icons/icon_game_lanterns.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -600,7 +1226,7 @@ DO NOT INCLUDE: any background, frame, circle, coin border, badge or plaque; any
 
 Cosas chicas que se ven menos: los regalos del día, los cuidados que faltan pintar, la escoba del camino de hojas, el farolito de la casa de té y el sello del Ensō. Adjuntá `store/art/style/style_keyart.webp`.
 
-### 29. `obj_care_marks` ⬜
+### 60. `obj_care_marks` ⬜
 
 Guardala como `store/art/garden/obj_care_marks.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -620,7 +1246,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 30. `obj_care_jar` ⬜
+### 61. `obj_care_jar` ⬜
 
 Guardala como `store/art/garden/obj_care_jar.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -640,7 +1266,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 31. `obj_east_broom` ⬜
+### 62. `obj_east_broom` ⬜
 
 Guardala como `store/art/garden/obj_east_broom.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -660,7 +1286,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 32. `obj_tea_lamp` ⬜
+### 63. `obj_tea_lamp` ⬜
 
 Guardala como `store/art/garden/obj_tea_lamp.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -680,7 +1306,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 33. `obj_enso_seal` ⬜
+### 64. `obj_enso_seal` ⬜
 
 Guardala como `store/art/garden/obj_enso_seal.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -700,7 +1326,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style, the carved stone seal itself.
 ```
 
-### 34. `spr_gift_dew` ⬜
+### 65. `spr_gift_dew` ⬜
 
 Guardala como `store/art/garden/spr_gift_dew.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -720,7 +1346,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 35. `spr_gift_firefly` ⬜
+### 66. `spr_gift_firefly` ⬜
 
 Guardala como `store/art/garden/spr_gift_firefly.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -740,7 +1366,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 36. `spr_gift_snowflake` ⬜
+### 67. `spr_gift_snowflake` ⬜
 
 Guardala como `store/art/garden/spr_gift_snowflake.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -760,7 +1386,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 37. `spr_gift_rainbow_drop` ⬜
+### 68. `spr_gift_rainbow_drop` ⬜
 
 Guardala como `store/art/garden/spr_gift_rainbow_drop.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -780,7 +1406,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 38. `spr_gift_seed` ⬜
+### 69. `spr_gift_seed` ⬜
 
 Guardala como `store/art/garden/spr_gift_seed.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -800,7 +1426,7 @@ COMPOSITION: The object stands upright, seen from the front and slightly above (
 DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame or border; any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; other objects; people or animals; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 39. `spr_gift_sunray` ⬜
+### 70. `spr_gift_sunray` ⬜
 
 Guardala como `store/art/garden/spr_gift_sunray.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -826,7 +1452,7 @@ DO NOT INCLUDE: any background, ground, grass patch, floor, cast shadow, frame o
 
 Van primero: fijan el estilo de todo lo demás. Guardalas en `store/art/style/` y **adjuntá `store/art/style/style_keyart.webp` como referencia en cada bloque siguiente** (arrastrala a la conversación antes de pegar el prompt). Si el estilo no te convence, se cambia el párrafo STYLE en `tool/gen_prompts.py` y se regenera este archivo.
 
-### 40. `style_stones` ⬜
+### 71. `style_stones` ⬜
 
 Guardala como `store/art/style/style_stones.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -846,7 +1472,7 @@ COMPOSITION: Each stone is separated from the others with generous empty paper a
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; labels; grid lines; frame or border; cast shadows on the paper; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-### 41. `style_plants` ⬜
+### 72. `style_plants` ⬜
 
 Guardala como `store/art/style/style_plants.png`. Adjuntá `store/art/style/style_keyart.webp`.
 
@@ -866,11 +1492,11 @@ COMPOSITION: Each plant is separated from the others with generous empty paper a
 DO NOT INCLUDE: any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters; labels; grid lines; frame or border; cast shadows on the paper; photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
-## Bloque 25 — La Maqueta (4)
+## Bloque 25 — La Maqueta (1)
 
-La mesa con el jardín en miniatura donde se decora: el objeto en el patio y el suelo de cada zona visto desde arriba (la grilla de parcelas la dibuja el juego). Adjuntá `store/art/style/style_courtyard_ref.webp` para la mesa y `store/art/style/style_keyart.webp` para los suelos. En el juego van como `assets/images/court/obj_model_table.webp` y `assets/images/decor/model_tray_<zona>.webp`.
+La mesa con el jardín en miniatura donde se decora en la vista Clásica. Los suelos de cada zona (`model_tray_*`) ya no hacen falta: los reemplaza la vista aérea del Sendero (Bloque 26). Adjuntá `store/art/style/style_courtyard_ref.webp`. En el juego va como `assets/images/court/obj_model_table.webp`.
 
-### 42. `obj_model_table` ⬜
+### 73. `obj_model_table` ⬜
 
 Guardala como `store/art/model/obj_model_table.png`. Adjuntá `store/art/style/style_courtyard_ref.webp`.
 
@@ -888,66 +1514,6 @@ STYLE: Detailed hand-painted watercolor and gouache illustration, exactly like t
 COMPOSITION: Seen from the front and slightly above (about 25 degrees), perfectly centered, filling about 80% of the canvas width. The feet of the table sit on an imaginary ground line near the bottom. Nothing cropped, all four corners empty and transparent.
 
 DO NOT INCLUDE: any background, ground, cast shadow, people, animals, chairs, cushions, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 43. `model_tray_patio` ⬜
-
-Guardala como `store/art/model/model_tray_patio.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is the ground of one zone of the miniature model garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player arranges tiny decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.
-
-SUBJECT: Pale beige raked sand with fine parallel rake lines, a few scattered tiny pebbles and one or two soft moss specks near the edges.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on it. Details stay small and spread evenly; the far edge may be a little softer.
-
-DO NOT INCLUDE: objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 44. `model_tray_pond` ⬜
-
-Guardala como `store/art/model/model_tray_pond.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is the ground of one zone of the miniature model garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player arranges tiny decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.
-
-SUBJECT: Soft green-grey ground of short moss and fine gravel, with a strip of calm blue-green pond water along the far edge and a few smooth wet stones at its border.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on it. Details stay small and spread evenly; the far edge may be a little softer.
-
-DO NOT INCLUDE: objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
-```
-
-### 45. `model_tray_forest` ⬜
-
-Guardala como `store/art/model/model_tray_forest.png`. Adjuntá `store/art/style/style_keyart.webp`.
-
-```
-Create ONE single image. Start generating immediately, without asking questions or requesting confirmation.
-
-Create a SQUARE image (1:1 aspect ratio, 1024×1024, not landscape, not portrait), PNG with a fully transparent background (real alpha channel, no white or checkerboard background). If transparency is impossible, use a perfectly flat pure magenta (#FF00FF) background with no gradient, no shadow and no texture.
-
-PURPOSE: This is the ground of one zone of the miniature model garden in a calm, cozy mobile game about caring for your own small Japanese zen garden (stone stacking, raking sand, rain falling into clay jars): the player arranges tiny decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.
-
-SUBJECT: Shaded forest floor of soft moss, fallen bamboo leaves and a few fern sprigs, with dappled light.
-
-STYLE: Soft hand-painted gouache illustration with light watercolor washes, like a picture book: calm, warm and cozy. Gentle muted natural palette: moss green (#6E8B5B), warm sand (#E8DCC2), stone gray (#8C8A85), dark wood (#8A5A3C), still-water teal (#5C9EA8), soft lantern amber (#E9A84C), and a warm ink brown-black (#2F2B28) only for the darkest accents. Subtle paper grain and visible soft brush texture. Clean, simple, readable shapes with soft edges and no harsh black outlines. Soft diffuse daylight from the upper left.
-
-COMPOSITION: Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on it. Details stay small and spread evenly; the far edge may be a little softer.
-
-DO NOT INCLUDE: objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, any text, letters, numbers, signature, watermark, seal stamp or Chinese/Japanese characters, photographic realism, 3D render, glossy plastic look, anime or cartoon style, pixel art, flat vector style.
 ```
 
 ---

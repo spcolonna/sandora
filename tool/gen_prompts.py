@@ -170,6 +170,73 @@ def visitor(name, subject):
         refs=('store/art/style/style_keyart.webp', 'store/art/characters/char_monk.webp'))
 
 
+# El Sendero: el jardín recorrido en primera persona. Todo se ve de frente, a la
+# altura de los ojos de quien camina, y el juego lo achica con la distancia.
+PATH_CAMERA = ('Camera: a person standing on a garden path at eye level (about 1.6 m), looking straight ahead at the '
+               'object a few steps away: a frontal, almost horizontal view with only a very slight look down '
+               '(about 5 degrees), no strong perspective distortion.')
+
+
+def path_obj(name, subject, size_hint, purpose=''):
+    """Objeto del Sendero, de frente, recortado sobre transparente."""
+    return img(
+        name, SQUARE_ALPHA + ALPHA_FALLBACK,
+        f'This object stands beside the path of {GAME}, which the player walks in first person. {purpose}The game '
+        f'draws the ground, fog and distance itself and scales the object as the player walks closer (up to '
+        f'{size_hint}), so the image must contain ONLY the object, matching the attached courtyard reference in '
+        'light and brushwork.',
+        subject,
+        f'{PATH_CAMERA} The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary '
+        'flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The '
+        'whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette '
+        'that still reads when it is small in the distance.',
+        f'any background, ground patch, sky, path or scenery behind the object; {NO_TEXT}; other objects; people or '
+        f'animals; {NO_STYLE}.',
+        style=COURT_STYLE)
+
+
+def path_ground(name, subject):
+    """Suelo del Sendero: textura sin costura vista desde arriba."""
+    return img(
+        name, SQUARE_OPAQUE,
+        f'This is a seamless ground texture for the first-person garden path of {GAME}. The game repeats it in a grid '
+        'and lays it flat in perspective toward the horizon, so it must tile perfectly in both directions.',
+        subject,
+        'Seen straight from above (top-down, 90 degrees), evenly lit with no directional shadows, filling the whole '
+        'canvas edge to edge. Seamless: the left edge continues exactly into the right edge and the top into the '
+        'bottom. Details stay small and spread evenly, with no single feature that would repeat visibly.',
+        f'objects, stones larger than a fist, plants taller than grass, people, animals, borders, vignette, light '
+        f'spots, {NO_TEXT}, {NO_STYLE}.',
+        style=COURT_STYLE)
+
+
+def path_hills(name, subject, band):
+    """Fondo del Sendero: franja que se repite a lo ancho, detrás de todo."""
+    return img(
+        name, LANDSCAPE_ALPHA + ALPHA_FALLBACK,
+        f'This is a distant background band behind the first-person garden path of {GAME}. The game repeats it side '
+        'by side and slides it slowly as the player turns, so it must tile horizontally without a visible seam.',
+        subject,
+        f'Frontal view at eye level. The band occupies {band}; everything above it is fully transparent (the game '
+        'paints the sky). The bottom of the band is flat and fades softly into mist. Seamless horizontally: the '
+        'left edge continues exactly into the right edge.',
+        f'sky, sun, clouds, buildings, paths, people, animals, {NO_TEXT}, {NO_STYLE}.',
+        style=COURT_STYLE)
+
+
+def path_icon(name, subject):
+    return img(
+        name, SQUARE_ALPHA + ALPHA_FALLBACK,
+        f'This is a round button icon on the main screen of {GAME}. It is shown about 44 pixels wide over the garden '
+        'scene, so it must read instantly at that size.',
+        subject,
+        'One single simple object or symbol, perfectly centered, filling about 75% of the canvas. Very bold shape, '
+        'strong value contrast, a soft light rim so it reads on light and dark scenery. All four corners stay empty '
+        'and transparent.',
+        f'any background, circle, button frame, badge; {NO_TEXT}; fine detail that disappears at small size; '
+        f'{NO_STYLE}.')
+
+
 BLOCKS = [
     dict(
         id='A', title='Patio pintado: capas (lo más importante)', folder='store/art/court/',
@@ -1116,11 +1183,10 @@ BLOCKS = [
         ]),
     dict(
         id='25', title='La Maqueta', folder='store/art/model/',
-        intro=('La mesa con el jardín en miniatura donde se decora: el objeto en el patio y el suelo de cada zona '
-               'visto desde arriba (la grilla de parcelas la dibuja el juego). Adjuntá '
-               '`store/art/style/style_courtyard_ref.webp` para la mesa y `store/art/style/style_keyart.webp` para '
-               'los suelos. En el juego van como `assets/images/court/obj_model_table.webp` y '
-               '`assets/images/decor/model_tray_<zona>.webp`.'),
+        intro=('La mesa con el jardín en miniatura donde se decora en la vista Clásica. Los suelos de cada zona '
+               '(`model_tray_*`) ya no hacen falta: los reemplaza la vista aérea del Sendero (Bloque 26). Adjuntá '
+               '`store/art/style/style_courtyard_ref.webp`. En el juego va como '
+               '`assets/images/court/obj_model_table.webp`.'),
         images=[
             img('obj_model_table', SQUARE_ALPHA + ALPHA_FALLBACK,
                 f'This object sits in the painted courtyard of {GAME}; tapping it opens the decorating screen. The '
@@ -1133,33 +1199,137 @@ BLOCKS = [
                 'cropped, all four corners empty and transparent.',
                 f'any background, ground, cast shadow, people, animals, chairs, cushions, {NO_TEXT}, {NO_STYLE}.',
                 style=COURT_STYLE),
-            img('model_tray_patio', SQUARE_ALPHA + ALPHA_FALLBACK,
-                f'This is the ground of one zone of the miniature model garden in {GAME}: the player arranges tiny '
-                'decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.',
-                'Pale beige raked sand with fine parallel rake lines, a few scattered tiny pebbles and one or two soft moss specks near the edges.',
-                'Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole '
-                'canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on '
-                'it. Details stay small and spread evenly; the far edge may be a little softer.',
-                f'objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, '
-                f'{NO_TEXT}, {NO_STYLE}.'),
-            img('model_tray_pond', SQUARE_ALPHA + ALPHA_FALLBACK,
-                f'This is the ground of one zone of the miniature model garden in {GAME}: the player arranges tiny '
-                'decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.',
-                'Soft green-grey ground of short moss and fine gravel, with a strip of calm blue-green pond water along the far edge and a few smooth wet stones at its border.',
-                'Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole '
-                'canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on '
-                'it. Details stay small and spread evenly; the far edge may be a little softer.',
-                f'objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, '
-                f'{NO_TEXT}, {NO_STYLE}.'),
-            img('model_tray_forest', SQUARE_ALPHA + ALPHA_FALLBACK,
-                f'This is the ground of one zone of the miniature model garden in {GAME}: the player arranges tiny '
-                'decorations on it, in a grid of plots the game draws on top. It fills a trapezoid board.',
-                'Shaded forest floor of soft moss, fallen bamboo leaves and a few fern sprigs, with dappled light.',
-                'Seen from above at a steep angle (about 60 degrees), as a flat rectangle of ground that fills the whole '
-                'canvas edge to edge, evenly lit, with no strong features in the middle so tiny objects read clearly on '
-                'it. Details stay small and spread evenly; the far edge may be a little softer.',
-                f'objects standing on it, decorations, people, animals, grid lines, frame, wooden border, table, '
-                f'{NO_TEXT}, {NO_STYLE}.'),
+        ]),
+    dict(
+        id='26', title='El Sendero', folder='store/art/path/',
+        intro=('El jardín principal: un camino que se recorre en primera persona, con bifurcaciones hacia los juegos, '
+               'portones entre zonas, carteles y huecos para decorar. Todo se ve **de frente, a la altura de los '
+               'ojos** (no en la perspectiva desde arriba del patio). Los textos de carteles los escribe el juego: '
+               'las tablas van vacías. **Estaciones que reusan arte que ya existe** (no hace falta pedirlas): Apilar '
+               '`stack_pedestal`, Lluvia `obj_rain_vessel_03`, Shishi `obj_shishi_basin`, Musgo `obj_moss_rock`, '
+               'Bonsái `obj_bonsai_table` + `obj_bonsai_pot`, Ensō `obj_callig_hall`, Campana `obj_temple_belltower`, '
+               'Té `obj_tea_house`, Flauta `obj_bamboo_flute`, Linternas `obj_river_lantern`, tablón '
+               '`obj_court_board`. Los visitantes reusan `char_visitor_*`. **Adjuntá `' + COURT_REF + '`.** En el '
+               'juego van en `assets/images/path/`.'),
+        images=[
+            path_hills('bg_path_hills_far', 'A soft range of distant blue-grey mountains with gentle peaks, washed in '
+                       'morning mist, very light and airy like the far mountains in the reference.',
+                       'the lower 45% of the canvas'),
+            path_hills('bg_path_hills_near', 'Closer rolling green hills with rounded clumps of pine, maple and cedar '
+                       'trees, a little darker and more saturated than the far mountains, still softened by haze.',
+                       'the lower 35% of the canvas'),
+            path_ground('tile_path_sand', 'Pale beige finely raked gravel of a zen courtyard, with soft parallel rake '
+                        'lines running across and a few tiny scattered pebbles.'),
+            path_ground('tile_path_moss', 'Soft short green moss mixed with patches of fine grey gravel and a few '
+                        'tiny clover leaves, like the ground around a garden pond.'),
+            path_ground('tile_path_forest', 'Shaded forest floor: dark soft earth covered with fallen bamboo and maple '
+                        'leaves in browns and dull greens, a few small fern sprigs and moss specks.'),
+            path_ground('tile_path_water', 'Calm blue-green pond water seen from above, with soft painterly ripples, '
+                        'faint reflections of light and a hint of depth; no fish, no lily pads.'),
+            img('obj_path_stone_01', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This is one stepping stone of the garden path of {GAME}. The game lays many of them flat along the '
+                'path, in perspective, so the image is the stone seen from straight above.',
+                'One flat, slightly irregular rounded granite stepping stone, grey with warm undertones, a lightly '
+                'worn top and a thin ring of moss around its edge.',
+                'Seen straight from above (top-down), centered, filling about 85% of the canvas width, wider than '
+                'deep (about 3:2). Evenly lit. All four corners stay empty and transparent.',
+                f'any background, gravel, grass, cast shadow, other stones, {NO_TEXT}, {NO_STYLE}.',
+                style=COURT_STYLE),
+            img('obj_path_stone_02', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This is one stepping stone of the garden path of {GAME}. The game lays many of them flat along the '
+                'path, in perspective, alternating with another stone, so the image is the stone seen from straight '
+                'above.',
+                'One flat, more oval and slightly smaller granite stepping stone, a bit lighter and bluer grey, with a '
+                'small chip on one side and a few moss specks.',
+                'Seen straight from above (top-down), centered, filling about 80% of the canvas width, wider than '
+                'deep (about 3:2). Evenly lit. All four corners stay empty and transparent.',
+                f'any background, gravel, grass, cast shadow, other stones, {NO_TEXT}, {NO_STYLE}.',
+                style=COURT_STYLE),
+            path_obj('obj_path_gate', 'An open wooden gate between two zones of the garden: a simple torii-like frame '
+                     'of two round posts and a double lintel in weathered vermilion-red lacquer with dark grey caps, '
+                     'standing over the path so the player walks through the middle. Nothing inside the opening.',
+                     'the full screen height', 'The player walks through it to enter the next zone. '),
+            path_obj('obj_path_gate_closed', 'Exactly the same vermilion torii-like gate, now closed: a thick twisted '
+                     'straw shimenawa rope hangs across the opening at chest height with white zigzag paper streamers, '
+                     'and a small round wooden plaque hangs from its middle (blank, the game draws a lock on it).',
+                     'the full screen height', 'It blocks the way to a zone the player has not opened yet. '),
+            path_obj('obj_path_signpost', 'A wooden garden signpost: one weathered cedar post with a small roof cap '
+                     'and two blank planks shaped like arrows, one pointing left and one pointing right, at slightly '
+                     'different heights. The planks are empty and smooth so the game can write on them.',
+                     'half the screen height', 'It stands at a fork and tells where each branch leads. '),
+            path_obj('obj_path_sign_soon', 'A small blank wooden tablet hanging by two cords from a short wooden '
+                     'crossbar on a single post, with a tiny roof on top. The tablet face is empty and smooth so the '
+                     'game can write on it.', 'a third of the screen height',
+                     'It marks a part of the garden that will open later. '),
+            path_obj('obj_path_fence_closed', 'A low closed bamboo fence across a narrow garden path: tied vertical '
+                     'bamboo poles with black twine knots, and in the middle a short indigo noren curtain hanging '
+                     'closed, a little faded. Wide, about twice as wide as tall.', 'two thirds of the screen width',
+                     'It closes a branch of the path that leads to an activity not open yet. '),
+            path_obj('obj_station_sand', 'A small rectangular raked-sand garden in a low wooden frame: pale sand with '
+                     'concentric rake lines around two small stones, and a wooden rake leaning on the frame. Wider '
+                     'than tall.', 'half the screen width', 'Tapping it opens the sand raking game. '),
+            path_obj('obj_station_pond', 'The near edge of a small garden pond: a crescent of smooth wet stones and '
+                     'ferns framing a patch of blue-green water where two orange and white koi swim. Wider than tall.',
+                     'half the screen width', 'Tapping it opens the koi pond game. '),
+            path_obj('obj_station_leaves', 'A small Japanese maple tree with red and orange leaves, a few leaves '
+                     'falling, and a soft pile of fallen leaves at its foot with a bamboo broom leaning on the trunk.',
+                     'half the screen height', 'Tapping it opens the leaf sweeping game. '),
+            path_obj('obj_station_meditation', 'A low square wooden meditation platform with a round dark-blue zafu '
+                     'cushion in the middle and a tiny incense holder with a thin wisp of smoke at one corner.',
+                     'half the screen width', 'Tapping it starts a meditation. '),
+            path_obj('obj_path_pine', 'A Japanese black pine with a gently leaning trunk and cloud-shaped layers of '
+                     'dark green needles, carefully pruned.', 'the full screen height'),
+            path_obj('obj_path_maple', 'A Japanese maple with a slender trunk and a soft rounded crown of small '
+                     'green leaves turning orange at the tips.', 'the full screen height'),
+            path_obj('obj_path_bush', 'A rounded clipped azalea bush, dense deep green with a few small pink flowers. '
+                     'Wider than tall.', 'a third of the screen width'),
+            path_obj('obj_path_grass', 'A small clump of soft ornamental grass (hakone grass) with arching yellow-green '
+                     'blades. Wider than tall.', 'a fifth of the screen width'),
+            path_obj('obj_path_moss_rock', 'A low rounded garden rock covered on top with thick green moss, with a few '
+                     'small ferns at its base. Wider than tall.', 'a third of the screen width'),
+            path_obj('obj_path_lantern_stone', 'A small stone lantern (a low yukimi-style lantern) of weathered grey '
+                     'granite with moss on its wide cap, its window glowing softly warm.', 'half the screen height',
+                     'It lights the path at dusk. '),
+            img('spr_path_slot', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This marks a free spot beside the first-person garden path of {GAME} where the player can place a '
+                'decoration. The game lays it flat on the ground in perspective and makes it pulse softly.',
+                'A soft circle of tiny pale pebbles on the ground with a faint warm glow in the middle, like an '
+                'invitation, very light and delicate.',
+                'Seen straight from above (top-down), centered, filling about 85% of the canvas. All four corners stay '
+                'empty and transparent.',
+                f'any background, objects, plants, {NO_TEXT}, {NO_STYLE}.', style=COURT_STYLE),
+            img('spr_path_slot_locked', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This marks a spot beside the first-person garden path of {GAME} that is still closed; the player can '
+                'pay to open it. The game lays it flat on the ground in perspective.',
+                'A small square of rough unraked earth bordered by four little wooden stakes joined by a thin straw '
+                'rope.',
+                'Seen straight from above (top-down), centered, filling about 85% of the canvas. All four corners stay '
+                'empty and transparent.',
+                f'any background, plants, padlock, {NO_TEXT}, {NO_STYLE}.', style=COURT_STYLE),
+            img('ui_path_arrow', SQUARE_ALPHA + ALPHA_FALLBACK,
+                f'This is a turn arrow painted on the ground at a fork of the first-person garden path of {GAME}; the '
+                'player taps it to choose a branch. The game mirrors it for the other side.',
+                'A gentle curved arrow made of small pale stones and a few white petals, curving from the bottom '
+                'toward the upper right, softly glowing.',
+                'Seen straight from above (top-down), centered, filling about 80% of the canvas. All four corners stay '
+                'empty and transparent.',
+                f'any background, ground, {NO_TEXT}, {NO_STYLE}.'),
+            path_icon('icon_btn_aerial', 'A tiny folded paper map of a garden with a winding path drawn in ink, seen '
+                      'slightly from above, in warm washi colors.'),
+            path_icon('icon_btn_quick', 'A small bamboo signpost with three short arrow planks pointing different ways, '
+                      'in warm wood and green.'),
+            path_icon('icon_btn_path', 'A short winding path of three stepping stones leading toward a small red torii '
+                      'gate, seen from the front.'),
+            path_icon('icon_btn_classic', 'A small hanging scroll showing a tiny painted garden scene, in warm paper '
+                      'and wood tones.'),
+            img('bg_path_aerial_paper', SQUARE_OPAQUE,
+                f'This is the paper on which {GAME} draws the garden plan seen from above, where the player arranges '
+                'decorations. The game draws the path, places and pieces on top and repeats the paper.',
+                'Warm off-white handmade washi paper with soft visible fibers, very faint pale green and beige washes '
+                'and an almost invisible grid of pale ink lines.',
+                'Flat, evenly lit, filling the whole canvas edge to edge, seamless in both directions, with no strong '
+                'features.',
+                f'drawings, maps, objects, stains, folds, borders, {NO_TEXT}, {NO_STYLE}.'),
         ]),
 ]
 
@@ -1418,6 +1588,7 @@ def image_text(i, im):
 
 # Orden en que conviene generarlas: lo que más se ve en el juego primero. Cada uno con por qué va ahí.
 PRIORITY = [
+    ('26', 'El Sendero es el jardín principal: hoy cielo, suelo, piedras, portones y carteles son de código.'),
     ('22', 'Lo más visible que queda en código: las puertas se ven en cada arranque, el cielo siempre.'),
     ('23', 'Los botones del jardín y los sellos de los minijuegos usan íconos genéricos de Material.'),
     ('24', 'Detalles chicos: los regalos del día, dos cuidados, la escoba, el farolito y el sello del Ensō.'),
