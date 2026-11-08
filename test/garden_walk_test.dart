@@ -19,7 +19,8 @@ void main() {
     addTearDown(tester.view.reset);
     SharedPreferences.setMockInitialValues({});
     await AppSettings.instance.load(const ['es']);
-    final balance = loadBalance();
+    // El paseo por las vistas es para cuando la decoración se ve en ellas.
+    final balance = loadBalanceWith((b) => (b['model'] as Map)['inViews'] = true);
     await WeatherService.instance.load(balance);
     final p = Progress.instance;
     await p.load(balance);

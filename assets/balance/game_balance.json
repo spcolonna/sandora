@@ -393,8 +393,19 @@
       {"id": "sakura", "level": 17, "cost": {"pebbles": 1000, "wood": 50, "light": 25}, "size": 0.3, "aspect": 0.99}
     ]
   },
+  "sendero": {
+    "_comment": "El Sendero: el camino en primera persona que cruza las tres zonas. Cada zona mide segment pasos; la fila de la Maqueta r queda a rowZ[r] pasos del comienzo de su zona (la 0, la del fondo, más adelante) y la columna c a colX[c] del centro del camino, corrida colStagger*c hacia adelante. speed: pasos por segundo al caminar solo. decorScale: ancho en el mundo por unidad de size de la decoración. halfWidth: medio ancho del camino.",
+    "segment": 14,
+    "rowZ": [10.5, 7, 3.5],
+    "colX": [-2.6, -1.45, 1.45, 2.6],
+    "colStagger": 0.45,
+    "speed": 1.1,
+    "decorScale": 6,
+    "halfWidth": 0.7
+  },
   "model": {
-    "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. feet: dónde queda el pie de cada parcela (x, y) en cada vista, en fracción de la vista (el patio pintado, del lienzo); elegidos a mano para no tapar los lugares. table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo).",
+    "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. feet: dónde queda el pie de cada parcela (x, y) en cada vista, en fracción de la vista (el patio pintado, del lienzo); elegidos a mano para no tapar los lugares. inViews: si la decoración también se ve en las vistas de actividades (false: solo en el Sendero, que se abre desde la Maqueta). table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo).",
+    "inViews": false,
     "cols": 4,
     "rows": 3,
     "start": [5, 6, 9, 10],

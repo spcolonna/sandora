@@ -494,4 +494,8 @@ const ja = <String, String>{
   'walk.decor': 'あなたの飾り',
   'walk.place': '庭の場所',
   'model.flip': '向きを変える',
+  'sendero.title': '小径',
+  'sendero.hint': 'タップで歩く・止まる · スワイプで進む',
+  'sendero.end': '小径の終わり',
+  'sendero.again': 'タップでもう一度',
 };

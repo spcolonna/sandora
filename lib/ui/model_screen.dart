@@ -8,6 +8,7 @@ import '../garden/economy.dart';
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
 import 'decor_tray.dart';
+import 'sendero_screen.dart';
 import 'fx/sfx.dart';
 import 'garden/garden_decor.dart';
 import 'garden/scene_art.dart';
@@ -168,12 +169,21 @@ class _ModelScreenState extends State<ModelScreen> {
     final i = _picked;
     if (i == null) return;
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+    if (!p.modelRules.inViews) {
+      openSendero(context, at: i);
+      return;
+    }
     Navigator.of(context).pop<ModelFocus>((side: _side, index: i));
   }
 
-  /// Pasear por el jardín, empezando por la zona que se está viendo.
+  /// Recorrer el Sendero (o, con la decoración en las vistas, pasear por el
+  /// jardín empezando por la zona que se está viendo).
   void _walk() {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+    if (!p.modelRules.inViews) {
+      openSendero(context);
+      return;
+    }
     Navigator.of(context).pop<ModelFocus>((side: _side, index: null));
   }
 

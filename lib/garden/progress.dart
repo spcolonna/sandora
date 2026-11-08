@@ -1255,9 +1255,11 @@ class Progress extends ChangeNotifier {
       weatherAt: weatherAt,
       windy: windy,
       blockHours: blockHours,
+      // Solo se caen las que están a la vista.
       decorPlaced: [
-        for (final (i, d) in decor.indexed)
-          if (d.placed) i,
+        if (modelRules.inViews)
+          for (final (i, d) in decor.indexed)
+            if (d.placed) i,
       ],
       hasDrawing: sandDrawing.isNotEmpty,
     );

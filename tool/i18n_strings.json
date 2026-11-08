@@ -3449,5 +3449,33 @@
   "pt": "Virar",
   "ja": "向きを変える",
   "zh": "翻转"
+ },
+ "sendero.title": {
+  "es": "El Sendero",
+  "en": "The Path",
+  "pt": "A Trilha",
+  "ja": "小径",
+  "zh": "小径"
+ },
+ "sendero.hint": {
+  "es": "Tocá para caminar o detenerte · deslizá para avanzar",
+  "en": "Tap to walk or stop · swipe to move",
+  "pt": "Toque para andar ou parar · deslize para avançar",
+  "ja": "タップで歩く・止まる · スワイプで進む",
+  "zh": "轻触行走或停下 · 滑动前进"
+ },
+ "sendero.end": {
+  "es": "Fin del sendero",
+  "en": "End of the path",
+  "pt": "Fim da trilha",
+  "ja": "小径の終わり",
+  "zh": "小径尽头"
+ },
+ "sendero.again": {
+  "es": "Tocá para volver a empezar",
+  "en": "Tap to start again",
+  "pt": "Toque para recomeçar",
+  "ja": "タップでもう一度",
+  "zh": "轻触重新开始"
  }
 }

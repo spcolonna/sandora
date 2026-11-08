@@ -494,4 +494,8 @@ const pt = <String, String>{
   'walk.decor': 'Sua decoração',
   'walk.place': 'Lugar do jardim',
   'model.flip': 'Virar',
+  'sendero.title': 'A Trilha',
+  'sendero.hint': 'Toque para andar ou parar · deslize para avançar',
+  'sendero.end': 'Fim da trilha',
+  'sendero.again': 'Toque para recomeçar',
 };

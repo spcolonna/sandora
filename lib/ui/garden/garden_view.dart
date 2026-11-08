@@ -356,7 +356,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
         final size = layout.size;
         final decor = [
           for (final (i, d) in p.decor.indexed)
-            if (d.side == widget.side)
+            if (p.modelRules.inViews && d.side == widget.side)
               if (p.decorRules.byId(d.id) case final item?)
                 (i, d.id, decorRect(item, clampFoot(Offset(d.x * size.width, d.y * size.height), layout), layout)),
         ];

@@ -494,4 +494,8 @@ const zh = <String, String>{
   'walk.decor': '你的装饰',
   'walk.place': '花园一角',
   'model.flip': '翻转',
+  'sendero.title': '小径',
+  'sendero.hint': '轻触行走或停下 · 滑动前进',
+  'sendero.end': '小径尽头',
+  'sendero.again': '轻触重新开始',
 };

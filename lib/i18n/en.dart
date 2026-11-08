@@ -494,4 +494,8 @@ const en = <String, String>{
   'walk.decor': 'Your decoration',
   'walk.place': 'Garden spot',
   'model.flip': 'Flip',
+  'sendero.title': 'The Path',
+  'sendero.hint': 'Tap to walk or stop · swipe to move',
+  'sendero.end': 'End of the path',
+  'sendero.again': 'Tap to start again',
 };

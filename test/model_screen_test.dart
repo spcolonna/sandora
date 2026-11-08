@@ -5,6 +5,7 @@ import 'package:sandora/garden/progress.dart';
 import 'package:sandora/i18n/i18n.dart';
 import 'package:sandora/settings.dart';
 import 'package:sandora/ui/model_screen.dart';
+import 'package:sandora/ui/sendero_screen.dart';
 import 'package:sandora/ui/theme/palette.dart';
 
 import 'helpers.dart';
@@ -72,13 +73,22 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(ValueKey('cell1.$cell')));
     await tester.pumpAndSettle();
+    // Verla abre el Sendero parado frente a ella; al cerrarlo se vuelve a la maqueta.
     await tester.tap(find.text(tr('model.see')));
-    await tester.pumpAndSettle();
-    expect(focus, (side: 1, index: p.decorAt(1, cell)!));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(SenderoScreen), findsOneWidget);
+    expect(find.text(tr('decor.${item.id}')), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('senderoClose')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(SenderoScreen), findsNothing);
+    expect(find.text(tr('model.title')), findsOneWidget);
+    expect(focus, isNull);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Recorrer cierra la maqueta y pide un paseo desde la zona que se ve', (tester) async {
+  testWidgets('Recorrer abre el Sendero caminando', (tester) async {
     tester.view.physicalSize = const Size(1320, 2868);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -105,8 +115,14 @@ void main() {
     await tester.tap(find.text(tr('garden.forest')));
     await tester.pumpAndSettle();
     await tester.tap(find.text(tr('model.walk')));
-    await tester.pumpAndSettle();
-    expect(focus, (side: 2, index: null));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.byType(SenderoScreen), findsOneWidget);
+    expect(find.textContaining(tr('sendero.title')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('senderoClose')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(focus, isNull);
     expect(tester.takeException(), isNull);
   });
 }

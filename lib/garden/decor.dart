@@ -70,6 +70,10 @@ class ModelRules {
   /// La mesa en el patio pintado: ancho, centro x y base y.
   final (double, double, double) table;
 
+  /// Si las decoraciones también se ven en las vistas de actividades (si no,
+  /// solo en el Sendero).
+  final bool inViews;
+
   ModelRules(Balance balance)
     : cols = balance.section('model').i('cols'),
       rows = balance.section('model').i('rows'),
@@ -85,6 +89,7 @@ class ModelRules {
               if (f case [final num x, final num y]) (x.toDouble(), y.toDouble()) else (0.5, 0.8),
           ],
       ],
+      inViews = balance.section('model').raw('inViews') != false,
       table = switch (balance.section('model').list('table')) {
         [final w, final x, final y] => (w, x, y),
         _ => (0.15, 0.15, 0.9),

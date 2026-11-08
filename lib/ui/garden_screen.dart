@@ -24,6 +24,7 @@ import 'garden/garden_scene.dart';
 import 'garden/garden_view.dart';
 import 'market_screen.dart';
 import 'model_screen.dart';
+import 'sendero_screen.dart';
 import 'rest_sheet.dart';
 import 'widgets/daily_goals.dart';
 import 'widgets/garden_sign.dart';
@@ -176,6 +177,12 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     if (_autoWalk && kDebugMode) {
       Future<void>.delayed(const Duration(seconds: 4), () {
         if (mounted) _walk(0);
+      });
+    }
+    // Para ver el Sendero sin tocar nada: `--dart-define=SANDORA_PATH=true`.
+    if (_autoPath && kDebugMode) {
+      Future<void>.delayed(const Duration(seconds: 3), () {
+        if (mounted) openSendero(context);
       });
     }
     // Hoy ya se entró: los recordatorios arrancan mañana.
@@ -664,6 +671,7 @@ const _hudRow = 56.0, _signScale = 0.78;
 /// primer toque solo la frena): se asienta rápido para que eso casi no pase.
 const _pageTurn = Duration(milliseconds: 300);
 const _autoWalk = bool.fromEnvironment('SANDORA_WALK');
+const _autoPath = bool.fromEnvironment('SANDORA_PATH');
 
 class _QuickPagePhysics extends PageScrollPhysics {
   const _QuickPagePhysics({super.parent});
