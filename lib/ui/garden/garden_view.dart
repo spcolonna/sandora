@@ -268,7 +268,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
     if (_fingers.isEmpty && _zoom > 1 && _zoom < 1.12) _glide(1, Offset.zero);
   }
 
-  bool get _afterRain => _rainbowTime(widget.now);
+  bool get _afterRain => rainbowTime(widget.now);
 
   /// Dónde empieza el jardín en la vista (lo de arriba es cielo).
   double _stageTop = 0;
@@ -356,7 +356,7 @@ class _GardenViewState extends State<GardenView> with TickerProviderStateMixin {
         final size = layout.size;
         final decor = [
           for (final (i, d) in p.decor.indexed)
-            if (p.modelRules.inViews && d.side == widget.side)
+            if (p.decorInViews && d.side == widget.side)
               if (p.decorRules.byId(d.id) case final item?)
                 (i, d.id, decorRect(item, clampFoot(Offset(d.x * size.width, d.y * size.height), layout), layout)),
         ];
@@ -668,7 +668,7 @@ class _SkyState {
     final stoppedAt = WeatherService.instance.rainStoppedAt(now);
     // El arcoíris se ve de día y se va apagando a medida que pasa el rato.
     final clearish = blend.amount(Weather.clear) + blend.amount(Weather.cloudy);
-    final rainbow = _rainbowTime(now) && clearish > 0
+    final rainbow = rainbowTime(now) && clearish > 0
         ? clearish * daylight * (1 - now.difference(stoppedAt!).inSeconds / rules.rainbowFor.inSeconds).clamp(0.0, 1.0)
         : 0.0;
     return _SkyState._(
@@ -825,7 +825,7 @@ class _VignettePainter extends CustomPainter {
 }
 
 /// Si paró de llover hace poco (todavía se ve el arcoíris).
-bool _rainbowTime(DateTime now) {
+bool rainbowTime(DateTime now) {
   final ws = WeatherService.instance;
   final at = ws.rainStoppedAt(now);
   return at != null && now.difference(at) < ws.rules.rainbowFor;
@@ -886,7 +886,14 @@ class _Label extends StatelessWidget {
   final double scale;
   const _Label({required this.at, required this.place, required this.onTap, this.scale = 1});
 
-  static String nameOf(Place p) => switch (p) {
+  static String nameOf(Place p) => placeName(p);
+
+  @override
+  Widget build(BuildContext context) => _LabelBody(at: at, place: place, onTap: onTap, scale: scale);
+}
+
+/// El nombre de un lugar, como se lee en su cartelito.
+String placeName(Place p) => switch (p) {
     Place.board => tr('board.title'),
     Place.meditation => tr('meditation.title'),
     Place.sand => tr('mg.sand.name'),
@@ -903,6 +910,28 @@ class _Label extends StatelessWidget {
     Place.flute ||
     Place.lanterns => tr('mg.${p.name}.name'),
   };
+
+/// Qué falta para abrir [place] (null si ya está abierto).
+String? placeLockNote(Place place) {
+  final p = Progress.instance;
+  final zone = p.unlockZone(place.name);
+  final (locked, why) = switch (place) {
+    Place.meditation => (!p.meditationUnlocked, tr('level.short', {'n': p.levels.meditationLevel})),
+    Place.board => (false, ''),
+    _ when zone != null => (!p.gameUnlocked(place.name), tr('level.short', {'n': zone.level})),
+    _ => (!p.gameUnlocked(place.name), tr('garden.lockedDay', {'n': p.unlockDay(place.name)})),
+  };
+  return locked ? why : null;
+}
+
+class _LabelBody extends StatelessWidget {
+  final Offset at;
+  final Place place;
+  final VoidCallback onTap;
+  final double scale;
+  const _LabelBody({required this.at, required this.place, required this.onTap, required this.scale});
+
+  String nameOf(Place p) => placeName(p);
 
   @override
   Widget build(BuildContext context) {

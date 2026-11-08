@@ -24,7 +24,8 @@ import 'garden/garden_scene.dart';
 import 'garden/garden_view.dart';
 import 'market_screen.dart';
 import 'model_screen.dart';
-import 'sendero_screen.dart';
+import 'sendero/sendero_walk.dart';
+import '../garden/sendero.dart';
 import 'rest_sheet.dart';
 import 'widgets/daily_goals.dart';
 import 'widgets/garden_sign.dart';
@@ -32,6 +33,7 @@ import 'meditation/meditation_screen.dart';
 import 'achievements_sheet.dart';
 import 'album_sheet.dart';
 import 'settings_sheet.dart';
+import '../settings.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
 import 'widgets/glass.dart';
@@ -78,6 +80,93 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
   /// El patio pintado está acercado: deslizar mueve la cámara, no la vista.
   bool _zoomed = false;
 
+  /// La vista Sendero (el jardín en primera persona) en vez de la Clásica.
+  bool get _path => !AppSettings.instance.classicView;
+  final _sendero = SenderoController();
+  final _walkKey = GlobalKey<SenderoWalkState>();
+
+  /// Un portón cerrado del Sendero: qué falta para abrir esa zona.
+  Future<void> _gate(int zone) async {
+    final p = Progress.instance;
+    final places = [
+      for (final st in _walkKey.currentState?.world.stations ?? const <SenderoStation>[])
+        if (st.zone == zone) st.place,
+    ];
+    SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+    // Lo que abre antes: por zona comprada se ofrece comprarla; si no, se dice cuándo.
+    if (places.any((g) => p.unlockZone(g) != null && !p.gameUnlocked(g)) &&
+        places.every((g) => p.unlockZone(g) != null || p.playDay >= p.unlockDay(g) && p.lockedByLevel(g))) {
+      await showExpansionsSheet(context);
+      if (mounted) _announceUnlocks();
+      return;
+    }
+    final days = [for (final g in places) if (p.unlockZone(g) == null && p.playDay < p.unlockDay(g)) p.unlockDay(g)];
+    final levels = [for (final g in places) if (p.lockedByLevel(g)) p.unlockLevel(g)];
+    final text = days.isNotEmpty
+        ? trN('sendero.gateDays', days.reduce(min) - p.playDay)
+        : levels.isNotEmpty
+        ? tr('sendero.gateLevel', {'n': levels.reduce(min)})
+        : tr('sendero.gateClosed');
+    _toast(text);
+  }
+
+  /// El acceso rápido: los juegos ya encontrados van directo; los demás se
+  /// encuentran paseando.
+  Future<void> _quick() async {
+    final walk = _walkKey.currentState;
+    if (walk == null) return;
+    SoundBoard.instance.play(Sfx.uiTap, volume: 0.4);
+    final p = Progress.instance;
+    final places = [for (final st in walk.world.stations) st];
+    final picked = await showWashiSheet<String>(
+      context,
+      isScrollControlled: true,
+      builder: (sheet) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(tr('sendero.quick'), textAlign: TextAlign.center, style: Theme.of(sheet).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              Text(
+                tr('sendero.quickHint'),
+                textAlign: TextAlign.center,
+                style: Theme.of(sheet).textTheme.bodySmall?.copyWith(color: Palette.ink.withValues(alpha: 0.65)),
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      for (final st in places)
+                        if (Place.values.byName(st.place) case final place)
+                          _QuickChip(
+                            key: ValueKey('quick${st.place}'),
+                            label: p.discovered(st.place) && placeOpen(p, st.place)
+                                ? placeName(place)
+                                : '? · ${tr(const ['garden.patio', 'garden.pond', 'garden.forest'][st.zone])}',
+                            known: p.discovered(st.place) && placeOpen(p, st.place),
+                            onTap: p.discovered(st.place) && placeOpen(p, st.place)
+                                ? () => Navigator.pop(sheet, st.place)
+                                : null,
+                          ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked != null && mounted) _sendero.goTo(picked);
+  }
+
   /// La decoración que se pidió ver desde la Maqueta (índice, pedido).
   (int, int)? _focus;
   var _focusAsks = 0;
@@ -87,7 +176,12 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     final p = Progress.instance;
     if (p.guideStep == Guide.decor) p.advanceGuide(Guide.done);
     setState(() => _panel = _Panel.none);
-    final focus = await openModel(context, side: _page);
+    final walk = _walkKey.currentState;
+    final focus = await openModel(
+      context,
+      side: _path ? (walk == null ? 0 : walk.world.zoneOf(walk.world.position(walk.walker))) : _page,
+      world: _path ? walk?.world : null,
+    );
     if (!mounted) return;
     // Al poner la primera decoración, a subir de nivel; el aviso de lo que
     // cambió se ve ya en el jardín.
@@ -95,6 +189,13 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     _celebrate();
     if (focus == null) return;
     final index = focus.index;
+    if (_path) {
+      // En el Sendero: caminar o pararse frente a la decoración.
+      final d = index == null ? null : p.decor[index];
+      if (d == null || d.cell == null) return _sendero.stroll();
+      if (walk != null) _sendero.standAt(walk.world.slot(d.side!, d.cell!));
+      return;
+    }
     if (index == null) return _walk(focus.side);
     if (focus.side != _page) {
       await _pages.animateToPage(focus.side, duration: _pageTurn, curve: Calm.curve);
@@ -179,10 +280,10 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
         if (mounted) _walk(0);
       });
     }
-    // Para ver el Sendero sin tocar nada: `--dart-define=SANDORA_PATH=true`.
+    // Para ver el Sendero caminando solo: `--dart-define=SANDORA_PATH=true`.
     if (_autoPath && kDebugMode) {
       Future<void>.delayed(const Duration(seconds: 3), () {
-        if (mounted) openSendero(context);
+        if (mounted && _path) _sendero.stroll();
       });
     }
     // Hoy ya se entró: los recordatorios arrancan mañana.
@@ -256,6 +357,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     _walletAuto?.cancel();
     _pages.dispose();
     _drift.dispose();
+    _sendero.dispose();
     super.dispose();
   }
 
@@ -427,7 +529,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     return Scaffold(
       backgroundColor: Palette.mossDark,
       body: ListenableBuilder(
-        listenable: Listenable.merge([p, WeatherService.instance]),
+        listenable: Listenable.merge([p, WeatherService.instance, AppSettings.instance]),
         builder: (context, _) {
           final now = gardenNow();
           final weather = WeatherService.instance.at(now);
@@ -440,41 +542,59 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                 Expanded(
                   child: Stack(
                     children: [
-                      Positioned.fill(
-                        child: RepaintBoundary(
-                          child: GardenBackdrop(now: now, weather: weather, page: _drift, top: top),
+                      if (_path)
+                        Positioned.fill(
+                          child: SenderoWalk(
+                            key: _walkKey,
+                            now: now,
+                            weather: weather,
+                            top: top + 70,
+                            bottom: bottom + 8,
+                            controller: _sendero,
+                            slots: p.decorUnlocked,
+                            onPlace: _enter,
+                            onGate: _gate,
+                            onSlot: (side, cell) => _model(),
+                            onDecor: (i) => _model(),
+                          ),
+                        )
+                      else ...[
+                        Positioned.fill(
+                          child: RepaintBoundary(
+                            child: GardenBackdrop(now: now, weather: weather, page: _drift, top: top),
+                          ),
                         ),
-                      ),
-                      // El patio y, deslizando, el estanque y el bosque.
-                      Positioned.fill(
-                        child: PageView(
-                          controller: _pages,
-                          physics: _zoomed || _walking
-                              ? const NeverScrollableScrollPhysics()
-                              : const _QuickPagePhysics(),
-                          onPageChanged: (i) => setState(() => _page = i),
-                          children: [
-                            for (final side in [0, 1, 2])
-                              GardenView(
-                                side: side,
-                                now: now,
-                                weather: weather,
-                                onPlace: _enter,
-                                onZoom: side == 0 ? (z) => setState(() => _zoomed = z) : null,
-                                onModel: side == 0 ? _model : null,
-                                focus: side == _page ? _focus : null,
-                                walk: side == _walkSide ? _walkAsk : null,
-                                onWalkStop: (name, kind) => setState(() => _walkStop = (name, kind)),
-                                onWalkDone: () => _walkSideDone?.complete(),
-                                top: top,
-                                bottom: bottom,
-                              ),
-                          ],
+                        // El patio y, deslizando, el estanque y el bosque.
+                        Positioned.fill(
+                          child: PageView(
+                            controller: _pages,
+                            physics: _zoomed || _walking
+                                ? const NeverScrollableScrollPhysics()
+                                : const _QuickPagePhysics(),
+                            onPageChanged: (i) => setState(() => _page = i),
+                            children: [
+                              for (final side in [0, 1, 2])
+                                GardenView(
+                                  side: side,
+                                  now: now,
+                                  weather: weather,
+                                  onPlace: _enter,
+                                  onZoom: side == 0 ? (z) => setState(() => _zoomed = z) : null,
+                                  onModel: side == 0 ? _model : null,
+                                  focus: side == _page ? _focus : null,
+                                  walk: side == _walkSide ? _walkAsk : null,
+                                  onWalkStop: (name, kind) => setState(() => _walkStop = (name, kind)),
+                                  onWalkDone: () => _walkSideDone?.complete(),
+                                  top: top,
+                                  bottom: bottom,
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Positioned.fill(
-                        child: GardenSkyLife(now: now, weather: weather),
-                      ),
+                        Positioned.fill(
+                          child: GardenSkyLife(now: now, weather: weather),
+                        ),
+                      ],
                       // Con un panel abierto, tocar el jardín lo cierra.
                       if (_panel != _Panel.none)
                         Positioned.fill(
@@ -521,6 +641,19 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                             _ when _walking => const SizedBox.shrink(),
                             _Panel.wallet => _WalletPanel(onMarket: _market),
                             _Panel.level => const _LevelPanel(),
+                            // En el Sendero, la guía dice adónde caminar (y tocarla lleva).
+                            _Panel.none
+                                when _path && (p.guideStep == Guide.play || p.guideStep == Guide.level2) =>
+                              _GuideHint(
+                                text: tr('guide.pathSand'),
+                                right: 0,
+                                onTap: () => _sendero.goTo('sand', enter: false),
+                              ),
+                            _Panel.none when _path && p.guideStep == Guide.tryRain => _GuideHint(
+                              text: tr('guide.pathRain'),
+                              right: 0,
+                              onTap: () => _sendero.goTo('rain', enter: false),
+                            ),
                             _Panel.none when p.guideStep == Guide.market => _GuideHint(
                               text: tr('guide.market'),
                               right: 30,
@@ -535,6 +668,7 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                             _Panel.none
                                 when (p.guideStep == Guide.place || p.guideStep == Guide.decor) &&
                                     p.decorUnlocked &&
+                                    !_path &&
                                     _page != 0 =>
                               _GuideHint(
                                 text: tr('guide.modelBack'),
@@ -550,13 +684,15 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                         right: 0,
                         bottom: pad.bottom + 10,
                         child: Center(
-                          child: _Hidden(
-                            hidden: _walking,
-                            child: _SideDots(
-                              page: _page,
-                              onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
-                            ),
-                          ),
+                          child: _path
+                              ? _SenderoBar(onQuick: _quick, onDecor: p.decorUnlocked ? _model : null)
+                              : _Hidden(
+                                  hidden: _walking,
+                                  child: _SideDots(
+                                    page: _page,
+                                    onTap: (i) => _pages.animateToPage(i, duration: _pageTurn, curve: Calm.curve),
+                                  ),
+                                ),
                         ),
                       ),
                       // Paseando: franjas de cine, lo que se está mirando y,
@@ -1175,4 +1311,80 @@ class _SideDots extends StatelessWidget {
     );
     return Glass(padding: const EdgeInsets.symmetric(horizontal: 6), child: dots);
   }
+}
+
+/// Abajo, en el Sendero: el acceso rápido a los juegos y la vista aérea para
+/// decorar.
+class _SenderoBar extends StatelessWidget {
+  final VoidCallback onQuick;
+  final VoidCallback? onDecor;
+  const _SenderoBar({required this.onQuick, required this.onDecor});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Progress.instance;
+    Widget button(Key key, IconData icon, String label, VoidCallback onTap, {bool pulse = false}) => GestureDetector(
+      key: key,
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 19, color: pulse ? Palette.lantern : Palette.wood),
+            const SizedBox(width: 6),
+            Text(label, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Palette.ink)),
+          ],
+        ),
+      ),
+    );
+    return Glass(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          button(const ValueKey('quick'), Icons.signpost_rounded, tr('sendero.quick'), onQuick),
+          if (onDecor != null) ...[
+            Container(width: 1, height: 22, color: Palette.ink.withValues(alpha: 0.15)),
+            button(
+              const ValueKey('aerial'),
+              Icons.map_rounded,
+              tr('aerial.title'),
+              onDecor!,
+              pulse: p.guideStep == Guide.place || p.guideStep == Guide.decor,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickChip extends StatelessWidget {
+  final String label;
+  final bool known;
+  final VoidCallback? onTap;
+  const _QuickChip({super.key, required this.label, required this.known, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: known ? Palette.paper : Palette.paper.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: known ? Palette.wood.withValues(alpha: 0.5) : Palette.ink.withValues(alpha: 0.12)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: Palette.ink.withValues(alpha: known ? 0.9 : 0.45),
+        ),
+      ),
+    ),
+  );
 }

@@ -143,6 +143,23 @@ class SceneArt {
     'model_tray_patio': 'decor',
     'model_tray_pond': 'decor',
     'model_tray_forest': 'decor',
+    // El Sendero (Bloque 26 de `docs/prompts.md`): mientras falte, se pinta con código.
+    'bg_path_hills_far': 'path',
+    'bg_path_hills_near': 'path',
+    'obj_path_stone_01': 'path',
+    'obj_path_stone_02': 'path',
+    'obj_path_gate': 'path',
+    'obj_path_gate_closed': 'path',
+    'obj_path_signpost': 'path',
+    'obj_path_sign_soon': 'path',
+    'obj_path_fence_closed': 'path',
+    'obj_station_sand': 'path',
+    'obj_station_pond': 'path',
+    'obj_station_leaves': 'path',
+    'obj_station_meditation': 'path',
+    'spr_path_slot': 'path',
+    'spr_path_slot_locked': 'path',
+    'bg_path_aerial_paper': 'path',
   };
 
   final _images = <String, ui.Image>{};

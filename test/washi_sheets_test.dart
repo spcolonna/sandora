@@ -35,6 +35,14 @@ void main() {
     await tester.tap(find.text('x'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    // La vista del jardín: Sendero de entrada, Clásica a un toque (y se guarda).
+    expect(AppSettings.instance.classicView, isFalse);
+    await tester.tap(find.byKey(const ValueKey('viewClassic')));
+    await tester.pump();
+    expect(AppSettings.instance.classicView, isTrue);
+    await AppSettings.instance.load(const ['es']);
+    expect(AppSettings.instance.classicView, isTrue);
+    AppSettings.instance.setClassicView(false);
   });
 
   testWidgets('la hoja de descanso muestra lo que falta y cobra un loto por seguir', (tester) async {

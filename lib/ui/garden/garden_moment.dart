@@ -24,7 +24,7 @@ class MomentChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = Progress.instance;
     final phase = p.dayCycle.phaseAt(now);
-    final after = _rainbowTime(now);
+    final after = rainbowTime(now);
     final gifts = p.dayCycle.giftsAt(now, weather, afterRain: after);
     final left = gifts.fold(0, (n, g) => n + p.giftsLeft(g, weather: weather, afterRain: after, now: now));
     final open = gifts.where((g) => p.giftsLeft(g, weather: weather, afterRain: after, now: now) > 0).firstOrNull;
@@ -70,7 +70,7 @@ Future<void> _showNowSheet(BuildContext context, {required DateTime now, require
         final p = Progress.instance;
         final phase = p.dayCycle.phaseAt(now);
         final w = ws.at(now);
-        final gifts = p.dayCycle.giftsAt(now, w, afterRain: _rainbowTime(now));
+        final gifts = p.dayCycle.giftsAt(now, w, afterRain: rainbowTime(now));
         final hint = gifts.isEmpty ? tr('moment.${phase.name}.hint') : tr('gift.${gifts.first.id}.hint');
         return SafeArea(
           child: Padding(

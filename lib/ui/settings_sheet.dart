@@ -91,6 +91,31 @@ Future<void> showSettingsSheet(BuildContext context) {
                       ),
                     ),
                   const SizedBox(height: 8),
+                  Text(tr('settings.view'), style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(
+                    tr('settings.viewHint'),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Palette.ink.withValues(alpha: 0.65)),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      InkChip(
+                        key: const ValueKey('viewPath'),
+                        label: tr('settings.viewPath'),
+                        selected: !s.classicView,
+                        onTap: () => s.setClassicView(false),
+                      ),
+                      InkChip(
+                        key: const ValueKey('viewClassic'),
+                        label: tr('settings.viewClassic'),
+                        selected: s.classicView,
+                        onTap: () => s.setClassicView(true),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   Text(tr('settings.language'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 10),
                   Wrap(

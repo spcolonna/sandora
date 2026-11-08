@@ -394,17 +394,28 @@
     ]
   },
   "sendero": {
-    "_comment": "El Sendero: el camino en primera persona que cruza las tres zonas. Cada zona mide segment pasos; la fila de la Maqueta r queda a rowZ[r] pasos del comienzo de su zona (la 0, la del fondo, más adelante) y la columna c a colX[c] del centro del camino, corrida colStagger*c hacia adelante. speed: pasos por segundo al caminar solo. decorScale: ancho en el mundo por unidad de size de la decoración. halfWidth: medio ancho del camino.",
-    "segment": 14,
+    "_comment": "El Sendero: el jardín principal, recorrido en primera persona. El tronco cruza las tres zonas (cada una mide segment pasos, con un portón al empezar el estanque y el bosque). La fila r de la Maqueta queda a rowZ[r] pasos del comienzo de su zona (la 0, la del fondo, más adelante) y la columna c a colX[c] del centro del camino, corrida colStagger*c hacia adelante. branches: los ramales hacia los juegos (zona, a cuántos pasos del comienzo de la zona sale, lado -1 izquierda / 1 derecha, y los lugares al final). board: el tablón de récords (pasos desde la entrada y lado). speed: pasos por segundo al caminar solo. decorScale: ancho en el mundo por unidad de size de la decoración. halfWidth: medio ancho del camino.",
+    "segment": 24,
     "rowZ": [10.5, 7, 3.5],
     "colX": [-2.6, -1.45, 1.45, 2.6],
     "colStagger": 0.45,
-    "speed": 1.1,
+    "speed": 1.4,
     "decorScale": 6,
-    "halfWidth": 0.7
+    "halfWidth": 0.7,
+    "board": [1.8, -2.3],
+    "branches": [
+      {"zone": 0, "at": 13, "side": -1, "places": ["sand", "stack"]},
+      {"zone": 0, "at": 17.5, "side": 1, "places": ["rain", "meditation"]},
+      {"zone": 1, "at": 13, "side": -1, "places": ["shishi", "moss"]},
+      {"zone": 1, "at": 16, "side": 1, "places": ["pond", "leaves"]},
+      {"zone": 1, "at": 19, "side": -1, "places": ["bonsai"]},
+      {"zone": 1, "at": 20.5, "side": 1, "places": ["enso", "bell"]},
+      {"zone": 2, "at": 13, "side": -1, "places": ["matcha"]},
+      {"zone": 2, "at": 17, "side": 1, "places": ["flute", "lanterns"]}
+    ]
   },
   "model": {
-    "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. feet: dónde queda el pie de cada parcela (x, y) en cada vista, en fracción de la vista (el patio pintado, del lienzo); elegidos a mano para no tapar los lugares. inViews: si la decoración también se ve en las vistas de actividades (false: solo en el Sendero, que se abre desde la Maqueta). table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo).",
+    "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. feet: dónde queda el pie de cada parcela (x, y) en cada vista, en fracción de la vista (el patio pintado, del lienzo); elegidos a mano para no tapar los lugares. inViews: si la decoración también se ve en las vistas de actividades con la vista Sendero (en la Clásica siempre se ve). table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo).",
     "inViews": false,
     "cols": 4,
     "rows": 3,

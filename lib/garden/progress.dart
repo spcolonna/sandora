@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../balance/balance.dart';
 import '../minigames/sand/sand_shapes.dart';
+import '../settings.dart';
 import 'care.dart';
 import 'daily_goals.dart';
 import 'day_cycle.dart';
@@ -130,6 +131,9 @@ class Progress extends ChangeNotifier {
   /// estrellas y juegos que se probaron.
   int runsTotal = 0, threeTotal = 0;
   Set<String> gamesPlayed = {};
+
+  /// Lugares a los que ya se llegó caminando por el Sendero.
+  Set<String> senderoSeen = {};
 
   /// Logros conseguidos y cuántos se vieron (para el punto de "hay nuevo").
   Set<String> achievements = {};
@@ -400,6 +404,7 @@ class Progress extends ChangeNotifier {
     runsTotal = _prefs.getInt('stats.runs') ?? 0;
     threeTotal = _prefs.getInt('stats.three') ?? 0;
     gamesPlayed = (_prefs.getStringList('stats.games') ?? []).toSet();
+    senderoSeen = (_prefs.getStringList('sendero.seen') ?? []).toSet();
     // De antes de los logros: los juegos con récord ya se habían probado.
     if (!_prefs.containsKey('stats.games')) {
       gamesPlayed = {
@@ -741,6 +746,20 @@ class Progress extends ChangeNotifier {
   /// Si se ve la mesa de la Maqueta: con el catálogo abierto o con alguna
   /// decoración (la del tutorial) para poner.
   bool get decorUnlocked => decorOpen || decor.isNotEmpty;
+
+  /// Si ya se encontró el lugar [place] (se llegó caminando o se jugó): sale
+  /// en el acceso rápido.
+  bool discovered(String place) => senderoSeen.contains(place) || gamesPlayed.contains(place);
+
+  void seePlace(String place) {
+    if (!senderoSeen.add(place)) return;
+    _prefs.setStringList('sendero.seen', senderoSeen.toList());
+    notifyListeners();
+  }
+
+  /// Si la decoración también se ve en las vistas pintadas: siempre en la
+  /// vista Clásica; con el Sendero, según el balance.
+  bool get decorInViews => modelRules.inViews || AppSettings.instance.classicView;
 
   /// La decoración que el tutorial ofrece en el Mercado antes del nivel de
   /// decorar, a precio de comienzo y una sola vez.
@@ -1257,7 +1276,7 @@ class Progress extends ChangeNotifier {
       blockHours: blockHours,
       // Solo se caen las que están a la vista.
       decorPlaced: [
-        if (modelRules.inViews)
+        if (decorInViews)
           for (final (i, d) in decor.indexed)
             if (d.placed) i,
       ],

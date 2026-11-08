@@ -20,6 +20,10 @@ class AppSettings extends ChangeNotifier {
   bool reminders = true;
   int? reminderMinutes;
 
+  /// La vista Clásica del jardín (las tres vistas pintadas con los juegos a
+  /// mano) en vez del Sendero en primera persona.
+  bool classicView = false;
+
   Future<void> load(Iterable<String> systemLocales) async {
     _prefs = await SharedPreferences.getInstance();
     sound = _prefs.getBool('sound') ?? true;
@@ -27,6 +31,7 @@ class AppSettings extends ChangeNotifier {
     haptics = _prefs.getBool('haptics') ?? true;
     reminders = _prefs.getBool('reminders') ?? true;
     reminderMinutes = _prefs.getInt('reminderMinutes');
+    classicView = _prefs.getBool('classicView') ?? false;
     setLanguage(_prefs.getString('language') ?? systemLanguage(systemLocales));
   }
 
@@ -34,6 +39,7 @@ class AppSettings extends ChangeNotifier {
   void setMusic(bool v) => _set('music', music = v);
   void setHaptics(bool v) => _set('haptics', haptics = v);
   void setReminders(bool v) => _set('reminders', reminders = v);
+  void setClassicView(bool v) => _set('classicView', classicView = v);
 
   void setReminderMinutes(int minutes) {
     reminderMinutes = minutes;

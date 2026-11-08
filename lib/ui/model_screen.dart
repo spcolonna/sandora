@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/cupertino.dart';
@@ -6,12 +7,15 @@ import 'package:flutter/material.dart';
 import '../garden/decor.dart';
 import '../garden/economy.dart';
 import '../garden/progress.dart';
+import '../garden/sendero.dart';
 import '../i18n/i18n.dart';
 import 'decor_tray.dart';
-import 'sendero_screen.dart';
+import 'garden/garden_scene.dart';
+import 'garden/garden_view.dart';
 import 'fx/sfx.dart';
 import 'garden/garden_decor.dart';
 import 'garden/scene_art.dart';
+import 'sendero/sendero_painter.dart';
 import 'theme/palette.dart';
 import 'upgrade_sheet.dart';
 import 'widgets/currency.dart';
@@ -26,12 +30,17 @@ typedef ModelFocus = ({int side, int? index});
 /// estanque, bosque) es una grilla de parcelas; se compran parcelas y se pone
 /// cada decoración en la suya. Entra deslizando desde el costado, como el
 /// Mercado. Devuelve la decoración que se pidió ver en el jardín, si alguna.
-Future<ModelFocus?> openModel(BuildContext context, {int side = 0}) =>
-    Navigator.of(context).push(CupertinoPageRoute<ModelFocus>(builder: (_) => ModelScreen(side: side)));
+///
+/// Con [world] (la vista Sendero) es la vista aérea: el mismo jardín visto
+/// desde arriba, con cada parcela en su hueco al costado del camino.
+Future<ModelFocus?> openModel(BuildContext context, {int side = 0, SenderoWorld? world}) => Navigator.of(
+  context,
+).push(CupertinoPageRoute<ModelFocus>(builder: (_) => ModelScreen(side: side, world: world)));
 
 class ModelScreen extends StatefulWidget {
   final int side;
-  const ModelScreen({super.key, this.side = 0});
+  final SenderoWorld? world;
+  const ModelScreen({super.key, this.side = 0, this.world});
 
   @override
   State<ModelScreen> createState() => _ModelScreenState();
@@ -169,21 +178,12 @@ class _ModelScreenState extends State<ModelScreen> {
     final i = _picked;
     if (i == null) return;
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-    if (!p.modelRules.inViews) {
-      openSendero(context, at: i);
-      return;
-    }
     Navigator.of(context).pop<ModelFocus>((side: _side, index: i));
   }
 
-  /// Recorrer el Sendero (o, con la decoración en las vistas, pasear por el
-  /// jardín empezando por la zona que se está viendo).
+  /// Recorrer el jardín empezando por la zona que se está viendo.
   void _walk() {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
-    if (!p.modelRules.inViews) {
-      openSendero(context);
-      return;
-    }
     Navigator.of(context).pop<ModelFocus>((side: _side, index: null));
   }
 
@@ -226,7 +226,7 @@ class _ModelScreenState extends State<ModelScreen> {
                       ),
                       Expanded(
                         child: Text(
-                          tr('model.title'),
+                          tr(widget.world != null ? 'aerial.title' : 'model.title'),
                           style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -261,14 +261,24 @@ class _ModelScreenState extends State<ModelScreen> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-                    child: _Board(
-                      side: _side,
-                      holding: _holding,
-                      picked: _picked,
-                      onTap: _tapCell,
-                      onDropNew: (id, cell) => _place(id, cell),
-                      onDropMove: _move,
-                    ),
+                    child: widget.world != null
+                        ? _AerialBoard(
+                            world: widget.world!,
+                            side: _side,
+                            holding: _holding,
+                            picked: _picked,
+                            onTap: _tapCell,
+                            onDropNew: (id, cell) => _place(id, cell),
+                            onDropMove: _move,
+                          )
+                        : _Board(
+                            side: _side,
+                            holding: _holding,
+                            picked: _picked,
+                            onTap: _tapCell,
+                            onDropNew: (id, cell) => _place(id, cell),
+                            onDropMove: _move,
+                          ),
                   ),
                 ),
                 SizedBox(
@@ -538,12 +548,14 @@ class _Cell extends StatelessWidget {
           children: [
             if (!open)
               Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.lock_rounded, size: 18, color: Palette.ink.withValues(alpha: 0.45)),
-                    FittedBox(child: _CostLine(p.parcelCost(side))),
-                  ],
+                child: FittedBox(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock_rounded, size: 18, color: Palette.ink.withValues(alpha: 0.45)),
+                      _CostLine(p.parcelCost(side)),
+                    ],
+                  ),
                 ),
               ),
             if (target) Center(child: Icon(Icons.add_rounded, size: 22, color: Palette.ink.withValues(alpha: 0.45))),
@@ -780,4 +792,223 @@ class _UpgradeList extends StatelessWidget {
       },
     );
   }
+}
+
+/// La vista aérea de una zona del Sendero: el camino, los ramales y los
+/// lugares sobre papel, y cada parcela en su hueco. Arranca acercada a las
+/// parcelas; se pellizca para alejar y ver toda la zona.
+class _AerialBoard extends StatefulWidget {
+  final SenderoWorld world;
+  final int side;
+  final String? holding;
+  final int? picked;
+  final ValueChanged<int> onTap;
+  final void Function(String id, int cell) onDropNew;
+  final void Function(int index, int cell) onDropMove;
+
+  const _AerialBoard({
+    required this.world,
+    required this.side,
+    required this.holding,
+    required this.picked,
+    required this.onTap,
+    required this.onDropNew,
+    required this.onDropMove,
+  });
+
+  @override
+  State<_AerialBoard> createState() => _AerialBoardState();
+}
+
+class _AerialBoardState extends State<_AerialBoard> {
+  final _view = TransformationController();
+
+  /// Para qué zona y tamaño se acomodó la vista.
+  (int, Size)? _fitted;
+
+  SenderoWorld get world => widget.world;
+
+  @override
+  void dispose() {
+    _view.dispose();
+    super.dispose();
+  }
+
+  Rect _around(Iterable<Offset> pts) {
+    var box = Rect.fromPoints(pts.first, pts.first);
+    for (final p in pts) {
+      box = box.expandToInclude(Rect.fromPoints(p, p));
+    }
+    return box;
+  }
+
+  /// Toda la zona: su tramo del tronco, sus ramales y lugares.
+  Rect _zone(int side) {
+    final r = world.rules;
+    return _around([
+      for (var s = r.zoneStart(side); s <= r.zoneStart(side) + r.segment; s += 1) world.trunk.pointAt(s),
+      for (final b in world.branches)
+        if (b.spec.zone == side) ...world.tracks[b.track].points,
+      for (final st in world.stations)
+        if (st.zone == side) st.pos,
+    ]).inflate(2.4);
+  }
+
+  /// Las parcelas de la zona.
+  Rect _cells(int side) => _around([for (var c = 0; c < world.cols * world.rows; c++) world.slot(side, c)]).inflate(0.9);
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Progress.instance;
+    final side = widget.side;
+    return LayoutBuilder(
+      builder: (context, box) {
+        final vp = box.biggest;
+        final focus = _cells(side);
+        final k = min(vp.width / focus.width, vp.height / focus.height);
+        final zone = _zone(side).expandToInclude(focus);
+        final size = Size(zone.width * k, zone.height * k);
+        // Hacia adelante es hacia arriba.
+        Offset map(Offset w) => Offset((w.dx - zone.left) * k, (zone.bottom - w.dy) * k);
+        if (_fitted != (side, vp)) {
+          _fitted = (side, vp);
+          final c = map(focus.center);
+          _view.value = Matrix4.translationValues(vp.width / 2 - c.dx, vp.height / 2 - c.dy, 0);
+        }
+        final cell = 1.05 * k;
+        final cells = p.modelRules.cells;
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: InteractiveViewer(
+            transformationController: _view,
+            constrained: false,
+            minScale: min(1, min(vp.width / size.width, vp.height / size.height)),
+            maxScale: 2.5,
+            boundaryMargin: const EdgeInsets.all(60),
+            child: SizedBox(
+              width: size.width,
+              height: size.height,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned.fill(child: CustomPaint(painter: _AerialPainter(world, side, zone, k))),
+                  for (var c = 0; c < cells; c++)
+                    Positioned.fromRect(
+                      rect: Rect.fromCenter(center: map(world.slot(side, c)), width: cell, height: cell),
+                      child: _Cell(
+                        key: ValueKey('cell$side.$c'),
+                        side: side,
+                        cell: c,
+                        decor: p.decorAt(side, c),
+                        open: p.parcelOpen(side, c),
+                        picked: widget.picked != null && p.decorAt(side, c) == widget.picked,
+                        target: widget.holding != null && p.parcelOpen(side, c) && p.decorAt(side, c) == null,
+                        onTap: () => widget.onTap(c),
+                        onDropNew: (id) => widget.onDropNew(id, c),
+                        onDropMove: (i) => widget.onDropMove(i, c),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AerialPainter extends CustomPainter {
+  final SenderoWorld world;
+  final int side;
+  final Rect bounds;
+  final double k;
+  _AerialPainter(this.world, this.side, this.bounds, this.k);
+
+  Offset _map(Offset w) => Offset((w.dx - bounds.left) * k, (bounds.bottom - w.dy) * k);
+
+  static const _zones = [Color(0xFFE2D5B8), Color(0xFFC9CDAA), Color(0xFF98A87A)];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+    final paper = SceneArt.instance['bg_path_aerial_paper'];
+    if (paper != null) {
+      drawArt(canvas, paper, Offset.zero & size);
+      canvas.drawRect(Offset.zero & size, Paint()..color = _zones[side].withValues(alpha: 0.35));
+    } else {
+      canvas.drawRect(Offset.zero & size, Paint()..color = Color.lerp(_zones[side], Palette.paper, 0.35)!);
+    }
+    // El agua.
+    final pond = [for (final q in pondShape(world)) _map(q)];
+    canvas.drawPath(Path()..addPolygon(pond, true), Paint()..color = Palette.water.withValues(alpha: 0.8));
+    // El paisaje, como copas y piedras vistas desde arriba.
+    for (final t in senderoScenery(world)) {
+      final c = _map(t.pos);
+      if (!(Offset.zero & size).inflate(20).contains(c)) continue;
+      final bamboo = (t.art ?? '').contains('bamboo');
+      canvas.drawCircle(
+        c,
+        t.width * k * (bamboo ? 0.4 : 0.3),
+        Paint()..color = (bamboo ? Palette.moss : Palette.stone).withValues(alpha: 0.45),
+      );
+    }
+    // Los caminos.
+    final hw = world.rules.halfWidth * 2 * k;
+    for (final t in world.tracks) {
+      final path = Path()..addPolygon([for (final q in t.points) _map(q)], false);
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = const Color(0xFFB9A982)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = hw + 3
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round,
+      );
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = const Color(0xFFEFE5CC)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = hw
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round,
+      );
+    }
+    // Los portones.
+    for (var z = 1; z < ModelRules.sides; z++) {
+      final s = world.gateAt(z);
+      final a = world.trunk.pointAt(s) - world.trunk.normalAt(s) * 1.3;
+      final b = world.trunk.pointAt(s) + world.trunk.normalAt(s) * 1.3;
+      canvas.drawLine(
+        _map(a),
+        _map(b),
+        Paint()
+          ..color = Palette.clay
+          ..strokeWidth = max(3, 0.25 * k)
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+    // Los lugares, con su nombre.
+    for (final st in [...world.stations.map((s) => (s.place, s.pos)), ('board', world.board)]) {
+      final c = _map(st.$2);
+      if (!(Offset.zero & size).inflate(30).contains(c)) continue;
+      canvas.drawCircle(c, max(10, 0.7 * k), Paint()..color = Palette.wood.withValues(alpha: 0.85));
+      final place = Place.values.byName(st.$1);
+      final tp = TextPainter(
+        text: TextSpan(
+          text: placeName(place),
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Palette.ink),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout(maxWidth: 110);
+      tp.paint(canvas, c + Offset(-tp.width / 2, max(10, 0.7 * k) + 2));
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_AerialPainter old) => old.side != side || old.k != k || old.bounds != bounds;
 }

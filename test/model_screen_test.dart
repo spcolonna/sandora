@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandora/garden/progress.dart';
+import 'package:sandora/garden/sendero.dart';
 import 'package:sandora/i18n/i18n.dart';
 import 'package:sandora/settings.dart';
 import 'package:sandora/ui/model_screen.dart';
-import 'package:sandora/ui/sendero_screen.dart';
 import 'package:sandora/ui/theme/palette.dart';
 
 import 'helpers.dart';
@@ -73,22 +73,15 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(ValueKey('cell1.$cell')));
     await tester.pumpAndSettle();
-    // Verla abre el Sendero parado frente a ella; al cerrarlo se vuelve a la maqueta.
+    // Verla cierra la maqueta y pide esa decoración.
     await tester.tap(find.text(tr('model.see')));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.byType(SenderoScreen), findsOneWidget);
-    expect(find.text(tr('decor.${item.id}')), findsWidgets);
-    await tester.tap(find.byKey(const ValueKey('senderoClose')));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.byType(SenderoScreen), findsNothing);
-    expect(find.text(tr('model.title')), findsOneWidget);
-    expect(focus, isNull);
+    await tester.pumpAndSettle();
+    expect(find.text(tr('model.title')), findsNothing);
+    expect(focus, (side: 1, index: p.decorAt(1, cell)));
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Recorrer abre el Sendero caminando', (tester) async {
+  testWidgets('Recorrer cierra la maqueta y pide pasear desde esa zona', (tester) async {
     tester.view.physicalSize = const Size(1320, 2868);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -115,14 +108,47 @@ void main() {
     await tester.tap(find.text(tr('garden.forest')));
     await tester.pumpAndSettle();
     await tester.tap(find.text(tr('model.walk')));
+    await tester.pumpAndSettle();
+    expect(focus, (side: 2, index: null));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('la vista aérea pone la pieza en su hueco del Sendero', (tester) async {
+    tester.view.physicalSize = const Size(1320, 2868);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    await AppSettings.instance.load(const ['es']);
+    final p = Progress.instance;
+    await p.load(loadBalance());
+    p.calm = p.levels.calmToReach(10);
+    p.pebbles = 100000;
+    for (final e in p.essences.keys) {
+      p.essences[e] = 10000;
+    }
+    final world = SenderoWorld(SenderoRules.from(p.economy.balance), cols: p.modelRules.cols, rows: p.modelRules.rows);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: Palette.theme(),
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(onPressed: () => openModel(context, world: world), child: const Text('x')),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('x'));
+    await tester.pumpAndSettle();
+    expect(find.text(tr('aerial.title')), findsOneWidget);
+    final item = p.decorRules.items.first;
+    await tester.tap(find.text(tr('decor.${item.id}')).last);
     await tester.pump();
-    await tester.pump(const Duration(seconds: 2));
-    expect(find.byType(SenderoScreen), findsOneWidget);
-    expect(find.textContaining(tr('sendero.title')), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('senderoClose')));
+    final cell = p.modelRules.start.last;
+    await tester.tap(find.byKey(ValueKey('cell0.$cell')));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(focus, isNull);
+    expect(p.decorAt(0, cell), isNotNull);
     expect(tester.takeException(), isNull);
   });
 }
