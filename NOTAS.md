@@ -146,6 +146,8 @@ simulador) está terminado. Quedan dos cosas esperando al usuario:
 - **IPA 1.0.0+2 generado (2026-11-06)** en `build/ios/ipa/Sandora.ipa`: sonido, arte de la racha, las 16 imágenes
   nuevas y los avisos de Apple. Falta que el usuario lo suba con Transporter. Las builds +3 y +4 se generaron pero
   **no se subieron**. Solo subir el número cuando el usuario suba de verdad una build (la siguiente sería +3).
+- **IPA 1.0.0+3 generado (2026-11-07)** para subir con Transporter: maqueta, parcelas y paseo en primera persona
+  (`540577b`). Hecho con `flutter clean` y verificado con `vtool` (todo `platform IOS`). La próxima subida sería +4.
 - **Error 409 "objective_c.framework ... unsupported platform" (2026-11-06):** el IPA llevó el `objective_c`
   de **simulador**, sacado de la caché de native assets que quedó tras correr en el simulador. **Antes de cada
   `flutter build ipa`, hacer `flutter clean`**, y revisar con
