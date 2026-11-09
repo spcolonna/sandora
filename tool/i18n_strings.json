@@ -3561,5 +3561,19 @@
   "pt": "Novas áreas do jardim vão abrir atrás deste portão",
   "ja": "この門の向こうに新しい庭が開きます",
   "zh": "这扇门后将开放新的庭园区域"
+ },
+ "mirador.hintWalk": {
+  "es": "Deslizá de costado para mirar · hacia arriba para caminar · tocá un juego para ir",
+  "en": "Swipe sideways to look · up to walk · tap a game to go there",
+  "pt": "Deslize para o lado para olhar · para cima para caminhar · toque um jogo para ir",
+  "ja": "横にスワイプで見回す・上で歩く・ゲームをタップして向かう",
+  "zh": "左右滑动环顾 · 向上滑动前进 · 点击游戏前往"
+ },
+ "mirador.backToCenter": {
+  "es": "Volver al centro",
+  "en": "Back to center",
+  "pt": "Voltar ao centro",
+  "ja": "中央に戻る",
+  "zh": "回到中央"
  }
 }

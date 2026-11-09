@@ -510,4 +510,6 @@ const ja = <String, String>{
   'mirador.hub': '庭の中央',
   'mirador.hint': 'ドラッグで見回す・光る石をタップして歩く',
   'mirador.future': 'この門の向こうに新しい庭が開きます',
+  'mirador.hintWalk': '横にスワイプで見回す・上で歩く・ゲームをタップして向かう',
+  'mirador.backToCenter': '中央に戻る',
 };

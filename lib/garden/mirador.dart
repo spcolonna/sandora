@@ -265,6 +265,42 @@ class MiradorWorld {
     return (w * 2.2).clamp(0.0, 1.0);
   }
 
+  /// El punto libre más cercano a [p] para pararse: dentro del muro, fuera del
+  /// agua y sin meterse en los lugares, el paisaje ni el pabellón.
+  Offset resolve(Offset p) {
+    final box = wall.deflate(0.9);
+    p = Offset(p.dx.clamp(box.left, box.right), p.dy.clamp(box.top, box.bottom));
+    for (final o in objects) {
+      if (o.kind == PanoKind.gate) continue;
+      if (o.decor == 'pavilion' || o.place == 'sand') {
+        // El pabellón (la galería de 1.8 m de fondo) y el arenero: rectángulos, con margen.
+        final r = o.place == 'sand'
+            ? Rect.fromCenter(center: o.at, width: o.width + 0.7, height: o.width * 0.64 + 0.7)
+            : Rect.fromCenter(center: o.at, width: o.width + 1.0, height: 2.8);
+        if (!r.contains(p)) continue;
+        final opts = [Offset(r.left, p.dy), Offset(r.right, p.dy), Offset(p.dx, r.top), Offset(p.dx, r.bottom)]
+          ..sort((a, b) => (a - p).distance.compareTo((b - p).distance));
+        p = opts.first;
+        continue;
+      }
+      if (o.place == 'pond') continue;
+      final r = o.width / 2 + 0.45;
+      final v = p - o.at;
+      if (v.distance >= r) continue;
+      p = o.at + (v.distance < 1e-6 ? Offset(0, -r) : v / v.distance * r);
+    }
+    for (final (c, _, wd) in islands) {
+      final r = wd * 0.35 + 0.3;
+      final v = p - c;
+      if (v.distance < r) p = c + (v.distance < 1e-6 ? Offset(0, -r) : v / v.distance * r);
+    }
+    final d = p - pondAt;
+    final e = sqrt(pow(d.dx / (pondRadii.width + 0.5), 2) + pow(d.dy / (pondRadii.height + 0.5), 2));
+    if (e < 1) p = pondAt + (e < 1e-6 ? Offset(-(pondRadii.width + 0.5), 0) : d / e);
+    // Lo que empujó un objeto tampoco saca del muro.
+    return Offset(p.dx.clamp(box.left, box.right), p.dy.clamp(box.top, box.bottom));
+  }
+
   /// La distancia desde [from] hasta el muro mirando hacia [angle] (radianes).
   double wallDistance(Offset from, double angle) {
     final dx = sin(angle), dy = cos(angle);
@@ -317,6 +353,36 @@ class MiradorWorld {
       if (inPond(p)) continue;
       if (decorAreas.any((a) => a.inflate(0.6).contains(p))) continue;
       out.add((p + Offset(rng.nextDouble() * 0.4 - 0.2, rng.nextDouble() * 0.4 - 0.2), size));
+    }
+    return out;
+  }();
+
+  /// Islas de musgo y piedras sobre la arena (centro, decoración y ancho), en
+  /// lo que queda libre: le dan vida al patio cuando se camina.
+  late final List<(Offset, String, double)> islands = () {
+    final out = <(Offset, String, double)>[];
+    final rng = Random(23);
+    final box = wall.deflate(2.2);
+    for (var x = box.left; x <= box.right; x += 2.7) {
+      for (var y = box.top; y <= box.bottom; y += 2.7) {
+        final p = Offset(x + rng.nextDouble() * 1.6 - 0.8, y + rng.nextDouble() * 1.6 - 0.8);
+        final keep = rng.nextDouble();
+        if (keep > 0.55) continue;
+        if ((p - hub.at).distance < 3.2) continue;
+        if (objects.any((o) => (o.at - p).distance < o.width / 2 + (o.decor == 'pavilion' ? 1.8 : 1.3))) continue;
+        if (decorAreas.any((a) => a.inflate(0.9).contains(p))) continue;
+        if (stones.any((s) => (s.$1 - p).distance < 1.1)) continue;
+        final e = p - pondAt;
+        if (pow(e.dx / (pondRadii.width + 1.2), 2) + pow(e.dy / (pondRadii.height + 1.2), 2) <= 1) continue;
+        if (hubPlants.any((h) => (h.$1 - p).distance < 1.2)) continue;
+        // Una mata de musgo con una piedra al lado, o piedras solas.
+        final big = keep < 0.3;
+        out.add((p, big ? 'moss' : 'rocks', big ? 1.1 + rng.nextDouble() * 0.4 : 0.7 + rng.nextDouble() * 0.3));
+        if (big) {
+          final t = rng.nextDouble() * 2 * pi;
+          out.add((p + Offset(sin(t), cos(t)) * 0.75, rng.nextBool() ? 'step' : 'rocks', 0.5 + rng.nextDouble() * 0.2));
+        }
+      }
     }
     return out;
   }();

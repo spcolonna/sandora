@@ -510,4 +510,6 @@ const zh = <String, String>{
   'mirador.hub': '庭院中央',
   'mirador.hint': '拖动环顾四周 · 点击发光的石头前进',
   'mirador.future': '这扇门后将开放新的庭园区域',
+  'mirador.hintWalk': '左右滑动环顾 · 向上滑动前进 · 点击游戏前往',
+  'mirador.backToCenter': '回到中央',
 };

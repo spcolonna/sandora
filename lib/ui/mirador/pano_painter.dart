@@ -139,6 +139,35 @@ const _maxHeight = {
   'bonsai': 1.6,
 };
 
+/// Recortes de arte ya pintado (una parte de una imagen), hechos una vez.
+final _crops = <(int, Rect), ui.Image>{};
+
+/// La parte [frac] (en fracciones del ancho y el alto) del arte [name].
+ui.Image? cropArt(String name, Rect frac) {
+  final img = SceneArt.instance[name];
+  if (img == null) return null;
+  return _crops[(identityHashCode(img), frac)] ??= () {
+    final src = Rect.fromLTRB(
+      frac.left * img.width,
+      frac.top * img.height,
+      frac.right * img.width,
+      frac.bottom * img.height,
+    );
+    final rec = ui.PictureRecorder();
+    Canvas(rec).drawImageRect(img, src, Offset.zero & src.size, Paint()..filterQuality = FilterQuality.medium);
+    return rec.endRecording().toImageSync(src.width.round(), src.height.round());
+  }();
+}
+
+/// El muro pintado del patio (bg_court_wall): el tramo sin portón, de la copa
+/// de los árboles al suelo, y el portón solo.
+const _wallFrac = Rect.fromLTRB(0, 320 / 1536, 0.62, 770 / 1536);
+const _gateFrac = Rect.fromLTRB(615 / 1024, 455 / 1536, 885 / 1024, 772 / 1536);
+
+/// En el muro pintado: dónde está el suelo y el alto del muro con su tejado
+/// (en píxeles del recorte, sobre 450 de alto).
+const _wallGround = 445.0, _wallRoof = 223.0;
+
 /// La cámara de un mirador: gira 360° alrededor de [pos]. Proyección
 /// cilíndrica: el ángulo da la x y la distancia da la altura en pantalla.
 class PanoCamera {
@@ -306,13 +335,13 @@ class PanoScene {
   late final _mist = Color.lerp(const Color(0xFF3A4660), const Color(0xFFEFE6D2), v.daylight)!;
   late final _tint = Color.lerp(const Color(0xFF7A86A8), Colors.white, v.daylight)!;
 
-  double _fog(double d) => ((d - 7) / 22).clamp(0.0, 0.5);
+  double _fog(double d) => ((d - 10) / 28).clamp(0.0, 0.4);
 
   /// El filtro de algo a [d] metros: bruma, luz del día y, si está cerrado,
   /// casi sin color.
   ColorFilter? _filter(double d, {bool locked = false}) {
     final fog = _fog(d);
-    final sat = locked ? 0.15 : 1.0;
+    final sat = locked ? 0.35 : 1.0;
     if (fog < 0.01 && !locked && v.daylight > 0.99) return null;
     const lr = 0.2126, lg = 0.7152, lb = 0.0722;
     final tint = [_tint.r, _tint.g, _tint.b];
@@ -375,6 +404,20 @@ class PanoScene {
     _c.drawRect(r, Paint()..shader = ui.Gradient.linear(r.topCenter, r.bottomCenter, [top, low]));
     final art = SceneArt.instance['pano_sky'];
     if (art != null) _band(art, 0, cam.horizon, 0.4, opacity: 0.9);
+    // El cielo pintado del patio, de día (de noche queda el degradado).
+    final painted = SceneArt.instance['bg_court_sky'];
+    if (art == null && painted != null) {
+      _band(
+        painted,
+        cam.horizon - cam.f * 1.5,
+        cam.horizon + 2,
+        0.25,
+        opacity: 0.15 + 0.85 * dl,
+        mirror: true,
+        filter: _farFilter(0),
+      );
+      return;
+    }
     // Nubes que giran con la mirada.
     final cloud = Paint()..color = Colors.white.withValues(alpha: 0.35 * dl + 0.05);
     for (var i = 0; i < 9; i++) {
@@ -393,17 +436,40 @@ class PanoScene {
 
   /// Una franja pintada que se repite alrededor (360°): [turn] es qué parte de
   /// la vuelta ocupa una copia.
-  void _band(ui.Image img, double top, double bottom, double turn, {double opacity = 1}) {
-    final wpx = cam.f * 2 * pi * turn;
+  /// Con [mirror], una copia sí y otra no va espejada (así el arte que no se
+  /// repite empalma sin costura; [turn] tiene que dar una cantidad par de copias).
+  void _band(
+    ui.Image img,
+    double top,
+    double bottom,
+    double turn, {
+    double opacity = 1,
+    bool mirror = false,
+    ColorFilter? filter,
+  }) {
+    final period = 2 * pi * turn;
+    final wpx = cam.f * period;
     if (wpx < 4) return;
-    final start = -((cam.yaw / (2 * pi * turn)) % 1) * wpx + size.width / 2;
     final paint = Paint()
-      ..colorFilter = _filter(40)
-      ..color = Colors.white.withValues(alpha: opacity);
-    var x = start - wpx * ((start / wpx).ceil());
-    while (x < size.width) {
-      drawArt(_c, img, Rect.fromLTRB(x, top, x + wpx + 1, bottom), paint: paint);
-      x += wpx;
+      ..colorFilter = filter ?? _filter(40)
+      ..color = Colors.white.withValues(alpha: opacity)
+      ..filterQuality = FilterQuality.medium;
+    final src = Offset.zero & Size(img.width.toDouble(), img.height.toDouble());
+    var n = ((cam.yaw - size.width / 2 / cam.f) / period).floor();
+    while (true) {
+      final x = size.width / 2 + (n * period - cam.yaw) * cam.f;
+      if (x >= size.width) break;
+      final dst = Rect.fromLTRB(x, top, x + wpx + 1, bottom);
+      if (mirror && n % 2 != 0) {
+        _c.save();
+        _c.translate(dst.center.dx * 2, 0);
+        _c.scale(-1, 1);
+        _c.drawImageRect(img, src, dst, paint);
+        _c.restore();
+      } else {
+        _c.drawImageRect(img, src, dst, paint);
+      }
+      n++;
     }
   }
 
@@ -420,6 +486,16 @@ class PanoScene {
   void _far() {
     final hz = cam.horizon;
     final mountains = SceneArt.instance['pano_far_mountains'];
+    final far = cropArt('bg_base_far', const Rect.fromLTRB(0, 0, 1, 0.78));
+    final hills = cropArt('bg_court_far', const Rect.fromLTRB(0, 330 / 1536, 1, 866 / 1536));
+    if (mountains == null && far != null) {
+      // Las montañas pintadas y, más cerca, las lomas con bosque (ya no se mueven al caminar).
+      _band(far, hz - cam.f * 0.62, hz + cam.f * 0.12, 0.125, mirror: true, filter: _farFilter(0.35));
+      if (hills != null) {
+        _band(hills, hz - cam.f * 0.4, hz + cam.f * 0.03, 0.125, mirror: true, filter: _farFilter(0.15));
+      }
+      return;
+    }
     if (mountains != null) {
       _band(mountains, hz - cam.f * 0.32, hz + 2, 0.5);
     } else {
@@ -439,6 +515,33 @@ class PanoScene {
     ], Color.lerp(const Color(0xFF223024), const Color(0xFF8C9C78), v.daylight)!);
   }
 
+  /// Lo lejano: el tinte de la hora y [haze] de bruma.
+  ColorFilter _farFilter(double haze) {
+    final k = 1 - haze;
+    return ColorFilter.matrix([
+      _tint.r * k,
+      0,
+      0,
+      0,
+      haze * _mist.r * 255,
+      0,
+      _tint.g * k,
+      0,
+      0,
+      haze * _mist.g * 255,
+      0,
+      0,
+      _tint.b * k,
+      0,
+      haze * _mist.b * 255,
+      0,
+      0,
+      0,
+      1,
+      0,
+    ]);
+  }
+
   void _silhouette(double base, double height, double minH, List<(double, double, double)> waves, Color color) {
     final path = Path()..moveTo(0, base + 2);
     for (var x = 0.0; x <= size.width + 6; x += 6) {
@@ -452,13 +555,17 @@ class PanoScene {
     _c.drawPath(path, Paint()..color = color);
   }
 
-  Color _groundAt(Offset p, double d) {
+  /// El color del suelo en [p]; con la arena pintada encima ([painted]), la
+  /// grava va casi blanca (la arena pone el color).
+  Color _groundAt(Offset p, double d, {bool painted = false}) {
     Color base;
     if (w.inPond(p)) {
       base = const Color(0xFF6F98A2);
     } else {
       final n = sin(p.dx * 1.9) * sin(p.dy * 1.4) * 0.5 + sin(p.dx * 0.6 + p.dy * 0.8) * 0.5;
-      final gravel = Color.lerp(const Color(0xFFE9E0CB), const Color(0xFFD9CDB2), 0.5 + n * 0.5)!;
+      final gravel = painted
+          ? Color.lerp(const Color(0xFFFFFFFF), const Color(0xFFEDE6D8), 0.5 + n * 0.5)!
+          : Color.lerp(const Color(0xFFE9E0CB), const Color(0xFFD9CDB2), 0.5 + n * 0.5)!;
       final moss = Color.lerp(const Color(0xFF8E9F68), const Color(0xFF6E8350), 0.5 + n * 0.5)!;
       base = Color.lerp(gravel, moss, w.mossAt(p))!;
     }
@@ -470,7 +577,11 @@ class PanoScene {
   void _ground() {
     final hz = cam.horizon;
     if (hz >= size.height) return;
-    final detail = SceneArt.instance['tex_pano_ground_detail'];
+    final ownDetail = SceneArt.instance['tex_pano_ground_detail'];
+    // Sin textura propia del suelo, la arena y el musgo pintados de los juegos.
+    final sand = ownDetail == null ? SceneArt.instance['tex_sand_base'] : null;
+    final mossTex = sand == null ? null : SceneArt.instance['tex_moss'];
+    final detail = ownDetail ?? sand;
     final cols = detail == null ? 22 : 30;
     final ys = <double>[];
     // Más filas cerca del horizonte (donde cambia más rápido).
@@ -483,7 +594,8 @@ class PanoScene {
     final tex = Float32List((cols + 1) * ys.length * 2);
     final colors = Int32List((cols + 1) * ys.length);
     // La textura de detalle cubre [_detailMeters] metros por copia, pegada al suelo.
-    final pxPerM = detail == null ? 0.0 : detail.width / _detailMeters;
+    final pxPerM = detail == null ? 0.0 : detail.width / (sand != null ? 1.6 : _detailMeters);
+    final mossCols = mossTex == null ? null : Int32List((cols + 1) * ys.length);
     var k = 0;
     for (var r = 0; r < ys.length; r++) {
       final y = ys[r];
@@ -496,7 +608,11 @@ class PanoScene {
         pos[k * 2 + 1] = y;
         tex[k * 2] = p.dx * pxPerM;
         tex[k * 2 + 1] = p.dy * pxPerM;
-        colors[k] = _groundAt(p, d).toARGB32();
+        colors[k] = _groundAt(p, d, painted: sand != null).toARGB32();
+        if (mossCols != null) {
+          final m = w.inPond(p) ? 0.0 : ((w.mossAt(p) - 0.2) / 0.6).clamp(0.0, 1.0);
+          mossCols[k] = Color.lerp(_tint, _mist, _fog(d))!.withValues(alpha: m).toARGB32();
+        }
         k++;
       }
     }
@@ -510,7 +626,11 @@ class PanoScene {
     _c.drawRect(Rect.fromLTRB(0, hz, size.width, size.height), Paint()..color = _mist);
     final indices = Uint16List.fromList(idx);
     if (detail == null) {
-      _c.drawVertices(ui.Vertices.raw(ui.VertexMode.triangles, pos, colors: colors, indices: indices), BlendMode.dst, Paint());
+      _c.drawVertices(
+        ui.Vertices.raw(ui.VertexMode.triangles, pos, colors: colors, indices: indices),
+        BlendMode.dst,
+        Paint(),
+      );
       return;
     }
     // El color de cada punto multiplicado por la textura (casi blanca, con piedritas y surcos).
@@ -519,6 +639,19 @@ class PanoScene {
       BlendMode.modulate,
       Paint()
         ..shader = ImageShader(detail, TileMode.repeated, TileMode.repeated, Matrix4.identity().storage)
+        ..filterQuality = FilterQuality.medium,
+    );
+    if (mossTex == null || mossCols == null) return;
+    // El musgo pintado encima, donde hay musgo (el alfa de cada punto).
+    final mk = mossTex.width / 2.0 / pxPerM;
+    for (var i = 0; i < tex.length; i++) {
+      tex[i] *= mk;
+    }
+    _c.drawVertices(
+      ui.Vertices.raw(ui.VertexMode.triangles, pos, colors: mossCols, textureCoordinates: tex, indices: indices),
+      BlendMode.modulate,
+      Paint()
+        ..shader = ImageShader(mossTex, TileMode.mirror, TileMode.mirror, Matrix4.identity().storage)
         ..filterQuality = FilterQuality.medium,
     );
   }
@@ -563,6 +696,8 @@ class PanoScene {
       _mist,
       _fog(d) * 0.8,
     )!;
+    final painted = cropArt('bg_court_wall', _wallFrac);
+    if (painted != null) return _paintedWall(painted, pts);
     final hgt = w.wallHeight;
     double d(int i) => pts[i].$2;
     double s(int i) => pts[i].$3;
@@ -589,7 +724,8 @@ class PanoScene {
       strip(
         (i) => cam.yAt(d(i) + 1.5, crown(i, 0.8) - 0.6),
         (i) => cam.yAt(d(i)),
-        (i) => lit(Color.lerp(const Color(0xFF6A8460), const Color(0xFF8C8A5E), 0.3 + 0.3 * sin(s(i) * 0.37))!, d(i) + 8),
+        (i) =>
+            lit(Color.lerp(const Color(0xFF6A8460), const Color(0xFF8C8A5E), 0.3 + 0.3 * sin(s(i) * 0.37))!, d(i) + 8),
       );
     }
     const plaster = [Color(0xFFEDE3CC), Color(0xFFE2D6BB), Color(0xFFE6DAC0), Color(0xFFF0E8D4)];
@@ -600,6 +736,39 @@ class PanoScene {
       (i) => cam.yAt(d(i), hgt + 0.22),
       (i) => cam.yAt(d(i), hgt - 0.04),
       (i) => lit(const Color(0xFF666D78), d(i)),
+    );
+  }
+
+  /// El muro pintado (yeso, tejado, matas al pie y árboles detrás) estirado
+  /// sobre el muro del patio, a su distancia.
+  void _paintedWall(ui.Image img, List<(double, double, double, int)> pts) {
+    final k = img.height / 450;
+    final pxPerM = _wallRoof * k / (w.wallHeight + 0.22);
+    final top = _wallGround * k / pxPerM;
+    final n = pts.length;
+    final pos = Float32List(n * 4);
+    final tex = Float32List(n * 4);
+    final cols = Int32List(n * 2);
+    for (var i = 0; i < n; i++) {
+      final (x, d, along, _) = pts[i];
+      pos[i * 4] = x;
+      pos[i * 4 + 1] = cam.yAt(d, top);
+      pos[i * 4 + 2] = x;
+      pos[i * 4 + 3] = cam.yAt(d) + 1;
+      tex[i * 4] = along * pxPerM;
+      tex[i * 4 + 1] = 0;
+      tex[i * 4 + 2] = along * pxPerM;
+      tex[i * 4 + 3] = _wallGround * k;
+      final c = Color.lerp(_tint, _mist, _fog(d) * 0.8)!.toARGB32();
+      cols[i * 2] = c;
+      cols[i * 2 + 1] = c;
+    }
+    _c.drawVertices(
+      ui.Vertices.raw(ui.VertexMode.triangleStrip, pos, colors: cols, textureCoordinates: tex),
+      BlendMode.modulate,
+      Paint()
+        ..shader = ImageShader(img, TileMode.mirror, TileMode.clamp, Matrix4.identity().storage)
+        ..filterQuality = FilterQuality.medium,
     );
   }
 
@@ -677,18 +846,35 @@ class PanoScene {
   // ---- Cosas del patio ----
 
   void _build() {
-    // En la Clásica no se camina: sin senderos, con matas cerca.
+    // Las piedras de paso entre miradores (en la Clásica se camina libre: no van).
     if (!v.hub) {
       for (final (p, r) in w.stones) {
         _stone(p, r);
       }
-    } else {
-      for (final (i, (p, size)) in w.hubPlants.indexed) {
-        _hedge(p, size, i + 100);
+    }
+    // Con el muro pintado, sus matas ya están al pie; sin él, arbustos de código.
+    if (cropArt('bg_court_wall', _wallFrac) == null) {
+      for (final (i, (p, size)) in w.hedges.indexed) {
+        _hedge(p, size, i);
       }
     }
-    for (final (i, (p, size)) in w.hedges.indexed) {
-      _hedge(p, size, i);
+    for (final (i, (p, id, wd)) in w.islands.indexed) {
+      if (SceneArt.instance['obj_decor_$id'] == null) continue;
+      final (_, d) = cam.polar(p);
+      if (id == 'moss') _patch(p, wd * 1.3, d);
+      _prop(PanoObject('island$i', PanoKind.prop, p, wd, decor: id, flip: i.isOdd));
+    }
+    if (v.hub) {
+      // Matas, musgo y piedras pintadas alrededor del centro.
+      const kinds = ['azalea', 'moss', 'rocks', 'azalea', 'boulder', 'moss'];
+      for (final (i, (p, size)) in w.hubPlants.indexed) {
+        final id = kinds[i % kinds.length];
+        if (SceneArt.instance['obj_decor_$id'] == null) {
+          _hedge(p, size, i + 100);
+        } else {
+          _prop(PanoObject('hub$i', PanoKind.prop, p, size * (id == 'boulder' ? 0.9 : 1.2), decor: id, flip: i.isOdd));
+        }
+      }
     }
     for (final o in w.objects) {
       switch (o.kind) {
@@ -709,6 +895,15 @@ class PanoScene {
     for (final e in v.exits) {
       _exit(e);
     }
+    // Los carteles no se pisan: si dos chocan, queda el del más cercano.
+    _labels.sort((a, b) => a.dist.compareTo(b.dist));
+    final kept = <_Item>[];
+    for (final l in _labels) {
+      if (!kept.any((k) => k.rect.inflate(3).overlaps(l.rect))) kept.add(l);
+    }
+    _labels
+      ..clear()
+      ..addAll(kept);
   }
 
   bool _offscreen(Rect r) => r.right < -20 || r.left > size.width + 20 || r.bottom < 0;
@@ -740,14 +935,22 @@ class PanoScene {
     return path..close();
   }
 
-  void _stone(Offset p, double r) {
+  void _stone(Offset p, double r, {double near = 0.45}) {
     final (a, d) = cam.polar(p);
-    if (d < 0.45 || a.abs() > cam.fov / cam.zoom * 0.5 + 0.3) return;
+    if (d < near || a.abs() > cam.fov / cam.zoom * 0.5 + 0.3) return;
     final ctr = Offset(cam.xAt(a), cam.yAt(d));
     final wpx = 2 * r * cam.f / d;
     final hpx = min(wpx * 0.7, wpx * cam.eye / d);
     final rect = Rect.fromCenter(center: ctr, width: wpx, height: hpx);
     if (_offscreen(rect)) return;
+    final art = SceneArt.instance['obj_decor_step'];
+    if (art != null) {
+      // La piedra de paso pintada, aplastada según cuánto se la ve de costado.
+      final h = min(wpx * 0.75, wpx * cam.eye / d * 1.6);
+      final r = Rect.fromCenter(center: ctr, width: wpx * 1.1, height: h);
+      _flat.add(_Item(d, r, null, () => _art(art, r, d)));
+      return;
+    }
     _flat.add(
       _Item(d, rect, null, () {
         final shade = Color.lerp(const Color(0xFF8F8A80), _mist, _fog(d))!;
@@ -823,13 +1026,20 @@ class PanoScene {
           _bonsai(img, r, d, locked, alpha);
         } else if (img != null) {
           _art(img, r, d, flip: o.flip, locked: locked, alpha: alpha);
+          final bowl = SceneArt.instance['obj_court_singing_bowl'];
+          if (id == 'meditation' && bowl != null) {
+            // El cuenco al lado del cojín.
+            final bw = r.width * 0.42;
+            final bh = bw * bowl.height / bowl.width;
+            _art(bowl, Rect.fromLTWH(r.right - bw * 0.2, r.bottom - bh, bw, bh), d, locked: locked, alpha: alpha);
+          }
         } else {
           _filtered(r, d, () => _sketch(id, r), locked: locked, alpha: alpha);
         }
       }),
     );
-    if (look != null && d < 10.5) {
-      _labels.add(_Item(d, _labelRect(look, r.topCenter), target, () => _label(look, r.topCenter, d)));
+    if (look != null && d < _labelFar) {
+      _labels.add(_Item(d, _labelRect(look, r.topCenter, d), target, () => _label(look, r.topCenter, d)));
     }
   }
 
@@ -972,9 +1182,9 @@ class PanoScene {
         }
       }),
     );
-    if (look != null && d < 12) {
+    if (look != null && d < _labelFar) {
       final top = Offset(b.center.dx, b.top);
-      _labels.add(_Item(d, _labelRect(look, top), target, () => _label(look, top, d)));
+      _labels.add(_Item(d, _labelRect(look, top, d), target, () => _label(look, top, d)));
     }
   }
 
@@ -1077,18 +1287,24 @@ class PanoScene {
       if (path == null) return;
       final b = path.getBounds();
       final (_, d) = cam.polar(m.pos);
+      // En la Clásica los huecos para decorar son discretos y no se pisan.
+      final soft = v.hub && m.target.kind == PanoHit.slot;
+      if (soft && d < 2.6) return;
+      final k = soft ? 0.5 * ((d - 2.6) / 1.5).clamp(0.0, 1.0) : 1.0;
       _flat.add(
         _Item(d - 0.1, b.inflate(8), m.target, () {
-          if (img != null) return _art(img, b, d);
-          _c.drawPath(path, Paint()..color = m.color.withValues(alpha: 0.16));
+          if (img != null) return _art(img, b, d, alpha: soft ? k * 1.6 : 1);
+          _c.drawPath(path, Paint()..color = m.color.withValues(alpha: 0.16 * k));
           _c.drawPath(
             path,
             Paint()
-              ..color = m.color.withValues(alpha: 0.8)
+              ..color = m.color.withValues(alpha: 0.8 * k)
               ..style = PaintingStyle.stroke
-              ..strokeWidth = max(1.5, b.height * 0.06),
+              ..strokeWidth = max(1.2, b.height * (soft ? 0.035 : 0.06)),
           );
-          if (m.icon != null) _glyph(m.icon!, b.center, min(b.height, b.width) * 0.6, m.color);
+          if (m.icon != null) {
+            _glyph(m.icon!, b.center, min(b.height, b.width) * (soft ? 0.4 : 0.6), m.color.withValues(alpha: k));
+          }
         }),
       );
       return;
@@ -1156,15 +1372,23 @@ class PanoScene {
   }
 
   void _gate(PanoObject o) {
-    final s = _stand(o.at, o.width, 1.0);
+    final open = o.id == 'entrance';
+    // Sin arte propio, el portón del muro pintado (cerrado, con su tejadito).
+    final own = SceneArt.instance[open ? 'obj_path_gate' : 'obj_gate_future'];
+    final art = own ?? cropArt('bg_court_wall', _gateFrac);
+    final s = _stand(o.at, o.width, art == null ? 1.0 : art.height / art.width);
     if (s == null) return;
     final (r, d) = s;
-    final open = o.id == 'entrance';
-    final art = SceneArt.instance[open ? 'obj_path_gate' : 'obj_gate_future'];
     _items.add(
       _Item(d, r, open ? null : PanoTarget(PanoHit.gate, id: o.id), () {
-        if (art != null) return _art(art, r, d);
-        _filtered(r, d, () => _gateSketch(r, open));
+        if (art == null) return _filtered(r, d, () => _gateSketch(r, open));
+        _art(art, r, d);
+        if (!open && own == null) {
+          // El sello con candado de las zonas que vienen.
+          final seal = Offset(r.center.dx - r.width * 0.02, r.top + r.height * 0.62);
+          _c.drawCircle(seal, r.width * 0.06, Paint()..color = Palette.clay);
+          _glyph(Icons.lock_rounded, seal, r.width * 0.07, Palette.paper);
+        }
       }),
     );
   }
@@ -1450,23 +1674,20 @@ class PanoScene {
 
   // ---- Carteles ----
 
-  Rect _labelRect(PlaceLook look, Offset top) {
-    final wpx = max(60.0, look.name.length * 8.5 + (look.open ? 0 : 16) + 22);
-    final hpx = look.note == null ? 26.0 : 42.0;
-    return Rect.fromLTWH(top.dx - wpx / 2, top.dy - hpx - 8, wpx, hpx);
-  }
+  /// Hasta dónde se ve el cartel de un lugar (m) y desde dónde se empieza a
+  /// desvanecer.
+  static const _labelFar = 19.0, _labelFade = 14.0;
 
-  void _label(PlaceLook look, Offset top, double d) {
-    final alpha = (1 - (d - 7.5) / 3).clamp(0.0, 1.0);
-    if (alpha <= 0) return;
+  double _labelAlpha(double d) => (1 - (d - _labelFade) / (_labelFar - _labelFade)).clamp(0.0, 1.0);
+
+  /// El cartel de madera de un lugar: más chico cuanto más lejos.
+  (Rect, TextPainter, TextPainter?) _labelLayout(PlaceLook look, Offset top, double d) {
+    final k = (1 - (d - 5) / 12).clamp(0.0, 1.0);
+    final size = 12.5 + 2.5 * k;
     final name = TextPainter(
       text: TextSpan(
         text: look.name,
-        style: TextStyle(
-          color: Palette.ink.withValues(alpha: alpha),
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-        ),
+        style: TextStyle(color: Palette.ink, fontSize: size, fontWeight: FontWeight.w700),
       ),
       textDirection: TextDirection.ltr,
     )..layout(maxWidth: 200);
@@ -1475,32 +1696,57 @@ class PanoScene {
         : (TextPainter(
             text: TextSpan(
               text: look.note,
-              style: TextStyle(color: Palette.ink.withValues(alpha: 0.7 * alpha), fontSize: 11.5),
+              style: TextStyle(color: Palette.ink.withValues(alpha: 0.75), fontSize: size - 2.5),
             ),
             textDirection: TextDirection.ltr,
           )..layout(maxWidth: 200));
-    final lock = look.open ? 0.0 : 16.0;
+    final lock = look.open ? 0.0 : size + 3;
     final wpx = max(name.width + lock, note?.width ?? 0) + 20;
-    final hpx = name.height + (note?.height ?? 0) + 8;
-    final box = Rect.fromLTWH(top.dx - wpx / 2, top.dy - hpx - 8, wpx, hpx);
+    final hpx = name.height + (note?.height ?? 0) + 9;
+    return (Rect.fromLTWH(top.dx - wpx / 2, top.dy - hpx - 10, wpx, hpx), name, note);
+  }
+
+  Rect _labelRect(PlaceLook look, Offset top, double d) => _labelLayout(look, top, d).$1;
+
+  void _label(PlaceLook look, Offset top, double d) {
+    final alpha = _labelAlpha(d);
+    if (alpha <= 0) return;
+    final (box, name, note) = _labelLayout(look, top, d);
+    final rr = RRect.fromRectAndRadius(box, const Radius.circular(9));
+    if (alpha < 0.99) _c.saveLayer(box.inflate(12), Paint()..color = Colors.white.withValues(alpha: alpha));
+    // Un palito que lo baja hasta el lugar, sombra, papel y borde de madera.
+    _c.drawLine(
+      box.bottomCenter,
+      top,
+      Paint()
+        ..color = Palette.wood.withValues(alpha: 0.8)
+        ..strokeWidth = 2,
+    );
+    _c.drawRRect(rr.shift(const Offset(0, 2)), Paint()..color = Palette.ink.withValues(alpha: 0.22));
+    _c.drawRRect(rr, Paint()..color = look.open ? Palette.paper : Color.lerp(Palette.paper, Palette.stoneDark, 0.18)!);
     _c.drawRRect(
-      RRect.fromRectAndRadius(box, const Radius.circular(10)),
-      Paint()..color = Palette.paper.withValues(alpha: 0.88 * alpha),
+      rr,
+      Paint()
+        ..color = Palette.wood
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6,
     );
     if (look.dot) {
-      _c.drawCircle(box.topRight + const Offset(-4, 4), 5, Paint()..color = Palette.lantern.withValues(alpha: alpha));
+      _c.drawCircle(box.topRight + const Offset(-3, 3), 5.5, Paint()..color = Palette.lantern);
     }
+    final lock = look.open ? 0.0 : name.height * 0.8 + 3;
     final x = box.center.dx - (name.width + lock) / 2;
     if (!look.open) {
       _glyph(
         Icons.lock_rounded,
-        Offset(x + 6, box.top + 4 + name.height / 2),
-        13,
-        Palette.ink.withValues(alpha: 0.7 * alpha),
+        Offset(x + lock / 2 - 1, box.top + 4.5 + name.height / 2),
+        name.height * 0.8,
+        Palette.ink.withValues(alpha: 0.75),
       );
     }
-    name.paint(_c, Offset(x + lock, box.top + 4));
-    note?.paint(_c, Offset(box.center.dx - note.width / 2, box.top + 4 + name.height));
+    name.paint(_c, Offset(x + lock, box.top + 4.5));
+    note?.paint(_c, Offset(box.center.dx - note.width / 2, box.top + 4.5 + name.height));
+    if (alpha < 0.99) _c.restore();
   }
 
   Rect _pillRect(String text, Offset top, double size) {

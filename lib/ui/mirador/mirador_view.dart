@@ -134,6 +134,22 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
   String? _goal;
   bool _goalEnter = false;
 
+  /// En la Clásica se camina libre: hacia dónde se va solo (un juego o de
+  /// vuelta al centro) y, al llegar, hacia dónde mirar si no es a un juego.
+  Offset? _dest;
+  double? _destYaw;
+
+  /// Lo que se sigue caminando después de soltar (m/s hacia adelante).
+  double _glide = 0;
+
+  /// Qué hace el arrastre de un dedo en la Clásica: girar o caminar (se decide
+  /// al empezar a mover).
+  Axis? _axis;
+  Offset _drag = Offset.zero;
+
+  /// Cuántos metros se camina por píxel arrastrado.
+  static const _mPerPx = 0.025;
+
   PanoTarget? _glow;
   Size _size = const Size(400, 800);
 
@@ -142,15 +158,21 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
 
   /// La ayuda de cómo moverse: hasta el primer giro (una vez por sesión).
   static bool _hinted = false;
-  bool get _showHint => widget.multi && !_hinted;
+  bool get _showHint => !_hinted;
 
   /// El nombre del mirador al que se acaba de llegar.
   String? _arrived;
   Timer? _arrivedTimer;
 
   String get lookout => _at;
+
+  /// Dónde se está parado ahora (en la Clásica se camina libre).
+  Offset get position => _pos;
   int get sector => world.lookout(_at).sector;
-  bool get walking => _route.isNotEmpty;
+  bool get walking => _route.isNotEmpty || _dest != null;
+
+  /// Qué tan lejos del centro anduvo en la Clásica.
+  bool get _away => !widget.multi && (_pos - world.hub.at).distance > 1.5;
 
   @override
   void initState() {
@@ -170,6 +192,8 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
     }
     if (old.multi != widget.multi) {
       _route.clear();
+      _dest = null;
+      _glide = 0;
       _turnTo = null;
       _at = widget.multi ? world.entrance.id : world.hub.id;
       _pos = world.lookout(_at).at;
@@ -257,18 +281,33 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
         if (_route.isEmpty) _arrive();
       } else {
         pos += left / left.distance * step;
-        final before = _walked;
-        _walked += step;
-        if ((before / 0.9).floor() != (_walked / 0.9).floor()) {
-          SoundBoard.instance.play(Sfx.stoneSand, volume: 0.08);
-        }
+        _footstep(step);
       }
+    } else if (_dest case final dest?) {
+      final left = dest - pos;
+      final step = world.walk * dt * (_fast ? 2.6 : 1.6);
+      if (left.distance > 0.2) yaw += _diff(atan2(left.dx, left.dy), yaw) * min(1, dt * 6);
+      if (left.distance <= step) {
+        pos = dest;
+        _arriveFree();
+      } else {
+        final next = world.resolve(pos + left / left.distance * step);
+        final moved = (next - pos).distance;
+        pos = next;
+        _footstep(moved);
+        // Trabado contra algo: llega hasta ahí nomás.
+        if (moved < step * 0.25) _arriveFree();
+      }
+    } else if (_glide != 0) {
+      pos = _stepFrom(pos, yaw, _glide * dt);
+      _glide *= exp(-dt * 4);
+      if (_glide.abs() < 0.15) _glide = 0;
     } else if (spin != 0) {
       yaw += spin * dt;
       spin *= exp(-dt * 3.5);
       if (spin.abs() < 0.02) spin = 0;
     }
-    final idle = _turnTo == null && _route.isEmpty && spin == 0;
+    final idle = _turnTo == null && _route.isEmpty && _dest == null && _glide == 0 && spin == 0;
     setState(() {
       _yaw = PanoCamera.wrap(yaw);
       _pos = pos;
@@ -278,6 +317,59 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       _ticker.stop();
       if (_goal != null) _reach();
     }
+  }
+
+  /// Suma lo caminado y, cada tanto, un paso en la grava.
+  void _footstep(double meters) {
+    final before = _walked;
+    _walked += meters;
+    if ((before / 0.9).floor() != (_walked / 0.9).floor()) {
+      SoundBoard.instance.play(Sfx.stoneSand, volume: 0.08);
+    }
+  }
+
+  /// [meters] hacia adelante (o atrás) mirando a [yaw], sin atravesar nada.
+  Offset _stepFrom(Offset pos, double yaw, double meters) {
+    final next = world.resolve(pos + Offset(sin(yaw), cos(yaw)) * meters);
+    _footstep((next - pos).distance);
+    return next;
+  }
+
+  /// Llegó caminando libre: mira al juego al que iba (y entra) o hacia donde
+  /// se pidió.
+  void _arriveFree() {
+    _dest = null;
+    final place = _goal == null ? null : world.place(_goal!);
+    if (place != null) {
+      _turnTo = MiradorWorld.bearing(_pos, place.at) * pi / 180;
+    } else if (_destYaw != null) {
+      _turnTo = _destYaw;
+    }
+    _destYaw = null;
+  }
+
+  /// Dónde pararse para jugar en [o]: delante, del lado de donde se viene.
+  Offset _standFor(PanoObject o) {
+    final v = _pos - o.at;
+    final dir = v.distance < 1e-6 ? const Offset(0, -1) : v / v.distance;
+    final reach = o.place == 'pond' ? world.pondRadii.longestSide + 1.3 : o.width / 2 + 1.8;
+    return world.resolve(o.at + dir * reach);
+  }
+
+  /// Vuelve caminando al centro del patio, mirando como al llegar.
+  void _goHome() {
+    SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+    setState(() {
+      _goal = null;
+      _spin = 0;
+      _glide = 0;
+      _glow = null;
+      _fast = false;
+      _dest = world.hub.at;
+      _destYaw = world.hub.yaw * pi / 180;
+      _turnTo = MiradorWorld.bearing(_pos, world.hub.at) * pi / 180;
+    });
+    _wake();
   }
 
   /// Llegó al último mirador del camino: si iba a un lugar, gira hacia él.
@@ -353,6 +445,21 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
     _fast = fast;
     final route = widget.multi ? world.route(_at, world.lookoutOf(place).id) : const <String>[];
     if (route.isNotEmpty) return _walk(route, fast: fast);
+    if (!widget.multi) {
+      // En la Clásica se camina hasta el juego (si no se está ya enfrente).
+      final stand = _standFor(o);
+      if ((stand - _pos).distance > 0.6) {
+        setState(() {
+          _spin = 0;
+          _glide = 0;
+          _glow = null;
+          _dest = stand;
+          _destYaw = null;
+          _turnTo = MiradorWorld.bearing(_pos, stand) * pi / 180;
+        });
+        return _wake();
+      }
+    }
     setState(() {
       _spin = 0;
       _turnTo = MiradorWorld.bearing(_pos, o.at) * pi / 180;
@@ -364,7 +471,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
   PanoView _view() {
     final p = _p;
     final now = widget.now;
-    final bob = _route.isEmpty ? 0.0 : sin(_walked / 0.9 * pi * 2) * 3;
+    final bob = walking || _glide != 0 ? sin(_walked / 0.9 * pi * 2) * 3 : 0.0;
     return PanoView(
       world: world,
       pos: _pos,
@@ -583,7 +690,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
     switch (hit.kind) {
       case PanoHit.place:
         final place = hit.id!;
-        final far = widget.multi && world.lookoutOf(place).id != _at;
+        final far = widget.multi ? world.lookoutOf(place).id != _at : (world.place(place)!.at - _pos).distance > 4.5;
         if (far && placeOpen(_p, place)) return goTo(place);
         setState(() => _glow = hit);
         widget.onPlace(Place.values.byName(place));
@@ -667,7 +774,14 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
 
   void _scaleStart(ScaleStartDetails d) {
     _zoomStart = _zoom;
-    if (_spin != 0) setState(() => _spin = 0);
+    _axis = null;
+    _drag = Offset.zero;
+    if (_spin != 0 || _glide != 0) {
+      setState(() {
+        _spin = 0;
+        _glide = 0;
+      });
+    }
   }
 
   void _scaleUpdate(ScaleUpdateDetails d) {
@@ -676,15 +790,34 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       _turnTo = null;
       if (d.pointerCount > 1) {
         _zoom = (_zoomStart * d.scale).clamp(1.0, world.zoomMax);
-      } else {
-        _yaw = PanoCamera.wrap(_yaw - d.focalPointDelta.dx / _f);
-        if (d.focalPointDelta.dx.abs() > 2) _hinted = true;
+        return;
       }
+      if (!widget.multi) {
+        // En la Clásica: de costado gira, para arriba camina hacia adelante.
+        _drag += d.focalPointDelta;
+        if (_axis == null) {
+          if (_drag.distance < 10) return;
+          _axis = _drag.dy.abs() > _drag.dx.abs() * 1.2 ? Axis.vertical : Axis.horizontal;
+        }
+        if (_axis == Axis.vertical) {
+          _pos = _stepFrom(_pos, _yaw, -d.focalPointDelta.dy * _mPerPx);
+          _hinted = true;
+          return;
+        }
+      }
+      _yaw = PanoCamera.wrap(_yaw - d.focalPointDelta.dx / _f);
+      if (widget.multi && d.focalPointDelta.dx.abs() > 2) _hinted = true;
     });
   }
 
   void _scaleEnd(ScaleEndDetails d) {
     if (walking || d.pointerCount > 0) return;
+    if (!widget.multi && _axis == Axis.vertical) {
+      final vy = d.velocity.pixelsPerSecond.dy;
+      if (vy.abs() < 150) return;
+      setState(() => _glide = (-vy * _mPerPx).clamp(-5.0, 5.0));
+      return _wake();
+    }
     final v = d.velocity.pixelsPerSecond.dx;
     if (v.abs() < 120) return;
     setState(() => _spin = (-v / _f).clamp(-6.0, 6.0));
@@ -711,6 +844,12 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
                 child: CustomPaint(painter: PanoPainter(v)),
               ),
             ),
+            if (_away && !walking)
+              Positioned(
+                right: 12,
+                bottom: widget.bottom + 56,
+                child: _HomeButton(label: tr('mirador.backToCenter'), onTap: _goHome),
+              ),
             Positioned(
               left: 12,
               right: 12,
@@ -721,7 +860,11 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
                   child: _arrived != null
                       ? _Caption(key: ValueKey('arrived$_arrived'), text: _arrived!, style: text, strong: true)
                       : _showHint
-                      ? _Caption(key: const ValueKey('hint'), text: tr('mirador.hint'), style: text)
+                      ? _Caption(
+                          key: const ValueKey('hint'),
+                          text: tr(widget.multi ? 'mirador.hint' : 'mirador.hintWalk'),
+                          style: text,
+                        )
                       : const SizedBox.shrink(),
                 ),
               ),
@@ -731,6 +874,40 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       },
     );
   }
+}
+
+/// Volver caminando al centro del patio (en la Clásica, cuando se anduvo).
+class _HomeButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _HomeButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Palette.ink.withValues(alpha: 0.6),
+    shape: const StadiumBorder(),
+    child: InkWell(
+      key: const ValueKey('mirador-home'),
+      customBorder: const StadiumBorder(),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.u_turn_left_rounded, size: 18, color: Palette.lantern),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(color: Palette.paper, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _Caption extends StatelessWidget {

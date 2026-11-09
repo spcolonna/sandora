@@ -77,7 +77,19 @@ void main() {
     }
   });
 
-  test('la cámara gira 360°: adelante al centro, a la derecha más a la derecha, atrás afuera', () {
+  test('al caminar no se atraviesan el muro, los juegos ni el agua', () {
+    expect(world.wall.deflate(0.8).contains(world.resolve(const Offset(-40, 3))), isTrue);
+    expect(world.wall.deflate(0.8).contains(world.resolve(const Offset(2, 80))), isTrue);
+    for (final o in world.objects.where((o) => o.kind == PanoKind.place && o.place != 'pond')) {
+      final p = world.resolve(o.at + const Offset(0.05, -0.05));
+      expect((p - o.at).distance, greaterThan(0.4), reason: 'no se mete en ${o.place}');
+    }
+    expect(world.inPond(world.resolve(world.pondAt)), isFalse);
+    // Lo libre queda como está.
+    expect(world.resolve(world.hub.at), world.hub.at);
+  });
+
+    test('la cámara gira 360°: adelante al centro, a la derecha más a la derecha, atrás afuera', () {
     const cam = PanoCamera(size: size, pos: Offset.zero, yaw: 0, fov: 70 * pi / 180);
     final ahead = cam.project(const Offset(0, 5))!;
     expect(ahead.dx, closeTo(size.width / 2, 1e-6));
@@ -256,7 +268,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('en la Clásica no se camina: tocar un juego de la tira gira hacia él y entra', (tester) async {
+  testWidgets('en la Clásica, tocar un juego de la tira camina hasta él y entra', (tester) async {
     await setUp();
     final c = MiradorController();
     final key = GlobalKey<MiradorViewState>();
@@ -275,11 +287,48 @@ void main() {
     );
     expect(key.currentState!.lookout, world.hub.id);
     c.goTo('sand');
-    for (var i = 0; i < 60 && got == null; i++) {
+    for (var i = 0; i < 100 && got == null; i++) {
       await tester.pump(const Duration(milliseconds: 50));
     }
     expect(got, Place.sand);
     expect(key.currentState!.lookout, world.hub.id);
+    final sand = world.place('sand')!;
+    expect((key.currentState!.position - sand.at).distance, lessThan(sand.width / 2 + 2.5), reason: 'quedó al lado');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('en la Clásica, arrastrar para arriba camina hacia adelante sin salir del patio', (tester) async {
+    await setUp();
+    final key = GlobalKey<MiradorViewState>();
+    await pump(
+      tester,
+      MiradorView(
+        key: key,
+        now: DateTime(2026, 11, 8, 11),
+        weather: Weather.clear,
+        multi: false,
+        onPlace: (_) async {},
+        onGate: (_) {},
+      ),
+    );
+    final painter = find.byKey(const ValueKey('mirador'));
+    final start = key.currentState!.position;
+    await tester.drag(painter, const Offset(0, -240));
+    await tester.pumpAndSettle();
+    final after = key.currentState!.position;
+    // Se mira al fondo (yaw 0): avanzar es ir hacia +y.
+    expect(after.dy - start.dy, greaterThan(2), reason: 'caminó hacia adelante');
+    expect((after.dx - start.dx).abs(), lessThan(1.5));
+    for (var i = 0; i < 15; i++) {
+      await tester.drag(painter, const Offset(0, -400));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await tester.pumpAndSettle();
+    expect(world.wall.contains(key.currentState!.position), isTrue, reason: 'el muro frena');
+    // Y se puede volver al centro.
+    await tester.tap(find.byKey(const ValueKey('mirador-home')));
+    await tester.pumpAndSettle();
+    expect((key.currentState!.position - world.hub.at).distance, lessThan(0.3));
     expect(tester.takeException(), isNull);
   });
 
