@@ -1841,8 +1841,31 @@ class PanoScene {
         }),
       );
     }
-    if (!corners.contains(null) && !lows.contains(null)) {
-      final top = corners.cast<Offset>();
+    final frontArt = SceneArt.instance['obj_pavilion_front'];
+    final sf = _stand(
+      front,
+      o.width * 1.16,
+      frontArt == null ? 4.0 / (o.width * 1.16) : frontArt.height / frontArt.width,
+    );
+    // El piso une las dos capas (que se dibujan de frente): de la base de la
+    // pared del fondo al pie de los postes de adelante, sin asomar por los costados.
+    var top = corners.contains(null) ? null : corners.cast<Offset>();
+    var low = lows.contains(null) ? null : lows.cast<Offset>();
+    if (sb != null && sf != null && top != null) {
+      final (rb, _) = sb;
+      final (rf, _) = sf;
+      final inset = rf.width * (frontArt == null ? 0.0825 : 0.091);
+      final yFloor = (top[0].dy + top[1].dy) / 2;
+      top = [
+        Offset(rf.left + inset, yFloor),
+        Offset(rf.right - inset, yFloor),
+        Offset(rb.right, rb.bottom),
+        Offset(rb.left, rb.bottom),
+      ];
+      low = [Offset(rf.left + inset, rf.bottom), Offset(rf.right - inset, rf.bottom)];
+    }
+    if (top case final top? when low != null) {
+      final floorLow = low;
       final b = Path()..addPolygon(top, true);
       final bounds = b.getBounds();
       _items.add(
@@ -1859,19 +1882,13 @@ class PanoScene {
             }
             // El frente de la galería, de la madera al suelo.
             _c.drawPath(
-              Path()..addPolygon([top[0], top[1], lows[1]!, lows[0]!], true),
+              Path()..addPolygon([top[0], top[1], floorLow[1], floorLow[0]], true),
               Paint()..color = const Color(0xFF6E4D33),
             );
           });
         }),
       );
     }
-    final frontArt = SceneArt.instance['obj_pavilion_front'];
-    final sf = _stand(
-      front,
-      o.width * 1.16,
-      frontArt == null ? 4.0 / (o.width * 1.16) : frontArt.height / frontArt.width,
-    );
     if (sf != null) {
       final (r, d) = sf;
       _items.add(
