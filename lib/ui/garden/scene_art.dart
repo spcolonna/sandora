@@ -138,7 +138,7 @@ class SceneArt {
     'obj_decor_pagoda': 'decor',
     'obj_decor_maple': 'decor',
     'obj_decor_sakura': 'decor',
-    // La Maqueta (`model_screen.dart`, `garden_model_table.dart`): sin arte, se pinta con código.
+    // La Maqueta (`model_screen.dart`, `pano_painter.dart`): sin arte, se pinta con código.
     'obj_model_table': 'court',
     // Los Miradores (Bloque 26 de `docs/prompts.md`): mientras falte, se pinta con código.
     'pano_sky': 'path',
