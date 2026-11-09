@@ -10,6 +10,7 @@ import 'package:sandora/garden/weather.dart';
 import 'package:sandora/garden/weather_service.dart';
 import 'package:sandora/settings.dart';
 import 'package:sandora/ui/garden/garden_scene.dart';
+import 'package:sandora/ui/garden/garden_view.dart';
 import 'package:sandora/ui/mirador/mirador_view.dart';
 import 'package:sandora/ui/mirador/pano_painter.dart';
 import 'package:sandora/ui/theme/palette.dart';
@@ -104,6 +105,30 @@ void main() {
     expect(PanoCamera.wrap(3 * pi).abs(), closeTo(pi, 1e-9));
   });
 
+  test('el piso de la Clásica: senderos de piedras libres y surcos solo en la arena', () {
+    expect(world.hubStones.length, greaterThan(20), reason: 'senderos desde el centro');
+    for (final (p, r) in world.hubStones) {
+      expect(world.wall.deflate(0.6).contains(p), isTrue);
+      expect(world.inPond(p), isFalse);
+      for (final o in world.objects) {
+        if (o.kind == PanoKind.gate || o.decor == 'pavilion' || o.place == 'pond') continue;
+        expect((o.at - p).distance, greaterThan(o.width * 0.42 + r), reason: 'piedra sobre ${o.id}');
+      }
+    }
+    final rake = world.rake(true);
+    expect(rake.length, greaterThan(100));
+    for (final line in rake) {
+      for (final p in line) {
+        expect(world.wall.contains(p) && !world.inPond(p), isTrue);
+        expect(world.mossAt(p), lessThanOrEqualTo(0.15), reason: 'surcos fuera del musgo');
+        for (final (s, r) in world.hubStones) {
+          expect((s - p).distance, greaterThanOrEqualTo(r), reason: 'los surcos no pisan las piedras');
+        }
+      }
+    }
+    expect(world.fallenLeaves, isNotEmpty, reason: 'hojas bajo el arce');
+  });
+
   test('desde cada mirador, mirando hacia un lugar, se lo toca', () {
     for (final place in Place.values) {
       final o = world.place(place.name)!;
@@ -124,8 +149,7 @@ void main() {
   });
 
   test('desde el mirador central de la Clásica se ve y se toca cada lugar', () {
-    // La casa de té queda detrás del arce de las hojas: desde el central se llega por la tira.
-    for (final place in Place.values.where((p) => p != Place.matcha)) {
+    for (final place in Place.values) {
       final o = world.place(place.name)!;
       final view = PanoView(
         world: world,
@@ -313,12 +337,22 @@ void main() {
     );
     final painter = find.byKey(const ValueKey('mirador'));
     final start = key.currentState!.position;
+    final yaw = key.currentState!.yaw;
+    // Arranca mirando hacia los juegos abiertos, no hacia los cerrados.
+    final open = [for (final p in Place.values) if (placeLockNote(p) == null) world.place(p.name)!.at];
+    expect(open, isNotEmpty);
+    expect(
+      open.any((at) => PanoCamera.wrap(MiradorWorld.bearing(world.hub.at, at) * pi / 180 - yaw).abs() < 0.5),
+      isTrue,
+      reason: 'algún juego abierto a la vista al empezar',
+    );
     await tester.drag(painter, const Offset(0, -240));
     await tester.pumpAndSettle();
-    final after = key.currentState!.position;
-    // Se mira al fondo (yaw 0): avanzar es ir hacia +y.
-    expect(after.dy - start.dy, greaterThan(2), reason: 'caminó hacia adelante');
-    expect((after.dx - start.dx).abs(), lessThan(1.5));
+    final moved = key.currentState!.position - start;
+    // Avanzar es ir hacia donde se mira.
+    final ahead = Offset(sin(yaw), cos(yaw));
+    expect(moved.dx * ahead.dx + moved.dy * ahead.dy, greaterThan(2), reason: 'caminó hacia adelante');
+    expect((moved.dx * ahead.dy - moved.dy * ahead.dx).abs(), lessThan(1.5));
     for (var i = 0; i < 15; i++) {
       await tester.drag(painter, const Offset(0, -400));
       await tester.pump(const Duration(milliseconds: 50));

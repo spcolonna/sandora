@@ -773,51 +773,78 @@ class PanoScene {
   }
 
   /// Los surcos del rastrillo en la grava y las matitas del musgo, cerca.
-  void _texture() {
-    const reach = 11.0;
-    final half = cam.fov / cam.zoom / 2 + 0.15;
-    final lines = [Path(), Path(), Path()];
-    final c0 = cam.pos;
-    bool gravel(Offset p) => w.wall.deflate(0.4).contains(p) && !w.inPond(p) && w.mossAt(p) < 0.3;
-    // Ondas concéntricas alrededor del centro del patio, como el rastrillo.
-    final center = w.decorAreas.length > 2 ? w.decorAreas[2].center : Offset.zero;
-    final dc = (c0 - center).distance;
-    final r0 = max(0.3, dc - reach), r1 = dc + reach;
-    for (var ring = (r0 / 0.34).floor(); ring <= (r1 / 0.34).ceil(); ring++) {
-      final rad = ring * 0.34;
-      if (rad < 0.3) continue;
-      var drawing = false;
-      var band = 0;
-      final n = max(24, (rad * 2 * pi / 0.4).ceil());
-      for (var k = 0; k <= n; k++) {
-        final t = k * 2 * pi / n;
-        final p = center + Offset(sin(t), cos(t)) * (rad + 0.05 * sin(t * 7 + ring));
-        final (a, dist) = cam.polar(p);
-        if (dist < 0.6 || dist > reach || a.abs() > half || !gravel(p)) {
-          drawing = false;
+  /// Los surcos del rastrillo: cada uno, una sombra con un filo de luz
+  /// debajo, más finos y suaves a lo lejos (lejos se pierden en la arena).
+  void _rake(double half) {
+    const reach = 10.5;
+    const bands = [2.2, 4.0, 6.5, reach];
+    final grooves = [for (final _ in bands) Path()];
+    for (final seg in w.rake(v.hub)) {
+      var band = -1;
+      Offset? prev;
+      for (final p in seg) {
+        final (a, d) = cam.polar(p);
+        if (d < 0.45 || d > reach || a.abs() > half) {
+          band = -1;
+          prev = null;
           continue;
         }
-        final sp = Offset(cam.xAt(a), cam.yAt(dist));
-        final b = dist < 3.5 ? 0 : (dist < 7 ? 1 : 2);
-        if (!drawing || b != band) {
-          lines[b].moveTo(sp.dx, sp.dy);
-          drawing = true;
-          band = b;
-        } else {
-          lines[b].lineTo(sp.dx, sp.dy);
+        final s = Offset(cam.xAt(a), cam.yAt(d));
+        var b = 0;
+        while (bands[b] < d) {
+          b++;
         }
+        if (band == -1) {
+          grooves[b].moveTo(s.dx, s.dy);
+        } else if (b != band) {
+          // Cambia de grosor: el tramo sigue en la otra banda sin cortarse.
+          grooves[band].lineTo(s.dx, s.dy);
+          grooves[b].moveTo(prev!.dx, prev.dy);
+          grooves[b].lineTo(s.dx, s.dy);
+        } else {
+          grooves[b].lineTo(s.dx, s.dy);
+        }
+        band = b;
+        prev = s;
       }
     }
-    final groove = Color.lerp(const Color(0xFFC2B698), _mist, 0.2)!;
-    for (final (i, wpx) in [(0, 1.6), (1, 1.0), (2, 0.6)]) {
+    const widths = [2.1, 1.6, 1.1, 0.75];
+    const alphas = [0.52, 0.5, 0.4, 0.26];
+    for (var i = 0; i < bands.length; i++) {
+      final d = i == 0 ? 1.5 : bands[i - 1] + 1;
+      final shade = Color.lerp(_lit(const Color(0xFF8F7C5C)), _mist, _fog(d) + i * 0.08)!;
+      final glint = Color.lerp(_lit(const Color(0xFFFFFCF4)), _mist, _fog(d))!;
+      final wpx = widths[i];
+      _c.save();
+      _c.translate(0, wpx * 0.9);
       _c.drawPath(
-        lines[i],
+        grooves[i],
         Paint()
-          ..color = groove.withValues(alpha: 0.55 - i * 0.12)
+          ..color = glint.withValues(alpha: alphas[i] * 0.7)
           ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = wpx * 0.6,
+      );
+      _c.restore();
+      _c.drawPath(
+        grooves[i],
+        Paint()
+          ..color = shade.withValues(alpha: alphas[i])
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
           ..strokeWidth = wpx,
       );
     }
+  }
+
+  /// Un color con la luz del momento (más azul y oscuro de noche).
+  Color _lit(Color c) => Color.from(alpha: c.a, red: c.r * _tint.r, green: c.g * _tint.g, blue: c.b * _tint.b);
+
+  void _texture() {
+    final c0 = cam.pos;
+    final half = cam.fov / cam.zoom / 2 + 0.1;
+    _rake(half);
     // Matitas y manchitas en el musgo.
     const cell = 0.55;
     final tuft = Paint()..color = Color.lerp(const Color(0xFF5D7442), _mist, 0.1)!;
@@ -846,12 +873,15 @@ class PanoScene {
   // ---- Cosas del patio ----
 
   void _build() {
-    // Las piedras de paso entre miradores (en la Clásica se camina libre: no van).
-    if (!v.hub) {
-      for (final (p, r) in w.stones) {
-        _stone(p, r);
-      }
+    // Las piedras de paso: entre miradores, o los senderos que salen del centro.
+    for (final (i, (p, r)) in (v.hub ? w.hubStones : w.stones).indexed) {
+      _stone(p, r, seed: i);
     }
+    // Islas de musgo bajo las piedras, las plantas y los faroles.
+    for (final (i, (p, r, moss)) in w.grounded(v.hub).indexed) {
+      if (moss) _mossDecal(p, r + 0.24, i);
+    }
+    _leaves();
     // Con el muro pintado, sus matas ya están al pie; sin él, arbustos de código.
     if (cropArt('bg_court_wall', _wallFrac) == null) {
       for (final (i, (p, size)) in w.hedges.indexed) {
@@ -860,8 +890,6 @@ class PanoScene {
     }
     for (final (i, (p, id, wd)) in w.islands.indexed) {
       if (SceneArt.instance['obj_decor_$id'] == null) continue;
-      final (_, d) = cam.polar(p);
-      if (id == 'moss') _patch(p, wd * 1.3, d);
       _prop(PanoObject('island$i', PanoKind.prop, p, wd, decor: id, flip: i.isOdd));
     }
     if (v.hub) {
@@ -935,68 +963,216 @@ class PanoScene {
     return path..close();
   }
 
-  void _stone(Offset p, double r, {double near = 0.45}) {
+  /// Una piedra de paso: chata, de borde irregular, con su canto en sombra,
+  /// la cara de arriba clara y una mancha de musgo de a ratos.
+  void _stone(Offset p, double r, {int seed = 0}) {
     final (a, d) = cam.polar(p);
-    if (d < near || a.abs() > cam.fov / cam.zoom * 0.5 + 0.3) return;
-    final ctr = Offset(cam.xAt(a), cam.yAt(d));
-    final wpx = 2 * r * cam.f / d;
-    final hpx = min(wpx * 0.7, wpx * cam.eye / d);
-    final rect = Rect.fromCenter(center: ctr, width: wpx, height: hpx);
-    if (_offscreen(rect)) return;
-    final art = SceneArt.instance['obj_decor_step'];
-    if (art != null) {
-      // La piedra de paso pintada, aplastada según cuánto se la ve de costado.
-      final h = min(wpx * 0.75, wpx * cam.eye / d * 1.6);
-      final r = Rect.fromCenter(center: ctr, width: wpx * 1.1, height: h);
-      _flat.add(_Item(d, r, null, () => _art(art, r, d)));
-      return;
+    if (d < 0.4 || d > 22 || a.abs() > cam.fov / cam.zoom * 0.5 + 0.3) return;
+    final rng = Random(seed * 7919 + 3);
+    final ph = rng.nextDouble() * 2 * pi;
+    final ry = 0.78 + rng.nextDouble() * 0.2;
+    const n = 14;
+    final top = <Offset>[], foot = <Offset>[];
+    for (var i = 0; i < n; i++) {
+      final t = i * 2 * pi / n;
+      final k = 1 + 0.1 * sin(t * 3 + ph) + 0.05 * sin(t * 5 + ph * 2);
+      final q = p + Offset(cos(t + ph) * r * k, sin(t + ph) * r * k * ry);
+      final st = cam.project(q, 0.05), sf = cam.project(q);
+      if (st == null || sf == null) return;
+      top.add(st);
+      foot.add(sf);
     }
+    final topPath = Path()..addPolygon(top, true);
+    final footPath = Path()..addPolygon(foot, true);
+    final b = footPath.getBounds().expandToInclude(topPath.getBounds());
+    if (_offscreen(b)) return;
+    final tone = rng.nextDouble();
+    final art = SceneArt.instance['obj_decor_step'];
+    final mossy = art == null && rng.nextDouble() < 0.35;
     _flat.add(
-      _Item(d, rect, null, () {
-        final shade = Color.lerp(const Color(0xFF8F8A80), _mist, _fog(d))!;
-        final top = Color.lerp(const Color(0xFFC4BFB3), _mist, _fog(d))!;
-        _c.drawOval(rect.shift(Offset(0, hpx * 0.12)), Paint()..color = shade);
-        _c.drawOval(rect, Paint()..color = top);
-        _c.drawOval(
-          Rect.fromCenter(center: ctr - Offset(wpx * 0.12, hpx * 0.12), width: wpx * 0.45, height: hpx * 0.4),
-          Paint()..color = Colors.white.withValues(alpha: 0.18),
+      _Item(d + 0.1, b, null, () {
+        final fog = _fog(d);
+        // La sombra en la arena, el canto y la cara de arriba.
+        _c.drawPath(
+          footPath.shift(Offset(b.width * 0.04, b.height * 0.12)),
+          Paint()
+            ..color = Colors.black.withValues(alpha: 0.13 * (1 - fog))
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, max(0.6, b.height * 0.12)),
+        );
+        _c.drawPath(footPath, Paint()..color = Color.lerp(_lit(const Color(0xFF8A8172)), _mist, fog)!);
+        final face = Color.lerp(const Color(0xFFBDB7AA), const Color(0xFFCFC6B4), tone)!;
+        final tb = topPath.getBounds();
+        if (art != null) {
+          // La cara de arriba con la piedra pintada (su centro), recortada al borde.
+          final aw = art.width.toDouble(), ah = art.height.toDouble();
+          final src = Rect.fromLTRB(aw * (0.18 + tone * 0.1), ah * 0.2, aw * (0.72 + tone * 0.1), ah * 0.62);
+          _c.save();
+          _c.clipPath(topPath);
+          _c.drawImageRect(
+            art,
+            src,
+            tb.inflate(tb.width * 0.05),
+            Paint()
+              ..filterQuality = FilterQuality.medium
+              ..colorFilter = ColorFilter.matrix(_stoneMatrix(fog)),
+          );
+          _c.restore();
+        } else {
+          _c.drawPath(
+            topPath,
+            Paint()
+              ..shader = ui.Gradient.linear(b.topLeft, b.bottomRight, [
+                Color.lerp(_lit(Color.lerp(face, Colors.white, 0.25)!), _mist, fog)!,
+                Color.lerp(_lit(face), _mist, fog)!,
+              ]),
+          );
+        }
+        // Luz en el filo de arriba.
+        _c.drawPath(
+          topPath,
+          Paint()
+            ..color = Colors.white.withValues(alpha: 0.16 * (1 - fog))
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = max(0.5, tb.height * 0.05),
+        );
+        if (mossy && b.width > 6) {
+          final m = Offset.lerp(top[(seed * 5) % n], b.center, 0.55)!;
+          _c.drawOval(
+            Rect.fromCenter(center: m, width: b.width * 0.3, height: b.height * 0.22),
+            Paint()..color = Color.lerp(_lit(const Color(0xFF7E9150)), _mist, fog)!.withValues(alpha: 0.55),
+          );
+        }
+      }),
+    );
+  }
+
+  /// La piedra pintada, un poco más clara y cálida, con la luz y la niebla del momento.
+  List<double> _stoneMatrix(double fog) {
+    final k = 1.3 * (1 - fog);
+    return [
+      _tint.r * k,
+      0,
+      0,
+      0,
+      _mist.r * 255 * fog + 6,
+      0,
+      _tint.g * k,
+      0,
+      0,
+      _mist.g * 255 * fog + 4,
+      0,
+      0,
+      _tint.b * k,
+      0,
+      _mist.b * 255 * fog,
+      0,
+      0,
+      0,
+      1,
+      0,
+    ];
+  }
+
+  /// Una isla de musgo pintado apoyada en la arena, de borde suave e irregular.
+  void _mossDecal(Offset c, double r, int seed) {
+    final (a, d) = cam.polar(c);
+    if (d > 26 || a.abs() > cam.fov / cam.zoom * 0.5 + 0.8 || d < 0.2) return;
+    final tex = SceneArt.instance['tex_moss'];
+    final rng = Random(seed * 131 + 17);
+    final p1 = rng.nextDouble() * 2 * pi, p2 = rng.nextDouble() * 2 * pi;
+    const n = 18;
+    final world = <Offset>[c];
+    final alpha = <double>[1];
+    for (final (ring, al) in [(0.5, 1.0), (1.0, 0.0)]) {
+      for (var i = 0; i < n; i++) {
+        final t = i * 2 * pi / n;
+        final k = 1 + 0.17 * sin(t * 3 + p1) + 0.09 * sin(t * 5 + p2);
+        world.add(c + Offset(sin(t), cos(t) * 0.92) * (r * k * ring));
+        alpha.add(al);
+      }
+    }
+    final pos = Float32List(world.length * 2);
+    final texc = Float32List(world.length * 2);
+    final cols = Int32List(world.length);
+    final pxPerM = tex == null ? 0.0 : tex.width / 2.0;
+    final base = tex == null ? const Color(0xFF7D9158) : Colors.white;
+    var bounds = Rect.zero;
+    for (final (i, q) in world.indexed) {
+      final s = cam.project(q);
+      if (s == null) return;
+      pos[i * 2] = s.dx;
+      pos[i * 2 + 1] = s.dy;
+      texc[i * 2] = q.dx * pxPerM;
+      texc[i * 2 + 1] = q.dy * pxPerM;
+      final (_, dq) = cam.polar(q);
+      cols[i] = Color.lerp(_lit(base), _mist, _fog(dq))!.withValues(alpha: alpha[i] * 0.92).toARGB32();
+      bounds = i == 0
+          ? Rect.fromCenter(center: s, width: 1, height: 1)
+          : bounds.expandToInclude(Rect.fromCenter(center: s, width: 1, height: 1));
+    }
+    if (_offscreen(bounds)) return;
+    final idx = <int>[];
+    for (var i = 0; i < n; i++) {
+      final j = (i + 1) % n;
+      idx.addAll([0, 1 + i, 1 + j]);
+      final a0 = 1 + i, a1 = 1 + j, b0 = 1 + n + i, b1 = 1 + n + j;
+      idx.addAll([a0, b0, a1, a1, b0, b1]);
+    }
+    final verts = ui.Vertices.raw(
+      ui.VertexMode.triangles,
+      pos,
+      colors: cols,
+      textureCoordinates: tex == null ? null : texc,
+      indices: Uint16List.fromList(idx),
+    );
+    _flat.add(
+      _Item(d + 0.3, bounds, null, () {
+        if (tex == null) {
+          _c.drawVertices(verts, BlendMode.dst, Paint());
+          return;
+        }
+        _c.drawVertices(
+          verts,
+          BlendMode.modulate,
+          Paint()
+            ..shader = ImageShader(tex, TileMode.mirror, TileMode.mirror, Matrix4.identity().storage)
+            ..filterQuality = FilterQuality.medium,
         );
       }),
     );
   }
 
-  /// Un parche de grava rastrillada o de musgo bajo un lugar: lo apoya en el patio.
-  void _patch(Offset p, double width, double d, {bool moss = false}) {
-    final path = _groundOval(p, width * 0.62, width * 0.42);
-    if (path == null) return;
-    final b = path.getBounds();
-    _flat.add(
-      _Item(d + 0.4, b, null, () {
-        final base = moss ? const Color(0xFF7D9158) : const Color(0xFFF1EADA);
-        _c.drawPath(path, Paint()..color = Color.lerp(base, _mist, _fog(d))!.withValues(alpha: 0.85));
-        _c.drawPath(
-          path,
-          Paint()
-            ..color = (moss ? const Color(0xFF5E7244) : const Color(0xFFB5AA92)).withValues(alpha: 0.6)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = max(1, b.width * 0.012),
-        );
-        if (!moss) {
-          // Surcos del rastrillo alrededor.
-          for (final k in [0.78, 0.56]) {
-            final ring = _groundOval(p, width * 0.62 * k, width * 0.42 * k);
-            if (ring == null) continue;
-            _c.drawPath(
-              ring,
-              Paint()
-                ..color = const Color(0xFFC9BEA6).withValues(alpha: 0.55)
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = max(1, b.width * 0.008),
-            );
-          }
-        }
-      }),
-    );
+  /// Las hojas caídas bajo los arces, chatas sobre la arena.
+  void _leaves() {
+    final half = cam.fov / cam.zoom * 0.5 + 0.2;
+    for (final (p, turn, size, kind) in w.fallenLeaves) {
+      final img = SceneArt.instance['spr_leaf_0${kind + 1}'];
+      if (img == null) return;
+      final (a, d) = cam.polar(p);
+      if (d < 0.5 || d > 14 || a.abs() > half) continue;
+      final s = Offset(cam.xAt(a), cam.yAt(d));
+      final px = size * cam.f / d;
+      if (px < 1.5) continue;
+      final squash = (cam.eye / d).clamp(0.22, 0.9);
+      final rect = Rect.fromCenter(center: s, width: px, height: px);
+      _flat.add(
+        _Item(d + 0.05, rect, null, () {
+          _c.save();
+          _c.translate(s.dx, s.dy);
+          _c.scale(1, squash);
+          _c.rotate(turn);
+          _c.drawImageRect(
+            img,
+            Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+            Rect.fromCenter(center: Offset.zero, width: px, height: px * img.height / img.width),
+            Paint()
+              ..colorFilter = _filter(d)
+              ..filterQuality = FilterQuality.medium,
+          );
+          _c.restore();
+        }),
+      );
+    }
   }
 
   void _place(PanoObject o) {
@@ -1014,7 +1190,6 @@ class PanoScene {
     if (s == null) return;
     final (r, d) = s;
     final locked = look != null && !look.open;
-    if (lift == 0 && (id != 'sand' || img != null)) _patch(o.at, o.width, d, moss: w.mossAt(o.at) > 0.5);
     final target = id == 'model' ? const PanoTarget(PanoHit.model) : PanoTarget(PanoHit.place, id: id);
     final alpha = _near(d);
     if (id == 'sand' && img == null) _sandBed(o, d, locked);
@@ -1084,51 +1259,168 @@ class PanoScene {
   );
 
   /// El arenero: un lecho de arena rastrillada con borde de madera, en el suelo.
+  /// El arenero sin arte propio: un cajón de madera con arena rastrillada en
+  /// líneas, ondas alrededor de tres piedras pintadas.
   void _sandBed(PanoObject o, double d, bool locked) {
     final hw = o.width / 2, hd = o.width * 0.32;
-    final corners = [
-      for (final c in [Offset(-hw, -hd), Offset(hw, -hd), Offset(hw, hd), Offset(-hw, hd)]) cam.project(o.at + c, 0.12),
+    const lip = 0.12, top = 0.14;
+    List<Offset>? quad(double ex, double z) {
+      final out = <Offset>[];
+      for (final c in [
+        Offset(-hw - ex, -hd - ex),
+        Offset(hw + ex, -hd - ex),
+        Offset(hw + ex, hd + ex),
+        Offset(-hw - ex, hd + ex),
+      ]) {
+        final s = cam.project(o.at + c, z);
+        if (s == null) return null;
+        out.add(s);
+      }
+      return out;
+    }
+
+    final sand = quad(0, top), rim = quad(lip, top), foot = quad(lip, 0);
+    if (sand == null || rim == null || foot == null) return;
+    final sandPath = Path()..addPolygon(sand, true);
+    final rimPath = Path()..addPolygon(rim, true);
+    final footPath = Path()..addPolygon(foot, true);
+    final b = footPath.getBounds().expandToInclude(rimPath.getBounds());
+    if (_offscreen(b)) return;
+    // Las piedras (centro en metros desde el medio y radio) y sus ondas.
+    final rocks = [
+      (Offset(-0.45 * hw, 0.2 * hd), 0.17),
+      (Offset(0.3 * hw, -0.24 * hd), 0.21),
+      (Offset(0.62 * hw, 0.36 * hd), 0.11),
     ];
-    if (corners.any((c) => c == null)) return;
-    final path = Path()..addPolygon(corners.cast<Offset>(), true);
-    final b = path.getBounds();
+    const gap = 0.075;
+    final grooves = Path();
+    // Un surco por los puntos dados (null lo corta).
+    void stroke(Iterable<Offset?> pts) {
+      var on = false;
+      for (final q in pts) {
+        final inside = q != null && q.dx.abs() < hw - 0.04 && q.dy.abs() < hd - 0.04;
+        final s = inside ? cam.project(o.at + q, top) : null;
+        if (s == null) {
+          on = false;
+          continue;
+        }
+        on ? grooves.lineTo(s.dx, s.dy) : grooves.moveTo(s.dx, s.dy);
+        on = true;
+      }
+    }
+
+    bool free(Offset q, int skip) {
+      for (final (i, (c, r)) in rocks.indexed) {
+        if (i != skip && (q - c).distance < r + gap * 3.5) return false;
+      }
+      return true;
+    }
+
+    for (var y = -hd + gap; y < hd - 0.02; y += gap) {
+      final pts = <Offset>[];
+      for (var x = -hw; x <= hw; x += 0.05) {
+        final q = Offset(x, y);
+        if (free(q, -1)) {
+          pts.add(q);
+        } else {
+          stroke(pts);
+          pts.clear();
+        }
+      }
+      stroke(pts);
+    }
+    for (final (i, (c, r)) in rocks.indexed) {
+      for (var k = 1; k <= 3; k++) {
+        final rad = r + gap * k;
+        stroke([
+          for (var t = 0; t <= 36; t++)
+            if (c + Offset(sin(t * pi / 18), cos(t * pi / 18)) * rad case final q) free(q, i) ? q : null,
+        ]);
+      }
+    }
+    final px = cam.f / d;
+    final boulder = SceneArt.instance['obj_decor_boulder'];
+    final sandTex = SceneArt.instance['tex_sand_base'];
     _flat.add(
       _Item(d + 0.2, b, PanoTarget(PanoHit.place, id: o.place), () {
         _filtered(b, d, () {
-          final frame = Path()
-            ..addPolygon([
-              for (final c in [
-                Offset(-hw - 0.12, -hd - 0.12),
-                Offset(hw + 0.12, -hd - 0.12),
-                Offset(hw + 0.12, hd + 0.12),
-                Offset(-hw - 0.12, hd + 0.12),
-              ])
-                cam.project(o.at + c, 0.12) ?? b.center,
-            ], true);
-          _c.drawPath(frame, Paint()..color = Palette.wood);
-          _c.drawPath(path, Paint()..color = const Color(0xFFF1E8D2));
-          final line = Paint()
-            ..color = const Color(0xFFCDBF9F)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = max(1, b.width * 0.006);
-          for (var i = 1; i < 6; i++) {
-            final t = -hd + 2 * hd * i / 6;
-            final l = cam.project(o.at + Offset(-hw + 0.08, t), 0.12),
-                rr = cam.project(o.at + Offset(hw - 0.08, t), 0.12);
-            if (l != null && rr != null) {
-              final mid = Offset((l.dx + rr.dx) / 2, (l.dy + rr.dy) / 2 + b.height * 0.015);
-              _c.drawPath(
-                Path()
-                  ..moveTo(l.dx, l.dy)
-                  ..quadraticBezierTo(mid.dx, mid.dy, rr.dx, rr.dy),
-                line,
-              );
-            }
+          _c.drawPath(
+            footPath.shift(Offset(0, b.height * 0.05)),
+            Paint()
+              ..color = Colors.black.withValues(alpha: 0.14)
+              ..maskFilter = MaskFilter.blur(BlurStyle.normal, max(1, b.height * 0.06)),
+          );
+          _c.drawPath(footPath, Paint()..color = Color.lerp(Palette.wood, Colors.black, 0.35)!);
+          _c.drawPath(rimPath, Paint()..color = Palette.wood);
+          _c.drawPath(
+            rimPath,
+            Paint()
+              ..color = Colors.white.withValues(alpha: 0.18)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = max(0.6, px * 0.012),
+          );
+          final sb = sandPath.getBounds();
+          _c.drawPath(sandPath, Paint()..color = const Color(0xFFF3EBD9));
+          if (sandTex != null) {
+            _c.save();
+            _c.clipPath(sandPath);
+            _c.drawImageRect(
+              sandTex,
+              Rect.fromLTWH(0, 0, sandTex.width * 0.5, sandTex.height * 0.5),
+              sb,
+              Paint()
+                ..blendMode = BlendMode.multiply
+                ..filterQuality = FilterQuality.medium,
+            );
+            _c.restore();
           }
-          // Tres piedras en la arena.
-          for (final (dx, dy, rad) in [(-0.45, 0.1, 0.16), (0.3, -0.12, 0.2), (0.6, 0.18, 0.11)]) {
-            final rock = _groundOval(o.at + Offset(dx * hw, dy * hd * 2), rad, rad * 0.8, h: 0.14, n: 12);
-            if (rock != null) _c.drawPath(rock, Paint()..color = Palette.stoneDark);
+          // Sombra suave del borde sobre la arena.
+          _c.drawPath(
+            sandPath,
+            Paint()
+              ..color = Colors.black.withValues(alpha: 0.12)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = max(1, px * 0.04)
+              ..maskFilter = MaskFilter.blur(BlurStyle.normal, max(0.8, px * 0.02)),
+          );
+          final w = max(0.6, px * 0.011);
+          _c.save();
+          _c.clipPath(sandPath);
+          _c.drawPath(
+            grooves.shift(Offset(0, w * 0.9)),
+            Paint()
+              ..color = Colors.white.withValues(alpha: 0.75)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = w * 0.7,
+          );
+          _c.drawPath(
+            grooves,
+            Paint()
+              ..color = const Color(0xFFB5A27C).withValues(alpha: 0.8)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = w,
+          );
+          _c.restore();
+          for (final (c, r) in rocks) {
+            final base = cam.project(o.at + c + Offset(0, r * 0.3), top);
+            if (base == null) continue;
+            final wpx = r * 2.5 * px;
+            final shadow = _groundOval(o.at + c + Offset(0.03, 0.04), r * 1.15, r * 0.85, h: top, n: 14);
+            if (shadow != null) _c.drawPath(shadow, Paint()..color = const Color(0x33000000));
+            if (boulder == null) {
+              _c.drawOval(
+                Rect.fromCenter(center: base, width: wpx * 0.8, height: wpx * 0.45),
+                Paint()..color = Palette.stoneDark,
+              );
+              continue;
+            }
+            final hpx = wpx * boulder.height / boulder.width;
+            _c.drawImageRect(
+              boulder,
+              Rect.fromLTWH(0, 0, boulder.width.toDouble(), boulder.height.toDouble()),
+              Rect.fromLTWH(base.dx - wpx / 2, base.dy - hpx * 0.92, wpx, hpx),
+              Paint()..filterQuality = FilterQuality.medium,
+            );
           }
         }, locked: locked);
       }),

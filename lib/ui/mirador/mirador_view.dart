@@ -118,7 +118,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
   /// Dónde se está: el mirador (o el último por el que se pasó caminando).
   late String _at = widget.multi ? world.entrance.id : world.hub.id;
   late Offset _pos = world.lookout(_at).at;
-  late double _yaw = world.lookout(_at).yaw * pi / 180;
+  late double _yaw = widget.multi ? world.lookout(_at).yaw * pi / 180 : _homeYaw();
   double _zoom = 1, _zoomStart = 1;
 
   /// Girando solo después de soltar (radianes por segundo).
@@ -168,6 +168,9 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
 
   /// Dónde se está parado ahora (en la Clásica se camina libre).
   Offset get position => _pos;
+
+  /// Hacia dónde se mira (radianes).
+  double get yaw => _yaw;
   int get sector => world.lookout(_at).sector;
   bool get walking => _route.isNotEmpty || _dest != null;
 
@@ -197,8 +200,33 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       _turnTo = null;
       _at = widget.multi ? world.entrance.id : world.hub.id;
       _pos = world.lookout(_at).at;
-      _yaw = world.lookout(_at).yaw * pi / 180;
+      _yaw = widget.multi ? world.lookout(_at).yaw * pi / 180 : _homeYaw();
     }
+  }
+
+  /// En la Clásica se arranca mirando hacia donde hay más juegos abiertos
+  /// (los más cercanos pesan más), no hacia los que todavía están cerrados.
+  double _homeYaw() {
+    final base = world.hub.yaw * pi / 180;
+    final half = world.hubFov * pi / 180 * 0.4;
+    final open = [
+      for (final place in Place.values)
+        if (placeLockNote(place) == null) ?world.place(place.name)?.at,
+    ];
+    var best = base, bestScore = 0.0;
+    for (var k = 0; k < 72; k++) {
+      final yaw = base + k * 2 * pi / 72;
+      var score = 0.0;
+      for (final at in open) {
+        final a = PanoCamera.wrap(MiradorWorld.bearing(world.hub.at, at) * pi / 180 - yaw);
+        if (a.abs() < half) score += 1 + 4 / (at - world.hub.at).distance - a.abs() * 0.3;
+      }
+      if (score > bestScore + 1e-6) {
+        best = yaw;
+        bestScore = score;
+      }
+    }
+    return PanoCamera.wrap(best);
   }
 
   @override
@@ -291,12 +319,25 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
         pos = dest;
         _arriveFree();
       } else {
-        final next = world.resolve(pos + left / left.distance * step);
+        // Derecho hacia allá; si algo se interpone, lo rodea por el lado que más acerca.
+        final heading = atan2(left.dx, left.dy);
+        var next = pos;
+        var gain = -1.0;
+        for (final turn in const [0.0, 0.45, -0.45, 0.9, -0.9, 1.35, -1.35]) {
+          final a = heading + turn;
+          final q = world.resolve(pos + Offset(sin(a), cos(a)) * step);
+          final g = left.distance - (dest - q).distance - turn.abs() * step * 0.05;
+          if (g > gain) {
+            gain = g;
+            next = q;
+          }
+          if (turn == 0 && g > step * 0.8) break;
+        }
         final moved = (next - pos).distance;
         pos = next;
         _footstep(moved);
         // Trabado contra algo: llega hasta ahí nomás.
-        if (moved < step * 0.25) _arriveFree();
+        if (gain < step * 0.1) _arriveFree();
       }
     } else if (_glide != 0) {
       pos = _stepFrom(pos, yaw, _glide * dt);
@@ -366,7 +407,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       _glow = null;
       _fast = false;
       _dest = world.hub.at;
-      _destYaw = world.hub.yaw * pi / 180;
+      _destYaw = _homeYaw();
       _turnTo = MiradorWorld.bearing(_pos, world.hub.at) * pi / 180;
     });
     _wake();
