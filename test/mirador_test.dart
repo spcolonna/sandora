@@ -111,6 +111,28 @@ void main() {
     }
   });
 
+  test('desde el mirador central de la Clásica se ve y se toca cada lugar', () {
+    // La casa de té queda detrás del arce de las hojas: desde el central se llega por la tira.
+    for (final place in Place.values.where((p) => p != Place.matcha)) {
+      final o = world.place(place.name)!;
+      final view = PanoView(
+        world: world,
+        pos: world.hub.at,
+        yaw: MiradorWorld.bearing(world.hub.at, o.at) * pi / 180,
+        fov: world.hubFov * pi / 180,
+        hub: true,
+        places: {for (final p in Place.values) p.name: PlaceLook(open: true, name: p.name)},
+      );
+      final scene = PanoScene(size, view);
+      final target = PanoTarget(PanoHit.place, id: place.name);
+      final r = scene.rectOf(target);
+      expect(r, isNotNull, reason: '${place.name} se ve desde el central');
+      // Algo cercano puede tapar la base de un lugar lejano: alcanza con que asome.
+      final spots = [r!.center, Offset(r.center.dx, r.top + r.height * 0.25)];
+      expect(spots.map(scene.hit), contains(target), reason: '${place.name} se toca desde el central');
+    }
+  });
+
   Future<void> setUp() async {
     SharedPreferences.setMockInitialValues({});
     await AppSettings.instance.load(const ['es']);

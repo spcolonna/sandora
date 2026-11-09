@@ -82,7 +82,7 @@ class MiradorWorld {
   /// La cámara: campo de visión (grados, normal y en la Clásica), altura de
   /// los ojos (m), dónde queda el horizonte (fracción del alto), zoom máximo
   /// y a qué velocidad se camina (m/s).
-  final double fov, hubFov, eye, horizon, zoomMax, walk;
+  final double fov, hubFov, eye, hubEye, horizon, hubHorizon, zoomMax, walk;
 
   MiradorWorld._({
     required this.lookouts,
@@ -100,7 +100,9 @@ class MiradorWorld {
     required this.fov,
     required this.hubFov,
     required this.eye,
+    required this.hubEye,
     required this.horizon,
+    required this.hubHorizon,
     required this.zoomMax,
     required this.walk,
   });
@@ -166,7 +168,9 @@ class MiradorWorld {
       fov: c('fov'),
       hubFov: c('hubFov'),
       eye: c('eye'),
+      hubEye: c('hubEye'),
       horizon: c('horizon'),
+      hubHorizon: c('hubHorizon'),
       zoomMax: c('zoomMax'),
       walk: c('walk'),
     );
@@ -313,6 +317,22 @@ class MiradorWorld {
       if (inPond(p)) continue;
       if (decorAreas.any((a) => a.inflate(0.6).contains(p))) continue;
       out.add((p + Offset(rng.nextDouble() * 0.4 - 0.2, rng.nextDouble() * 0.4 - 0.2), size));
+    }
+    return out;
+  }();
+
+  /// Matas bajas alrededor del mirador central (centro y ancho): dan un
+  /// primer plano en la Clásica sin tapar los juegos, que quedan más lejos.
+  late final List<(Offset, double)> hubPlants = () {
+    final out = <(Offset, double)>[];
+    final rng = Random(11);
+    for (var k = 0; k < 14; k++) {
+      final t = (k + rng.nextDouble() * 0.5) * 2 * pi / 14;
+      final d = 2.1 + rng.nextDouble() * 0.6;
+      final p = hub.at + Offset(sin(t), cos(t)) * d;
+      if (objects.any((o) => (o.at - p).distance < o.width / 2 + 0.5)) continue;
+      if (decorAreas.any((a) => a.inflate(0.5).contains(p))) continue;
+      out.add((p, 0.55 + rng.nextDouble() * 0.35));
     }
     return out;
   }();

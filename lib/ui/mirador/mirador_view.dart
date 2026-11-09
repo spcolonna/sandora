@@ -372,6 +372,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       fov: _fov,
       zoom: _zoom,
       bob: bob,
+      hub: !widget.multi,
       daylight: p.dayCycle.daylight(now),
       places: {
         for (final o in world.objects)
@@ -551,16 +552,16 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       final m = p.modelRules;
       for (var side = 0; side < 3; side++) {
         for (var cell = 0; cell < m.cells; cell++) {
-          if (p.decorAt(side, cell) != null) continue;
-          final open = p.parcelOpen(side, cell);
+          // Las parcelas cerradas se abren desde la vista aérea: en la escena no se ven.
+          if (p.decorAt(side, cell) != null || !p.parcelOpen(side, cell)) continue;
           out.add(
             PanoMarker(
               pos: world.slot(side, cell),
-              width: 1.0,
+              width: widget.multi ? 1.0 : 0.8,
               flat: true,
-              art: open ? 'spr_path_slot' : 'spr_path_slot_locked',
-              icon: open ? Icons.add_rounded : Icons.lock_rounded,
-              color: open ? Palette.lantern : Palette.stoneDark,
+              art: 'spr_path_slot',
+              icon: Icons.add_rounded,
+              color: Palette.lantern,
               target: PanoTarget(PanoHit.slot, zone: side, index: cell),
             ),
           );

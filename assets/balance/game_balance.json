@@ -394,8 +394,8 @@
     ]
   },
   "miradores": {
-    "_comment": "El jardín es un patio ampliado visto desde arriba, en metros (x hacia la derecha, y hacia el fondo; la entrada abajo). Se recorre de mirador en mirador: en cada uno se gira 360° y se camina por un sendero de piedras (links) al siguiente. El mirador hub (central) es la vista Clásica. sector: 0 entrada y arena, 1 rincón del agua, 2 pabellón y bambú (la decoración y los cuidados de cada uno). places: [x, y, ancho, espejado?] (model: la mesa de la Maqueta; meditation y model van sobre la galería del pabellón). gates: portones [x, y, ancho] (future: el de las zonas que vienen). props: paisaje [decoración u obj_arte, x, y, ancho, espejado?] (pavilion: el pabellón, x e y del centro). pond: centro y radios del estanque. moss: manchas de musgo [x, y, radio]. decor: por sector, el rectángulo [izq, frente, der, fondo] de sus huecos (cols x rows de la Maqueta). decorScale: metros por unidad de tamaño de una decoración. camera: fov y hubFov en grados, eye altura de los ojos (m), horizon fracción del alto, walk m/s.",
-    "camera": {"fov": 70, "hubFov": 92, "eye": 1.5, "horizon": 0.47, "zoomMax": 2.2, "walk": 2.2},
+    "_comment": "El jardín es un patio ampliado visto desde arriba, en metros (x hacia la derecha, y hacia el fondo; la entrada abajo). Se recorre de mirador en mirador: en cada uno se gira 360° y se camina por un sendero de piedras (links) al siguiente. El mirador hub (central) es la vista Clásica. sector: 0 entrada y arena, 1 rincón del agua, 2 pabellón y bambú (la decoración y los cuidados de cada uno). places: [x, y, ancho, espejado?] (model: la mesa de la Maqueta; meditation y model van sobre la galería del pabellón). gates: portones [x, y, ancho] (future: el de las zonas que vienen). props: paisaje [decoración u obj_arte, x, y, ancho, espejado?] (pavilion: el pabellón, x e y del centro). pond: centro y radios del estanque. moss: manchas de musgo [x, y, radio]. decor: por sector, el rectángulo [izq, frente, der, fondo] de sus huecos (cols x rows de la Maqueta). decorScale: metros por unidad de tamaño de una decoración. camera: fov y hubFov en grados, eye y hubEye altura de los ojos (m), horizon y hubHorizon fracción del alto (en la Clásica, más abajo y más bajo para que el piso no ocupe media pantalla), walk m/s.",
+    "camera": {"fov": 70, "hubFov": 76, "eye": 1.5, "hubEye": 1.2, "horizon": 0.47, "hubHorizon": 0.57, "zoomMax": 2.2, "walk": 2.2},
     "wall": [-12, -11, 12, 15],
     "wallHeight": 2.0,
     "lookouts": [
@@ -404,7 +404,7 @@
       {"id": "water", "at": [6, 0], "yaw": 100, "sector": 1},
       {"id": "pavilion", "at": [-4, 6], "yaw": -35, "sector": 2},
       {"id": "bamboo", "at": [4, 8], "yaw": 30, "sector": 2},
-      {"id": "hub", "at": [0, -1], "yaw": 0, "sector": 0, "hub": true}
+      {"id": "hub", "at": [0.5, -1], "yaw": 0, "sector": 0, "hub": true}
     ],
     "links": [
       ["entrance", "sand"],

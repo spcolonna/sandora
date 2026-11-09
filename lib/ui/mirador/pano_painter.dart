@@ -201,6 +201,10 @@ class PanoView {
   final List<PanoMarker> markers;
   final List<PanoExit> exits;
 
+  /// El mirador central de la Clásica: cámara más baja, sin senderos y con
+  /// matas en primer plano.
+  final bool hub;
+
   /// Un objeto resaltado (al llegar a un juego o una decoración pedida).
   final PanoTarget? glow;
 
@@ -216,6 +220,7 @@ class PanoView {
     this.decor = const [],
     this.markers = const [],
     this.exits = const [],
+    this.hub = false,
     this.glow,
   });
 }
@@ -238,8 +243,8 @@ class PanoScene {
     yaw: v.yaw,
     fov: v.fov,
     zoom: v.zoom,
-    eye: v.world.eye,
-    horizonFrac: v.world.horizon,
+    eye: v.hub ? v.world.hubEye : v.world.eye,
+    horizonFrac: v.hub ? v.world.hubHorizon : v.world.horizon,
     bob: v.bob,
   );
   final Canvas _c;
@@ -672,8 +677,15 @@ class PanoScene {
   // ---- Cosas del patio ----
 
   void _build() {
-    for (final (p, r) in w.stones) {
-      _stone(p, r);
+    // En la Clásica no se camina: sin senderos, con matas cerca.
+    if (!v.hub) {
+      for (final (p, r) in w.stones) {
+        _stone(p, r);
+      }
+    } else {
+      for (final (i, (p, size)) in w.hubPlants.indexed) {
+        _hedge(p, size, i + 100);
+      }
     }
     for (final (i, (p, size)) in w.hedges.indexed) {
       _hedge(p, size, i);
