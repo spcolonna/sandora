@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sandora/garden/progress.dart';
-import 'package:sandora/garden/sendero.dart';
+import 'package:sandora/garden/mirador.dart';
 import 'package:sandora/i18n/i18n.dart';
 import 'package:sandora/settings.dart';
 import 'package:sandora/ui/model_screen.dart';
@@ -113,7 +113,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('la vista aérea pone la pieza en su hueco del Sendero', (tester) async {
+  testWidgets('la vista aérea pone la pieza en su hueco del patio', (tester) async {
     tester.view.physicalSize = const Size(1320, 2868);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -126,14 +126,17 @@ void main() {
     for (final e in p.essences.keys) {
       p.essences[e] = 10000;
     }
-    final world = SenderoWorld(SenderoRules.from(p.economy.balance), cols: p.modelRules.cols, rows: p.modelRules.rows);
+    final world = MiradorWorld.from(p.economy.balance, cols: p.modelRules.cols, rows: p.modelRules.rows);
     await tester.pumpWidget(
       MaterialApp(
         theme: Palette.theme(),
         home: Builder(
           builder: (context) => Scaffold(
             body: Center(
-              child: TextButton(onPressed: () => openModel(context, world: world), child: const Text('x')),
+              child: TextButton(
+                onPressed: () => openModel(context, world: world),
+                child: const Text('x'),
+              ),
             ),
           ),
         ),

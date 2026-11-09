@@ -3408,26 +3408,12 @@
   "ja": "どの場所も改良できます。報酬が増えて見た目も良くなります",
   "zh": "每个地点都能升级：收获更多，也更好看"
  },
- "guide.modelBack": {
-  "es": "Volvé al patio: la maqueta está en la mesa",
-  "en": "Go back to the courtyard: the model is on the table",
-  "pt": "Volte ao pátio: a maquete está na mesa",
-  "ja": "中庭に戻ろう。箱庭はテーブルの上です",
-  "zh": "回到庭院：沙盘在桌子上"
- },
  "model.walk": {
   "es": "Recorrer",
   "en": "Walk",
   "pt": "Passear",
   "ja": "散策",
   "zh": "漫步"
- },
- "walk.end": {
-  "es": "Tocá para terminar el paseo",
-  "en": "Tap to end the walk",
-  "pt": "Toque para terminar o passeio",
-  "ja": "タップで散策を終える",
-  "zh": "轻触结束漫步"
  },
  "walk.decor": {
   "es": "Tu decoración",
@@ -3456,55 +3442,6 @@
   "pt": "Descansando",
   "ja": "休憩中",
   "zh": "休息中"
- },
- "sendero.entrance": {
-  "es": "Entrada",
-  "en": "Entrance",
-  "pt": "Entrada",
-  "ja": "入口",
-  "zh": "入口"
- },
- "sendero.gateClosed": {
-  "es": "El portón todavía está cerrado",
-  "en": "The gate is still closed",
-  "pt": "O portão ainda está fechado",
-  "ja": "門はまだ閉じています",
-  "zh": "大门还关着"
- },
- "sendero.gateDays.one": {
-  "es": "El portón se abre mañana",
-  "en": "The gate opens tomorrow",
-  "pt": "O portão abre amanhã",
-  "ja": "門は明日開きます",
-  "zh": "大门明天打开"
- },
- "sendero.gateDays.other": {
-  "es": "El portón se abre en {n} días",
-  "en": "The gate opens in {n} days",
-  "pt": "O portão abre em {n} dias",
-  "ja": "門は{n}日後に開きます",
-  "zh": "大门{n}天后打开"
- },
- "sendero.gateLevel": {
-  "es": "El portón se abre en el nivel {n}",
-  "en": "The gate opens at level {n}",
-  "pt": "O portão abre no nível {n}",
-  "ja": "門はレベル{n}で開きます",
-  "zh": "大门在{n}级打开"
- },
- "sendero.tapPlace": {
-  "es": "Tocá un lugar para entrar",
-  "en": "Tap a place to go in",
-  "pt": "Toque num lugar para entrar",
-  "ja": "場所をタップして入ろう",
-  "zh": "轻触一个地方进入"
- },
- "sendero.back": {
-  "es": "Volver",
-  "en": "Go back",
-  "pt": "Voltar",
-  "ja": "戻る",
-  "zh": "返回"
  },
  "sendero.quick": {
   "es": "Juegos",
@@ -3569,11 +3506,60 @@
   "ja": "新しいあそびが開きました：道で探そう",
   "zh": "新游戏开放了：在小路上找找看"
  },
- "sendero.onward": {
-  "es": "Seguir",
-  "en": "Keep going",
-  "pt": "Seguir",
-  "ja": "先へ",
-  "zh": "继续"
+ "mirador.entrance": {
+  "es": "Entrada",
+  "en": "Entrance",
+  "pt": "Entrada",
+  "ja": "入口",
+  "zh": "入口"
+ },
+ "mirador.sand": {
+  "es": "Arena y lluvia",
+  "en": "Sand and rain",
+  "pt": "Areia e chuva",
+  "ja": "砂と雨",
+  "zh": "沙与雨"
+ },
+ "mirador.water": {
+  "es": "Rincón del agua",
+  "en": "Water corner",
+  "pt": "Canto da água",
+  "ja": "水辺",
+  "zh": "水畔"
+ },
+ "mirador.pavilion": {
+  "es": "Pabellón",
+  "en": "Pavilion",
+  "pt": "Pavilhão",
+  "ja": "東屋",
+  "zh": "亭子"
+ },
+ "mirador.bamboo": {
+  "es": "Bambú",
+  "en": "Bamboo",
+  "pt": "Bambu",
+  "ja": "竹林",
+  "zh": "竹林"
+ },
+ "mirador.hub": {
+  "es": "Centro del patio",
+  "en": "Courtyard center",
+  "pt": "Centro do pátio",
+  "ja": "庭の中央",
+  "zh": "庭院中央"
+ },
+ "mirador.hint": {
+  "es": "Arrastrá para mirar alrededor · tocá una piedra con luz para caminar",
+  "en": "Drag to look around · tap a glowing stone to walk",
+  "pt": "Arraste para olhar ao redor · toque uma pedra iluminada para caminhar",
+  "ja": "ドラッグで見回す・光る石をタップして歩く",
+  "zh": "拖动环顾四周 · 点击发光的石头前进"
+ },
+ "mirador.future": {
+  "es": "Detrás de este portón van a abrir nuevas zonas del jardín",
+  "en": "New garden areas will open behind this gate",
+  "pt": "Novas áreas do jardim vão abrir atrás deste portão",
+  "ja": "この門の向こうに新しい庭が開きます",
+  "zh": "这扇门后将开放新的庭园区域"
  }
 }

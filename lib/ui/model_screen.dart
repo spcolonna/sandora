@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../garden/decor.dart';
 import '../garden/economy.dart';
 import '../garden/progress.dart';
-import '../garden/sendero.dart';
+import '../garden/mirador.dart';
 import '../i18n/i18n.dart';
 import 'decor_tray.dart';
 import 'garden/garden_scene.dart';
@@ -15,7 +15,6 @@ import 'garden/garden_view.dart';
 import 'fx/sfx.dart';
 import 'garden/garden_decor.dart';
 import 'garden/scene_art.dart';
-import 'sendero/sendero_painter.dart';
 import 'theme/palette.dart';
 import 'upgrade_sheet.dart';
 import 'widgets/currency.dart';
@@ -33,13 +32,15 @@ typedef ModelFocus = ({int side, int? index});
 ///
 /// Con [world] (la vista Sendero) es la vista aérea: el mismo jardín visto
 /// desde arriba, con cada parcela en su hueco al costado del camino.
-Future<ModelFocus?> openModel(BuildContext context, {int side = 0, SenderoWorld? world}) => Navigator.of(
-  context,
-).push(CupertinoPageRoute<ModelFocus>(builder: (_) => ModelScreen(side: side, world: world)));
+Future<ModelFocus?> openModel(BuildContext context, {int side = 0, MiradorWorld? world}) => Navigator.of(context).push(
+  CupertinoPageRoute<ModelFocus>(
+    builder: (_) => ModelScreen(side: side, world: world),
+  ),
+);
 
 class ModelScreen extends StatefulWidget {
   final int side;
-  final SenderoWorld? world;
+  final MiradorWorld? world;
   const ModelScreen({super.key, this.side = 0, this.world});
 
   @override
@@ -798,7 +799,7 @@ class _UpgradeList extends StatelessWidget {
 /// lugares sobre papel, y cada parcela en su hueco. Arranca acercada a las
 /// parcelas; se pellizca para alejar y ver toda la zona.
 class _AerialBoard extends StatefulWidget {
-  final SenderoWorld world;
+  final MiradorWorld world;
   final int side;
   final String? holding;
   final int? picked;
@@ -826,7 +827,7 @@ class _AerialBoardState extends State<_AerialBoard> {
   /// Para qué zona y tamaño se acomodó la vista.
   (int, Size)? _fitted;
 
-  SenderoWorld get world => widget.world;
+  MiradorWorld get world => widget.world;
 
   @override
   void dispose() {
@@ -842,20 +843,12 @@ class _AerialBoardState extends State<_AerialBoard> {
     return box;
   }
 
-  /// Toda la zona: su tramo del tronco, sus ramales y lugares.
-  Rect _zone(int side) {
-    final r = world.rules;
-    return _around([
-      for (var s = r.zoneStart(side); s <= r.zoneStart(side) + r.segment; s += 1) world.trunk.pointAt(s),
-      for (final b in world.branches)
-        if (b.spec.zone == side) ...world.tracks[b.track].points,
-      for (final st in world.stations)
-        if (st.zone == side) st.pos,
-    ]).inflate(2.4);
-  }
+  /// Todo el patio (la vista aérea se puede alejar hasta verlo entero).
+  Rect _zone(int side) => world.wall.inflate(0.8);
 
   /// Las parcelas de la zona.
-  Rect _cells(int side) => _around([for (var c = 0; c < world.cols * world.rows; c++) world.slot(side, c)]).inflate(0.9);
+  Rect _cells(int side) =>
+      _around([for (var c = 0; c < world.cols * world.rows; c++) world.slot(side, c)]).inflate(0.9);
 
   @override
   Widget build(BuildContext context) {
@@ -919,7 +912,7 @@ class _AerialBoardState extends State<_AerialBoard> {
 }
 
 class _AerialPainter extends CustomPainter {
-  final SenderoWorld world;
+  final MiradorWorld world;
   final int side;
   final Rect bounds;
   final double k;
@@ -940,51 +933,65 @@ class _AerialPainter extends CustomPainter {
     } else {
       canvas.drawRect(Offset.zero & size, Paint()..color = Color.lerp(_zones[side], Palette.paper, 0.35)!);
     }
-    // El agua.
-    final pond = [for (final q in pondShape(world)) _map(q)];
-    canvas.drawPath(Path()..addPolygon(pond, true), Paint()..color = Palette.water.withValues(alpha: 0.8));
+    // El muro, el musgo y el agua.
+    final wall = Rect.fromPoints(_map(world.wall.topLeft), _map(world.wall.bottomRight));
+    canvas.drawRect(
+      wall,
+      Paint()
+        ..color = Palette.wood.withValues(alpha: 0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = max(3, 0.3 * k),
+    );
+    for (final (c, r) in world.moss) {
+      canvas.drawCircle(_map(c), r * k * 0.8, Paint()..color = Palette.moss.withValues(alpha: 0.22));
+    }
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: _map(world.pondAt),
+        width: world.pondRadii.width * 2 * k,
+        height: world.pondRadii.height * 2 * k,
+      ),
+      Paint()..color = Palette.water.withValues(alpha: 0.8),
+    );
     // El paisaje, como copas y piedras vistas desde arriba.
-    for (final t in senderoScenery(world)) {
-      final c = _map(t.pos);
+    for (final o in world.objects) {
+      if (o.kind != PanoKind.prop) continue;
+      final c = _map(o.at);
       if (!(Offset.zero & size).inflate(20).contains(c)) continue;
-      final bamboo = (t.art ?? '').contains('bamboo');
+      if (o.decor == 'pavilion') {
+        canvas.drawRect(
+          Rect.fromCenter(center: c, width: o.width * k, height: 1.8 * k),
+          Paint()..color = Palette.wood.withValues(alpha: 0.55),
+        );
+        continue;
+      }
+      final green = !const {
+        'boulder',
+        'rocks',
+        'peak',
+        'lantern',
+        'jizo',
+        'pagoda',
+        'obj_court_rock',
+        'obj_court_lantern_tall',
+      }.contains(o.decor);
       canvas.drawCircle(
         c,
-        t.width * k * (bamboo ? 0.4 : 0.3),
-        Paint()..color = (bamboo ? Palette.moss : Palette.stone).withValues(alpha: 0.45),
+        o.width * k * 0.38,
+        Paint()..color = (green ? Palette.moss : Palette.stone).withValues(alpha: 0.45),
       );
     }
-    // Los caminos.
-    final hw = world.rules.halfWidth * 2 * k;
-    for (final t in world.tracks) {
-      final path = Path()..addPolygon([for (final q in t.points) _map(q)], false);
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = const Color(0xFFB9A982)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = hw + 3
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round,
-      );
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = const Color(0xFFEFE5CC)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = hw
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round,
-      );
+    // Los senderos de piedras entre miradores.
+    for (final (q, r) in world.stones) {
+      canvas.drawCircle(_map(q), max(2, r * k), Paint()..color = const Color(0xFFB9A982));
     }
     // Los portones.
-    for (var z = 1; z < ModelRules.sides; z++) {
-      final s = world.gateAt(z);
-      final a = world.trunk.pointAt(s) - world.trunk.normalAt(s) * 1.3;
-      final b = world.trunk.pointAt(s) + world.trunk.normalAt(s) * 1.3;
+    for (final o in world.objects) {
+      if (o.kind != PanoKind.gate) continue;
+      final a = _map(o.at - Offset(o.width / 2, 0)), b = _map(o.at + Offset(o.width / 2, 0));
       canvas.drawLine(
-        _map(a),
-        _map(b),
+        a,
+        b,
         Paint()
           ..color = Palette.clay
           ..strokeWidth = max(3, 0.25 * k)
@@ -992,14 +999,14 @@ class _AerialPainter extends CustomPainter {
       );
     }
     // Los lugares, con su nombre.
-    for (final st in [...world.stations.map((s) => (s.place, s.pos)), ('board', world.board)]) {
-      final c = _map(st.$2);
+    for (final o in world.objects) {
+      if (o.place == null) continue;
+      final c = _map(o.at);
       if (!(Offset.zero & size).inflate(30).contains(c)) continue;
       canvas.drawCircle(c, max(10, 0.7 * k), Paint()..color = Palette.wood.withValues(alpha: 0.85));
-      final place = Place.values.byName(st.$1);
       final tp = TextPainter(
         text: TextSpan(
-          text: placeName(place),
+          text: o.place == 'model' ? tr('model.title') : placeName(Place.values.byName(o.place!)),
           style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Palette.ink),
         ),
         textDirection: TextDirection.ltr,

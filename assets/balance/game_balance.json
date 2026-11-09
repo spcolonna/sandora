@@ -393,26 +393,92 @@
       {"id": "sakura", "level": 17, "cost": {"pebbles": 1000, "wood": 50, "light": 25}, "size": 0.3, "aspect": 0.99}
     ]
   },
-  "sendero": {
-    "_comment": "El Sendero: el jardín principal, recorrido en primera persona. El tronco cruza las tres zonas (cada una mide segment pasos, con un portón al empezar el estanque y el bosque). La fila r de la Maqueta queda a rowZ[r] pasos del comienzo de su zona (la 0, la del fondo, más adelante) y la columna c a colX[c] del centro del camino, corrida colStagger*c hacia adelante. branches: los ramales hacia los juegos (zona, a cuántos pasos del comienzo de la zona sale, lado -1 izquierda / 1 derecha, y los lugares al final). board: el tablón de récords (pasos desde la entrada y lado). speed: pasos por segundo al caminar solo. decorScale: ancho en el mundo por unidad de size de la decoración. halfWidth: medio ancho del camino.",
-    "segment": 24,
-    "rowZ": [10.5, 7, 3.5],
-    "colX": [-2.6, -1.45, 1.45, 2.6],
-    "colStagger": 0.45,
-    "speed": 1.4,
-    "decorScale": 6,
-    "halfWidth": 0.7,
-    "board": [1.8, -2.3],
-    "branches": [
-      {"zone": 0, "at": 13, "side": -1, "places": ["sand", "stack"]},
-      {"zone": 0, "at": 17.5, "side": 1, "places": ["rain", "meditation"]},
-      {"zone": 1, "at": 13, "side": -1, "places": ["shishi", "moss"]},
-      {"zone": 1, "at": 16, "side": 1, "places": ["pond", "leaves"]},
-      {"zone": 1, "at": 19, "side": -1, "places": ["bonsai"]},
-      {"zone": 1, "at": 20.5, "side": 1, "places": ["enso", "bell"]},
-      {"zone": 2, "at": 13, "side": -1, "places": ["matcha"]},
-      {"zone": 2, "at": 17, "side": 1, "places": ["flute", "lanterns"]}
-    ]
+  "miradores": {
+    "_comment": "El jardín es un patio ampliado visto desde arriba, en metros (x hacia la derecha, y hacia el fondo; la entrada abajo). Se recorre de mirador en mirador: en cada uno se gira 360° y se camina por un sendero de piedras (links) al siguiente. El mirador hub (central) es la vista Clásica. sector: 0 entrada y arena, 1 rincón del agua, 2 pabellón y bambú (la decoración y los cuidados de cada uno). places: [x, y, ancho, espejado?] (model: la mesa de la Maqueta; meditation y model van sobre la galería del pabellón). gates: portones [x, y, ancho] (future: el de las zonas que vienen). props: paisaje [decoración u obj_arte, x, y, ancho, espejado?] (pavilion: el pabellón, x e y del centro). pond: centro y radios del estanque. moss: manchas de musgo [x, y, radio]. decor: por sector, el rectángulo [izq, frente, der, fondo] de sus huecos (cols x rows de la Maqueta). decorScale: metros por unidad de tamaño de una decoración. camera: fov y hubFov en grados, eye altura de los ojos (m), horizon fracción del alto, walk m/s.",
+    "camera": {"fov": 70, "hubFov": 92, "eye": 1.5, "horizon": 0.47, "zoomMax": 2.2, "walk": 2.2},
+    "wall": [-12, -11, 12, 15],
+    "wallHeight": 2.0,
+    "lookouts": [
+      {"id": "entrance", "at": [0, -7.9], "yaw": 0, "sector": 0},
+      {"id": "sand", "at": [-5, -2], "yaw": -50, "sector": 0},
+      {"id": "water", "at": [6, 0], "yaw": 100, "sector": 1},
+      {"id": "pavilion", "at": [-4, 6], "yaw": -35, "sector": 2},
+      {"id": "bamboo", "at": [4, 8], "yaw": 30, "sector": 2},
+      {"id": "hub", "at": [0, -1], "yaw": 0, "sector": 0, "hub": true}
+    ],
+    "links": [
+      ["entrance", "sand"],
+      ["sand", "water"],
+      ["sand", "pavilion"],
+      ["pavilion", "bamboo"],
+      ["water", "bamboo"]
+    ],
+    "places": {
+      "board": [2.7, -7.4, 1.4],
+      "sand": [-7.4, -4.7, 2.4],
+      "rain": [-9.3, -1.0, 2.0],
+      "stack": [-6.4, 1.7, 1.4],
+      "bonsai": [3.6, -4.3, 1.7],
+      "pond": [9.4, -3.6, 4.4],
+      "shishi": [10.4, 0.9, 1.6],
+      "moss": [8.4, 3.9, 1.8],
+      "leaves": [3.4, 3.4, 2.2],
+      "meditation": [-6.6, 10.4, 1.0],
+      "model": [-4.9, 11.3, 1.2],
+      "enso": [-9.9, 6.4, 3.2],
+      "bell": [-1.6, 12.4, 2.6],
+      "matcha": [7.6, 11.6, 4.4],
+      "flute": [4.2, 12.6, 1.4],
+      "lanterns": [9.9, 7.2, 1.2]
+    },
+    "gates": {
+      "entrance": [0, -11, 3.0],
+      "future": [1.4, 15, 3.0]
+    },
+    "props": [
+      ["pavilion", -5.8, 10.9, 5.6],
+      ["pine", -10.6, -9.6, 2.2],
+      ["pine", 10.9, -9.8, 2.4, true],
+      ["pine", -11.0, 3.6, 2.3],
+      ["pine", 11.0, 13.8, 2.2],
+      ["maple", -10.8, 12.9, 2.4],
+      ["sakura", -3.6, -10.2, 2.6],
+      ["sakura", 3.3, -10.3, 2.2, true],
+      ["obj_bamboo_grove", 10.8, 9.6, 2.6],
+      ["obj_bamboo_grove", 5.4, 14.3, 2.6],
+      ["obj_bamboo_grove", -4.4, 14.3, 2.4],
+      ["obj_bamboo_grove", 9.4, 14.2, 2.4],
+      ["bamboo", 2.5, 7.0, 1.0],
+      ["obj_court_lantern_tall", 1.3, -6.8, 0.7],
+      ["lantern", -6.4, 4.3, 0.8],
+      ["boulder", -11.0, -3.6, 1.6],
+      ["rocks", 7.2, -6.5, 1.4],
+      ["peak", 11.2, 2.6, 1.2],
+      ["moss", 1.4, 10.2, 1.2],
+      ["azalea", -2.3, -8.2, 1.1],
+      ["azalea", -3.4, -0.4, 1.0],
+      ["azalea", 7.4, -1.4, 1.0, true],
+      ["azalea", -5.4, 7.8, 1.0],
+      ["azalea", 5.7, 6.8, 1.0],
+      ["boulder", 0.6, -4.4, 1.5],
+      ["rocks", 1.7, -3.9, 1.0, true],
+      ["jizo", -8.6, 3.3, 0.6],
+      ["pagoda", -11.0, -5.4, 1.0],
+      ["obj_court_rock", -3.4, -5.6, 0.9],
+      ["obj_moss_rock", 6.6, 9.2, 1.0]
+    ],
+    "pond": [9.4, -3.6, 2.4, 1.8],
+    "moss": [
+      [8.5, 3.5, 3.0],
+      [-8.0, 8.0, 3.5],
+      [6.0, 11.0, 4.0],
+      [10.0, 7.0, 2.5],
+      [3.8, -4.2, 1.8],
+      [-2.0, 13.0, 2.5],
+      [1.0, -4.2, 1.3]
+    ],
+    "decor": [[-11, -10.3, -5.5, -7.2], [4.5, -10.3, 11, -7.2], [-2.2, 2.4, 2.2, 5.6]],
+    "decorScale": 7
   },
   "model": {
     "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. feet: dónde queda el pie de cada parcela (x, y) en cada vista, en fracción de la vista (el patio pintado, del lienzo); elegidos a mano para no tapar los lugares. inViews: si la decoración también se ve en las vistas de actividades con la vista Sendero (en la Clásica siempre se ve). table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo).",
