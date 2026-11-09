@@ -115,8 +115,11 @@ const placeArt = <String, (List<String>, double)>{
   'matcha': (['obj_tea_house'], 0.75),
   'flute': (['obj_bamboo_flute'], 1.6),
   'lanterns': (['obj_river_lantern'], 1.6),
-  'model': (['obj_pavilion_table', 'obj_model_table'], 0.8),
+  'model': (['obj_model_table'], 0.8),
 };
+
+/// Cuántos metros de suelo cubre cada copia de la textura de detalle.
+const _detailMeters = 2.2;
 
 /// Lo que va sobre la galería del pabellón (a cuántos metros del suelo).
 const _lifted = {'meditation': 0.45, 'model': 0.45};
@@ -462,16 +465,20 @@ class PanoScene {
   void _ground() {
     final hz = cam.horizon;
     if (hz >= size.height) return;
-    const cols = 22;
+    final detail = SceneArt.instance['tex_pano_ground_detail'];
+    final cols = detail == null ? 22 : 30;
     final ys = <double>[];
     // Más filas cerca del horizonte (donde cambia más rápido).
-    const rows = 34;
+    final rows = detail == null ? 34 : 46;
     for (var i = 0; i <= rows; i++) {
       final t = i / rows;
       ys.add(hz + 1.5 + (size.height - hz) * t * t);
     }
     final pos = Float32List((cols + 1) * ys.length * 2);
+    final tex = Float32List((cols + 1) * ys.length * 2);
     final colors = Int32List((cols + 1) * ys.length);
+    // La textura de detalle cubre [_detailMeters] metros por copia, pegada al suelo.
+    final pxPerM = detail == null ? 0.0 : detail.width / _detailMeters;
     var k = 0;
     for (var r = 0; r < ys.length; r++) {
       final y = ys[r];
@@ -482,6 +489,8 @@ class PanoScene {
         final p = cam.pos + Offset(sin(a), cos(a)) * d;
         pos[k * 2] = x;
         pos[k * 2 + 1] = y;
+        tex[k * 2] = p.dx * pxPerM;
+        tex[k * 2 + 1] = p.dy * pxPerM;
         colors[k] = _groundAt(p, d).toARGB32();
         k++;
       }
@@ -494,10 +503,18 @@ class PanoScene {
       }
     }
     _c.drawRect(Rect.fromLTRB(0, hz, size.width, size.height), Paint()..color = _mist);
+    final indices = Uint16List.fromList(idx);
+    if (detail == null) {
+      _c.drawVertices(ui.Vertices.raw(ui.VertexMode.triangles, pos, colors: colors, indices: indices), BlendMode.dst, Paint());
+      return;
+    }
+    // El color de cada punto multiplicado por la textura (casi blanca, con piedritas y surcos).
     _c.drawVertices(
-      ui.Vertices.raw(ui.VertexMode.triangles, pos, colors: colors, indices: Uint16List.fromList(idx)),
-      BlendMode.dst,
-      Paint(),
+      ui.Vertices.raw(ui.VertexMode.triangles, pos, colors: colors, textureCoordinates: tex, indices: indices),
+      BlendMode.modulate,
+      Paint()
+        ..shader = ImageShader(detail, TileMode.repeated, TileMode.repeated, Matrix4.identity().storage)
+        ..filterQuality = FilterQuality.medium,
     );
   }
 
@@ -544,6 +561,12 @@ class PanoScene {
     final hgt = w.wallHeight;
     double d(int i) => pts[i].$2;
     double s(int i) => pts[i].$3;
+    final forest = SceneArt.instance['pano_forest'];
+    if (forest != null) {
+      // Pintado: una franja que da la vuelta, apoyada detrás del muro.
+      final far = pts.map((p) => p.$2).reduce(min);
+      _band(forest, cam.yAt(far + 6, hgt + 5.5), cam.yAt(far + 6, hgt - 0.5), 0.5);
+    }
     // El bosque de atrás: copas de distintos altos (pinos, cedros, arces), en dos tandas.
     double crown(int i, double k) {
       final a = s(i);
@@ -552,16 +575,18 @@ class PanoScene {
           k * (1.2 * (0.5 + 0.5 * sin(a * 0.9)) + 0.8 * (0.5 + 0.5 * sin(a * 2.3 + 1)) + 0.25 * sin(a * 4.3));
     }
 
-    strip(
-      (i) => cam.yAt(d(i) + 6, crown(i, 1.3)),
-      (i) => cam.yAt(d(i)),
-      (i) => lit(const Color(0xFF8A9C86), d(i) + 14),
-    );
-    strip(
-      (i) => cam.yAt(d(i) + 1.5, crown(i, 0.8) - 0.6),
-      (i) => cam.yAt(d(i)),
-      (i) => lit(Color.lerp(const Color(0xFF6A8460), const Color(0xFF8C8A5E), 0.3 + 0.3 * sin(s(i) * 0.37))!, d(i) + 8),
-    );
+    if (forest == null) {
+      strip(
+        (i) => cam.yAt(d(i) + 6, crown(i, 1.3)),
+        (i) => cam.yAt(d(i)),
+        (i) => lit(const Color(0xFF8A9C86), d(i) + 14),
+      );
+      strip(
+        (i) => cam.yAt(d(i) + 1.5, crown(i, 0.8) - 0.6),
+        (i) => cam.yAt(d(i)),
+        (i) => lit(Color.lerp(const Color(0xFF6A8460), const Color(0xFF8C8A5E), 0.3 + 0.3 * sin(s(i) * 0.37))!, d(i) + 8),
+      );
+    }
     const plaster = [Color(0xFFEDE3CC), Color(0xFFE2D6BB), Color(0xFFE6DAC0), Color(0xFFF0E8D4)];
     // Base de piedra, yeso y un tejadito.
     strip((i) => cam.yAt(d(i), hgt), (i) => cam.yAt(d(i)), (i) => lit(plaster[pts[i].$4], d(i)));
@@ -774,10 +799,10 @@ class PanoScene {
     if (s == null) return;
     final (r, d) = s;
     final locked = look != null && !look.open;
-    if (lift == 0 && id != 'sand') _patch(o.at, o.width, d, moss: w.mossAt(o.at) > 0.5);
+    if (lift == 0 && (id != 'sand' || img != null)) _patch(o.at, o.width, d, moss: w.mossAt(o.at) > 0.5);
     final target = id == 'model' ? const PanoTarget(PanoHit.model) : PanoTarget(PanoHit.place, id: id);
     final alpha = _near(d);
-    if (id == 'sand') _sandBed(o, d, locked);
+    if (id == 'sand' && img == null) _sandBed(o, d, locked);
     _items.add(
       _Item(d, r.inflate(r.width * 0.06), target, () {
         if (lift == 0) _shadow(r);
@@ -978,13 +1003,15 @@ class PanoScene {
 
   /// Un arbusto podado en mata (karikomi), dibujado con código.
   void _hedge(Offset p, double size, int seed) {
-    final s = _stand(p, size, 0.62);
+    final art = SceneArt.instance['obj_path_bush'];
+    final s = _stand(p, size, art == null ? 0.62 : art.height / art.width);
     if (s == null) return;
     final (r, d) = s;
     final alpha = _near(d);
     _items.add(
       _Item(d, r, null, () {
         _shadow(r);
+        if (art != null) return _art(art, r, d, flip: seed.isOdd, alpha: alpha);
         _filtered(r, d, () => _bush(r, seed: seed), alpha: alpha);
       }),
     );
@@ -1086,10 +1113,13 @@ class PanoScene {
         if (glow != null) {
           _c.drawPath(glow, Paint()..color = Palette.lantern.withValues(alpha: 0.18 + 0.12 * (1 - v.daylight)));
         }
-        final art = SceneArt.instance['obj_path_lantern_arrow'];
-        if (art != null) return drawArt(_c, art, b);
-        _c.drawPath(path.shift(Offset(0, b.height * 0.1)), Paint()..color = const Color(0xFF8F8A80));
-        _c.drawPath(path, Paint()..color = const Color(0xFFD3CDBF));
+        final art = SceneArt.instance['spr_path_glow_stone'];
+        if (art != null) {
+          drawArt(_c, art, b);
+        } else {
+          _c.drawPath(path.shift(Offset(0, b.height * 0.1)), Paint()..color = const Color(0xFF8F8A80));
+          _c.drawPath(path, Paint()..color = const Color(0xFFD3CDBF));
+        }
         // La flecha pintada en la piedra, hacia el otro mirador.
         final dir = e.bearing * pi / 180;
         final tip = cam.project(e.pos + Offset(sin(dir), cos(dir)) * 0.3);
