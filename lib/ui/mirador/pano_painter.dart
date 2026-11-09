@@ -1768,7 +1768,12 @@ class PanoScene {
     final (_, dBack) = cam.polar(back);
     final (_, dFront) = cam.polar(front);
     final backArt = SceneArt.instance['obj_pavilion_back'];
-    final sb = _stand(back, o.width, (wallTop - floor + 1.4) / o.width, lift: floor);
+    final sb = _stand(
+      back,
+      o.width,
+      backArt == null ? (wallTop - floor + 1.4) / o.width : backArt.height / backArt.width,
+      lift: floor,
+    );
     if (sb != null) {
       final (r, d) = sb;
       _items.add(
@@ -1862,7 +1867,11 @@ class PanoScene {
       );
     }
     final frontArt = SceneArt.instance['obj_pavilion_front'];
-    final sf = _stand(front, o.width * 1.16, 4.0 / (o.width * 1.16));
+    final sf = _stand(
+      front,
+      o.width * 1.16,
+      frontArt == null ? 4.0 / (o.width * 1.16) : frontArt.height / frontArt.width,
+    );
     if (sf != null) {
       final (r, d) = sf;
       _items.add(

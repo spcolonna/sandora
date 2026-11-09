@@ -177,7 +177,7 @@ PATH_CAMERA = ('Camera: a person standing in the garden at eye level (about 1.6 
                '(about 5 degrees), no strong perspective distortion.')
 
 
-def path_obj(name, subject, size_hint, purpose=''):
+def path_obj(name, subject, size_hint, purpose='', framed=False):
     """Objeto de los Miradores, de frente, recortado sobre transparente."""
     return img(
         name, SQUARE_ALPHA + ALPHA_FALLBACK,
@@ -189,10 +189,13 @@ def path_obj(name, subject, size_hint, purpose=''):
         subject,
         f'{PATH_CAMERA} The object is centered and fills about 85% of the canvas height. Its base sits on an imaginary '
         'flat ground line near the bottom of the canvas with only a very soft contact shadow right under it. The '
-        'whole object is visible, nothing is cropped. All four corners stay empty and transparent. Bold silhouette '
-        'that still reads when it is small in the distance.',
-        f'any background, ground patch, sky, path or scenery behind the object; {NO_TEXT}; other objects; people or '
-        f'animals; {NO_STYLE}.',
+        'whole object is visible, nothing is cropped. All four corners stay empty and transparent. '
+        + ('Only the view through the opening is painted; everything outside the silhouette stays transparent. '
+           if framed else '') + 'Bold silhouette that still reads when it is small in the distance.',
+        (f'walls or fences attached to the sides, ground patch or sky outside the silhouette; {NO_TEXT}; other objects; '
+         f'people or animals; {NO_STYLE}.') if framed else
+        (f'any background, ground patch, sky, path or scenery behind the object; {NO_TEXT}; other objects; people or '
+         f'animals; {NO_STYLE}.'),
         style=COURT_STYLE)
 
 
@@ -1192,12 +1195,12 @@ BLOCKS = [
                '`assets/images/court/obj_model_table.webp`.'),
         images=[
             img('obj_model_table', SQUARE_ALPHA + ALPHA_FALLBACK,
-                f'This object sits in the painted courtyard of {GAME}; tapping it opens the decorating screen. The '
-                'game draws it about 150 pixels wide on top of the raked gravel.',
+                f'This object sits on the wooden floor of the garden pavilion in the 360-degree garden of {GAME}; '
+                'tapping it opens the decorating screen. The game scales it by distance.',
                 'A low, simple Japanese wooden table of warm, worn cedar on four short legs, holding a shallow wooden '
                 'tray with a tiny model of a zen garden: raked pale sand, three miniature stones, a little moss mound '
                 'and a tiny stone lantern. Cozy and handmade, like a craftsman\'s model.',
-                'Seen from the front and slightly above (about 25 degrees), perfectly centered, filling about 80% of '
+                'Seen from the front at eye level, looking slightly down (about 15 degrees), centered, filling about 80% of '
                 'the canvas width. The feet of the table sit on an imaginary ground line near the bottom. Nothing '
                 'cropped, all four corners empty and transparent.',
                 f'any background, ground, cast shadow, people, animals, chairs, cushions, {NO_TEXT}, {NO_STYLE}.',
@@ -1235,9 +1238,10 @@ BLOCKS = [
                         'scattered small pebbles with gentle light-grey shading, a few faint specks, all very pale.'),
             path_obj('obj_path_gate', 'The main wooden gate of the garden seen from inside: a roofed gate '
                      '(yakuimon style) with two thick posts, a small dark-tiled roof with upturned eaves, and its two '
-                     'wooden doors swung fully open toward the viewer, so through the opening you see a stone path '
-                     'leaving between trees outside. About as wide as tall.', 'the full screen height',
-                     'It is behind the player when they arrive at the garden. '),
+                     'wooden doors swung fully open toward the viewer. Through the opening, painted inside the frame '
+                     'only, a short stone path leads away between soft misty trees outside, lighter and bluer with '
+                     'distance. About as wide as tall.', 'the full screen height',
+                     'It is behind the player when they arrive at the garden. ', framed=True),
             path_obj('obj_gate_future', 'The same roofed wooden garden gate (yakuimon style), now with its two doors '
                      'closed: a thick twisted straw shimenawa rope with white zigzag paper streamers hangs across '
                      'the doors, and a small round blank wooden plaque hangs from its middle (the game draws a lock '
@@ -1562,6 +1566,16 @@ INCLUDED = {
     'obj_care_leaves': ('assets/images/court/obj_care_leaves.webp', 'Hojas de las tareas de cuidado, 320 px; al barrer se corren y se apagan.'),
     'obj_tea_gift': ('assets/images/forest/obj_tea_gift.webp', 'Regalo de la casa de té, 260 px; el brillo que late sigue siendo código (`tea_visit.dart`).'),
     'ui_market_awning': ('assets/images/ui/ui_market_awning.webp', 'Toldo del Mercado, 1280 px, estirado a lo ancho con su sombra (`market_screen.dart`).'),
+    'obj_model_table': ('assets/images/court/obj_model_table.webp', 'Mesa de la Maqueta en la galería del pabellón y en la vista aérea, 768 px (`garden_model_table.dart`).'),
+    'pano_far_mountains': ('assets/images/path/pano_far_mountains.webp', 'Montañas de los Miradores, franja de 360° (dos vueltas), costura fundida y recortada al alfa (`_far`).'),
+    'tex_pano_ground_detail': ('assets/images/path/tex_pano_ground_detail.webp', 'Detalle del suelo, 1024 px gris neutro sin costura que se multiplica por el color del suelo, 2.2 m por copia (`_ground`).'),
+    'obj_path_gate': ('assets/images/path/obj_path_gate.webp', 'Portón de entrada abierto, 1024 px (`_gate`).'),
+    'obj_pavilion_back': ('assets/images/path/obj_pavilion_back.webp', 'Pared del fondo del pabellón con shoji y nicho, 1280 px, sobre la galería.'),
+    'obj_pavilion_front': ('assets/images/path/obj_pavilion_front.webp', 'Postes y tejado del pabellón, adelante de la galería, 1280 px.'),
+    'obj_path_bush': ('assets/images/path/obj_path_bush.webp', 'Azalea podada en mata (karikomi), 640 px, espejada según la semilla (`_hedge`).'),
+    'obj_station_sand': ('assets/images/path/obj_station_sand.webp', 'El Arenero, 768 px.'),
+    'obj_station_leaves': ('assets/images/path/obj_station_leaves.webp', 'Hojas al viento: el arce con la escoba, 768 px.'),
+    'obj_station_meditation': ('assets/images/path/obj_station_meditation.webp', 'Rincón de meditación en la galería, 768 px.'),
 }
 
 
