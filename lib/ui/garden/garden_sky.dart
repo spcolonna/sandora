@@ -47,6 +47,9 @@ class _SkyLifePainter extends CustomPainter {
 
   void _paintClouds(Canvas canvas, Size size, double t) {
     final w = size.width, h = size.height;
+    // Pensadas para el ancho de un teléfono: en el iPad crecen con la pantalla
+    // (si no, quedan como puntitos sueltos).
+    final big = (w / 400).clamp(1.0, 2.6);
     final grey = blend.mix(
       (w) => switch (w) {
         Weather.clear => 0.0,
@@ -63,16 +66,20 @@ class _SkyLifePainter extends CustomPainter {
       final shown = i < 3 ? 1.0 : 1 - _clear;
       if (shown < 0.01) continue;
       final speed = (3.0 + i * 1.6) * (1 + 0.6 * _wet);
-      final span = w + 160;
-      final x = (i * 157 + t * speed) % span - 80;
+      final span = w + 160 * big;
+      final x = (i * 157 * big + t * speed * big) % span - 80 * big;
       final y = h * (0.06 + 0.05 * (i % 3)) + (i >= 3 ? h * 0.02 : 0);
-      final scale = 0.8 + 0.1 * (i % 3) + (i >= 3 ? 0.35 : 0);
+      final scale = (0.8 + 0.1 * (i % 3) + (i >= 3 ? 0.35 : 0)) * big;
       // Difusas, como pintadas en húmedo (círculos nítidos se ven pegados).
       final p = Paint()
         ..color = cloud.withValues(alpha: a * 0.8 * shown)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, 9 * scale);
+      // Alargadas a lo ancho, como pinceladas: redondas se ven como manchas.
       for (final (dx, dy, r) in [(0.0, 0.0, 16.0), (18.0, -6.0, 20.0), (38.0, 0.0, 15.0), (20.0, 6.0, 16.0)]) {
-        canvas.drawCircle(Offset(x + dx * scale, y + dy * scale), r * scale, p);
+        canvas.drawOval(
+          Rect.fromCenter(center: Offset(x + dx * scale * 2.2, y + dy * scale * 0.7), width: r * scale * 4.4, height: r * scale * 1.1),
+          p,
+        );
       }
     }
   }
