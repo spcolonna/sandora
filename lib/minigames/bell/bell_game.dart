@@ -26,6 +26,7 @@ class BellGame extends FlameGame with DragCallbacks {
   late final List<double> _targets = rules.targets(Random());
   final _scores = <double>[];
   double _t = 0;
+  final _note = FadingNote();
 
   /// Cuánto está tirado el tronco (0 en reposo, 1 al máximo) y su velocidad
   /// mientras vuela hacia la campana o vuelve.
@@ -76,12 +77,16 @@ class BellGame extends FlameGame with DragCallbacks {
     super.onDragStart(event);
     if (_over || _flying || _pull.abs() > 0.02) return;
     _holding = true;
+    Haptics.light();
   }
 
   @override
   void onDragUpdate(DragUpdateEvent event) {
     if (!_holding) return;
+    final before = _pull;
     _pull = (_pull - event.localDelta.x / _maxPull).clamp(0.0, 1.0);
+    // La cuerda se tensa a tirones suaves: un roce cada quinto del recorrido.
+    if ((_pull * 5).floor() > (before * 5).floor()) Haptics.light();
   }
 
   @override
@@ -112,7 +117,7 @@ class BellGame extends FlameGame with DragCallbacks {
     Haptics.medium();
     final streak = _streak.hit(_lastGrade);
     if (_lastGrade != null) {
-      celebrate(world, Vector2(_bell.dx, _bell.dy), _lastGrade!, sound: false, streak: streak);
+      celebrate(world, Vector2(_bell.dx, _bell.dy), _lastGrade!, sound: false, streak: streak, label: false);
     }
     if (_strike >= rules.strikes) _end();
   }
@@ -274,14 +279,19 @@ class BellGame extends FlameGame with DragCallbacks {
     } else {
       msg = '';
     }
-    if (msg.isNotEmpty) _text(canvas, msg, Offset(size.x / 2, size.y * 0.86), 17);
+    final (note, a) = _note.show(msg, _t);
+    if (a > 0) _text(canvas, note, Offset(size.x / 2, size.y * 0.86), 17, alpha: a);
   }
 
-  void _text(Canvas canvas, String s, Offset center, double fontSize) {
+  void _text(Canvas canvas, String s, Offset center, double fontSize, {double alpha = 1}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
-        style: TextStyle(color: Palette.ink.withValues(alpha: 0.85), fontSize: fontSize, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: Palette.ink.withValues(alpha: 0.85 * alpha),
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,

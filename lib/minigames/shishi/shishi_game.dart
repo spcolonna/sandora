@@ -87,6 +87,7 @@ class ShishiGame extends FlameGame with TapCallbacks {
   void onTapDown(TapDownEvent event) {
     if (!_canPour) return;
     _holding = true;
+    Haptics.light();
     // El chorro suena mientras cae (la lluvia suave hace de hilo de agua).
     SoundBoard.instance.loop(Ambience.rain, volume: 0.18, fade: const Duration(milliseconds: 150));
   }
@@ -214,14 +215,17 @@ class ShishiGame extends FlameGame with TapCallbacks {
     Progress.instance.setBest('shishi', _points);
     final stars = starsFor(_points.toDouble(), b.list('stars'));
     closeRun(world, Vector2(_pivot.dx, _pivot.dy), stars);
-    finish(
-      RunOutcome(
-        score: _points,
-        stars: stars,
-        headline: tr('shishi.result', {'n': _perfects, 'total': _rounds}),
-        record: record,
-      ),
-    );
+    // Un respiro para ver el cierre antes del resultado.
+    Future.delayed(const Duration(milliseconds: 1100), () {
+      finish(
+        RunOutcome(
+          score: _points,
+          stars: stars,
+          headline: tr('shishi.result', {'n': _perfects, 'total': _rounds}),
+          record: record,
+        ),
+      );
+    });
   }
 
   // --- Dibujo ---
@@ -286,7 +290,10 @@ class ShishiGame extends FlameGame with TapCallbacks {
       canvas.drawRect(
         Offset.zero & Size(size.x, size.y),
         Paint()
-          ..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [const Color(0xFFD9E6DA), const Color(0xFFEDE5D0)]),
+          ..shader = Gradient.linear(Offset.zero, Offset(0, size.y), [
+            const Color(0xFFD9E6DA),
+            const Color(0xFFEDE5D0),
+          ]),
       );
       canvas.drawRect(Rect.fromLTWH(0, ground, size.x, size.y - ground), Paint()..color = Palette.moss);
     }

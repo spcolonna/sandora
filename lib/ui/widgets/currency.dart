@@ -10,16 +10,24 @@ class CurrencyChip extends StatelessWidget {
   final int value;
   final String prefix;
 
-  const CurrencyChip._(this.currency, this.value, this.prefix);
+  /// Si se da, al aparecer cuenta desde acá (lo ganado en una partida sube
+  /// desde 0), después de [delay].
+  final int? from;
+  final Duration delay;
 
-  factory CurrencyChip.pebbles(int n, {String prefix = ''}) => CurrencyChip._('pebbles', n, prefix);
+  const CurrencyChip._(this.currency, this.value, this.prefix, {this.from, this.delay = Duration.zero});
 
-  factory CurrencyChip.lotus(int n, {String prefix = ''}) => CurrencyChip._('lotus', n, prefix);
+  factory CurrencyChip.pebbles(int n, {String prefix = '', int? from, Duration delay = Duration.zero}) =>
+      CurrencyChip._('pebbles', n, prefix, from: from, delay: delay);
+
+  factory CurrencyChip.lotus(int n, {String prefix = '', int? from, Duration delay = Duration.zero}) =>
+      CurrencyChip._('lotus', n, prefix, from: from, delay: delay);
 
   /// Cualquier moneda del Mercado por su clave ('pebbles', 'lotus' o una esencia).
   factory CurrencyChip.of(String key, int n, {String prefix = ''}) => CurrencyChip._(key, n, prefix);
 
-  factory CurrencyChip.essence(Essence e, int n, {String prefix = ''}) => CurrencyChip._(e.name, n, prefix);
+  factory CurrencyChip.essence(Essence e, int n, {String prefix = '', int? from, Duration delay = Duration.zero}) =>
+      CurrencyChip._(e.name, n, prefix, from: from, delay: delay);
 
   String get _tooltip => switch (currency) {
     'pebbles' => tr('currency.pebbles'),
@@ -38,9 +46,13 @@ class CurrencyChip extends StatelessWidget {
           CurrencyIcon(currency),
           const SizedBox(width: 6),
           TweenAnimationBuilder<double>(
-            tween: Tween(end: value.toDouble()),
-            duration: const Duration(milliseconds: 1300),
-            curve: const Interval(0.45, 1, curve: Curves.easeOutCubic),
+            tween: Tween(begin: (from ?? value).toDouble(), end: value.toDouble()),
+            duration: delay + const Duration(milliseconds: 1300),
+            curve: Interval(
+              (delay.inMilliseconds + (from == null ? 585 : 150)) / (delay.inMilliseconds + 1300),
+              1,
+              curve: Curves.easeOutCubic,
+            ),
             builder: (context, v, _) => Text('$prefix${v.round()}', style: style),
           ),
         ],

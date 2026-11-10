@@ -29,6 +29,7 @@ class EnsoGame extends FlameGame with DragCallbacks {
   /// Ancho del pincel en cada punto del trazo (suavizado).
   final _widths = <double>[];
   double _t = 0;
+  final _note = FadingNote();
 
   /// Recorrido desde el último roce del pincel: suena cada tanto, más fuerte
   /// cuanto más rápido va.
@@ -38,6 +39,10 @@ class EnsoGame extends FlameGame with DragCallbacks {
 
   /// Aviso cuando un trazo no alcanzó (muy chico o muy corto).
   double _retryAt = -10;
+
+  /// El trazo que no alcanzó, que se va apagando en el papel.
+  List<Offset> _ghost = const [];
+  List<double> _ghostW = const [];
 
   @override
   Color backgroundColor() => const Color(0xFFF1E8D4);
@@ -96,6 +101,8 @@ class EnsoGame extends FlameGame with DragCallbacks {
     if (r.tooSmall || r.sweep < 0.4) {
       // No cuenta: se borra despacio y se puede volver a intentar.
       _retryAt = _t;
+      _ghost = [for (final p in _stroke) p.at];
+      _ghostW = List.of(_widths);
       _stroke.clear();
       _widths.clear();
       missCue(volume: 0.25);
@@ -127,22 +134,19 @@ class EnsoGame extends FlameGame with DragCallbacks {
     _ink(canvas);
     super.render(canvas);
     final r = _result;
-    if (r != null) {
-      _text(
-        canvas,
-        tr('enso.parts', {
-          'round': (r.roundness * 100).round(),
-          'close': (r.closure * 100).round(),
-          'flow': (r.fluency * 100).round(),
-        }),
-        Offset(size.x / 2, size.y * 0.86),
-        15,
-      );
-    } else if (_t - _retryAt < 2.5) {
-      _text(canvas, tr('enso.retry'), Offset(size.x / 2, size.y * 0.86), 16);
-    } else if (_stroke.isEmpty) {
-      _text(canvas, tr('enso.hint'), Offset(size.x / 2, size.y * 0.86), 16);
-    }
+    final msg = r != null
+        ? tr('enso.parts', {
+            'round': (r.roundness * 100).round(),
+            'close': (r.closure * 100).round(),
+            'flow': (r.fluency * 100).round(),
+          })
+        : _t - _retryAt < 2.5
+        ? tr('enso.retry')
+        : _stroke.isEmpty
+        ? tr('enso.hint')
+        : '';
+    final (note, a) = _note.show(msg, _t);
+    if (a > 0) _text(canvas, note, Offset(size.x / 2, size.y * 0.86), r != null ? 15 : 16, alpha: a);
   }
 
   /// Papel washi y un sello rojo en la esquina.
@@ -156,13 +160,25 @@ class EnsoGame extends FlameGame with DragCallbacks {
     );
   }
 
-  void _ink(Canvas canvas) => paintEnsoInk(canvas, [for (final p in _stroke) p.at], _widths);
+  void _ink(Canvas canvas) {
+    final fade = 1 - (_t - _retryAt) / 0.7;
+    if (fade > 0 && _ghost.isNotEmpty) {
+      canvas.saveLayer(null, Paint()..color = Color.fromRGBO(0, 0, 0, fade.clamp(0.0, 1.0) * 0.8));
+      paintEnsoInk(canvas, _ghost, _ghostW);
+      canvas.restore();
+    }
+    paintEnsoInk(canvas, [for (final p in _stroke) p.at], _widths);
+  }
 
-  void _text(Canvas canvas, String s, Offset center, double fontSize) {
+  void _text(Canvas canvas, String s, Offset center, double fontSize, {double alpha = 1}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
-        style: TextStyle(color: Palette.ink.withValues(alpha: 0.8), fontSize: fontSize, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: Palette.ink.withValues(alpha: 0.8 * alpha),
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,

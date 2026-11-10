@@ -268,6 +268,9 @@ class StackGame extends FlameGame with TapCallbacks {
     // Si ni la roza, sigue de largo: se pierde esa piedra y nada más.
     if ((d.x - belowX).abs() > belowW / 2 + d.shape.width * 0.45) {
       if (d.y > _topY + 1.5) {
+        // Se perdió: un aviso suave y la racha vuelve a empezar.
+        _streak.miss();
+        missCue(volume: 0.25);
         _debris.add(d..spin = d.vx.sign * 1.5);
         _drop = null;
         _next();
@@ -448,16 +451,20 @@ class StackGame extends FlameGame with TapCallbacks {
     final net = _height - _startHeight;
     final stars = starsFor(max(0, net).toDouble(), b.list('starNet'));
     closeRun(world, Vector2(size.x / 2, size.y * 0.42), stars);
-    finish(
-      RunOutcome(
-        score: max(0, net) + _perfects * b.i('perfectBonus'),
-        stars: stars,
-        headline: trN('stack.tower', _height),
-        detail: [
-          if (_placedRun > 0) trN('stack.added', _placedRun),
-          if (_lostRun > 0) trN('stack.lost', _lostRun),
-        ].join(' · '),
-        record: record,
+    // Un respiro para ver el cierre antes del resultado.
+    Future.delayed(
+      const Duration(milliseconds: 1100),
+      () => finish(
+        RunOutcome(
+          score: max(0, net) + _perfects * b.i('perfectBonus'),
+          stars: stars,
+          headline: trN('stack.tower', _height),
+          detail: [
+            if (_placedRun > 0) trN('stack.added', _placedRun),
+            if (_lostRun > 0) trN('stack.lost', _lostRun),
+          ].join(' · '),
+          record: record,
+        ),
       ),
     );
   }

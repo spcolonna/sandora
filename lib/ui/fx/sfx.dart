@@ -194,6 +194,28 @@ class SoundBoard {
     _fadeTo(a, volume, fade);
   }
 
+  final _held = <Ambience>{};
+
+  /// Pausa los ambientes que suenan (el chorro, el rastrillo, el viento) sin
+  /// olvidarlos: la pausa de un minijuego no deja sonando el agua. La música
+  /// sigue.
+  void holdLoops() {
+    for (final MapEntry(key: a, value: p) in _loops.entries) {
+      if (p.state != PlayerState.playing) continue;
+      _fades.remove(a)?.cancel();
+      _held.add(a);
+      p.pause();
+    }
+  }
+
+  /// Retoma lo que [holdLoops] pausó.
+  void releaseLoops() {
+    for (final a in _held) {
+      if (!_hidden) _loops[a]?.resume();
+    }
+    _held.clear();
+  }
+
   /// Baja el ambiente hasta el silencio y recién ahí lo pausa.
   void stopLoop(Ambience a, {Duration fade = const Duration(milliseconds: 800)}) {
     if (!_ready || _loops[a] == null) return;
@@ -203,6 +225,7 @@ class SoundBoard {
   /// Corta los ambientes y, si [music], también la música (al meditar). Los
   /// minijuegos dejan la música: la suya se funde con la del jardín.
   void stopAllLoops({Duration fade = const Duration(milliseconds: 800), bool music = true}) {
+    _held.clear();
     for (final a in Ambience.values) {
       stopLoop(a, fade: fade);
     }
@@ -259,9 +282,14 @@ class SoundBoard {
     final old = _music;
     final playing = old.state == PlayerState.playing;
     if (playing) {
-      _fadeTo(old, 0, _crossfade, then: () {
-        if (old != _music) old.stop();
-      });
+      _fadeTo(
+        old,
+        0,
+        _crossfade,
+        then: () {
+          if (old != _music) old.stop();
+        },
+      );
     } else {
       old.stop();
     }

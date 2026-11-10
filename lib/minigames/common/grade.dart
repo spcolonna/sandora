@@ -227,3 +227,36 @@ class StarMilestones {
     Haptics.medium();
   }
 }
+
+/// Un aviso de texto pintado en el lienzo que no salta: al cambiar, el anterior
+/// se apaga y el nuevo se enciende (0,3 s en total); al quedar vacío, se apaga.
+class FadingNote {
+  static const fade = 0.3;
+  String _text = '', _prev = '';
+  double _at = -10;
+
+  /// El texto a pintar ahora y su opacidad (0..1), con [t] el reloj del juego.
+  (String, double) show(String text, double t) {
+    if (text != _text) {
+      // Si el cambio llega a mitad de un fundido, sigue desde lo que se veía.
+      _prev = _text.isEmpty ? _prev : _text;
+      _text = text;
+      _at = t;
+    }
+    final k = ((t - _at) / fade).clamp(0.0, 1.0);
+    if (_text.isEmpty) return (_prev, 1 - k);
+    if (_prev.isEmpty || _prev == _text) return (_text, k);
+    return k < 0.5 ? (_prev, 1 - 2 * k) : (_text, 2 * k - 1);
+  }
+}
+
+/// Los últimos segundos de un reloj: un toc de bambú suave en 3, 2 y 1 para
+/// que el final no llegue de sorpresa. [before] y [after] son el tiempo que
+/// quedaba antes y después de este cuadro.
+void lastSeconds(double before, double after) {
+  final b = before.ceil(), a = after.ceil();
+  if (a < b && a >= 1 && a <= 3) {
+    SoundBoard.instance.play(Sfx.bambooTok, volume: 0.12 + 0.06 * (3 - a));
+    Haptics.light();
+  }
+}

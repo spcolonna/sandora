@@ -31,6 +31,7 @@ class FluteGame extends FlameGame with TapCallbacks {
   final _fingers = <int, (int, double)>{};
   final _scores = <double>[];
   double _t = 0;
+  final _note = FadingNote();
   bool _over = false;
   Grade? _lastGrade;
   final _streak = Streak();
@@ -70,6 +71,7 @@ class FluteGame extends FlameGame with TapCallbacks {
           scale: 0.8,
           streak: streak,
           streakNote: false,
+          label: false,
         );
       } else {
         missCue(volume: 0.22);
@@ -294,17 +296,22 @@ class FluteGame extends FlameGame with TapCallbacks {
     } else {
       msg = '';
     }
-    if (msg.isNotEmpty) {
+    final (note, a) = _note.show(msg, _t);
+    if (a > 0) {
       final y = _t - _gradeAt < 1 && !_over ? _holeY(_gradeHole) - 34 : size.y * 0.88;
-      _text(canvas, msg, Offset(_t - _gradeAt < 1 && !_over ? _fluteX + 70 : size.x / 2, y), 17);
+      _text(canvas, note, Offset(_t - _gradeAt < 1 && !_over ? _fluteX + 70 : size.x / 2, y), 17, alpha: a);
     }
   }
 
-  void _text(Canvas canvas, String s, Offset center, double fontSize) {
+  void _text(Canvas canvas, String s, Offset center, double fontSize, {double alpha = 1}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
-        style: TextStyle(color: Palette.ink.withValues(alpha: 0.85), fontSize: fontSize, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: Palette.ink.withValues(alpha: 0.85 * alpha),
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,

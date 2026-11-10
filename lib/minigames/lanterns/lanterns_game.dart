@@ -35,6 +35,7 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
   LanternRun? _run;
   double _runT = 0;
   double _t = 0;
+  final _fade = FadingNote();
   bool _over = false;
   String _note = '';
   double _noteAt = -10;
@@ -88,8 +89,12 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
       return;
     }
     final p = _toRiver(at);
-    if (!rules.canPlace(p)) return;
+    if (!rules.canPlace(p)) {
+      missCue(volume: 0.15);
+      return;
+    }
     if (_stones.length >= rules.maxStones) {
+      missCue(volume: 0.2);
       _say(tr('lanterns.full'));
       return;
     }
@@ -102,6 +107,7 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     if (_run == null && !_over) _dragging = _stoneAt(event.localPosition.toOffset());
+    if (_dragging != null) Haptics.light();
   }
 
   @override
@@ -115,10 +121,17 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
   @override
   void onDragEnd(DragEndEvent event) {
     super.onDragEnd(event);
+    if (_dragging != null) {
+      SoundBoard.instance.play(Sfx.waterDrop, volume: 0.3);
+      Haptics.light();
+    }
     _dragging = null;
   }
 
   void _release() {
+    // La linterna se apoya en el agua y empieza a andar.
+    SoundBoard.instance.play(Sfx.waterDrop, volume: 0.45);
+    Haptics.medium();
     _run = rules.simulate(_lantern, _stones);
     _runT = 0;
     _dragging = null;
@@ -141,7 +154,7 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
             ? Grade.great
             : Grade.good;
         final dock = _toScreen(Offset(_lantern.dockX, 1));
-        celebrate(world, Vector2(dock.dx, dock.dy), g, streak: _streak.hit(g));
+        celebrate(world, Vector2(dock.dx, dock.dy), g, streak: _streak.hit(g), label: false);
         _say(tr('grade.${g.name}'));
         _next();
       case LanternEnd.missed:
@@ -357,14 +370,19 @@ class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
     } else {
       msg = '';
     }
-    if (msg.isNotEmpty) _text(canvas, msg, Offset(size.x / 2, size.y * 0.12), 16, maxWidth: size.x - 150);
+    final (note, a) = _fade.show(msg, _t);
+    if (a > 0) _text(canvas, note, Offset(size.x / 2, size.y * 0.12), 16, maxWidth: size.x - 150, alpha: a);
   }
 
-  void _text(Canvas canvas, String s, Offset center, double fontSize, {double? maxWidth}) {
+  void _text(Canvas canvas, String s, Offset center, double fontSize, {double? maxWidth, double alpha = 1}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
-        style: TextStyle(color: Palette.ink.withValues(alpha: 0.9), fontSize: fontSize, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: Palette.ink.withValues(alpha: 0.9 * alpha),
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,

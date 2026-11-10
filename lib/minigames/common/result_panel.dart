@@ -57,19 +57,47 @@ class _ResultPanelState extends State<ResultPanel> {
 
   int get _afterStars => _starAt + _starEvery * 3 + 150;
 
-  /// Cuándo aparece cada meta cumplida, después de la barra de nivel.
-  int _goalAt(int i) => _afterStars + 1500 + 350 * i;
+  /// Cuándo termina de llenarse la barra de nivel.
+  int get _barDone => _afterStars + 700 + 1300;
+
+  /// Cuándo aparece cada meta cumplida, después de la barra de nivel (y del
+  /// cartel de nivel nuevo, si lo hay).
+  int _goalAt(int i) => (widget.reward.newLevel != null ? _barDone + 900 : _afterStars + 1500) + 350 * i;
+
+  /// Los botones esperan un instante: el último toque de una partida rápida
+  /// no debe saltearse el resultado.
+  bool _armed = false;
 
   @override
   void initState() {
     super.initState();
-    // Cada estrella suena una nota más alta al encenderse.
+    // Cada estrella suena una nota más alta al encenderse; la tercera, con
+    // todo: es la partida perfecta.
     for (var i = 0; i < widget.outcome.stars; i++) {
       _at(_starAt + _starEvery * i + 120, () {
         SoundBoard.instance.play(Sfx.rainNote, variant: 2 + i, volume: 0.45);
-        Haptics.light();
+        if (i == 2) {
+          SoundBoard.instance.play(Sfx.perfect, volume: 0.4);
+          Haptics.perfect();
+        } else {
+          Haptics.light();
+        }
       });
     }
+    // Lo ganado cuenta con un tic suave por moneda.
+    for (var i = 0; i < _chipCount; i++) {
+      _at(_afterStars + 150 + 120 * i + 60, () => SoundBoard.instance.play(Sfx.pluck, volume: 0.18));
+    }
+    // El nivel nuevo suena cuando la barra se llena, junto con su cartel.
+    if (widget.reward.newLevel != null) {
+      _at(_barDone, () {
+        SoundBoard.instance.play(Sfx.bell, volume: 0.7);
+        Haptics.perfect();
+      });
+    }
+    _at(900, () {
+      if (mounted) setState(() => _armed = true);
+    });
     if (widget.outcome.record) {
       _at(_afterStars, () {
         SoundBoard.instance.play(Sfx.great, volume: 0.5);
@@ -83,6 +111,8 @@ class _ResultPanelState extends State<ResultPanel> {
       });
     }
   }
+
+  int get _chipCount => 2 + (widget.reward.essenceAmount > 0 ? 1 : 0) + (widget.reward.lotus > 0 ? 1 : 0);
 
   void _at(int ms, VoidCallback f) => _timers.add(Timer(Duration(milliseconds: ms), f));
 
@@ -169,14 +199,26 @@ class _ResultPanelState extends State<ResultPanel> {
                         spacing: 16,
                         alignment: WrapAlignment.center,
                         children: [
-                          for (final (i, chip) in [
-                            CurrencyChip.pebbles(reward.pebbles, prefix: '+'),
+                          for (final (i, chip) in <Widget Function(Duration)>[
+                            (d) => CurrencyChip.pebbles(reward.pebbles, prefix: '+', from: 0, delay: d),
                             if (reward.essenceAmount > 0)
-                              CurrencyChip.essence(reward.essence, reward.essenceAmount, prefix: '+'),
-                            if (reward.lotus > 0) CurrencyChip.lotus(reward.lotus, prefix: '+'),
-                            CalmChip(reward.calm),
+                              (d) => CurrencyChip.essence(
+                                reward.essence,
+                                reward.essenceAmount,
+                                prefix: '+',
+                                from: 0,
+                                delay: d,
+                              ),
+                            if (reward.lotus > 0)
+                              (d) => CurrencyChip.lotus(reward.lotus, prefix: '+', from: 0, delay: d),
+                            (d) => CalmChip(reward.calm, delay: d),
                           ].indexed)
-                            CalmAppear(delay: after(150 + 120 * i), fromScale: 0.85, rise: 6, child: chip),
+                            CalmAppear(
+                              delay: after(150 + 120 * i),
+                              fromScale: 0.85,
+                              rise: 6,
+                              child: chip(after(150 + 120 * i)),
+                            ),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -184,7 +226,10 @@ class _ResultPanelState extends State<ResultPanel> {
                         delay: after(500),
                         child: _LevelGain(before: widget.calmBefore, gained: reward.calm, delay: after(700)),
                       ),
-                      if (reward.newLevel != null) ...[const SizedBox(height: 12), LevelUpBanner(reward.newLevel!)],
+                      if (reward.newLevel != null) ...[
+                        const SizedBox(height: 12),
+                        LevelUpBanner(reward.newLevel!, delay: Duration(milliseconds: _barDone - 80)),
+                      ],
                       for (final (i, g) in widget.goals.indexed)
                         CalmAppear(
                           delay: Duration(milliseconds: _goalAt(i)),
@@ -219,9 +264,16 @@ class _ResultPanelState extends State<ResultPanel> {
                       ],
                       const SizedBox(height: 16),
                       // "Otra vez" es lo más grande y está a mano; el jardín, debajo.
-                      InkButton(label: tr('result.again'), glyph: InkGlyph.replay, onPressed: widget.onAgain),
-                      const SizedBox(height: 4),
-                      InkButton.quiet(label: tr('result.garden'), onPressed: widget.onGarden),
+                      IgnorePointer(
+                        ignoring: !_armed,
+                        child: Column(
+                          children: [
+                            InkButton(label: tr('result.again'), glyph: InkGlyph.replay, onPressed: widget.onAgain),
+                            const SizedBox(height: 4),
+                            InkButton.quiet(label: tr('result.garden'), onPressed: widget.onGarden),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

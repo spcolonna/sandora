@@ -105,7 +105,7 @@ class BonsaiGame extends FlameGame with DragCallbacks {
     }
     _branches.removeWhere((br) => br.fall > 1.2);
     if (_over) return;
-    _left -= dt;
+    lastSeconds(_left, _left -= dt);
     _spawn -= dt;
     if (_spawn <= 0) {
       _spawn = b.d('spawnEvery') * (0.6 + 0.8 * _rng.nextDouble());
@@ -224,7 +224,12 @@ class BonsaiGame extends FlameGame with DragCallbacks {
       canvas.save();
       canvas.translate(r.center.dx, r.center.dy);
       if (seed.isOdd) canvas.scale(-1, 1);
-      drawArt(canvas, art, Rect.fromCenter(center: Offset.zero, width: w, height: h), paint: paint);
+      drawArt(
+        canvas,
+        art,
+        Rect.fromCenter(center: Offset.zero, width: w, height: h),
+        paint: paint,
+      );
       canvas.restore();
       return;
     }

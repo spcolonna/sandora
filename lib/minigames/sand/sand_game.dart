@@ -76,6 +76,7 @@ class SandGame extends FlameGame with DragCallbacks {
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     if (_phase != _Phase.draw) return;
+    Haptics.light();
     final p = _avoid(_toBox(event.canvasPosition));
     _smoothed = p;
     strokes.add([p]);
@@ -149,9 +150,7 @@ class SandGame extends FlameGame with DragCallbacks {
 
   void _end() {
     final s = _score!;
-    if (s.stars > 0) {
-      celebrate(world, Vector2(size.x / 2, box.top - 10), Grade.values[s.stars - 1]);
-    }
+    closeRun(world, Vector2(size.x / 2, box.top - 10), s.stars);
     final flat = [
       for (final st in strokes)
         for (final p in resample(st, 0.012)) ...[p.x, p.y],

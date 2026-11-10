@@ -6,6 +6,7 @@ import '../../garden/progress.dart';
 import '../../garden/reminders.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
+import '../../ui/widgets/soft.dart';
 import '../../ui/widgets/washi.dart';
 import 'intro_card.dart';
 import 'result_panel.dart';
@@ -59,9 +60,22 @@ class _MinigameScreenState extends State<MinigameScreen> {
   /// La primera vez, antes de jugar, la tarjeta de cómo se juega.
   late bool _intro = !Progress.instance.introSeen.contains(widget.id);
 
+  /// Si la hoja de pausa está abierta (para no abrirla dos veces).
+  bool _paused = false;
+
+  /// Una llamada, el centro de control o salir de la app pausan la partida:
+  /// al volver, la pausa espera y nada se perdió.
+  late final AppLifecycleListener _lifecycle = AppLifecycleListener(onInactive: _autoPause, onHide: _autoPause);
+
+  void _autoPause() {
+    if (!mounted || _intro || _outcome != null || _paused) return;
+    _pause(quiet: true);
+  }
+
   @override
   void initState() {
     super.initState();
+    _lifecycle;
     _start();
     // La música del jardín se funde con la de este juego.
     SoundBoard.instance.music(set: widget.id, volume: 0.24);
@@ -72,7 +86,12 @@ class _MinigameScreenState extends State<MinigameScreen> {
     _reward = null;
     _round++;
     _calmBefore = Progress.instance.calm;
-    _game = widget.build(_finish);
+    // Un final que llega tarde (los juegos esperan un poco antes de cerrar)
+    // no paga ni muestra nada si en el medio se reinició la partida.
+    final round = _round;
+    _game = widget.build((o) {
+      if (round == _round) _finish(o);
+    });
   }
 
   void _finish(RunOutcome outcome) {
@@ -80,19 +99,18 @@ class _MinigameScreenState extends State<MinigameScreen> {
     final reward = Progress.instance.finishRun(widget.id, outcome.stars, record: outcome.record);
     final p = Progress.instance;
     if (p.lastRunTea) Reminders.instance.teaServed(p.teaArrivesAt, p.teaVisitor().id);
-    if (reward.newLevel != null) {
-      SoundBoard.instance.play(Sfx.bell, volume: 0.7);
-      Haptics.perfect();
-    }
     setState(() {
       _outcome = outcome;
       _reward = reward;
     });
   }
 
-  Future<void> _pause() async {
-    SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+  Future<void> _pause({bool quiet = false}) async {
+    if (_paused) return;
+    _paused = true;
+    if (!quiet) SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
     _game.pauseEngine();
+    SoundBoard.instance.holdLoops();
     final choice = await showWashiDialog<_PauseChoice>(
       context,
       title: tr('pause.title'),
@@ -110,21 +128,26 @@ class _MinigameScreenState extends State<MinigameScreen> {
         InkButton.quiet(label: tr('pause.quit'), onPressed: () => Navigator.pop(context, _PauseChoice.quit)),
       ],
     );
+    _paused = false;
     if (!mounted) return;
     switch (choice) {
       case _PauseChoice.quit:
+        SoundBoard.instance.play(Sfx.uiTap, volume: 0.35);
         Navigator.pop(context);
       case _PauseChoice.restart:
         // Lo jugado se descarta sin pagar: empezar de nuevo es inmediato.
         SoundBoard.instance.stopAllLoops(fade: const Duration(milliseconds: 200), music: false);
         setState(_start);
       case _PauseChoice.resume || null:
+        SoundBoard.instance.play(Sfx.uiTap, volume: 0.35);
+        SoundBoard.instance.releaseLoops();
         _game.resumeEngine();
     }
   }
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     _hush();
     super.dispose();
   }
@@ -149,32 +172,54 @@ class _MinigameScreenState extends State<MinigameScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      // En plena partida, el gesto de volver pausa en vez de salir sin aviso.
+      canPop: _intro || _outcome != null,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) _hush();
+        if (didPop) {
+          _hush();
+        } else {
+          _pause();
+        }
       },
       child: _screen(context),
     );
   }
 
   Widget _screen(BuildContext context) {
-    if (_intro) {
-      return Scaffold(
-        body: IntroCard(id: widget.id, onStart: _closeIntro, onBack: () => Navigator.pop(context)),
-      );
-    }
+    // De la tarjeta al juego, y de una partida a la siguiente, con un fundido:
+    // nada se corta de golpe.
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 420),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: _intro
+          ? Scaffold(
+              key: const ValueKey('intro'),
+              body: IntroCard(id: widget.id, onStart: _closeIntro, onBack: () => Navigator.pop(context)),
+            )
+          : KeyedSubtree(key: ValueKey(_round), child: _play(context)),
+    );
+  }
+
+  Widget _play(BuildContext context) {
+    final playing = _outcome == null;
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: GameWidget(key: ValueKey(_round), game: _game),
-          ),
-          if (widget.overlay != null && _outcome == null) widget.overlay!(context, _game),
-          if (_outcome == null)
-            Positioned(
-              top: MediaQuery.paddingOf(context).top + 8,
-              right: 12,
+          Positioned.fill(child: GameWidget(game: _game)),
+          if (widget.overlay != null)
+            Positioned.fill(
+              child: SoftShow(visible: playing, rise: 0, child: widget.overlay!(context, _game)),
+            ),
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 8,
+            right: 12,
+            child: SoftShow(
+              visible: playing,
+              rise: 0,
               child: InkIconButton(glyph: InkGlyph.pause, onPressed: _pause, tooltip: tr('pause.title')),
             ),
+          ),
           if (_outcome != null)
             ResultPanel(
               id: widget.id,
@@ -187,7 +232,10 @@ class _MinigameScreenState extends State<MinigameScreen> {
                 SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
                 setState(_start);
               },
-              onGarden: () => Navigator.pop(context),
+              onGarden: () {
+                SoundBoard.instance.play(Sfx.uiTap, volume: 0.35);
+                Navigator.pop(context);
+              },
             ),
         ],
       ),

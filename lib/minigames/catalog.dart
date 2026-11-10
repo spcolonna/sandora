@@ -4,6 +4,7 @@ import '../garden/economy.dart';
 import '../garden/progress.dart';
 import '../i18n/i18n.dart';
 import '../ui/theme/palette.dart';
+import '../ui/widgets/soft.dart';
 import '../ui/widgets/washi.dart';
 import 'bell/bell_game.dart';
 import 'bonsai/bonsai_game.dart';
@@ -141,8 +142,9 @@ class _LeavesOverlay extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ScoreFrame(
-                    child: Text(
-                      tr('leaves.pile', {'n': hud.inPile, 'total': hud.total}),
+                    child: CountUp(
+                      value: hud.inPile,
+                      format: (n) => tr('leaves.pile', {'n': n, 'total': hud.total}),
                       style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
                     ),
                   ),
@@ -153,17 +155,19 @@ class _LeavesOverlay extends StatelessWidget {
                 ],
               ),
             ),
-            if (hud.windWarning)
-              Positioned(
-                top: pad.top + 84,
-                left: 20,
-                right: 20,
+            Positioned(
+              top: pad.top + 84,
+              left: 20,
+              right: 20,
+              child: SoftShow(
+                visible: hud.windWarning,
                 child: Text(
                   tr('leaves.wind'),
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Palette.ink),
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -193,8 +197,9 @@ class _PondOverlay extends StatelessWidget {
                 children: [
                   // Claro sobre el agua oscura del estanque.
                   ScoreFrame(
-                    child: Text(
-                      tr('pond.points', {'n': hud.score}),
+                    child: CountUp(
+                      value: hud.score,
+                      format: (n) => tr('pond.points', {'n': n}),
                       style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                     ),
                   ),
@@ -205,11 +210,12 @@ class _PondOverlay extends StatelessWidget {
                 ],
               ),
             ),
-            if (hud.current)
-              Positioned(
-                top: pad.top + 84,
-                left: 20,
-                right: 20,
+            Positioned(
+              top: pad.top + 84,
+              left: 20,
+              right: 20,
+              child: SoftShow(
+                visible: hud.current,
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -221,6 +227,7 @@ class _PondOverlay extends StatelessWidget {
                   child: Text(tr('pond.current'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -246,8 +253,9 @@ class _StackOverlay extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ScoreFrame(
-                  child: Text(
-                    trN('stack.height', hud.height),
+                  child: CountUp(
+                    value: hud.height,
+                    format: (n) => trN('stack.height', n),
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                   ),
                 ),
@@ -278,12 +286,13 @@ class _StackOverlay extends StatelessWidget {
                 ),
               ),
             ),
-          if (hud.windWarning || hud.windBlowing)
-            Positioned(
-              top: pad.top + 64,
-              left: 20,
-              right: 20,
-              child: IgnorePointer(
+          Positioned(
+            top: pad.top + 64,
+            left: 20,
+            right: 20,
+            child: IgnorePointer(
+              child: SoftShow(
+                visible: hud.windWarning || hud.windBlowing,
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -296,12 +305,15 @@ class _StackOverlay extends StatelessWidget {
                 ),
               ),
             ),
-          if (!hud.over)
-            Positioned(
-              bottom: pad.bottom + 20,
-              right: 20,
+          ),
+          Positioned(
+            bottom: pad.bottom + 20,
+            right: 20,
+            child: SoftShow(
+              visible: !hud.over,
               child: InkButton.paper(label: tr('stack.finish'), onPressed: game.endRun),
             ),
+          ),
         ],
       ),
     );

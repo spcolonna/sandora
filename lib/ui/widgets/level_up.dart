@@ -12,23 +12,30 @@ String unlockName(String id) => id == 'meditation' ? tr('meditation.title') : tr
 /// cálido late una sola vez detrás.
 class LevelUpBanner extends StatelessWidget {
   final int level;
-  const LevelUpBanner(this.level, {super.key});
+
+  /// Cuándo aparece: en el resultado, cuando la barra termina de llenarse.
+  final Duration delay;
+  const LevelUpBanner(this.level, {super.key, this.delay = const Duration(milliseconds: 900)});
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return CalmAppear(
-      delay: const Duration(milliseconds: 900),
+      delay: delay,
       duration: const Duration(milliseconds: 900),
       fromScale: 0.94,
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 2600),
+        duration: delay + const Duration(milliseconds: 1700),
         builder: (context, t, child) => DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
-              BoxShadow(color: Palette.lantern.withValues(alpha: 0.45 * _swell(t)), blurRadius: 28, spreadRadius: 2),
+              BoxShadow(
+                color: Palette.lantern.withValues(alpha: 0.45 * _swell(_after(t))),
+                blurRadius: 28,
+                spreadRadius: 2,
+              ),
             ],
           ),
           child: child,
@@ -52,6 +59,12 @@ class LevelUpBanner extends StatelessWidget {
     );
   }
 
+  /// El avance del halo desde que aparece el cartel.
+  double _after(double t) {
+    final total = delay.inMilliseconds + 1700;
+    return ((t * total - delay.inMilliseconds + 140) / 1700).clamp(0.0, 1.0);
+  }
+
   /// Sube y baja una vez, despacio (respira).
   static double _swell(double t) =>
       t < 0.4 ? Curves.easeOut.transform(t / 0.4) : 1 - Curves.easeInOut.transform((t - 0.4) / 0.6) * 0.6;
@@ -59,8 +72,13 @@ class LevelUpBanner extends StatelessWidget {
 
 /// Monto de Calma ganado, con el mismo formato que las monedas.
 class CalmChip extends StatelessWidget {
+  static const _style = TextStyle(fontWeight: FontWeight.w700, fontSize: 16);
+
   final int amount;
-  const CalmChip(this.amount, {super.key});
+
+  /// Si se da, cuenta desde 0 después de esta espera.
+  final Duration? delay;
+  const CalmChip(this.amount, {super.key, this.delay});
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +87,19 @@ class CalmChip extends StatelessWidget {
       children: [
         const Icon(Icons.spa_rounded, size: 18, color: Palette.moss),
         const SizedBox(width: 4),
-        Text('+$amount ${tr('level.calm')}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+        if (delay == null)
+          Text('+$amount ${tr('level.calm')}', style: _style)
+        else
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: amount.toDouble()),
+            duration: delay! + const Duration(milliseconds: 1300),
+            curve: Interval(
+              (delay!.inMilliseconds + 150) / (delay!.inMilliseconds + 1300),
+              1,
+              curve: Curves.easeOutCubic,
+            ),
+            builder: (context, v, _) => Text('+${v.round()} ${tr('level.calm')}', style: _style),
+          ),
       ],
     );
   }

@@ -24,6 +24,7 @@ class MatchaGame extends FlameGame with DragCallbacks {
 
   /// Segundos de partida; empieza con la primera batida.
   double _t = 0;
+  final _note = FadingNote();
   bool _started = false, _over = false;
   double _sum = 0;
 
@@ -65,6 +66,7 @@ class MatchaGame extends FlameGame with DragCallbacks {
     super.onDragStart(event);
     if (_over) return;
     _whisk = event.localPosition.toOffset();
+    if (!_started) Haptics.light();
     _started = true;
     _tracker.start(_whisk!.dx, _t);
     SoundBoard.instance.loop(Ambience.whisk, volume: 0.25, fade: const Duration(milliseconds: 300));
@@ -79,6 +81,8 @@ class MatchaGame extends FlameGame with DragCallbacks {
     final v = rules.strokeValue(stroke.interval, stroke.reach / (_bowlR * 2), rules.tempoAt(_t));
     _sum += v;
     final g = rules.grade(v);
+    // Un batido sin ritmo corta la racha.
+    if (g == null) _streak.miss();
     if (g != null && _t - _gradeAt > 1.2) {
       _lastGrade = g;
       _gradeAt = _t;
@@ -103,8 +107,7 @@ class MatchaGame extends FlameGame with DragCallbacks {
     final record = pct > Progress.instance.best('matcha');
     Progress.instance.setBest('matcha', pct);
     final stars = starsFor(foam, rules.b.list('stars'));
-    final g = rules.grade(foam);
-    if (g != null) celebrate(world, Vector2(_bowl.dx, _bowl.dy), g);
+    closeRun(world, Vector2(_bowl.dx, _bowl.dy), stars);
     Future.delayed(const Duration(milliseconds: 2000), () {
       finish(RunOutcome(score: pct, stars: stars, headline: tr('matcha.result', {'n': pct}), record: record));
     });
@@ -261,14 +264,19 @@ class MatchaGame extends FlameGame with DragCallbacks {
     } else {
       msg = '';
     }
-    if (msg.isNotEmpty) _text(canvas, msg, Offset(size.x / 2, size.y * 0.83), 17);
+    final (note, a) = _note.show(msg, _t);
+    if (a > 0) _text(canvas, note, Offset(size.x / 2, size.y * 0.83), 17, alpha: a);
   }
 
-  void _text(Canvas canvas, String s, Offset center, double fontSize) {
+  void _text(Canvas canvas, String s, Offset center, double fontSize, {double alpha = 1}) {
     final tp = TextPainter(
       text: TextSpan(
         text: s,
-        style: TextStyle(color: Palette.ink.withValues(alpha: 0.85), fontSize: fontSize, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: Palette.ink.withValues(alpha: 0.85 * alpha),
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,

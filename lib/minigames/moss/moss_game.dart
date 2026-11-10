@@ -208,7 +208,7 @@ class MossGame extends FlameGame with DragCallbacks {
       _shown[i] += (_field.moss[i] - _shown[i]) * k;
     }
     if (_over) return;
-    _left -= dt;
+    lastSeconds(_left, _left -= dt);
     _growT += dt;
     if (_growT > 0.25) {
       _growT = 0;
@@ -229,9 +229,8 @@ class MossGame extends FlameGame with DragCallbacks {
     final record = pct > Progress.instance.best('moss');
     Progress.instance.setBest('moss', pct);
     final stars = starsFor(score, b.list('stars'));
-    if (stars > 0) celebrate(world, Vector2(size.x / 2, size.y * 0.4), Grade.values[stars - 1]);
-    SoundBoard.instance.play(Sfx.good, volume: 0.4);
-    Future.delayed(const Duration(milliseconds: 700), () {
+    closeRun(world, Vector2(size.x / 2, size.y * 0.4), stars);
+    Future.delayed(const Duration(milliseconds: 1100), () {
       finish(
         RunOutcome(
           score: pct,

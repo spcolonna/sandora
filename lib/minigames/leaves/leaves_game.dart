@@ -99,6 +99,7 @@ class LeavesGame extends FlameGame with DragCallbacks {
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     if (_over) return;
+    Haptics.light();
     _last = Offset(event.localPosition.x, event.localPosition.y);
     _strokes++;
   }
@@ -139,7 +140,7 @@ class LeavesGame extends FlameGame with DragCallbacks {
     }
     _trail.removeWhere((e) => e.$2 <= 0);
     if (!_over) {
-      _left -= dt;
+      lastSeconds(_left, _left -= dt);
       _updateWind(dt);
       if (_left <= 0) _end();
     }
@@ -204,8 +205,8 @@ class LeavesGame extends FlameGame with DragCallbacks {
     final record = points > Progress.instance.best('leaves');
     Progress.instance.setBest('leaves', points);
     final stars = starsFor(score, b.list('stars'));
-    if (stars > 0) celebrate(world, Vector2(_pile.dx, _pile.dy - _pileR), Grade.values[stars - 1]);
-    Future.delayed(const Duration(milliseconds: 700), () {
+    closeRun(world, Vector2(_pile.dx, _pile.dy - _pileR), stars);
+    Future.delayed(const Duration(milliseconds: 1100), () {
       finish(
         RunOutcome(
           score: points,
@@ -225,6 +226,7 @@ class LeavesGame extends FlameGame with DragCallbacks {
       if (inPile > _heard && _t - _heardAt > 0.12) {
         _heardAt = _t;
         SoundBoard.instance.play(Sfx.rainNote, variant: (inPile * 5 / _leaves.length).ceil().clamp(1, 5), volume: 0.16);
+        Haptics.light();
       }
       _heard = inPile;
       _milestones.update(_score, world, Vector2(_pile.dx, _pile.dy - _pileR - 20));
