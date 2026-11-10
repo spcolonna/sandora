@@ -64,6 +64,17 @@ abstract final class Palette {
       ),
       elevation: 4,
     ),
+    tooltipTheme: TooltipThemeData(
+      decoration: BoxDecoration(
+        color: sandLight,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: wood.withValues(alpha: 0.25)),
+        boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2))],
+      ),
+      textStyle: const TextStyle(color: ink, fontSize: 14, fontWeight: FontWeight.w600),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      waitDuration: const Duration(milliseconds: 350),
+    ),
     popupMenuTheme: PopupMenuThemeData(
       color: sandLight,
       surfaceTintColor: Colors.transparent,

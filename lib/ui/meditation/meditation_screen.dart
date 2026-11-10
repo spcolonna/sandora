@@ -330,6 +330,7 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
             color: _light.withValues(alpha: 0.7),
             letterSpacing: 4,
             shadows: _shadow,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
         const Spacer(),

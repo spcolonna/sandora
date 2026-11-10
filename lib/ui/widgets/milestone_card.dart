@@ -155,7 +155,7 @@ Future<void> showMilestone(BuildContext context, Milestone m) {
       final t = anim.value;
       return Opacity(
         opacity: Curves.easeOut.transform(t.clamp(0.0, 1.0)),
-        child: Transform.scale(scale: 0.8 + 0.2 * Curves.easeOutBack.transform(t), child: child),
+        child: Transform.scale(scale: 0.92 + 0.08 * Curves.easeOutCubic.transform(t), child: child),
       );
     },
   );
@@ -184,7 +184,10 @@ class _MilestoneViewState extends State<_MilestoneView> with SingleTickerProvide
     final text = Theme.of(context).textTheme;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(),
+      onTap: () {
+        SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+        Navigator.of(context).pop();
+      },
       child: SafeArea(
         child: Center(
           child: Material(

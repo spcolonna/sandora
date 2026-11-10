@@ -27,12 +27,7 @@ class SoftShow extends StatelessWidget {
         offset: visible ? Offset.zero : Offset(0, rise),
         duration: duration,
         curve: Curves.easeOutCubic,
-        child: AnimatedOpacity(
-          opacity: visible ? 1 : 0,
-          duration: duration,
-          curve: Curves.easeOut,
-          child: child,
-        ),
+        child: AnimatedOpacity(opacity: visible ? 1 : 0, duration: duration, curve: Curves.easeOut, child: child),
       ),
     );
   }

@@ -399,30 +399,33 @@ class _Voice {
 class Haptics {
   static bool get _on => AppSettings.instance.haptics;
   static DateTime _last = DateTime(0);
+  static int _lastLevel = 0;
 
   /// Evita que varios golpes seguidos (una piedra que rebota) se sientan como
-  /// un zumbido.
-  static bool _ready() {
+  /// un zumbido. Un golpe más fuerte que el anterior pasa igual: el roce del
+  /// botón no tapa el festejo que dispara.
+  static bool _ready(int level) {
     if (!_on) return false;
     final now = DateTime.now();
-    if (now.difference(_last) < const Duration(milliseconds: 90)) return false;
+    if (now.difference(_last) < const Duration(milliseconds: 90) && level <= _lastLevel) return false;
     _last = now;
+    _lastLevel = level;
     return true;
   }
 
   /// Un roce: piedras que se apoyan, toques de interfaz.
   static void light() {
-    if (_ready()) HapticFeedback.selectionClick();
+    if (_ready(0)) HapticFeedback.selectionClick();
   }
 
   /// Un golpe suave: "genial", juntar piedritas, una caída.
   static void medium() {
-    if (_ready()) HapticFeedback.lightImpact();
+    if (_ready(1)) HapticFeedback.lightImpact();
   }
 
   /// Dos golpes suaves y espaciados, como un latido: "perfecto", subir de nivel.
   static void perfect() {
-    if (!_ready()) return;
+    if (!_ready(2)) return;
     HapticFeedback.lightImpact();
     Timer(const Duration(milliseconds: 160), HapticFeedback.selectionClick);
   }

@@ -11,6 +11,20 @@ import 'sfx.dart';
 abstract final class RewardFlight {
   static final _keys = <String, GlobalKey>{};
   static final _arrivals = <String, ValueNotifier<int>>{};
+  static final _held = <String, ValueNotifier<int>>{};
+
+  /// Lo que todavía está en el aire hacia el contador de [currency]: el
+  /// contador lo descuenta y lo suma cuando llega cada ícono, así el número
+  /// sube junto con lo que vuela y no antes.
+  static ValueNotifier<int> heldOf(String currency) => _held.putIfAbsent(currency, () => ValueNotifier(0));
+
+  /// Retiene [amount] de [currency] hasta que su vuelo llegue (ver [heldOf]).
+  static void hold(String currency, int amount) => heldOf(currency).value += amount;
+
+  static void _release(String currency, int amount) {
+    final h = heldOf(currency);
+    h.value = max(0, h.value - amount);
+  }
 
   /// La llave del contador de [currency] ('pebbles', 'lotus' o una esencia).
   static GlobalKey keyFor(String currency) => _keys.putIfAbsent(currency, () => GlobalKey(debugLabel: currency));
@@ -21,7 +35,14 @@ abstract final class RewardFlight {
   /// Hace volar [amount] de [currency] desde [from] (coordenadas globales).
   /// Si su contador no está a la vista (la billetera cerrada), va a la
   /// billetera ('wallet').
-  static void fly(BuildContext context, {required Offset from, required String currency, required int amount}) {
+  /// Con [held], lo retenido ya se apartó antes con [hold].
+  static void fly(
+    BuildContext context, {
+    required Offset from,
+    required String currency,
+    required int amount,
+    bool held = false,
+  }) {
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     var to = currency;
     RenderBox? target;
@@ -33,9 +54,11 @@ abstract final class RewardFlight {
       }
     }
     if (overlay == null || target == null) {
+      if (held) _release(currency, amount);
       arrivalsOf(currency).value++;
       return;
     }
+    if (!held) hold(currency, amount);
     final at = target.localToGlobal(target.size.centerLeft(const Offset(11, 0)));
     late final OverlayEntry entry;
     entry = OverlayEntry(
@@ -45,6 +68,7 @@ abstract final class RewardFlight {
         currency: currency,
         target: to,
         count: amount.clamp(1, 6),
+        amount: amount,
         onDone: () => entry.remove(),
       ),
     );
@@ -57,9 +81,10 @@ class _Flight extends StatefulWidget {
 
   /// Qué vuela y a qué contador llega (el suyo o la billetera).
   final String currency, target;
-  final int count;
+  final int count, amount;
   final VoidCallback onDone;
   const _Flight({
+    required this.amount,
     required this.from,
     required this.to,
     required this.currency,
@@ -97,11 +122,23 @@ class _FlightState extends State<_Flight> with SingleTickerProviderStateMixin {
       SoundBoard.instance.play(Sfx.rainNote, variant: min(_landed, 5), volume: 0.18);
       Haptics.light();
       RewardFlight.arrivalsOf(widget.target).value++;
+      _pay(_landed == widget.count ? widget.amount - _paid : widget.amount ~/ widget.count);
     }
+  }
+
+  var _paid = 0;
+
+  /// Cada ícono que llega suma su parte al contador.
+  void _pay(int n) {
+    if (n <= 0) return;
+    _paid += n;
+    RewardFlight._release(widget.currency, n);
   }
 
   @override
   void dispose() {
+    // Si se cortó antes de llegar, lo retenido no queda colgado.
+    _pay(widget.amount - _paid);
     _c.dispose();
     super.dispose();
   }
@@ -197,4 +234,18 @@ class _RewardTargetState extends State<RewardTarget> with SingleTickerProviderSt
       ),
     );
   }
+}
+
+/// Un monto de la billetera que descuenta lo que todavía vuela hacia él.
+class HeldAmount extends StatelessWidget {
+  final String currency;
+  final int value;
+  final Widget Function(int shown) builder;
+  const HeldAmount({super.key, required this.currency, required this.value, required this.builder});
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder(
+    valueListenable: RewardFlight.heldOf(currency),
+    builder: (context, held, _) => builder(max(0, value - held)),
+  );
 }

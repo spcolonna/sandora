@@ -45,7 +45,8 @@ class GardenSign extends StatelessWidget {
 
   Widget _sign(BuildContext context) {
     final name = Progress.instance.gardenName;
-    return GestureDetector(
+    return Pressable(
+      scale: 0.97,
       onTap: () => showGardensSheet(context),
       child: SizedBox(
         width: _width,

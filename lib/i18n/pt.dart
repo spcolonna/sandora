@@ -114,7 +114,8 @@ const pt = <String, String>{
   'currency.lotus': 'Lótus',
   'shop.title': 'Mercado',
   'shop.desc': 'Troque o que sobra pelo que falta.',
-  'shop.lotusHint': 'Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao cumprir as três metas do dia e a cada semana de sequência meditando.',
+  'shop.lotusHint':
+      'Ganhe lótus com a oferenda do dia (sua primeira partida ou meditação), ao cumprir as três metas do dia e a cada semana de sequência meditando.',
   'shop.trades': 'Trocas do dia',
   'shop.withLotus': 'Com lótus',
   'shop.left': 'Restam {n} hoje',
@@ -151,7 +152,8 @@ const pt = <String, String>{
   'weather.title': 'O jardim agora',
   'weather.own': 'Clima próprio do jardim: muda a cada poucas horas.',
   'weather.real.title': 'Clima de onde você está',
-  'weather.real.desc': 'Usa sua localização aproximada para que chova no jardim quando chove lá fora. A localização não é guardada.',
+  'weather.real.desc':
+      'Usa sua localização aproximada para que chova no jardim quando chove lá fora. A localização não é guardada.',
   'weather.real.denied': 'Sem permissão de localização, o jardim continua com seu próprio clima.',
   'weather.real.failed': 'Não foi possível obter o clima agora; tentará de novo sozinho.',
   'weather.source': 'Previsão: MET Norway',
@@ -499,7 +501,8 @@ const pt = <String, String>{
   'settings.view': 'Vista do jardim',
   'settings.viewPath': 'Trilha',
   'settings.viewClassic': 'Clássica',
-  'settings.viewHint': 'Trilha: você passeia pelo jardim e encontra os jogos. Clássica: os jogos à mão, em três vistas.',
+  'settings.viewHint':
+      'Trilha: você passeia pelo jardim e encontra os jogos. Clássica: os jogos à mão, em três vistas.',
   'guide.pathSand': 'Caminhe até o Jardim de areia (ou toque nele) para jogar',
   'guide.pathRain': 'Abriu um jogo novo: procure no caminho',
   'mirador.entrance': 'Entrada',

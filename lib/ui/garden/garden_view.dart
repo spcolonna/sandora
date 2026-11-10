@@ -216,22 +216,22 @@ bool placeLocked(Place place) {
 
 /// El nombre de un lugar, como se lee en su cartelito.
 String placeName(Place p) => switch (p) {
-    Place.board => tr('board.title'),
-    Place.meditation => tr('meditation.title'),
-    Place.sand => tr('mg.sand.name'),
-    Place.stack => tr('mg.stack.name'),
-    Place.rain => tr('mg.rain.name'),
-    Place.pond ||
-    Place.shishi ||
-    Place.leaves ||
-    Place.moss ||
-    Place.bonsai ||
-    Place.enso ||
-    Place.bell ||
-    Place.matcha ||
-    Place.flute ||
-    Place.lanterns => tr('mg.${p.name}.name'),
-  };
+  Place.board => tr('board.title'),
+  Place.meditation => tr('meditation.title'),
+  Place.sand => tr('mg.sand.name'),
+  Place.stack => tr('mg.stack.name'),
+  Place.rain => tr('mg.rain.name'),
+  Place.pond ||
+  Place.shishi ||
+  Place.leaves ||
+  Place.moss ||
+  Place.bonsai ||
+  Place.enso ||
+  Place.bell ||
+  Place.matcha ||
+  Place.flute ||
+  Place.lanterns => tr('mg.${p.name}.name'),
+};
 
 /// Qué falta para abrir [place] (null si ya está abierto).
 String? placeLockNote(Place place) {

@@ -132,7 +132,7 @@ class WashiTile extends StatelessWidget {
       child: child,
     );
     if (onTap == null) return tile;
-    return GestureDetector(behavior: HitTestBehavior.opaque, onTap: onTap, child: tile);
+    return Pressable(onTap: onTap, scale: 0.98, child: tile);
   }
 }
 
@@ -384,10 +384,14 @@ class _InkIconButtonState extends State<InkIconButton> {
     final s = widget.size;
     final painted = _paintedGlyphs[widget.glyph];
     final button = GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTapDown: (_) => setState(() => _down = true),
       onTapCancel: () => setState(() => _down = false),
       onTapUp: (_) => setState(() => _down = false),
-      onTap: widget.onPressed,
+      onTap: () {
+        Haptics.light();
+        widget.onPressed();
+      },
       child: AnimatedScale(
         scale: _down ? 0.9 : 1,
         duration: const Duration(milliseconds: 90),
@@ -750,6 +754,13 @@ Future<T?> showWashiSheet<T>(BuildContext context, {required WidgetBuilder build
     backgroundColor: Colors.transparent,
     elevation: 0,
     barrierColor: Palette.ink.withValues(alpha: 0.38),
+    // Sube despacio y se asienta, como el resto del juego (nada rebota).
+    sheetAnimationStyle: AnimationStyle(
+      duration: const Duration(milliseconds: 480),
+      reverseDuration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    ),
     builder: (context) => _WashiSheet(child: Builder(builder: builder)),
   );
 }
@@ -982,6 +993,59 @@ class InkChip extends StatelessWidget {
                   ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Cualquier cosa tocable del juego: se hunde un poco al apoyar el dedo, da un
+/// roce háptico y, si se pide, un toque de sonido. Así todos los botones
+/// responden igual, aunque cada uno se dibuje a su manera.
+class Pressable extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  /// Cuánto se achica al apoyar (0.94 = 6 %).
+  final double scale;
+
+  /// Un toque de sonido al soltar (null = mudo, porque la acción ya suena).
+  final double? tapVolume;
+
+  const Pressable({super.key, required this.child, this.onTap, this.onLongPress, this.scale = 0.94, this.tapVolume});
+
+  @override
+  State<Pressable> createState() => _PressableState();
+}
+
+class _PressableState extends State<Pressable> {
+  bool _down = false;
+
+  void _set(bool v) {
+    if (_down != v) setState(() => _down = v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final on = widget.onTap != null;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: on ? (_) => _set(true) : null,
+      onTapCancel: on ? () => _set(false) : null,
+      onTapUp: on ? (_) => _set(false) : null,
+      onTap: on
+          ? () {
+              Haptics.light();
+              if (widget.tapVolume != null) SoundBoard.instance.play(Sfx.uiTap, volume: widget.tapVolume!);
+              widget.onTap!();
+            }
+          : null,
+      onLongPress: widget.onLongPress,
+      child: AnimatedScale(
+        scale: _down ? widget.scale : 1,
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
+        child: widget.child,
       ),
     );
   }

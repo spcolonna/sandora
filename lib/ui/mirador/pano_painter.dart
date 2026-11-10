@@ -2001,23 +2001,12 @@ class PanoScene {
   /// El cartel de madera de un lugar: más chico cuanto más lejos.
   (Rect, TextPainter, TextPainter?) _labelLayout(PlaceLook look, Offset top, double d) {
     final k = (1 - (d - 5) / 12).clamp(0.0, 1.0);
-    final size = 12.5 + 2.5 * k;
-    final name = TextPainter(
-      text: TextSpan(
-        text: look.name,
-        style: TextStyle(color: Palette.ink, fontSize: size, fontWeight: FontWeight.w700),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: 200);
+    // De a cuarto de punto, para que el texto ya armado se reuse al girar.
+    final size = ((12.5 + 2.5 * k) * 4).round() / 4;
+    final name = _text(look.name, TextStyle(color: Palette.ink, fontSize: size, fontWeight: FontWeight.w700));
     final note = look.note == null
         ? null
-        : (TextPainter(
-            text: TextSpan(
-              text: look.note,
-              style: TextStyle(color: Palette.ink.withValues(alpha: 0.75), fontSize: size - 2.5),
-            ),
-            textDirection: TextDirection.ltr,
-          )..layout(maxWidth: 200));
+        : _text(look.note!, TextStyle(color: Palette.ink.withValues(alpha: 0.75), fontSize: size - 2.5));
     final lock = look.open ? 0.0 : size + 3;
     final wpx = max(name.width + lock, note?.width ?? 0) + 20;
     final hpx = name.height + (note?.height ?? 0) + 9;
@@ -2073,14 +2062,7 @@ class PanoScene {
   }
 
   void _pill(String text, Offset top, double size, {IconData? icon}) {
-    final tp = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: TextStyle(color: Palette.paper, fontSize: size, fontWeight: FontWeight.w700),
-      ),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    )..layout(maxWidth: 200);
+    final tp = _text(text, TextStyle(color: Palette.paper, fontSize: size, fontWeight: FontWeight.w700), maxLines: 1);
     final iw = icon == null ? 0.0 : size + 4;
     final box = Rect.fromCenter(
       center: Offset(top.dx, top.dy - size * 1.1),
@@ -2096,15 +2078,31 @@ class PanoScene {
   }
 
   void _glyph(IconData icon, Offset center, double size, Color color) {
-    final tp = TextPainter(
-      text: TextSpan(
-        text: String.fromCharCode(icon.codePoint),
-        style: TextStyle(fontFamily: icon.fontFamily, package: icon.fontPackage, fontSize: size, color: color),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
+    final tp = _text(
+      String.fromCharCode(icon.codePoint),
+      TextStyle(fontFamily: icon.fontFamily, package: icon.fontPackage, fontSize: size, color: color),
+    );
     tp.paint(_c, center - Offset(tp.width / 2, tp.height / 2));
   }
+}
+
+/// Textos ya armados: al girar, los mismos carteles se pintan cuadro a cuadro
+/// y armar el texto cada vez es lo más caro. Se guardan los últimos usados.
+final _texts = <(String, TextStyle, int?), TextPainter>{};
+
+TextPainter _text(String text, TextStyle style, {int? maxLines}) {
+  final key = (text, style, maxLines);
+  final hit = _texts.remove(key);
+  if (hit != null) return _texts[key] = hit;
+  if (_texts.length > 240) {
+    final old = _texts.keys.first;
+    _texts.remove(old)?.dispose();
+  }
+  return _texts[key] = TextPainter(
+    text: TextSpan(text: text, style: style),
+    textDirection: TextDirection.ltr,
+    maxLines: maxLines,
+  )..layout(maxWidth: 200);
 }
 
 /// Dibuja el patio desde un mirador.

@@ -28,7 +28,8 @@ class MomentChip extends StatelessWidget {
     final gifts = p.dayCycle.giftsAt(now, weather, afterRain: after);
     final left = gifts.fold(0, (n, g) => n + p.giftsLeft(g, weather: weather, afterRain: after, now: now));
     final open = gifts.where((g) => p.giftsLeft(g, weather: weather, afterRain: after, now: now) > 0).firstOrNull;
-    return GestureDetector(
+    return Pressable(
+      tapVolume: 0.35,
       onTap: () => _showNowSheet(context, now: now, weather: weather),
       child: Glass(
         radius: BorderRadius.circular(16),

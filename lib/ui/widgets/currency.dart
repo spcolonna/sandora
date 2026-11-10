@@ -4,7 +4,8 @@ import '../../garden/economy.dart';
 import '../../i18n/i18n.dart';
 
 /// Monto de una moneda con su ícono. Cuando el monto cambia, cuenta hasta el
-/// nuevo (después de una pausa, para que llegue junto con lo que vuela).
+/// nuevo. Lo que vuela al contador llega de a poco (`RewardFlight.hold`), así
+/// que no hace falta esperar.
 class CurrencyChip extends StatelessWidget {
   final String currency;
   final int value;
@@ -37,7 +38,8 @@ class CurrencyChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(fontWeight: FontWeight.w700, fontSize: 16);
+    // Cifras de ancho fijo: la píldora no tiembla mientras cuenta.
+    const style = TextStyle(fontWeight: FontWeight.w700, fontSize: 16, fontFeatures: [FontFeature.tabularFigures()]);
     return Tooltip(
       message: _tooltip,
       child: Row(
@@ -47,9 +49,9 @@ class CurrencyChip extends StatelessWidget {
           const SizedBox(width: 6),
           TweenAnimationBuilder<double>(
             tween: Tween(begin: (from ?? value).toDouble(), end: value.toDouble()),
-            duration: delay + const Duration(milliseconds: 1300),
+            duration: delay + Duration(milliseconds: from == null ? 600 : 1300),
             curve: Interval(
-              (delay.inMilliseconds + (from == null ? 585 : 150)) / (delay.inMilliseconds + 1300),
+              (delay.inMilliseconds + (from == null ? 0 : 150)) / (delay.inMilliseconds + 1300),
               1,
               curve: Curves.easeOutCubic,
             ),

@@ -36,10 +36,11 @@ class _BrandIntroState extends State<BrandIntro> with SingleTickerProviderStateM
     _left = true;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
-        transitionDuration: const Duration(milliseconds: 550),
+        // Del fondo oscuro al papel, despacio: sin destello claro.
+        transitionDuration: const Duration(milliseconds: 900),
         pageBuilder: (_, _, _) => widget.next,
         transitionsBuilder: (_, a, _, child) => FadeTransition(
-          opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
+          opacity: CurvedAnimation(parent: a, curve: Curves.easeInOut),
           child: child,
         ),
       ),
@@ -69,7 +70,8 @@ class _BrandIntroState extends State<BrandIntro> with SingleTickerProviderStateM
             final out = Curves.easeIn.transform(((t - 0.8) / 0.2).clamp(0.0, 1.0));
             final scale = 1 + 0.035 * glow - 0.02 * out;
             return Opacity(
-              opacity: 1 - out * 0.35,
+              // El logo se apaga del todo antes de que entre el título.
+              opacity: 1 - out,
               child: Center(
                 child: Transform.scale(
                   scale: scale,

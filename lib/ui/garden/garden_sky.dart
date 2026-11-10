@@ -77,7 +77,11 @@ class _SkyLifePainter extends CustomPainter {
       // Alargadas a lo ancho, como pinceladas: redondas se ven como manchas.
       for (final (dx, dy, r) in [(0.0, 0.0, 16.0), (18.0, -6.0, 20.0), (38.0, 0.0, 15.0), (20.0, 6.0, 16.0)]) {
         canvas.drawOval(
-          Rect.fromCenter(center: Offset(x + dx * scale * 2.2, y + dy * scale * 0.7), width: r * scale * 4.4, height: r * scale * 1.1),
+          Rect.fromCenter(
+            center: Offset(x + dx * scale * 2.2, y + dy * scale * 0.7),
+            width: r * scale * 4.4,
+            height: r * scale * 1.1,
+          ),
           p,
         );
       }

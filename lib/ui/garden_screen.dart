@@ -391,25 +391,45 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
   Future<void> _open(MinigameInfo m) async {
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
     _quiet();
-    final p = Progress.instance;
-    final keys = ['pebbles', for (final e in Essence.values) e.name, 'lotus'];
-    final before = {for (final k in keys) k: p.walletOf(k)};
+    final before = _wallet();
     _away = true;
     await Navigator.of(context).push(calmRoute<void>(m.screen()));
     _away = false;
     if (!mounted) return;
     _gardenSound();
-    // Lo ganado en las partidas vuela a sus contadores al volver: la
-    // billetera se abre un momento para verlo llegar y se vuelve a cerrar.
+    final wait = _flyGains(before);
+    // Después de ver llegar lo ganado, el aviso grande (si subió de nivel).
+    Future.delayed(Duration(milliseconds: wait + 500), _celebrate);
+    // Después de la primera partida (no al abrir la app) se ofrecen los avisos.
+    if (Progress.instance.guideStep >= 1) Reminders.instance.askOnce();
+  }
+
+  static final _walletKeys = ['pebbles', for (final e in Essence.values) e.name, 'lotus'];
+
+  Map<String, int> _wallet() => {for (final k in _walletKeys) k: Progress.instance.walletOf(k)};
+
+  /// Lo ganado afuera (una partida, una meditación) vuela a sus contadores al
+  /// volver: la billetera se abre un momento para verlo llegar y se vuelve a
+  /// cerrar. Los contadores no muestran lo ganado hasta que llega. Devuelve
+  /// cuánto tarda (ms).
+  int _flyGains(Map<String, int> before) {
+    final now = _wallet();
+    final gains = {for (final k in _walletKeys) k: now[k]! - before[k]!}..removeWhere((_, g) => g <= 0);
+    for (final MapEntry(key: k, value: gain) in gains.entries) {
+      RewardFlight.hold(k, gain);
+    }
     final from = MediaQuery.sizeOf(context).center(const Offset(0, 60));
     var wait = 380;
-    final gains = {for (final k in keys) k: p.walletOf(k) - before[k]!}..removeWhere((_, g) => g <= 0);
     if (gains.keys.any((k) => k != 'pebbles') && _panel == _Panel.none) {
       setState(() => _panel = _Panel.wallet);
     }
     for (final MapEntry(key: k, value: gain) in gains.entries) {
       Future.delayed(Duration(milliseconds: wait), () {
-        if (mounted) RewardFlight.fly(context, from: from, currency: k, amount: gain);
+        if (mounted) {
+          RewardFlight.fly(context, from: from, currency: k, amount: gain, held: true);
+        } else {
+          RewardFlight.heldOf(k).value = 0;
+        }
       });
       wait += 200;
     }
@@ -419,21 +439,21 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
         if (mounted && _panel == _Panel.wallet) setState(() => _panel = _Panel.none);
       });
     }
-    // Después de ver llegar lo ganado, el aviso grande (si subió de nivel).
-    Future.delayed(Duration(milliseconds: wait + 500), _celebrate);
-    // Después de la primera partida (no al abrir la app) se ofrecen los avisos.
-    if (Progress.instance.guideStep >= 1) Reminders.instance.askOnce();
+    return wait;
   }
 
   Future<void> _meditate() async {
     _quiet();
     // Para meditar, solo el ambiente que se elija.
     SoundBoard.instance.stopMusic();
+    final before = _wallet();
     _away = true;
     await Navigator.of(context).push(calmRoute<void>(const MeditationScreen()));
     _away = false;
-    if (mounted) _gardenSound();
-    Future.delayed(const Duration(milliseconds: 600), _celebrate);
+    if (!mounted) return;
+    _gardenSound();
+    final wait = _flyGains(before);
+    Future.delayed(Duration(milliseconds: wait + 600), _celebrate);
   }
 
   @override
@@ -686,7 +706,7 @@ class _LevelOrb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
-    return GestureDetector(
+    return Pressable(
       onTap: onTap,
       child: Badge(
         isLabelVisible: p.expansionAvailable || p.goalsUnseen(),
@@ -746,7 +766,7 @@ class _WalletPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
-    return GestureDetector(
+    return Pressable(
       onTap: onTap,
       child: RewardTarget(
         currency: 'wallet',
@@ -756,7 +776,10 @@ class _WalletPill extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RewardTarget(currency: 'pebbles', child: CurrencyChip.pebbles(p.pebbles)),
+              RewardTarget(
+                currency: 'pebbles',
+                child: HeldAmount(currency: 'pebbles', value: p.pebbles, builder: CurrencyChip.pebbles),
+              ),
               const SizedBox(width: 4),
               AnimatedRotation(
                 turns: open ? 0.5 : 0,
@@ -795,8 +818,18 @@ class _WalletPanel extends StatelessWidget {
                 runSpacing: 12,
                 children: [
                   for (final e in Essence.values)
-                    RewardTarget(currency: e.name, child: CurrencyChip.essence(e, p.essences[e]!)),
-                  RewardTarget(currency: 'lotus', child: CurrencyChip.lotus(p.lotus)),
+                    RewardTarget(
+                      currency: e.name,
+                      child: HeldAmount(
+                        currency: e.name,
+                        value: p.essences[e]!,
+                        builder: (n) => CurrencyChip.essence(e, n),
+                      ),
+                    ),
+                  RewardTarget(
+                    currency: 'lotus',
+                    child: HeldAmount(currency: 'lotus', value: p.lotus, builder: CurrencyChip.lotus),
+                  ),
                 ],
               ),
               Align(
@@ -891,7 +924,29 @@ class _RoundButton extends StatefulWidget {
 }
 
 class _RoundButtonState extends State<_RoundButton> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat(reverse: true);
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(_RoundButton old) {
+    super.didUpdateWidget(old);
+    if (old.pulse != widget.pulse) _sync();
+  }
+
+  /// Solo late cuando hay algo que avisar: quieto no gasta cuadros.
+  void _sync() {
+    if (widget.pulse) {
+      _c.repeat(reverse: true);
+    } else {
+      _c.stop();
+      _c.value = 0;
+    }
+  }
 
   @override
   void dispose() {
@@ -903,7 +958,7 @@ class _RoundButtonState extends State<_RoundButton> with SingleTickerProviderSta
   Widget build(BuildContext context) {
     return Tooltip(
       message: widget.tooltip,
-      child: GestureDetector(
+      child: Pressable(
         onTap: widget.onTap,
         child: AnimatedBuilder(
           animation: _c,
@@ -981,7 +1036,10 @@ class _MenuButton extends StatelessWidget {
                     SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
                     showAchievementsSheet(context);
                   }),
-                  item(Icons.settings_rounded, tr('settings.title'), false, () => showSettingsSheet(context)),
+                  item(Icons.settings_rounded, tr('settings.title'), false, () {
+                    SoundBoard.instance.play(Sfx.uiTap, volume: 0.45);
+                    showSettingsSheet(context);
+                  }),
                 ],
               ),
             ),
@@ -990,7 +1048,7 @@ class _MenuButton extends StatelessWidget {
       );
     }
 
-    return GestureDetector(
+    return Pressable(
       onTap: open,
       child: Badge(
         isLabelVisible: p.albumNew || p.achievementsNew,
@@ -1019,7 +1077,7 @@ class _GuideHint extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topRight,
-      child: GestureDetector(
+      child: Pressable(
         onTap: onTap,
         child: CalmAppear(
           delay: const Duration(milliseconds: 400),
@@ -1088,9 +1146,8 @@ class _SenderoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
-    Widget button(Key key, IconData icon, String label, VoidCallback onTap, {bool pulse = false}) => GestureDetector(
+    Widget button(Key key, IconData icon, String label, VoidCallback onTap, {bool pulse = false}) => Pressable(
       key: key,
-      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
@@ -1136,7 +1193,7 @@ class _QuickChip extends StatelessWidget {
   const _QuickChip({super.key, required this.label, required this.known, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) => Pressable(
     onTap: onTap,
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

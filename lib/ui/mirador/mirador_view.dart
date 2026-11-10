@@ -416,6 +416,9 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
   /// Llegó al último mirador del camino: si iba a un lugar, gira hacia él.
   void _arrive() {
     _arrivedTimer?.cancel();
+    // Un toc de madera suave: llegaste.
+    SoundBoard.instance.play(Sfx.bambooTok, volume: 0.22);
+    Haptics.light();
     _arrived = tr('mirador.$_at');
     _arrivedTimer = Timer(const Duration(milliseconds: 1800), () {
       if (mounted) setState(() => _arrived = null);
@@ -452,6 +455,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
   void _walk(List<String> route, {bool fast = false}) {
     if (route.isEmpty) return;
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+    Haptics.light();
     setState(() {
       _route
         ..clear()
@@ -490,6 +494,8 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       // En la Clásica se camina hasta el juego (si no se está ya enfrente).
       final stand = _standFor(o);
       if ((stand - _pos).distance > 0.6) {
+        SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+        Haptics.light();
         setState(() {
           _spin = 0;
           _glide = 0;
@@ -723,16 +729,24 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
 
   void _tap(TapUpDetails d) {
     if (d.localPosition.dy < widget.top) return;
+    if (walking) {
+      // Tocar mientras se camina apura el paso.
+      if (!_fast) {
+        Haptics.light();
+        setState(() => _fast = true);
+      }
+      return;
+    }
     final scene = PanoScene(_size, _view());
     final hit = scene.hit(d.localPosition);
     if (hit == null) return;
     final from = d.globalPosition;
-    if (walking) return;
     switch (hit.kind) {
       case PanoHit.place:
         final place = hit.id!;
         final far = widget.multi ? world.lookoutOf(place).id != _at : (world.place(place)!.at - _pos).distance > 4.5;
         if (far && placeOpen(_p, place)) return goTo(place);
+        Haptics.light();
         setState(() => _glow = hit);
         widget.onPlace(Place.values.byName(place));
       case PanoHit.model:
@@ -743,8 +757,10 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       case PanoHit.gate:
         widget.onGate(hit.id!);
       case PanoHit.decor:
+        SoundBoard.instance.play(Sfx.uiTap, volume: 0.4);
         widget.onDecor?.call(hit.index!);
       case PanoHit.slot:
+        SoundBoard.instance.play(Sfx.uiTap, volume: 0.4);
         widget.onSlot?.call(hit.zone!, hit.index!);
       case PanoHit.gift:
         _takeGift(hit.id!, hit.index!, from);
@@ -882,7 +898,8 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
                 onScaleStart: _scaleStart,
                 onScaleUpdate: _scaleUpdate,
                 onScaleEnd: _scaleEnd,
-                child: CustomPaint(painter: PanoPainter(v)),
+                // Capa propia: lo que se anima en el HUD no repinta el paisaje.
+                child: RepaintBoundary(child: CustomPaint(painter: PanoPainter(v))),
               ),
             ),
             if (_away && !walking)
