@@ -512,4 +512,7 @@ const zh = <String, String>{
   'mirador.future': '这扇门后将开放新的庭园区域',
   'mirador.hintWalk': '左右滑动环顾 · 向上滑动前进 · 点击游戏前往',
   'mirador.backToCenter': '回到中央',
+  'meditation.endAsk': '现在结束吗？',
+  'meditation.endAskBody': '到目前为止的冥想同样计入。',
+  'meditation.keep': '继续冥想',
 };

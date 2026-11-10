@@ -262,24 +262,31 @@ class _ModelScreenState extends State<ModelScreen> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-                    child: widget.world != null
-                        ? _AerialBoard(
-                            world: widget.world!,
-                            side: _side,
-                            holding: _holding,
-                            picked: _picked,
-                            onTap: _tapCell,
-                            onDropNew: (id, cell) => _place(id, cell),
-                            onDropMove: _move,
-                          )
-                        : _Board(
-                            side: _side,
-                            holding: _holding,
-                            picked: _picked,
-                            onTap: _tapCell,
-                            onDropNew: (id, cell) => _place(id, cell),
-                            onDropMove: _move,
-                          ),
+                    // Cambiar de zona funde un tablero en el otro.
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 280),
+                      child: KeyedSubtree(
+                        key: ValueKey(_side),
+                        child: widget.world != null
+                            ? _AerialBoard(
+                                world: widget.world!,
+                                side: _side,
+                                holding: _holding,
+                                picked: _picked,
+                                onTap: _tapCell,
+                                onDropNew: (id, cell) => _place(id, cell),
+                                onDropMove: _move,
+                              )
+                            : _Board(
+                                side: _side,
+                                holding: _holding,
+                                picked: _picked,
+                                onTap: _tapCell,
+                                onDropNew: (id, cell) => _place(id, cell),
+                                onDropMove: _move,
+                              ),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -568,7 +575,10 @@ class _Cell extends StatelessWidget {
     if (decor != null) {
       body = Draggable<int>(
         data: decor,
-        feedback: SizedBox.square(dimension: 84, child: CustomPaint(painter: DecorPainter(item!.id, item.aspect))),
+        feedback: liftedFeedback(
+          SizedBox.square(dimension: 84, child: CustomPaint(painter: DecorPainter(item!.id, item.aspect))),
+        ),
+        onDragStarted: Haptics.medium,
         childWhenDragging: const SizedBox.expand(),
         child: body,
       );
@@ -581,9 +591,11 @@ class _Cell extends StatelessWidget {
         final int i => onDropMove(i),
         _ => null,
       },
-      builder: (context, hover, _) => DecoratedBox(
+      builder: (context, hover, _) => AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOut,
         decoration: BoxDecoration(
-          color: hover.isNotEmpty ? Palette.lantern.withValues(alpha: 0.25) : null,
+          color: Palette.lantern.withValues(alpha: hover.isNotEmpty ? 0.25 : 0),
           borderRadius: BorderRadius.circular(8),
         ),
         child: body,

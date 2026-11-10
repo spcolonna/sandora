@@ -635,7 +635,12 @@ class ScoreFrame extends StatelessWidget {
 }
 
 /// Diálogo sobre papel washi, con un título y botones en columna.
-Future<T?> showWashiDialog<T>(BuildContext context, {required String title, required List<Widget> actions}) {
+Future<T?> showWashiDialog<T>(
+  BuildContext context, {
+  required String title,
+  required List<Widget> actions,
+  String? body,
+}) {
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: true,
@@ -655,6 +660,10 @@ Future<T?> showWashiDialog<T>(BuildContext context, {required String title, requ
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(title, style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
+                  if (body != null) ...[
+                    const SizedBox(height: 8),
+                    Text(body, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+                  ],
                   const SizedBox(height: 22),
                   for (final (i, a) in actions.indexed) ...[if (i > 0) const SizedBox(height: 6), a],
                 ],
@@ -1050,3 +1059,15 @@ class _PressableState extends State<Pressable> {
     );
   }
 }
+
+/// Lo que se lleva con el dedo al arrastrar: un poco más grande y con sombra,
+/// como levantado del tablero.
+Widget liftedFeedback(Widget child) => Transform.scale(
+  scale: 1.1,
+  child: DecoratedBox(
+    decoration: const BoxDecoration(
+      boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 18, spreadRadius: -4, offset: Offset(0, 10))],
+    ),
+    child: child,
+  ),
+);

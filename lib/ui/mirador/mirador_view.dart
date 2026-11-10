@@ -775,6 +775,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
         final gain = _p.collectTower();
         SoundBoard.instance.play(Sfx.stackPlace, volume: 0.6);
         Haptics.medium();
+        if (gain > 0) sparkleAt(context, from);
         if (gain > 0) RewardFlight.fly(context, from: from, currency: 'pebbles', amount: gain);
         setState(() {});
     }
@@ -786,6 +787,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
     if (!_p.takeGift(g, weather: widget.weather, afterRain: rainbowTime(widget.now), now: widget.now)) return;
     SoundBoard.instance.play(Sfx.good, volume: 0.4);
     Haptics.light();
+    sparkleAt(context, from);
     for (final e in g.give.entries) {
       RewardFlight.fly(context, from: from, currency: e.key, amount: e.value);
     }
@@ -803,6 +805,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       CareKind.stone || CareKind.decor => Sfx.stoneSand,
     }, volume: 0.55);
     Haptics.medium();
+    sparkleAt(context, from, color: const Color(0xFFE6F0C8));
     if (gain > 0) RewardFlight.fly(context, from: from, currency: 'pebbles', amount: gain);
     if (_p.care.isEmpty) {
       Future.delayed(const Duration(milliseconds: 250), () => SoundBoard.instance.play(Sfx.great, volume: 0.45));
@@ -816,6 +819,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
     if (gift == null) return;
     SoundBoard.instance.play(Sfx.great, volume: 0.45);
     Haptics.medium();
+    sparkleAt(context, from);
     var wait = 250;
     for (final e in gift.entries) {
       Timer(Duration(milliseconds: wait), () {

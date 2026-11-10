@@ -76,6 +76,92 @@ abstract final class RewardFlight {
   }
 }
 
+/// Un destello donde se juntó algo: un anillo tibio que se abre y unas
+/// chispas, para que lo tocado no desaparezca en seco.
+void sparkleAt(BuildContext context, Offset at, {Color color = const Color(0xFFFFE7A8)}) {
+  final overlay = Overlay.maybeOf(context, rootOverlay: true);
+  if (overlay == null) return;
+  late final OverlayEntry entry;
+  entry = OverlayEntry(
+    builder: (_) => _Sparkle(at: at, color: color, onDone: () => entry.remove()),
+  );
+  overlay.insert(entry);
+}
+
+class _Sparkle extends StatefulWidget {
+  final Offset at;
+  final Color color;
+  final VoidCallback onDone;
+  const _Sparkle({required this.at, required this.color, required this.onDone});
+
+  @override
+  State<_Sparkle> createState() => _SparkleState();
+}
+
+class _SparkleState extends State<_Sparkle> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 650))
+    ..addStatusListener((s) {
+      if (s == AnimationStatus.completed) widget.onDone();
+    })
+    ..forward();
+  final _seed = Random().nextDouble() * pi;
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    child: AnimatedBuilder(
+      animation: _c,
+      builder: (context, _) =>
+          CustomPaint(size: Size.infinite, painter: _SparklePainter(widget.at, widget.color, _c.value, _seed)),
+    ),
+  );
+}
+
+class _SparklePainter extends CustomPainter {
+  final Offset at;
+  final Color color;
+  final double t, seed;
+  _SparklePainter(this.at, this.color, this.t, this.seed);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final e = Curves.easeOutCubic.transform(t);
+    final fade = 1 - Curves.easeIn.transform(t);
+    canvas.drawCircle(
+      at,
+      10 + 34 * e,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3 * fade + 0.5
+        ..color = color.withValues(alpha: 0.85 * fade),
+    );
+    canvas.drawCircle(
+      at,
+      14 * (1 - e) + 2,
+      Paint()
+        ..color = color.withValues(alpha: 0.5 * fade)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+    for (var i = 0; i < 7; i++) {
+      final a = seed + i * 2 * pi / 7;
+      final r = 8 + 30 * e * (0.8 + 0.3 * ((i * 37) % 5) / 5);
+      canvas.drawCircle(
+        at + Offset(cos(a), sin(a) - 0.4 * e) * r,
+        2.2 * fade + 0.4,
+        Paint()..color = color.withValues(alpha: fade),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SparklePainter old) => old.t != t;
+}
+
 class _Flight extends StatefulWidget {
   final Offset from, to;
 

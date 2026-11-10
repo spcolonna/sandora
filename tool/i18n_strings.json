@@ -3575,5 +3575,26 @@
   "pt": "Voltar ao centro",
   "ja": "中央に戻る",
   "zh": "回到中央"
+ },
+ "meditation.endAsk": {
+  "es": "¿Terminar ya?",
+  "en": "End now?",
+  "pt": "Terminar agora?",
+  "ja": "もう終えますか？",
+  "zh": "现在结束吗？"
+ },
+ "meditation.endAskBody": {
+  "es": "Lo meditado hasta acá cuenta igual.",
+  "en": "The time you've meditated still counts.",
+  "pt": "O tempo meditado até aqui conta do mesmo jeito.",
+  "ja": "ここまでの瞑想もちゃんと記録されます。",
+  "zh": "到目前为止的冥想同样计入。"
+ },
+ "meditation.keep": {
+  "es": "Seguir meditando",
+  "en": "Keep meditating",
+  "pt": "Continuar meditando",
+  "ja": "続ける",
+  "zh": "继续冥想"
  }
 }

@@ -512,4 +512,7 @@ const ja = <String, String>{
   'mirador.future': 'この門の向こうに新しい庭が開きます',
   'mirador.hintWalk': '横にスワイプで見回す・上で歩く・ゲームをタップして向かう',
   'mirador.backToCenter': '中央に戻る',
+  'meditation.endAsk': 'もう終えますか？',
+  'meditation.endAskBody': 'ここまでの瞑想もちゃんと記録されます。',
+  'meditation.keep': '続ける',
 };

@@ -6,6 +6,8 @@ import '../i18n/i18n.dart';
 import 'garden/garden_decor.dart';
 import 'theme/palette.dart';
 import 'widgets/currency.dart';
+import 'fx/sfx.dart';
+import 'widgets/washi.dart';
 
 /// El cajón de la Maqueta: todo el catálogo. Lo que está en la caja se elige
 /// con un toque (o se arrastra a una parcela); lo demás se compra con el
@@ -33,7 +35,10 @@ class DecorTray extends StatelessWidget {
           return LongPressDraggable<String>(
             data: d.id,
             delay: const Duration(milliseconds: 250),
-            feedback: SizedBox.square(dimension: 84, child: CustomPaint(painter: DecorPainter(d.id, d.aspect))),
+            feedback: liftedFeedback(
+              SizedBox.square(dimension: 84, child: CustomPaint(painter: DecorPainter(d.id, d.aspect))),
+            ),
+            onDragStarted: Haptics.medium,
             childWhenDragging: Opacity(opacity: 0.5, child: card),
             child: card,
           );
@@ -58,12 +63,15 @@ class _Card extends StatelessWidget {
     return Semantics(
       button: true,
       label: tr('decor.${item.id}'),
-      child: GestureDetector(
+      child: Pressable(
         onTap: onTap,
+        scale: 0.95,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: can ? 1 : 0.55,
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
             width: 92,
             padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
             decoration: BoxDecoration(

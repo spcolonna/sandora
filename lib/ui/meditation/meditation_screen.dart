@@ -104,6 +104,22 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
     });
   }
 
+  /// Terminar antes de tiempo pregunta primero: un toque sin querer no corta
+  /// la sesión.
+  Future<void> _askFinish() async {
+    SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
+    final end = await showWashiDialog<bool>(
+      context,
+      title: tr('meditation.endAsk'),
+      body: tr('meditation.endAskBody'),
+      actions: [
+        InkButton(label: tr('meditation.keep'), onPressed: () => Navigator.pop(context, false)),
+        InkButton.quiet(label: tr('meditation.end'), onPressed: () => Navigator.pop(context, true)),
+      ],
+    );
+    if (end == true && mounted && _phase == _Phase.session) _finish();
+  }
+
   void _finish() {
     _tick?.cancel();
     // Se sale de meditar despacio: el ambiente se apaga en 3 s y suena la campana.
@@ -389,7 +405,7 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
         ),
         const Spacer(),
         TextButton(
-          onPressed: _finish,
+          onPressed: _askFinish,
           child: Text(tr('meditation.end'), style: TextStyle(color: _light.withValues(alpha: 0.6))),
         ),
         const SizedBox(height: 16),
