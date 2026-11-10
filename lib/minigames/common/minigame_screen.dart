@@ -63,6 +63,8 @@ class _MinigameScreenState extends State<MinigameScreen> {
   void initState() {
     super.initState();
     _start();
+    // La música del jardín se funde con la de este juego.
+    SoundBoard.instance.music(set: widget.id, volume: 0.24);
   }
 
   void _start() {
@@ -114,7 +116,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
         Navigator.pop(context);
       case _PauseChoice.restart:
         // Lo jugado se descarta sin pagar: empezar de nuevo es inmediato.
-        SoundBoard.instance.stopAllLoops(fade: const Duration(milliseconds: 200));
+        SoundBoard.instance.stopAllLoops(fade: const Duration(milliseconds: 200), music: false);
         setState(_start);
       case _PauseChoice.resume || null:
         _game.resumeEngine();
@@ -123,8 +125,19 @@ class _MinigameScreenState extends State<MinigameScreen> {
 
   @override
   void dispose() {
-    SoundBoard.instance.stopAllLoops();
+    _hush();
     super.dispose();
+  }
+
+  bool _hushed = false;
+
+  /// Apaga los ambientes del juego al salir; la música no (el jardín funde la
+  /// suya). Se hace al cerrar la pantalla y no al desarmarla, que llega
+  /// después: si no, apagaba lo que el jardín ya había vuelto a prender.
+  void _hush() {
+    if (_hushed) return;
+    _hushed = true;
+    SoundBoard.instance.stopAllLoops(music: false);
   }
 
   void _closeIntro() {
@@ -135,6 +148,15 @@ class _MinigameScreenState extends State<MinigameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) _hush();
+      },
+      child: _screen(context),
+    );
+  }
+
+  Widget _screen(BuildContext context) {
     if (_intro) {
       return Scaffold(
         body: IntroCard(id: widget.id, onStart: _closeIntro, onBack: () => Navigator.pop(context)),

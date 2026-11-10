@@ -20,8 +20,23 @@ void main() {
       p.essences[e] = 10000;
     }
     p.lotus = 100;
+    // Las pruebas de compra van con la compra armada (la etapa de prueba del
+    // juego abre todo).
+    p.modelRules.openAll = false;
     return p;
   }
+
+  test('en la etapa de prueba todas las parcelas vienen abiertas', () async {
+    final p = Progress.instance;
+    await p.load(balance);
+    expect(p.modelRules.openAll, isTrue);
+    for (var s = 0; s < ModelRules.sides; s++) {
+      for (var c = 0; c < p.modelRules.cells; c++) {
+        expect(p.parcelOpen(s, c), isTrue);
+        expect(p.canBuyParcel(s, c), isFalse, reason: 'no se cobra lo que ya está abierto');
+      }
+    }
+  });
 
   test('las reglas de la maqueta son coherentes', () {
     final m = ModelRules(balance);
@@ -108,8 +123,10 @@ void main() {
     p.buyParcel(0, c);
     p.lotus = p.gardenCost;
     expect(await p.buyGarden(), isTrue);
+    p.modelRules.openAll = false;
     expect(p.parcelOpen(0, c), isFalse);
     await p.switchGarden(0);
+    p.modelRules.openAll = false;
     expect(p.parcelOpen(0, c), isTrue);
   });
 

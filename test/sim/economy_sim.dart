@@ -129,6 +129,8 @@ Future<SimResult> simulate(Balance balance, Profile profile, {int days = 60, int
   final start = DateTime(2026, 11, 2);
   final p = Progress.instance;
   await p.load(balance, now: start);
+  // Se simula la economía de la versión final: las parcelas se compran.
+  p.modelRules.openAll = false;
   final weather = WeatherRules(balance);
   final games = [for (final m in minigames) m.id];
   final r = SimResult(profile, days);

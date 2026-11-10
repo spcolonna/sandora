@@ -381,10 +381,11 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
     });
   }
 
+  /// Se apagan el viento y la lluvia del jardín; la música sigue y el
+  /// minijuego la funde con la suya.
   void _quiet() {
     SoundBoard.instance.stopLoop(Ambience.wind);
     SoundBoard.instance.stopLoop(Ambience.rain);
-    SoundBoard.instance.stopMusic();
   }
 
   Future<void> _open(MinigameInfo m) async {
@@ -426,6 +427,8 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
 
   Future<void> _meditate() async {
     _quiet();
+    // Para meditar, solo el ambiente que se elija.
+    SoundBoard.instance.stopMusic();
     _away = true;
     await Navigator.of(context).push(calmRoute<void>(const MeditationScreen()));
     _away = false;

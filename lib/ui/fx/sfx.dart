@@ -68,7 +68,11 @@ class SoundBoard {
 
   final _pools = <String, List<_Voice>>{};
   final _loops = <Ambience, AudioPlayer>{};
-  final _music = AudioPlayer();
+  // Dos platos: al pasar del jardín a un juego (y de vuelta) una pieza se
+  // funde con la otra, sin silencio en el medio.
+  final _decks = [AudioPlayer(), AudioPlayer()];
+  int _deck = 0;
+  AudioPlayer get _music => _decks[_deck];
   final _rng = Random();
   bool _ready = false;
   final _loaded = Completer<void>();
@@ -121,20 +125,31 @@ class SoundBoard {
           debugPrint('Sin ${a.file}: $e');
         }
       }
-      await _music.setReleaseMode(ReleaseMode.stop);
-      _music.onPlayerComplete.listen((_) {
-        if (_musicOn) _musicGap = Timer(Duration(seconds: 8 + _rng.nextInt(10)), _nextTrack);
-      });
+      for (final d in _decks) {
+        await d.setReleaseMode(ReleaseMode.stop);
+        d.onPlayerComplete.listen((_) {
+          if (!_musicOn || d != _music) return;
+          // En el jardín, un respiro largo entre piezas; jugando, uno corto.
+          final gap = _set == garden ? Duration(seconds: 8 + _rng.nextInt(10)) : Duration(seconds: 2 + _rng.nextInt(3));
+          _musicGap = Timer(gap, _nextTrack);
+        });
+      }
       _lifecycle ??= AppLifecycleListener(
         onHide: () {
           _hidden = true;
           for (final p in _loops.values) {
             p.pause();
           }
-          if (_music.state == PlayerState.playing) _music.pause();
+          for (final d in _decks) {
+            if (d.state == PlayerState.playing) d.pause();
+          }
         },
         onShow: () {
           _hidden = false;
+          // Lo que se estaba apagando al irse no vuelve.
+          for (final d in _decks) {
+            if (d != _music && d.state == PlayerState.paused) d.stop();
+          }
           if (!_musicOn) return;
           if (_music.state == PlayerState.paused) {
             _music.resume();
@@ -185,42 +200,89 @@ class SoundBoard {
     _fadeTo(a, 0, fade, then: () => _loops[a]!.pause());
   }
 
-  /// Corta ambientes y música (al entrar a un minijuego o a meditar).
-  void stopAllLoops({Duration fade = const Duration(milliseconds: 800)}) {
+  /// Corta los ambientes y, si [music], también la música (al meditar). Los
+  /// minijuegos dejan la música: la suya se funde con la del jardín.
+  void stopAllLoops({Duration fade = const Duration(milliseconds: 800), bool music = true}) {
     for (final a in Ambience.values) {
       stopLoop(a, fade: fade);
     }
-    stopMusic(fade: fade);
+    if (music) stopMusic(fade: fade);
   }
 
-  /// Piezas de música del jardín (`tool/gen_audio.py`): terminan en silencio y
-  /// se alternan, con un respiro entre una y otra.
-  static const _tracks = ['music_garden_01', 'music_garden_02'];
+  /// La música del jardín.
+  static const garden = 'garden';
+
+  /// Piezas de música (`tool/gen_audio.py`): terminan en silencio y se
+  /// alternan, con un respiro entre una y otra. El jardín tiene dos; cada
+  /// minijuego, la suya.
+  static const _gardenTracks = ['music_garden_01', 'music_garden_02'];
+  static const gameTracks = {
+    'stack', 'sand', 'rain', 'pond', 'shishi', 'leaves', 'moss', //
+    'bonsai', 'enso', 'bell', 'matcha', 'flute', 'lanterns',
+  };
+
+  /// Las piezas de [set]: un juego sin pieza propia sigue con la del jardín.
+  static List<String> tracksFor(String set) => gameTracks.contains(set) ? ['music_game_$set'] : _gardenTracks;
+
   bool _musicOn = false;
   double _musicVolume = 0.28;
-  int _track = 0;
+  String _set = garden;
+  final _track = <String, int>{};
   Timer? _musicGap;
 
-  /// Arranca la música del jardín, o le cambia el volumen si ya suena.
-  void music({double volume = 0.28}) {
+  /// Arranca la música de [set] (el jardín o el id de un minijuego). Si ya
+  /// sonaba otra, se funden sin silencio; si es la misma, sigue.
+  void music({double volume = 0.28, String set = garden}) {
     if (!_ready || !AppSettings.instance.music) return;
     _musicVolume = volume;
+    if (tracksFor(set).first != tracksFor(_set).first) return _switchTo(set);
+    _set = set;
     if (_musicOn) return;
     _musicOn = true;
     // Si se estaba apagando, vuelve a subir sin cortar la pieza.
     if (_music.state == PlayerState.playing) {
-      _fadeTo('music', volume, const Duration(milliseconds: 1500));
+      _fadeTo(_music, volume, const Duration(milliseconds: 1500));
       return;
     }
     _musicGap?.cancel();
     _musicGap = Timer(const Duration(seconds: 3), _nextTrack);
   }
 
-  Future<void> _nextTrack() async {
+  static const _crossfade = Duration(milliseconds: 1800);
+
+  /// La pieza que suena se apaga en un plato mientras la de [set] entra en el
+  /// otro.
+  void _switchTo(String set) {
+    _set = set;
+    _musicOn = true;
+    _musicGap?.cancel();
+    final old = _music;
+    final playing = old.state == PlayerState.playing;
+    if (playing) {
+      _fadeTo(old, 0, _crossfade, then: () {
+        if (old != _music) old.stop();
+      });
+    } else {
+      old.stop();
+    }
+    _deck = 1 - _deck;
+    _nextTrack(fadeIn: playing ? _crossfade : const Duration(milliseconds: 600));
+  }
+
+  Future<void> _nextTrack({Duration? fadeIn}) async {
     if (!_musicOn || _hidden) return;
+    final p = _music, set = _set, tracks = tracksFor(set);
+    final i = (_track[set] ?? 0) % tracks.length;
+    _fades.remove(p)?.cancel();
     try {
-      await _music.play(AssetSource('audio/${_tracks[_track]}.m4a'), volume: _musicVolume);
-      _track = (_track + 1) % _tracks.length;
+      await p.play(AssetSource('audio/${tracks[i]}.m4a'), volume: fadeIn == null ? _musicVolume : 0);
+      _track[set] = i + 1;
+      // Si mientras cargaba se cambió de pieza o se apagó la música, esta no va.
+      if (p != _music || !_musicOn || _set != set) {
+        if (p != _music) p.stop();
+        return;
+      }
+      if (fadeIn != null) _fadeTo(p, _musicVolume, fadeIn);
     } catch (_) {
       // Sin música se juega igual.
     }
@@ -231,20 +293,22 @@ class SoundBoard {
     if (!_ready) return;
     _musicOn = false;
     _musicGap?.cancel();
-    if (_music.state != PlayerState.playing) return;
-    _fadeTo(
-      'music',
-      0,
-      fade,
-      then: () {
-        if (!_musicOn) _music.stop();
-      },
-    );
+    for (final d in _decks) {
+      if (d.state != PlayerState.playing) continue;
+      _fadeTo(
+        d,
+        0,
+        fade,
+        then: () {
+          if (!_musicOn || d != _music) d.stop();
+        },
+      );
+    }
   }
 
-  /// [key] es un [Ambience] o `'music'`.
+  /// [key] es un [Ambience] o uno de los platos de música.
   void _fadeTo(Object key, double target, Duration fade, {VoidCallback? then}) {
-    final p = key is Ambience ? _loops[key]! : _music;
+    final p = key is Ambience ? _loops[key]! : key as AudioPlayer;
     _fades.remove(key)?.cancel();
     final from = p.volume;
     const step = Duration(milliseconds: 50);

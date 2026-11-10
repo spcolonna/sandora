@@ -963,7 +963,7 @@ class Progress extends ChangeNotifier {
       ..y = y;
   }
 
-  bool parcelOpen(int side, int cell) => parcels[side].contains(cell);
+  bool parcelOpen(int side, int cell) => modelRules.openAll || parcels[side].contains(cell);
 
   /// Cuántas parcelas se compraron en este jardín (las del comienzo no cuentan).
   int get parcelsBought => parcels.fold(0, (n, s) => n + s.difference(modelRules.start.toSet()).length);

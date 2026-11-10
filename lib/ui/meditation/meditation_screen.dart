@@ -58,8 +58,19 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
     _ticker.dispose();
     _clock.dispose();
     _tick?.cancel();
-    SoundBoard.instance.stopAllLoops();
+    _hush();
     super.dispose();
+  }
+
+  bool _hushed = false;
+
+  /// Apaga el ambiente al salir. Se hace al cerrar la pantalla (no al
+  /// desarmarla, que llega después): si no, apagaba lo que el jardín ya había
+  /// vuelto a prender y se quedaba en silencio.
+  void _hush() {
+    if (_hushed) return;
+    _hushed = true;
+    SoundBoard.instance.stopAllLoops(music: false);
   }
 
   void _start() {
@@ -110,6 +121,9 @@ class _MeditationScreenState extends State<MeditationScreen> with SingleTickerPr
   Widget build(BuildContext context) {
     return PopScope(
       canPop: _phase != _Phase.session,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) _hush();
+      },
       // Entre fases el fondo se oscurece o aclara despacio y el contenido
       // cambia con un fundido largo, como bajar la luz.
       child: Scaffold(

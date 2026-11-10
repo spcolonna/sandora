@@ -583,6 +583,33 @@ def music(seed, chords, per, repeats, lead):
                 tt += step * rng.choice([1, 1, 1, 2, 0.5], p=[0.45, 0.15, 0.1, 0.2, 0.1]) + rng.normal(0, 0.02)
                 idx = int(np.clip(idx + rng.choice([-2, -1, -1, 1, 1, 2]), 0, len(notes) - 1))
             sec = tt + rng.uniform(4, 8)
+    elif lead == "kalimba":
+        # Frases cortas y saltarinas, como gotas: para los juegos más juguetones.
+        notes = scale(67, 88)
+        sec = rng.uniform(2.5, 4)
+        while sec < length - 6:
+            count = int(rng.integers(4, 9))
+            idx = int(rng.integers(2, len(notes) - 2))
+            step = rng.choice([0.3, 0.36, 0.42])
+            tt = sec
+            for j in range(count):
+                last = j == count - 1
+                if last:
+                    idx = snap(notes, idx, tt)
+                vel = rng.uniform(0.55, 0.9)
+                add(kalimba(hz(notes[idx]), 2.2 if last else 1.6, 1.1 if last else 0.8, 0.5 + 0.4 * vel) * vel * 0.4,
+                    tt, pan=rng.uniform(-0.4, 0.4), wet=0.4)
+                tt += step * rng.choice([1, 1, 2, 0.5], p=[0.55, 0.2, 0.15, 0.1]) + rng.normal(0, 0.015)
+                idx = int(np.clip(idx + rng.choice([-2, -1, 1, 1, 2, 3]), 0, len(notes) - 1))
+            sec = tt + rng.uniform(3, 6)
+    elif lead == "pad":
+        # Casi sin melodía: el jugador es el que toca (gotas, flauta, campana).
+        notes = scale(60, 79)
+        sec = rng.uniform(5, 8)
+        while sec < length - 6:
+            m = notes[snap(notes, int(rng.integers(0, len(notes))), sec)]
+            add(koto(hz(m), 4.0, t60=2.6, bright=0.2) * 0.3, sec, pan=rng.uniform(-0.3, 0.3), wet=0.5)
+            sec += rng.uniform(6, 11)
     else:
         notes = scale(62, 79)
         sec = rng.uniform(4, 6)
@@ -744,6 +771,29 @@ def main():
         write("music_garden_02",
               music(23, [[45, 52, 60, 67], [41, 48, 57, 64], [40, 48, 55, 64], [43, 50, 55, 64]], 14, 2, "flute"),
               0.75, kbps=128)
+
+    # Una pieza por minijuego, más corta (cerca de un minuto): se repite con
+    # un respiro mientras se juega. Del jardín al juego se funden sin corte.
+    C, Am, F, G, Em, Dm = ([48, 55, 62, 64], [45, 52, 60, 67], [41, 53, 57, 64, 67],
+                           [43, 50, 57, 62], [40, 47, 55, 64], [38, 45, 53, 62])
+    games = {
+        "stack": (31, [C, G, Am, F], 9, "kalimba"),
+        "sand": (37, [Am, F, C, G], 12, "koto"),
+        "rain": (41, [F, C, Dm, Am], 12, "pad"),
+        "pond": (43, [C, Em, F, G], 10, "kalimba"),
+        "shishi": (47, [Am, Em, F, C], 12, "flute"),
+        "leaves": (53, [G, C, Am, Em], 9, "koto"),
+        "moss": (59, [Dm, Am, C, G], 13, "flute"),
+        "bonsai": (61, [C, F, Am, G], 11, "koto"),
+        "enso": (67, [Am, F, C, Em], 14, "pad"),
+        "bell": (71, [C, Am, F, C], 14, "pad"),
+        "matcha": (73, [F, G, Em, Am], 10, "koto"),
+        "flute": (79, [Am, C, F, G], 13, "pad"),
+        "lanterns": (83, [Em, Am, F, C], 11, "kalimba"),
+    }
+    for gid, (seed, chords, per, lead) in games.items():
+        if wanted(f"music_game_{gid}"):
+            write(f"music_game_{gid}", music(seed, chords, per, 1, lead), 0.7, kbps=96)
 
 
 if __name__ == "__main__":

@@ -74,6 +74,10 @@ class ModelRules {
   /// solo en el Sendero).
   final bool inViews;
 
+  /// Etapa de prueba: todas las parcelas abiertas, sin comprarlas. La compra
+  /// sigue armada para cuando se vayan desbloqueando de a poco.
+  bool openAll;
+
   ModelRules(Balance balance)
     : cols = balance.section('model').i('cols'),
       rows = balance.section('model').i('rows'),
@@ -90,6 +94,7 @@ class ModelRules {
           ],
       ],
       inViews = balance.section('model').raw('inViews') != false,
+      openAll = balance.section('model').raw('openAll') == true,
       table = switch (balance.section('model').list('table')) {
         [final w, final x, final y] => (w, x, y),
         _ => (0.15, 0.15, 0.9),

@@ -479,7 +479,8 @@
     "decorScale": 7
   },
   "model": {
-    "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. feet: dónde queda el pie de cada parcela (x, y) en cada vista, en fracción de la vista (el patio pintado, del lienzo); elegidos a mano para no tapar los lugares. inViews: si la decoración también se ve en las vistas de actividades con la vista Sendero (en la Clásica siempre se ve). table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo).",
+    "_comment": "La Maqueta: cada vista (0 patio, 1 estanque, 2 bosque) es una grilla de cols x rows parcelas; la celda es fila*cols+col y la fila 0 es la del fondo. start: las abiertas al empezar. Cada parcela más cuesta pebbles x growth^(compradas en el jardín), de a 5; las últimas lotusLast cerradas de cada vista cuestan lotus. feet: dónde queda el pie de cada parcela (x, y) en cada vista, en fracción de la vista (el patio pintado, del lienzo); elegidos a mano para no tapar los lugares. inViews: si la decoración también se ve en las vistas de actividades con la vista Sendero (en la Clásica siempre se ve). table: la mesa de la maqueta en el patio pintado (ancho, centro x, base y, en fracción del lienzo). openAll: etapa de prueba, todas las parcelas abiertas sin pagar (en false vuelve la compra de a una).",
+    "openAll": true,
     "inViews": false,
     "cols": 4,
     "rows": 3,
