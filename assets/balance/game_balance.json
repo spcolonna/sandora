@@ -199,8 +199,11 @@
     "stars": [12, 19, 25]
   },
   "leaves": {
-    "_comment": "broomReach: alcance de la escoba (fracción del ancho). pileHold: cuánto del viento sienten las hojas del montón. stars: fracción de hojas en el montón (con un poco de premio por barrer con pocos gestos).",
+    "_comment": "startGrace: segundos antes de que el reloj arranque solo si no se tocó nada (el primer gesto lo arranca antes). broomReach: alcance de la escoba (fracción del ancho). pileHold: cuánto del viento sienten las hojas del montón. stars: fracción de hojas en el montón (con un poco de premio por barrer con pocos gestos).",
     "seconds": 30,
+    "startGrace": 3.0,
+    "startGrace": 3.0,
+    "startGrace": 3.0,
     "leaves": 30,
     "broomReach": 0.12,
     "sweepForce": 32,
@@ -215,7 +218,7 @@
     "stars": [0.45, 0.65, 0.85]
   },
   "moss": {
-    "_comment": "brush: radio del pincel en celdas (la grilla tiene 48 de ancho). growChance: probabilidad por tick de que el musgo se extienda solo. stars: cubierto - manchado * stainWeight.",
+    "_comment": "startGrace: segundos antes de que el reloj arranque solo si no se tocó nada (el primer gesto lo arranca antes). brush: radio del pincel en celdas (la grilla tiene 48 de ancho). growChance: probabilidad por tick de que el musgo se extienda solo. stars: cubierto - manchado * stainWeight.",
     "seconds": 35,
     "brush": 2.6,
     "amount": 0.55,
@@ -224,7 +227,7 @@
     "stars": [0.55, 0.75, 0.9]
   },
   "bonsai": {
-    "_comment": "Largos y velocidad como fracción del ancho. stars: armonía = (salvajes cortadas - goodCutPenalty * buenas cortadas) / salvajes.",
+    "_comment": "startGrace: segundos antes de que el reloj arranque solo si no se tocó nada (el primer gesto lo arranca antes). Largos y velocidad como fracción del ancho. stars: armonía = (salvajes cortadas - goodCutPenalty * buenas cortadas) / salvajes.",
     "seconds": 30,
     "spawnEvery": 1.1,
     "minLength": 0.08,

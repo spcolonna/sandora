@@ -103,7 +103,16 @@ class MarketScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         Text(tr('shop.decor'), style: text.titleSmall),
                         for (final d in decor) _DecorRow(d),
-                      ] else if (!p.decorOpen) ...[
+                      ] else if (p.decorOpen) ...[
+                        // Se compró todo lo de hoy: que no parezca que falta algo.
+                        const SizedBox(height: 16),
+                        Text(tr('shop.decor'), style: text.titleSmall),
+                        const SizedBox(height: 6),
+                        WashiTile(
+                          margin: EdgeInsets.zero,
+                          child: Text(tr('shop.decorDone'), style: text.bodyMedium, textAlign: TextAlign.center),
+                        ),
+                      ] else ...[
                         if (p.tutorialDecor != null || p.decor.any((d) => !d.placed)) ...[
                           const SizedBox(height: 14),
                           if (p.guideStep == Guide.buy)
@@ -253,7 +262,7 @@ class _OfferRow extends StatelessWidget {
                     children: [
                       for (final g in o.give.entries) CurrencyChip.of(g.key, g.value, prefix: '+'),
                       const Icon(Icons.swap_horiz_rounded, size: 18, color: Palette.stone),
-                      for (final c in o.cost.entries) CurrencyChip.of(c.key, c.value),
+                      for (final c in o.cost.entries) CurrencyChip.price(c.key, c.value),
                     ],
                   ),
                   if (left != null) ...[
@@ -266,6 +275,7 @@ class _OfferRow extends StatelessWidget {
             const SizedBox(width: 8),
             InkButton.small(
               label: tr('shop.trade'),
+              whyNot: shortNote(o.cost),
               onPressed: p.canTrade(o)
                   ? () {
                       if (p.trade(o)) {
@@ -330,7 +340,7 @@ class _DealCard extends StatelessWidget {
                     runSpacing: 2,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      for (final c in p.dealCost(d).entries) CurrencyChip.of(c.key, c.value),
+                      for (final c in p.dealCost(d).entries) CurrencyChip.price(c.key, c.value),
                       Text(
                         '${p.decorCost(d)['pebbles'] ?? ''}',
                         style: text.bodySmall?.copyWith(
@@ -349,6 +359,7 @@ class _DealCard extends StatelessWidget {
           else if (!taken)
             InkButton.small(
               label: tr('shop.dealBuy'),
+              whyNot: shortNote(p.dealCost(d)),
               onPressed: p.canBuyDeal()
                   ? () {
                       if (p.buyDeal()) {
@@ -396,7 +407,10 @@ class _TutorialCard extends StatelessWidget {
                 if (bought)
                   Text(tr('shop.tutorialPlace'), style: text.bodySmall)
                 else
-                  Wrap(spacing: 8, children: [for (final c in p.tutorialCost.entries) CurrencyChip.of(c.key, c.value)]),
+                  Wrap(
+                    spacing: 8,
+                    children: [for (final c in p.tutorialCost.entries) CurrencyChip.price(c.key, c.value)],
+                  ),
               ],
             ),
           ),
@@ -406,6 +420,7 @@ class _TutorialCard extends StatelessWidget {
           else
             InkButton.small(
               label: tr('shop.dealBuy'),
+              whyNot: shortNote(p.tutorialCost),
               onPressed: p.canBuyTutorial
                   ? () {
                       if (p.buyTutorialDecor()) {
@@ -456,7 +471,7 @@ class _DecorRow extends StatelessWidget {
                 Wrap(
                   spacing: 8,
                   runSpacing: 2,
-                  children: [for (final c in p.decorCost(d).entries) CurrencyChip.of(c.key, c.value)],
+                  children: [for (final c in p.decorCost(d).entries) CurrencyChip.price(c.key, c.value)],
                 ),
                 if (stored > 0) Text(tr('shop.inBox', {'n': stored}), style: text.bodySmall),
               ],
@@ -468,6 +483,7 @@ class _DecorRow extends StatelessWidget {
             children: [
               InkButton.small(
                 label: tr('shop.dealBuy'),
+                whyNot: p.level < d.level ? tr('decor.needLevel', {'n': d.level}) : shortNote(p.decorCost(d)),
                 onPressed: p.canBuyDecor(d)
                     ? () {
                         if (p.buyDecor(d)) {

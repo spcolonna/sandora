@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sandora/minigames/common/grade.dart';
 import 'package:sandora/ui/fx/reward_flight.dart';
 import 'package:sandora/ui/widgets/soft.dart';
+import 'package:sandora/ui/widgets/washi.dart';
 
 void main() {
   group('FadingNote', () {
@@ -103,6 +104,34 @@ void main() {
     await tester.pumpWidget(at(true));
     await tester.pumpAndSettle();
     await tester.tapAt(const Offset(50, 50));
+    expect(taps, 1);
+  });
+
+  testWidgets('TapPad: algo chico se toca como si midiera 44', (tester) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Center(
+              child: TapPad(
+                child: GestureDetector(
+                  onTap: () => taps++,
+                  child: const ColoredBox(color: Color(0xFF000000), child: SizedBox.square(dimension: 20)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final c = tester.getCenter(find.byType(TapPad));
+    await tester.tapAt(c + const Offset(0, 20));
+    expect(taps, 1);
+    await tester.tapAt(c + const Offset(0, 30));
     expect(taps, 1);
   });
 }

@@ -136,10 +136,14 @@ class _ExpansionRow extends StatelessWidget {
     } else if (!e.ready) {
       trailing = Text(tr('exp.soon'), style: Theme.of(context).textTheme.labelMedium);
     } else if (!reached) {
-      trailing = null;
+      trailing = Text(
+        tr('up.needLevel', {'n': e.level}),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Palette.ink.withValues(alpha: 0.6)),
+      );
     } else {
       trailing = InkButton.small(
         label: tr('exp.buy'),
+        whyNot: shortNote({'pebbles': e.pebbles, for (final c in e.essences.entries) c.key.name: c.value}),
         onPressed: p.canAfford(e)
             ? () {
                 if (p.buyExpansion(e)) {
@@ -165,8 +169,8 @@ class _ExpansionRow extends StatelessWidget {
           : Wrap(
               spacing: 12,
               children: [
-                CurrencyChip.pebbles(e.pebbles),
-                for (final c in e.essences.entries) CurrencyChip.essence(c.key, c.value),
+                CurrencyChip.price('pebbles', e.pebbles),
+                for (final c in e.essences.entries) CurrencyChip.price(c.key.name, c.value),
               ],
             ),
     );

@@ -73,6 +73,7 @@ class _RestSheetState extends State<_RestSheet> {
             const SizedBox(height: 18),
             InkButton(
               label: tr('rest.skip'),
+              whyNot: shortNote({'lotus': p.restSkipCost}),
               onPressed: p.canSkipRest(widget.game)
                   ? () {
                       if (p.skipRest(widget.game)) Navigator.pop(context, true);
@@ -80,7 +81,7 @@ class _RestSheetState extends State<_RestSheet> {
                   : null,
             ),
             const SizedBox(height: 6),
-            Center(child: CurrencyChip.lotus(p.restSkipCost)),
+            Center(child: CurrencyChip.price('lotus', p.restSkipCost)),
             const SizedBox(height: 6),
             InkButton.quiet(label: tr('rest.later'), onPressed: () => Navigator.pop(context, false)),
           ],

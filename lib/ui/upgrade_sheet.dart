@@ -67,12 +67,13 @@ Future<void> showUpgradeSheet(BuildContext context, String game) {
                   Wrap(
                     alignment: WrapAlignment.center,
                     spacing: 12,
-                    children: [for (final c in p.upgradeCost(game).entries) CurrencyChip.of(c.key, c.value)],
+                    children: [for (final c in p.upgradeCost(game).entries) CurrencyChip.price(c.key, c.value)],
                   ),
                   const SizedBox(height: 10),
                   Center(
                     child: InkButton.small(
                       label: p.level < next.level ? tr('up.needLevel', {'n': next.level}) : tr('up.buy'),
+                      whyNot: p.level < next.level ? null : shortNote(p.upgradeCost(game)),
                       onPressed: p.canUpgrade(game)
                           ? () {
                               if (p.buyUpgrade(game)) {

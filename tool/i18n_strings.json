@@ -3603,5 +3603,82 @@
   "pt": "Você ainda não o encontrou: caminhe até {place} para descobri-lo.",
   "ja": "まだ見つけていません。{place}まで歩いて探しましょう。",
   "zh": "你还没发现它：走到{place}去找找看。"
+ },
+ "mirador.a11y.walk": {
+  "es": "Caminar a {name}",
+  "en": "Walk to {name}",
+  "pt": "Caminhar até {name}",
+  "ja": "{name}へ歩く",
+  "zh": "走到{name}"
+ },
+ "mirador.a11y.decor": {
+  "es": "Decoración",
+  "en": "Decoration",
+  "pt": "Decoração",
+  "ja": "飾り",
+  "zh": "装饰"
+ },
+ "mirador.a11y.slot": {
+  "es": "Lugar para una decoración",
+  "en": "Spot for a decoration",
+  "pt": "Lugar para uma decoração",
+  "ja": "飾りを置ける場所",
+  "zh": "可放装饰的位置"
+ },
+ "mirador.a11y.care": {
+  "es": "Algo para cuidar en el jardín",
+  "en": "Something to tend in the garden",
+  "pt": "Algo para cuidar no jardim",
+  "ja": "庭の手入れが必要な場所",
+  "zh": "花园里需要照料的地方"
+ },
+ "mirador.a11y.visitor": {
+  "es": "Un visitante te espera",
+  "en": "A visitor is waiting for you",
+  "pt": "Um visitante está esperando você",
+  "ja": "訪問者が待っています",
+  "zh": "有位访客在等你"
+ },
+ "mirador.a11y.tower": {
+  "es": "Juntar las piedritas de la torre",
+  "en": "Collect the tower's pebbles",
+  "pt": "Pegar as pedrinhas da torre",
+  "ja": "塔の小石を集める",
+  "zh": "收集石塔的小石子"
+ },
+ "wallet.short": {
+  "es": "Todavía no alcanza: te faltan {list}",
+  "en": "Not enough yet: you need {list} more",
+  "pt": "Ainda não dá: faltam {list}",
+  "ja": "まだ足りません：あと{list}",
+  "zh": "还不够：还差{list}"
+ },
+ "wallet.and": {
+  "es": "{a} y {b}",
+  "en": "{a} and {b}",
+  "pt": "{a} e {b}",
+  "ja": "{a}と{b}",
+  "zh": "{a}和{b}"
+ },
+ "req.gone": {
+  "es": "El visitante siguió su camino. Va a volver otro día.",
+  "en": "The visitor went on their way. They'll come back another day.",
+  "pt": "O visitante seguiu seu caminho. Vai voltar outro dia.",
+  "ja": "訪問者は旅を続けました。また別の日に来ます。",
+  "zh": "访客继续上路了，改天会再来。"
+ },
+ "req.ok": {
+  "es": "Listo",
+  "en": "OK",
+  "pt": "Certo",
+  "ja": "わかった",
+  "zh": "好的"
+ },
+ "shop.decorDone": {
+  "es": "Ya te llevaste todo lo de hoy. Volvé mañana: llegan piezas nuevas.",
+  "en": "You took everything for today. Come back tomorrow for new pieces.",
+  "pt": "Você já levou tudo de hoje. Volte amanhã: chegam peças novas.",
+  "ja": "今日の品はすべて手に入れました。明日また新しい品が届きます。",
+  "zh": "今天的都买完了。明天再来，会有新物件。"
  }
 }

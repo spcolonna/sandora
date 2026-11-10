@@ -55,6 +55,11 @@ class BonsaiGame extends FlameGame with DragCallbacks {
   final _rng = Random();
   final _branches = <_Branch>[];
   late double _left = b.d('seconds');
+
+  /// El reloj arranca con el primer gesto (o tras unos segundos quieto): la
+  /// partida no se come tiempo mientras se mira el tablero.
+  late double _grace = b.d('startGrace');
+  bool get _waiting => _grace > 0;
   double _spawn = 0.6;
   int _wildCut = 0, _goodCut = 0;
   final _streak = Streak();
@@ -105,6 +110,10 @@ class BonsaiGame extends FlameGame with DragCallbacks {
     }
     _branches.removeWhere((br) => br.fall > 1.2);
     if (_over) return;
+    if (_waiting) {
+      _grace -= dt;
+      return;
+    }
     lastSeconds(_left, _left -= dt);
     _spawn -= dt;
     if (_spawn <= 0) {
@@ -132,6 +141,7 @@ class BonsaiGame extends FlameGame with DragCallbacks {
   @override
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
+    _grace = 0;
     _last = Offset(event.localPosition.x, event.localPosition.y);
   }
 

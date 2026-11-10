@@ -28,7 +28,24 @@ Future<void> showVisitorSheet(BuildContext context) {
         final p = Progress.instance;
         final r = p.visitorRequest;
         final text = Theme.of(sheet).textTheme;
-        if (r == null || p.visitorWho == null) return const SizedBox(height: 40);
+        if (r == null || p.visitorWho == null) {
+          // Se fue (o ya se le dio lo suyo) con la hoja abierta: se dice, en
+          // vez de dejar el papel en blanco.
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(tr('req.gone'), style: text.titleMedium, textAlign: TextAlign.center),
+                  const SizedBox(height: 14),
+                  InkButton.quiet(label: tr('req.ok'), onPressed: () => Navigator.pop(sheet)),
+                ],
+              ),
+            ),
+          );
+        }
         final state = p.visitorState;
         return SafeArea(
           child: Padding(

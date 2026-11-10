@@ -753,8 +753,38 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
     }
     final scene = PanoScene(_size, _view());
     final hit = scene.hit(d.localPosition);
-    if (hit == null) return;
-    final from = d.globalPosition;
+    if (hit != null) _act(hit, d.globalPosition);
+  }
+
+  /// Lo último que se dibujó.
+  PanoView? _shown;
+
+  /// Cómo se anuncia cada cosa tocable del patio (VoiceOver).
+  String? _describe(PanoTarget t) => switch (t.kind) {
+    PanoHit.place => switch (_shown?.places[t.id]) {
+      final look? => look.note == null ? look.name : '${look.name}. ${look.note}',
+      null => null,
+    },
+    PanoHit.model => tr('model.title'),
+    PanoHit.exit => tr('mirador.a11y.walk', {'name': tr('mirador.${t.id}')}),
+    PanoHit.gate => tr('mirador.future'),
+    PanoHit.decor => tr('mirador.a11y.decor'),
+    PanoHit.slot => tr('mirador.a11y.slot'),
+    PanoHit.gift => tr('gift.${t.id}'),
+    PanoHit.care => tr('mirador.a11y.care'),
+    PanoHit.visitor => tr('mirador.a11y.visitor'),
+    PanoHit.tea => tr('tea.served'),
+    PanoHit.tower => tr('mirador.a11y.tower'),
+  };
+
+  /// Activar algo desde VoiceOver: como tocarlo en su centro.
+  void _activate(PanoTarget t, Rect r) {
+    if (walking) return;
+    final box = context.findRenderObject() as RenderBox?;
+    _act(t, box?.localToGlobal(r.center) ?? r.center);
+  }
+
+  void _act(PanoTarget hit, Offset from) {
     switch (hit.kind) {
       case PanoHit.place:
         final place = hit.id!;
@@ -910,7 +940,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
     return LayoutBuilder(
       builder: (context, box) {
         _size = box.biggest;
-        final v = _view();
+        final v = _shown = _view();
         return Stack(
           children: [
             Positioned.fill(
@@ -922,7 +952,15 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
                 onScaleUpdate: _scaleUpdate,
                 onScaleEnd: _scaleEnd,
                 // Capa propia: lo que se anima en el HUD no repinta el paisaje.
-                child: RepaintBoundary(child: CustomPaint(painter: PanoPainter(v))),
+                child: RepaintBoundary(
+                  child: Semantics(
+                    label: tr('mirador.$_at'),
+                    hint: tr('mirador.hint'),
+                    child: CustomPaint(
+                      painter: PanoPainter(v, describe: _describe, activate: _activate),
+                    ),
+                  ),
+                ),
               ),
             ),
             if (_away && !walking)

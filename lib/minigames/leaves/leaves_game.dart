@@ -59,6 +59,11 @@ class LeavesGame extends FlameGame with DragCallbacks {
   final _rng = Random();
   final _leaves = <Leaf>[];
   late double _left = b.d('seconds');
+
+  /// El reloj arranca con el primer gesto (o tras unos segundos quieto): la
+  /// partida no se come tiempo mientras se mira el tablero.
+  late double _grace = b.d('startGrace');
+  bool get _waiting => _grace > 0;
   int _strokes = 0;
   late final _milestones = StarMilestones(b.list('stars'));
   int _heard = 0;
@@ -100,6 +105,7 @@ class LeavesGame extends FlameGame with DragCallbacks {
     super.onDragStart(event);
     if (_over) return;
     Haptics.light();
+    _grace = 0;
     _last = Offset(event.localPosition.x, event.localPosition.y);
     _strokes++;
   }
@@ -139,7 +145,9 @@ class LeavesGame extends FlameGame with DragCallbacks {
       _trail[i] = (_trail[i].$1, _trail[i].$2 - dt);
     }
     _trail.removeWhere((e) => e.$2 <= 0);
-    if (!_over) {
+    if (_waiting) {
+      _grace -= dt;
+    } else if (!_over) {
       lastSeconds(_left, _left -= dt);
       _updateWind(dt);
       if (_left <= 0) _end();

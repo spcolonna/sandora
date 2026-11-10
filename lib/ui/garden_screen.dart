@@ -777,7 +777,7 @@ class _WalletPill extends StatelessWidget {
         currency: 'wallet',
         child: Glass(
           opacity: open ? 0.86 : 0.62,
-          padding: const EdgeInsets.fromLTRB(12, 9, 8, 9),
+          padding: const EdgeInsets.fromLTRB(12, 11, 8, 11),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -842,7 +842,7 @@ class _WalletPanel extends StatelessWidget {
                 child: InkButton.paper(
                   label: tr('shop.title'),
                   glyph: InkGlyph.market,
-                  height: 38,
+                  height: 44,
                   onPressed: onMarket,
                 ),
               ),
@@ -1123,7 +1123,7 @@ class _GameStrip extends StatelessWidget {
       height: 52,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         children: [
           for (final g in games)
             Padding(
@@ -1155,7 +1155,7 @@ class _SenderoBar extends StatelessWidget {
       key: key,
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

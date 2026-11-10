@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../garden/economy.dart';
+import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 
 /// Monto de una moneda con su ícono. Cuando el monto cambia, cuenta hasta el
@@ -16,16 +17,36 @@ class CurrencyChip extends StatelessWidget {
   final int? from;
   final Duration delay;
 
-  const CurrencyChip._(this.currency, this.value, this.prefix, {this.from, this.delay = Duration.zero});
+  /// Lo que todavía no alcanza: la cifra va en rojo tierra.
+  final bool short;
+
+  const CurrencyChip._(
+    this.currency,
+    this.value,
+    this.prefix, {
+    this.from,
+    this.delay = Duration.zero,
+    this.short = false,
+  });
 
   factory CurrencyChip.pebbles(int n, {String prefix = '', int? from, Duration delay = Duration.zero}) =>
       CurrencyChip._('pebbles', n, prefix, from: from, delay: delay);
 
-  factory CurrencyChip.lotus(int n, {String prefix = '', int? from, Duration delay = Duration.zero}) =>
-      CurrencyChip._('lotus', n, prefix, from: from, delay: delay);
+  factory CurrencyChip.lotus(
+    int n, {
+    String prefix = '',
+    int? from,
+    Duration delay = Duration.zero,
+    bool short = false,
+  }) => CurrencyChip._('lotus', n, prefix, from: from, delay: delay, short: short);
 
   /// Cualquier moneda del Mercado por su clave ('pebbles', 'lotus' o una esencia).
-  factory CurrencyChip.of(String key, int n, {String prefix = ''}) => CurrencyChip._(key, n, prefix);
+  factory CurrencyChip.of(String key, int n, {String prefix = '', bool short = false}) =>
+      CurrencyChip._(key, n, prefix, short: short);
+
+  /// Un precio: en rojo si todavía no alcanza.
+  factory CurrencyChip.price(String key, int n) =>
+      CurrencyChip._(key, n, '', short: Progress.instance.walletOf(key) < n);
 
   factory CurrencyChip.essence(Essence e, int n, {String prefix = '', int? from, Duration delay = Duration.zero}) =>
       CurrencyChip._(e.name, n, prefix, from: from, delay: delay);
@@ -39,7 +60,12 @@ class CurrencyChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Cifras de ancho fijo: la píldora no tiembla mientras cuenta.
-    const style = TextStyle(fontWeight: FontWeight.w700, fontSize: 16, fontFeatures: [FontFeature.tabularFigures()]);
+    final style = TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 16,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      color: short ? shortColor : null,
+    );
     return Tooltip(
       message: _tooltip,
       child: Row(
@@ -62,6 +88,30 @@ class CurrencyChip extends StatelessWidget {
     );
   }
 }
+
+/// El rojo tierra de lo que no alcanza.
+const shortColor = Color(0xFFB0503C);
+
+/// Qué falta para pagar [cost] («Te faltan 12 Piedritas y 3 Agua»), o null
+/// si alcanza.
+String? shortNote(Map<String, int> cost) {
+  final p = Progress.instance;
+  final parts = [
+    for (final c in cost.entries)
+      if (p.walletOf(c.key) < c.value) '${c.value - p.walletOf(c.key)} ${_name(c.key)}',
+  ];
+  if (parts.isEmpty) return null;
+  final list = parts.length == 1
+      ? parts.first
+      : tr('wallet.and', {'a': parts.sublist(0, parts.length - 1).join(', '), 'b': parts.last});
+  return tr('wallet.short', {'list': list});
+}
+
+String _name(String key) => switch (key) {
+  'pebbles' => tr('currency.pebbles'),
+  'lotus' => tr('currency.lotus'),
+  _ => tr('essence.$key'),
+};
 
 /// El ícono de una moneda ('pebbles', 'lotus' o una esencia).
 class CurrencyIcon extends StatelessWidget {

@@ -86,6 +86,11 @@ class MossGame extends FlameGame with DragCallbacks {
   final _rng = Random();
   late final MossField _field;
   late double _left = b.d('seconds');
+
+  /// El reloj arranca con el primer gesto (o tras unos segundos quieto): la
+  /// partida no se come tiempo mientras se mira el tablero.
+  late double _grace = b.d('startGrace');
+  bool get _waiting => _grace > 0;
   bool _over = false;
   Offset? _last;
   final _rocks = <Rect>[];
@@ -159,6 +164,7 @@ class MossGame extends FlameGame with DragCallbacks {
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     if (_over) return;
+    _grace = 0;
     _last = _toField(event.localPosition);
     _brush(_last!);
   }
@@ -208,6 +214,10 @@ class MossGame extends FlameGame with DragCallbacks {
       _shown[i] += (_field.moss[i] - _shown[i]) * k;
     }
     if (_over) return;
+    if (_waiting) {
+      _grace -= dt;
+      return;
+    }
     lastSeconds(_left, _left -= dt);
     _growT += dt;
     if (_growT > 0.25) {

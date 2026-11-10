@@ -74,7 +74,7 @@ Future<void> showSettingsSheet(BuildContext context) {
                           final t = TimeOfDay(hour: m ~/ 60, minute: m % 60);
                           return InkButton.paper(
                             label: t.format(context),
-                            height: 38,
+                            height: 44,
                             onPressed: () async {
                               final picked = await showWashiTimePicker(
                                 context,

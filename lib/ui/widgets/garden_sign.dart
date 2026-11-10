@@ -172,12 +172,17 @@ Future<void> showGardensSheet(BuildContext context) {
                               style: text.bodySmall,
                             ),
                             const SizedBox(height: 6),
-                            CurrencyChip.lotus(p.gardenCost),
+                            CurrencyChip.price('lotus', p.gardenCost),
                           ],
                         ),
                       ),
                       InkButton.small(
                         label: tr('shop.dealBuy'),
+                        whyNot: p.gardenCount >= p.gardenMax
+                            ? tr('gardens.full')
+                            : p.level < p.gardenMinLevel
+                            ? tr('gardens.level', {'n': p.gardenMinLevel})
+                            : shortNote({'lotus': p.gardenCost}),
                         onPressed: p.canBuyGarden
                             ? () async {
                                 Navigator.pop(sheet);

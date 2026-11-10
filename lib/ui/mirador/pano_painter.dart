@@ -2,7 +2,9 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show listEquals, mapEquals;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show SemanticsProperties;
 
 import '../../garden/mirador.dart';
 import '../garden/garden_decor.dart';
@@ -49,6 +51,19 @@ class PanoThing {
     required this.index,
     this.flip = false,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      other is PanoThing &&
+      other.pos == pos &&
+      other.width == width &&
+      other.aspect == aspect &&
+      other.decor == decor &&
+      other.flip == flip &&
+      other.index == index;
+
+  @override
+  int get hashCode => Object.hash(pos, width, aspect, decor, flip, index);
 }
 
 /// Algo vivo que se toca: un regalo, un cuidado, un visitante, un hueco. Sin
@@ -74,6 +89,21 @@ class PanoMarker {
     this.color = Palette.lantern,
     this.flat = false,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      other is PanoMarker &&
+      other.pos == pos &&
+      other.width == width &&
+      other.aspect == aspect &&
+      other.art == art &&
+      other.icon == icon &&
+      other.color == color &&
+      other.target == target &&
+      other.flat == flat;
+
+  @override
+  int get hashCode => Object.hash(pos, width, aspect, art, icon, color, target, flat);
 }
 
 /// Cómo se ve cada lugar.
@@ -85,6 +115,13 @@ class PlaceLook {
   /// Tiene algo nuevo o para retirar.
   final bool dot;
   const PlaceLook({required this.open, required this.name, this.note, this.dot = false});
+
+  @override
+  bool operator ==(Object other) =>
+      other is PlaceLook && other.open == open && other.name == name && other.note == note && other.dot == dot;
+
+  @override
+  int get hashCode => Object.hash(open, name, note, dot);
 }
 
 /// Una salida: la piedra con luz hacia otro mirador.
@@ -95,6 +132,13 @@ class PanoExit {
   /// Hacia dónde apunta (grados).
   final double bearing;
   const PanoExit({required this.pos, required this.to, required this.label, required this.bearing});
+
+  @override
+  bool operator ==(Object other) =>
+      other is PanoExit && other.pos == pos && other.to == to && other.label == label && other.bearing == bearing;
+
+  @override
+  int get hashCode => Object.hash(pos, to, label, bearing);
 }
 
 /// El arte de cada lugar (el primero que esté pintado) y su alto sobre ancho
@@ -252,6 +296,28 @@ class PanoView {
     this.hub = false,
     this.glow,
   });
+
+  /// Igual si se dibujaría igual: así el jardín puede reconstruirse (un
+  /// contador, un aviso) sin repintar el paisaje entero.
+  @override
+  bool operator ==(Object other) =>
+      other is PanoView &&
+      identical(other.world, world) &&
+      other.pos == pos &&
+      other.yaw == yaw &&
+      other.fov == fov &&
+      other.zoom == zoom &&
+      other.bob == bob &&
+      other.daylight == daylight &&
+      other.hub == hub &&
+      other.glow == glow &&
+      mapEquals(other.places, places) &&
+      listEquals(other.decor, decor) &&
+      listEquals(other.markers, markers) &&
+      listEquals(other.exits, exits);
+
+  @override
+  int get hashCode => Object.hash(pos, yaw, fov, zoom, bob, daylight, hub, glow);
 }
 
 class _Item {
@@ -286,6 +352,25 @@ class PanoScene {
   }
 
   MiradorWorld get w => v.world;
+
+  /// Lo que se puede tocar y está a la vista, con el área que ocupa (para
+  /// VoiceOver), de lo más cercano a lo más lejano.
+  List<(Rect, PanoTarget)> targets() {
+    final screen = Offset.zero & size;
+    final areas = <PanoTarget, Rect>{};
+    final near = <PanoTarget, double>{};
+    for (final it in [..._labels, ..._items, ..._flat]) {
+      final t = it.target;
+      if (t == null) continue;
+      final r = it.rect.intersect(screen);
+      if (r.width < 4 || r.height < 4) continue;
+      areas[t] = areas[t]?.expandToInclude(r) ?? r;
+      near[t] = min(near[t] ?? double.infinity, it.dist);
+    }
+    final out = [for (final e in areas.entries) (e.value, e.key)];
+    out.sort((a, b) => near[a.$2]!.compareTo(near[b.$2]!));
+    return out;
+  }
 
   /// Lo que se tocó en [p] (lo más cercano primero).
   PanoTarget? hit(Offset p) {
@@ -2108,11 +2193,40 @@ TextPainter _text(String text, TextStyle style, {int? maxLines}) {
 /// Dibuja el patio desde un mirador.
 class PanoPainter extends CustomPainter {
   final PanoView view;
-  PanoPainter(this.view);
+
+  /// Para VoiceOver: cómo se llama cada cosa tocable (null = no se anuncia)
+  /// y qué pasa al activarla.
+  final String? Function(PanoTarget)? describe;
+  final void Function(PanoTarget, Rect)? activate;
+
+  PanoPainter(this.view, {this.describe, this.activate});
 
   @override
   void paint(Canvas canvas, Size size) => PanoScene(size, view, canvas).paint();
 
   @override
   bool shouldRepaint(PanoPainter old) => old.view != view;
+
+  @override
+  SemanticsBuilderCallback? get semanticsBuilder {
+    final describe = this.describe;
+    if (describe == null) return null;
+    return (size) => [
+      for (final (rect, target) in PanoScene(size, view).targets())
+        if (describe(target) case final label?)
+          CustomPainterSemantics(
+            key: ValueKey(target),
+            rect: rect,
+            properties: SemanticsProperties(
+              label: label,
+              button: true,
+              textDirection: TextDirection.ltr,
+              onTap: activate == null ? null : () => activate!(target, rect),
+            ),
+          ),
+    ];
+  }
+
+  @override
+  bool shouldRebuildSemantics(PanoPainter oldDelegate) => oldDelegate.view != view;
 }

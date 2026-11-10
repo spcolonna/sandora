@@ -8,6 +8,7 @@ import 'package:sandora/garden/mirador.dart';
 import 'package:sandora/garden/progress.dart';
 import 'package:sandora/garden/weather.dart';
 import 'package:sandora/garden/weather_service.dart';
+import 'package:sandora/i18n/i18n.dart';
 import 'package:sandora/settings.dart';
 import 'package:sandora/ui/garden/garden_scene.dart';
 import 'package:sandora/ui/garden/garden_view.dart';
@@ -90,7 +91,7 @@ void main() {
     expect(world.resolve(world.hub.at), world.hub.at);
   });
 
-    test('la cámara gira 360°: adelante al centro, a la derecha más a la derecha, atrás afuera', () {
+  test('la cámara gira 360°: adelante al centro, a la derecha más a la derecha, atrás afuera', () {
     const cam = PanoCamera(size: size, pos: Offset.zero, yaw: 0, fov: 70 * pi / 180);
     final ahead = cam.project(const Offset(0, 5))!;
     expect(ahead.dx, closeTo(size.width / 2, 1e-6));
@@ -339,7 +340,10 @@ void main() {
     final start = key.currentState!.position;
     final yaw = key.currentState!.yaw;
     // Arranca mirando hacia los juegos abiertos, no hacia los cerrados.
-    final open = [for (final p in Place.values) if (placeLockNote(p) == null) world.place(p.name)!.at];
+    final open = [
+      for (final p in Place.values)
+        if (placeLockNote(p) == null) world.place(p.name)!.at,
+    ];
     expect(open, isNotEmpty);
     expect(
       open.any((at) => PanoCamera.wrap(MiradorWorld.bearing(world.hub.at, at) * pi / 180 - yaw).abs() < 0.5),
@@ -391,5 +395,36 @@ void main() {
     await tester.tapAt(r.center);
     await tester.pump();
     expect(gates, ['future']);
+  });
+
+  testWidgets('VoiceOver anuncia lo tocable del patio y lo activa; sin cambios no se repinta', (tester) async {
+    await setUp();
+    final handle = tester.ensureSemantics();
+    final gates = <String>[];
+    final c = MiradorController();
+    await pump(
+      tester,
+      MiradorView(
+        now: DateTime(2026, 11, 8, 11),
+        weather: Weather.clear,
+        multi: false,
+        controller: c,
+        onPlace: (_) async {},
+        onGate: gates.add,
+      ),
+    );
+    c.lookAt(world.objects.firstWhere((o) => o.id == 'future').at);
+    await tester.pump();
+    expect(find.semantics.byLabel(tr('mirador.future')), findsOne);
+    tester.semantics.tap(find.semantics.byLabel(tr('mirador.future')));
+    await tester.pump();
+    expect(gates, ['future']);
+    final v = viewOf(tester);
+    tester.element(find.byType(MiradorView)).markNeedsBuild();
+    await tester.pump();
+    final again = viewOf(tester);
+    expect(identical(again, v), isFalse);
+    expect(PanoPainter(again).shouldRepaint(PanoPainter(v)), isFalse);
+    handle.dispose();
   });
 }

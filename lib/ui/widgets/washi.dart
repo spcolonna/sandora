@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../fx/sfx.dart';
 import '../garden/scene_art.dart';
@@ -147,29 +148,50 @@ class InkButton extends StatefulWidget {
 
   /// Sin acción, el botón queda apagado (más claro y sin responder).
   final VoidCallback? onPressed;
+
+  /// Apagado, por qué: tocarlo lo dice en un aviso en vez de no hacer nada.
+  final String? whyNot;
   final InkGlyph? glyph;
   final bool quiet, paper, compact;
   final double height;
-  const InkButton({super.key, required this.label, required this.onPressed, this.glyph, this.height = 54})
+  const InkButton({super.key, required this.label, required this.onPressed, this.glyph, this.whyNot, this.height = 54})
     : quiet = false,
       paper = false,
       compact = false;
 
   /// El trazo principal, pero del ancho de la palabra: para filas y tarjetas.
-  const InkButton.small({super.key, required this.label, required this.onPressed, this.glyph, this.height = 40})
-    : quiet = false,
-      paper = false,
-      compact = true;
+  const InkButton.small({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.glyph,
+    this.whyNot,
+    this.height = 44,
+  }) : quiet = false,
+       paper = false,
+       compact = true;
 
-  const InkButton.quiet({super.key, required this.label, required this.onPressed, this.glyph, this.height = 44})
-    : quiet = true,
-      paper = false,
-      compact = false;
+  const InkButton.quiet({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.glyph,
+    this.whyNot,
+    this.height = 44,
+  }) : quiet = true,
+       paper = false,
+       compact = false;
 
-  const InkButton.paper({super.key, required this.label, required this.onPressed, this.glyph, this.height = 44})
-    : quiet = true,
-      paper = true,
-      compact = false;
+  const InkButton.paper({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.glyph,
+    this.whyNot,
+    this.height = 44,
+  }) : quiet = true,
+       paper = true,
+       compact = false;
 
   @override
   State<InkButton> createState() => _InkButtonState();
@@ -216,6 +238,7 @@ class _InkButtonState extends State<InkButton> {
       button: true,
       enabled: on,
       label: widget.label,
+      hint: on ? null : widget.whyNot,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTapDown: on ? (_) => _set(true) : null,
@@ -226,7 +249,13 @@ class _InkButtonState extends State<InkButton> {
                 Haptics.light();
                 widget.onPressed!();
               }
-            : null,
+            : widget.whyNot == null
+            ? null
+            : () {
+                SoundBoard.instance.play(Sfx.uiTap, volume: 0.25);
+                Haptics.light();
+                showWashiToast(context, widget.whyNot!);
+              },
         child: AnimatedOpacity(
           opacity: on ? 1 : 0.45,
           duration: const Duration(milliseconds: 150),
@@ -419,7 +448,9 @@ class _InkIconButtonState extends State<InkIconButton> {
     return Semantics(
       button: true,
       label: widget.tooltip,
-      child: widget.tooltip == null ? button : Tooltip(message: widget.tooltip!, child: button),
+      child: TapPad(
+        child: widget.tooltip == null ? button : Tooltip(message: widget.tooltip!, child: button),
+      ),
     );
   }
 }
@@ -989,7 +1020,7 @@ class InkChip extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           child: SizedBox(
             key: ValueKey(selected),
-            height: 38,
+            height: 44,
             child: selected
                 ? CustomPaint(painter: _BrushFill(pressed: false), child: label)
                 : DecoratedBox(
@@ -1037,26 +1068,66 @@ class _PressableState extends State<Pressable> {
   @override
   Widget build(BuildContext context) {
     final on = widget.onTap != null;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: on ? (_) => _set(true) : null,
-      onTapCancel: on ? () => _set(false) : null,
-      onTapUp: on ? (_) => _set(false) : null,
-      onTap: on
-          ? () {
-              Haptics.light();
-              if (widget.tapVolume != null) SoundBoard.instance.play(Sfx.uiTap, volume: widget.tapVolume!);
-              widget.onTap!();
-            }
-          : null,
-      onLongPress: widget.onLongPress,
-      child: AnimatedScale(
-        scale: _down ? widget.scale : 1,
-        duration: const Duration(milliseconds: 90),
-        curve: Curves.easeOut,
-        child: widget.child,
+    return TapPad(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: on ? (_) => _set(true) : null,
+        onTapCancel: on ? () => _set(false) : null,
+        onTapUp: on ? (_) => _set(false) : null,
+        onTap: on
+            ? () {
+                Haptics.light();
+                if (widget.tapVolume != null) SoundBoard.instance.play(Sfx.uiTap, volume: widget.tapVolume!);
+                widget.onTap!();
+              }
+            : null,
+        onLongPress: widget.onLongPress,
+        child: AnimatedScale(
+          scale: _down ? widget.scale : 1,
+          duration: const Duration(milliseconds: 90),
+          curve: Curves.easeOut,
+          child: widget.child,
+        ),
       ),
     );
+  }
+}
+
+/// Algo chico que se toca como si midiera al menos [min] de lado: el área del
+/// dedo crece alrededor sin mover nada en pantalla (guía de iOS: 44 pt). Solo
+/// alcanza hasta donde llegue el padre.
+class TapPad extends SingleChildRenderObjectWidget {
+  final double min;
+  const TapPad({super.key, this.min = 44, super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderTapPad(min);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) => (renderObject as _RenderTapPad).min = min;
+}
+
+class _RenderTapPad extends RenderProxyBox {
+  double min;
+  _RenderTapPad(this.min);
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    final dx = max(0.0, (min - size.width) / 2), dy = max(0.0, (min - size.height) / 2);
+    if (!Rect.fromLTRB(-dx, -dy, size.width + dx, size.height + dy).contains(position)) return false;
+    final child = this.child;
+    if (child == null) return false;
+    // Fuera del dibujo, el toque va al borde más cercano.
+    // (apenas adentro: el borde de abajo y el derecho no cuentan como adentro).
+    final at = Offset(
+      position.dx.clamp(0.0, max(0.0, size.width - 0.01)),
+      position.dy.clamp(0.0, max(0.0, size.height - 0.01)),
+    );
+    if (child.hitTest(result, position: at)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
   }
 }
 
