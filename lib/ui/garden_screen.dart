@@ -132,7 +132,12 @@ class _GardenScreenState extends State<GardenScreen> with WidgetsBindingObserver
                               ? placeName(Place.values.byName(id))
                               : '? · ${tr('mirador.${view.world.lookoutOf(id).id}')}',
                           known: _known(id),
-                          onTap: _known(id) ? () => Navigator.pop(sheet, id) : null,
+                          onTap: _known(id)
+                              ? () => Navigator.pop(sheet, id)
+                              : () => showWashiToast(
+                                  sheet,
+                                  tr('sendero.quickFind', {'place': tr('mirador.${view.world.lookoutOf(id).id}')}),
+                                ),
                         ),
                     ],
                   ),
@@ -1207,7 +1212,7 @@ class _QuickChip extends StatelessWidget {
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w700,
-          color: Palette.ink.withValues(alpha: known ? 0.9 : 0.45),
+          color: Palette.ink.withValues(alpha: known ? 0.9 : 0.6),
         ),
       ),
     ),

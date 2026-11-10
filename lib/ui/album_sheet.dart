@@ -302,7 +302,7 @@ class _Tile extends StatelessWidget {
                 maxLines: 2,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11.5, color: Palette.ink.withValues(alpha: item.owned ? 0.85 : 0.4)),
+                style: TextStyle(fontSize: 11.5, color: Palette.ink.withValues(alpha: item.owned ? 0.85 : 0.6)),
               ),
             ],
           ),

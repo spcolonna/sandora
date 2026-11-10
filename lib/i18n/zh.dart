@@ -515,4 +515,5 @@ const zh = <String, String>{
   'meditation.endAsk': '现在结束吗？',
   'meditation.endAskBody': '到目前为止的冥想同样计入。',
   'meditation.keep': '继续冥想',
+  'sendero.quickFind': '你还没发现它：走到{place}去找找看。',
 };

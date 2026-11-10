@@ -515,4 +515,5 @@ const ja = <String, String>{
   'meditation.endAsk': 'もう終えますか？',
   'meditation.endAskBody': 'ここまでの瞑想もちゃんと記録されます。',
   'meditation.keep': '続ける',
+  'sendero.quickFind': 'まだ見つけていません。{place}まで歩いて探しましょう。',
 };

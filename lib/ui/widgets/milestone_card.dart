@@ -240,7 +240,7 @@ class _MilestoneViewState extends State<_MilestoneView> with SingleTickerProvide
                         const SizedBox(height: 16),
                         Text(
                           tr('milestone.tap'),
-                          style: text.labelMedium?.copyWith(color: Palette.ink.withValues(alpha: 0.45)),
+                          style: text.labelMedium?.copyWith(color: Palette.ink.withValues(alpha: 0.6)),
                         ),
                       ],
                     ),

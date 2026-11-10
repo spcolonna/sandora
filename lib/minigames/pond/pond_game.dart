@@ -200,9 +200,9 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
     final center = step.cleared.map(_home).reduce((a, b) => a + b) / step.cleared.length.toDouble();
     final at = _screen(center);
     if (_cascade >= 3 || step.created.values.any((p) => p.power == Power.moon)) {
-      celebrate(world, Vector2(at.dx, at.dy), Grade.perfect);
+      celebrate(world, Vector2(at.dx, at.dy), Grade.perfect, streak: _cascade, streakNote: false);
     } else if (_cascade == 2 || step.created.isNotEmpty) {
-      celebrate(world, Vector2(at.dx, at.dy), Grade.great);
+      celebrate(world, Vector2(at.dx, at.dy), Grade.great, streak: _cascade, streakNote: false);
     } else {
       Haptics.light();
     }
@@ -234,6 +234,7 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
         if (wrapped) _pos[id] = _home(i) - Offset(_currentDir.toDouble(), 0);
       }
       SoundBoard.instance.play(Sfx.rainNote, volume: 0.3, variant: 1);
+      Haptics.light();
       if (_board.groups().isNotEmpty) {
         _cascade = 1;
         _resolving = true;
@@ -247,6 +248,9 @@ class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
       _currentDir = _rng.nextBool() ? 1 : -1;
     }
     if (!_board.hasMove()) {
+      // Sin jugadas: el agua remueve las flores, con su sonido.
+      SoundBoard.instance.play(Sfx.sweep, volume: 0.35);
+      Haptics.light();
       _board.shuffle();
       for (var i = 0; i < _board.cells.length; i++) {
         _pos[_board.cells[i]!.id] = _home(i) + Offset(0, -0.4);

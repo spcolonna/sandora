@@ -446,9 +446,14 @@ class _ToastState extends State<_Toast> {
         child: CalmAppear(
           rise: 24,
           child: Material(
-            color: Palette.paper,
-            elevation: 6,
-            borderRadius: BorderRadius.circular(18),
+            // Papel washi como los demás avisos, no la tarjeta de Material.
+            color: Palette.sandLight,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(color: Palette.wood.withValues(alpha: 0.25)),
+            ),
+            elevation: 4,
+            shadowColor: const Color(0x55000000),
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Column(mainAxisSize: MainAxisSize.min, children: [for (final g in widget.goals) GoalDoneRow(g)]),

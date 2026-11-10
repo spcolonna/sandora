@@ -127,6 +127,9 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
   /// Los miradores que faltan para llegar, y hacia dónde girar antes.
   final _route = <String>[];
   double? _turnTo;
+
+  /// Zoom al que vuelve solo (al caminar, el acercamiento se suelta despacio).
+  double? _zoomTo;
   bool _fast = false;
   double _walked = 0;
 
@@ -348,8 +351,17 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       spin *= exp(-dt * 3.5);
       if (spin.abs() < 0.02) spin = 0;
     }
-    final idle = _turnTo == null && _route.isEmpty && _dest == null && _glide == 0 && spin == 0;
+    var zoom = _zoom;
+    if (_zoomTo != null) {
+      zoom += (_zoomTo! - zoom) * min(1.0, dt * 6);
+      if ((zoom - _zoomTo!).abs() < 0.005) {
+        zoom = _zoomTo!;
+        _zoomTo = null;
+      }
+    }
+    final idle = _turnTo == null && _zoomTo == null && _route.isEmpty && _dest == null && _glide == 0 && spin == 0;
     setState(() {
+      _zoom = zoom;
       _yaw = PanoCamera.wrap(yaw);
       _pos = pos;
       _spin = spin;
@@ -454,6 +466,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
 
   void _walk(List<String> route, {bool fast = false}) {
     if (route.isEmpty) return;
+    if (_zoom != 1) _zoomTo = 1;
     SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
     Haptics.light();
     setState(() {
@@ -494,6 +507,7 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
       // En la Clásica se camina hasta el juego (si no se está ya enfrente).
       final stand = _standFor(o);
       if ((stand - _pos).distance > 0.6) {
+        if (_zoom != 1) _zoomTo = 1;
         SoundBoard.instance.play(Sfx.uiTap, volume: 0.3);
         Haptics.light();
         setState(() {
@@ -850,7 +864,12 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
     setState(() {
       _turnTo = null;
       if (d.pointerCount > 1) {
+        // Acerca hacia donde están los dedos, no hacia el centro.
+        final before = _f;
+        _zoomTo = null;
         _zoom = (_zoomStart * d.scale).clamp(1.0, world.zoomMax);
+        final dx = d.localFocalPoint.dx - _size.width / 2;
+        _yaw = PanoCamera.wrap(_yaw + dx / before - dx / _f);
         return;
       }
       if (!widget.multi) {
@@ -945,13 +964,15 @@ class _HomeButton extends StatelessWidget {
   const _HomeButton({required this.label, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: Palette.ink.withValues(alpha: 0.6),
-    shape: const StadiumBorder(),
-    child: InkWell(
-      key: const ValueKey('mirador-home'),
-      customBorder: const StadiumBorder(),
-      onTap: onTap,
+  Widget build(BuildContext context) => Pressable(
+    key: const ValueKey('mirador-home'),
+    onTap: onTap,
+    child: DecoratedBox(
+      decoration: ShapeDecoration(
+        color: Palette.ink.withValues(alpha: 0.6),
+        shape: const StadiumBorder(),
+        shadows: const [BoxShadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2))],
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         child: Row(

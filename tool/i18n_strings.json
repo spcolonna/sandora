@@ -3596,5 +3596,12 @@
   "pt": "Continuar meditando",
   "ja": "続ける",
   "zh": "继续冥想"
+ },
+ "sendero.quickFind": {
+  "es": "Todavía no lo encontraste: caminá hasta {place} para descubrirlo.",
+  "en": "You haven't found it yet: walk to {place} to discover it.",
+  "pt": "Você ainda não o encontrou: caminhe até {place} para descobri-lo.",
+  "ja": "まだ見つけていません。{place}まで歩いて探しましょう。",
+  "zh": "你还没发现它：走到{place}去找找看。"
  }
 }
