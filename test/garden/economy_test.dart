@@ -15,7 +15,9 @@ void main() {
     expect(three.pebbles, greaterThan(zero.pebbles));
     expect(three.essence, Essence.water);
     expect(zero.essenceAmount, 0);
-    final tired = eco.reward('rain', 3, balance.repeats.i('fullRuns') + 1);
+    // Hoy todos descansan entre partidas; la regla de repeats vale para los que no.
+    final noRest = Economy(loadBalanceWith((root) => root['rest']['games'] = <String>[]));
+    final tired = noRest.reward('rain', 3, balance.repeats.i('fullRuns') + 1);
     expect(tired.tired, isTrue);
     expect(tired.pebbles, lessThan(three.pebbles));
     expect(tired.pebbles, greaterThan(0), reason: 'sin energía: siempre se gana algo');

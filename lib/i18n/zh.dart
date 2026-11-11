@@ -527,4 +527,7 @@ const zh = <String, String>{
   'req.gone': '访客继续上路了，改天会再来。',
   'req.ok': '好的',
   'shop.decorDone': '今天的都买完了。明天再来，会有新物件。',
+  'game.error': '这个游戏无法打开。',
+  'game.errorBack': '返回庭园',
+  'sendero.restingFor': '休息 {n} 分钟',
 };

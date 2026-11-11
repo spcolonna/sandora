@@ -9,13 +9,13 @@
     "floor": 0.40
   },
   "repeats": {
-    "_comment": "Sin energía: se juega todo lo que se quiera, pero desde la partida N del mismo minijuego en el día rinde menos.",
+    "_comment": "Sin energía: desde la partida N del mismo minijuego en el día rinde menos. Hoy no aplica a ninguno: todos están en rest.games (la regla queda para juegos sin descanso).",
     "fullRuns": 3,
     "factorAfter": 0.5
   },
   "rest": {
     "_comment": "Después de cada partida estos lugares descansan `minutes` minutos (sin la regla de repeats); seguir ya cuesta skipLotus lotos.",
-    "games": ["sand", "stack"],
+    "games": ["sand", "stack", "rain", "pond", "shishi", "leaves", "moss", "bonsai", "enso", "bell", "matcha", "flute", "lanterns"],
     "minutes": 30,
     "skipLotus": 1
   },
@@ -202,8 +202,6 @@
     "_comment": "startGrace: segundos antes de que el reloj arranque solo si no se tocó nada (el primer gesto lo arranca antes). broomReach: alcance de la escoba (fracción del ancho). pileHold: cuánto del viento sienten las hojas del montón. stars: fracción de hojas en el montón (con un poco de premio por barrer con pocos gestos).",
     "seconds": 30,
     "startGrace": 3.0,
-    "startGrace": 3.0,
-    "startGrace": 3.0,
     "leaves": 30,
     "broomReach": 0.12,
     "sweepForce": 32,
@@ -220,6 +218,7 @@
   "moss": {
     "_comment": "startGrace: segundos antes de que el reloj arranque solo si no se tocó nada (el primer gesto lo arranca antes). brush: radio del pincel en celdas (la grilla tiene 48 de ancho). growChance: probabilidad por tick de que el musgo se extienda solo. stars: cubierto - manchado * stainWeight.",
     "seconds": 35,
+    "startGrace": 3.0,
     "brush": 2.6,
     "amount": 0.55,
     "growChance": 0.02,
@@ -229,6 +228,7 @@
   "bonsai": {
     "_comment": "startGrace: segundos antes de que el reloj arranque solo si no se tocó nada (el primer gesto lo arranca antes). Largos y velocidad como fracción del ancho. stars: armonía = (salvajes cortadas - goodCutPenalty * buenas cortadas) / salvajes.",
     "seconds": 30,
+    "startGrace": 3.0,
     "spawnEvery": 1.1,
     "minLength": 0.08,
     "maxLength": 0.3,

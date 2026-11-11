@@ -114,8 +114,7 @@ const es = <String, String>{
   'currency.lotus': 'Lotos',
   'shop.title': 'Mercado',
   'shop.desc': 'Cambiá lo que te sobra por lo que te falta.',
-  'shop.lotusHint':
-      'Los lotos se ganan con la ofrenda del día (tu primera partida o meditación), al cumplir las tres metas del día y con cada semana de racha meditando.',
+  'shop.lotusHint': 'Los lotos se ganan con la ofrenda del día (tu primera partida o meditación), al cumplir las tres metas del día y con cada semana de racha meditando.',
   'shop.trades': 'Trueques del día',
   'shop.withLotus': 'Con lotos',
   'shop.left': 'Quedan {n} hoy',
@@ -152,8 +151,7 @@ const es = <String, String>{
   'weather.title': 'El jardín ahora',
   'weather.own': 'Clima propio del jardín: cambia cada pocas horas.',
   'weather.real.title': 'Clima de donde estás',
-  'weather.real.desc':
-      'Usa tu ubicación aproximada para que en el jardín llueva cuando llueve afuera. La ubicación no se guarda.',
+  'weather.real.desc': 'Usa tu ubicación aproximada para que en el jardín llueva cuando llueve afuera. La ubicación no se guarda.',
   'weather.real.denied': 'Sin permiso de ubicación, el jardín sigue con su propio clima.',
   'weather.real.failed': 'No se pudo traer el clima ahora; se vuelve a intentar solo.',
   'weather.source': 'Pronóstico: MET Norway',
@@ -501,8 +499,7 @@ const es = <String, String>{
   'settings.view': 'Vista del jardín',
   'settings.viewPath': 'Sendero',
   'settings.viewClassic': 'Clásica',
-  'settings.viewHint':
-      'Sendero: paseás por el jardín y encontrás los juegos. Clásica: los juegos a mano, en tres vistas.',
+  'settings.viewHint': 'Sendero: paseás por el jardín y encontrás los juegos. Clásica: los juegos a mano, en tres vistas.',
   'guide.pathSand': 'Caminá hasta el Arenero (o tocalo) para jugar',
   'guide.pathRain': 'Se abrió un juego nuevo: buscalo en el camino',
   'mirador.entrance': 'Entrada',
@@ -530,4 +527,7 @@ const es = <String, String>{
   'req.gone': 'El visitante siguió su camino. Va a volver otro día.',
   'req.ok': 'Listo',
   'shop.decorDone': 'Ya te llevaste todo lo de hoy. Volvé mañana: llegan piezas nuevas.',
+  'game.error': 'Este juego no se pudo abrir.',
+  'game.errorBack': 'Volver al jardín',
+  'sendero.restingFor': 'Descansa {n} min',
 };

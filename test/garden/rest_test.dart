@@ -16,14 +16,18 @@ void main() {
     return p;
   }
 
-  test('el Arenero y las Piedras descansan 30 min después de jugarlos; la Lluvia no', () async {
+  test('todos los minijuegos descansan 30 min después de jugarlos', () async {
     final t0 = DateTime(2026, 11, 7, 10);
     final p = await afterGuide(t0);
+    const games = ['stack', 'sand', 'rain', 'pond', 'shishi', 'leaves', 'moss', 'bonsai', 'enso', 'bell', 'matcha', 'flute', 'lanterns'];
+    for (final g in games) {
+      expect(p.restsAfterPlay(g), isTrue, reason: g);
+    }
     p.finishRun('sand', 2, now: t0);
     p.finishRun('rain', 2, now: t0);
     expect(p.restLeft('sand', now: t0), const Duration(minutes: 30));
-    expect(p.restLeft('stack', now: t0), Duration.zero);
-    expect(p.restLeft('rain', now: t0), Duration.zero);
+    expect(p.restLeft('stack', now: t0), Duration.zero, reason: 'solo descansa lo jugado');
+    expect(p.restLeft('rain', now: t0), const Duration(minutes: 30));
     expect(p.restLeft('sand', now: t0.add(const Duration(minutes: 29))), const Duration(minutes: 1));
     expect(p.restLeft('sand', now: t0.add(const Duration(minutes: 30))), Duration.zero);
     await p.load(balance, now: t0);
@@ -52,7 +56,7 @@ void main() {
   });
 
   test('los lugares que descansan no se cansan además', () {
-    final eco = Economy(balance);
+    final eco = Economy(loadBalanceWith((root) => root['rest']['games'] = ['sand', 'stack']));
     final late = balance.repeats.i('fullRuns') + 1;
     expect(eco.reward('sand', 3, late).tired, isFalse);
     expect(eco.reward('stack', 3, late).tired, isFalse);

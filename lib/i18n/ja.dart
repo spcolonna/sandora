@@ -527,4 +527,7 @@ const ja = <String, String>{
   'req.gone': '訪問者は旅を続けました。また別の日に来ます。',
   'req.ok': 'わかった',
   'shop.decorDone': '今日の品はすべて手に入れました。明日また新しい品が届きます。',
+  'game.error': 'このゲームを開けませんでした。',
+  'game.errorBack': '庭に戻る',
+  'sendero.restingFor': '休憩 あと{n}分',
 };

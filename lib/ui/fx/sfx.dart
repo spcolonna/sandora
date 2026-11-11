@@ -70,7 +70,7 @@ class SoundBoard {
   final _loops = <Ambience, AudioPlayer>{};
   // Dos platos: al pasar del jardín a un juego (y de vuelta) una pieza se
   // funde con la otra, sin silencio en el medio.
-  final _decks = [AudioPlayer(), AudioPlayer()];
+  late final _decks = [AudioPlayer(), AudioPlayer()];
   int _deck = 0;
   AudioPlayer get _music => _decks[_deck];
   final _rng = Random();

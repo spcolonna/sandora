@@ -3680,5 +3680,26 @@
   "pt": "Você já levou tudo de hoje. Volte amanhã: chegam peças novas.",
   "ja": "今日の品はすべて手に入れました。明日また新しい品が届きます。",
   "zh": "今天的都买完了。明天再来，会有新物件。"
+ },
+ "game.error": {
+  "es": "Este juego no se pudo abrir.",
+  "en": "This game couldn't open.",
+  "pt": "Este jogo não pôde abrir.",
+  "ja": "このゲームを開けませんでした。",
+  "zh": "这个游戏无法打开。"
+ },
+ "game.errorBack": {
+  "es": "Volver al jardín",
+  "en": "Back to the garden",
+  "pt": "Voltar ao jardim",
+  "ja": "庭に戻る",
+  "zh": "返回庭园"
+ },
+ "sendero.restingFor": {
+  "es": "Descansa {n} min",
+  "en": "Resting {n} min",
+  "pt": "Descansa {n} min",
+  "ja": "休憩 あと{n}分",
+  "zh": "休息 {n} 分钟"
  }
 }

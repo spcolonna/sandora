@@ -581,11 +581,11 @@ class MiradorViewState extends State<MiradorView> with SingleTickerProviderState
   PlaceLook _look(Place place) {
     final p = _p;
     final note = placeLockNote(place);
-    final rest = place != Place.board && place != Place.meditation && p.restLeft(place.name) > Duration.zero;
+    final left = place == Place.board || place == Place.meditation ? Duration.zero : p.restLeft(place.name);
     return PlaceLook(
       open: note == null,
       name: placeName(place),
-      note: note ?? (rest ? tr('sendero.resting') : null),
+      note: note ?? (left > Duration.zero ? tr('sendero.restingFor', {'n': (left.inSeconds / 60).ceil()}) : null),
       dot: place == Place.stack && p.towerPending() > 0,
     );
   }

@@ -206,7 +206,14 @@ class _MinigameScreenState extends State<MinigameScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: GameWidget(game: _game)),
+          Positioned.fill(
+            child: GameWidget(
+              game: _game,
+              // Si el juego falla al cargar, un aviso de papel con salida en vez
+              // de la caja gris de Flutter.
+              errorBuilder: (context, error) => _LoadFailed(onBack: () => Navigator.pop(context)),
+            ),
+          ),
           if (widget.overlay != null)
             Positioned.fill(
               child: SoftShow(visible: playing, rise: 0, child: widget.overlay!(context, _game)),
@@ -244,3 +251,30 @@ class _MinigameScreenState extends State<MinigameScreen> {
 }
 
 enum _PauseChoice { resume, restart, quit }
+
+class _LoadFailed extends StatelessWidget {
+  final VoidCallback onBack;
+  const _LoadFailed({required this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: WashiCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(tr('game.error'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 18),
+                InkButton(label: tr('game.errorBack'), onPressed: onBack),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
