@@ -426,6 +426,74 @@ class ShishiGame extends FlameGame with TapCallbacks {
     );
   }
 
+  /// El agua dentro del bambú, de la boca hasta [reach]. Con el arte
+  /// `obj_shishi_water` (mismo encuadre que el bambú) se recorta ese dibujo;
+  /// si no, una lámina translúcida con frente que se mece y un brillo arriba,
+  /// metida en el hueco del tallo para que no parezca una barra.
+  void _paintWater(Canvas canvas, Rect body, double reach, bool painted) {
+    final water = SceneArt.instance['obj_shishi_water'];
+    if (water != null) {
+      canvas.save();
+      canvas.clipRect(Rect.fromLTRB(body.left, body.top, body.left + reach, body.bottom));
+      drawArt(canvas, water, body);
+      canvas.restore();
+      return;
+    }
+    // El tallo pintado es macizo: el agua se ve como un tinte frío que lo
+    // "llena" (multiplicado sobre el verde), con un espejo en la boca abierta.
+    final band = painted ? body.height * 0.62 : body.height - 8;
+    final top = -band / 2, bottom = band / 2;
+    final left = body.left + (painted ? _len * 0.12 : 4);
+    final front = body.left + reach;
+    if (painted) {
+      // La boca en bisel: ahí se ve la superficie del agua.
+      final mouth = Rect.fromCenter(
+        center: Offset(body.left + _len * 0.085, 0),
+        width: _len * 0.09,
+        height: body.height * 0.58,
+      );
+      canvas.drawOval(
+        mouth.deflate(2),
+        Paint()
+          ..shader = Gradient.radial(mouth.center, mouth.height / 2, [const Color(0xE07FBAC4), const Color(0xCC3F7F8C)])
+          ..color = Color.fromRGBO(0, 0, 0, min(1, reach / (_len * 0.1))),
+      );
+    }
+    if (front <= left + 2) return;
+    // El frente no es recto: se mece con el chorro.
+    final sway = sin(_t * 5.2) * 2.2 + sin(_t * 8.9) * 1.1;
+    final r = band / 2;
+    final path = Path()
+      ..moveTo(left + r, top)
+      ..lineTo(front - 3 + sway, top)
+      ..cubicTo(front + 3 + sway, top + band * 0.25, front + 4 - sway * 0.5, bottom - band * 0.3, front + 1, bottom)
+      ..lineTo(left + r, bottom)
+      ..arcToPoint(Offset(left + r, top), radius: Radius.circular(r));
+    canvas.drawPath(
+      path,
+      Paint()
+        ..blendMode = painted ? BlendMode.multiply : BlendMode.srcOver
+        ..shader = Gradient.linear(Offset(0, top), Offset(0, bottom), [
+          const Color(0xFFCFEFF0),
+          const Color(0xFF8CC7CF),
+          const Color(0xFF5C9EA8),
+        ], [0, 0.5, 1])
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+    );
+    // Brillo fino arriba y un reflejo que corre despacio.
+    final shine = Paint()
+      ..color = const Color(0x88FFFFFF)
+      ..strokeWidth = 1.6
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(Offset(left + r, top + 3), Offset(front - 5 + sway, top + 3), shine);
+    final glintX = left + (front - left) * ((_t * 0.35) % 1);
+    canvas.drawLine(
+      Offset(glintX, top + band * 0.32),
+      Offset(min(front - 4, glintX + band), top + band * 0.32),
+      shine..color = const Color(0x44FFFFFF),
+    );
+  }
+
   void _paintBamboo(Canvas canvas) {
     canvas.save();
     canvas.translate(_pivot.dx, _pivot.dy);
@@ -451,13 +519,8 @@ class ShishiGame extends FlameGame with TapCallbacks {
     // Agua adentro: crece desde la boca hacia el centro.
     final fill = _shownFill;
     if (fill > 0) {
-      canvas.save();
-      canvas.clipRRect(rr.deflate(4));
-      canvas.drawRect(
-        Rect.fromLTWH(tube.left, -h / 2, _len * 0.55 * fill, h),
-        Paint()..color = Palette.water.withValues(alpha: 0.75),
-      );
-      canvas.restore();
+      final ah = art == null ? h : _len * art.height / art.width;
+      _paintWater(canvas, Rect.fromLTWH(tube.left, -ah / 2, _len, ah), _len * 0.55 * fill, art != null);
     }
     // Marca del punto justo (lo que se aprende a mirar).
     final mark = tube.left + _len * 0.55 * b.d('perfectFrom');

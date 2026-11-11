@@ -66,6 +66,7 @@ class SceneArt {
     // Minijuegos de la vista del estanque.
     'obj_shishi_bamboo': 'east',
     'obj_shishi_basin': 'east',
+    'obj_shishi_water': 'east',
     'spr_leaf_01': 'east',
     'spr_leaf_02': 'east',
     'spr_leaf_03': 'east',

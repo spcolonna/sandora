@@ -1120,6 +1120,19 @@ BLOCKS = [
             obj('obj_shishi_feed', 'A thin horizontal bamboo water pipe (kakei) resting on two small crossed bamboo '
                 'sticks tied with rope, its open end cut at an angle on the right.', 'about 200 pixels wide',
                 ', water stream'),
+            img('obj_shishi_water', LANDSCAPE_ALPHA + ALPHA_FALLBACK,
+                f'This is the water that fills the seesaw bamboo spout (shishi-odoshi) in a minigame of {GAME}. The '
+                'game lays it exactly over the painted bamboo tube `obj_shishi_bamboo` (attach it) and reveals it '
+                'from the open slanted mouth on the left towards the right as the tube fills, so it must match that '
+                'tube\'s outline and framing exactly.',
+                'Clear, cool water seen as if through the bamboo wall: a translucent teal-blue body shaped like the '
+                'inside of the tube, lighter and almost white along its top edge with a soft highlight streak, '
+                'deeper teal at the bottom, gentle watercolor ripples, and a small shining water surface inside the '
+                'slanted mouth on the left.',
+                'A long horizontal strip with the same proportions and position as `obj_shishi_bamboo` (about 5:1, '
+                'mouth on the left, centered vertically, spanning the full width). Only the water is painted; the '
+                'bamboo itself and everything else is fully transparent.',
+                f'{NO_TEXT}; the bamboo tube, nodes, background, stones, splashes outside the tube; {NO_STYLE}.'),
             img('obj_lantern_dock', LANDSCAPE_ALPHA + ALPHA_FALLBACK,
                 f'This is the small wooden dock at the bottom of the river lanterns minigame in {GAME}: the player '
                 'launches paper lanterns from here.',
