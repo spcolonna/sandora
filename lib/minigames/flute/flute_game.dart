@@ -316,6 +316,8 @@ class FluteGame extends FlameGame with TapCallbacks {
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     )..layout(maxWidth: size.x - 48);
-    tp.paint(canvas, center - Offset(tp.width / 2, tp.height / 2));
+    // La nota de un agujero va corrida a la derecha: que no se salga.
+    final x = center.dx.clamp(24 + tp.width / 2, max(24 + tp.width / 2, size.x - 24 - tp.width / 2)).toDouble();
+    tp.paint(canvas, Offset(x, center.dy) - Offset(tp.width / 2, tp.height / 2));
   }
 }

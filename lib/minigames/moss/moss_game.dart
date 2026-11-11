@@ -376,7 +376,7 @@ class MossGame extends FlameGame with DragCallbacks {
         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Palette.mossDark),
       ),
       textDirection: TextDirection.ltr,
-    )..layout();
+    )..layout(maxWidth: size.x - 48);
     tp.paint(canvas, Offset((size.x - tp.width) / 2, size.y * 0.1 + 14));
     super.render(canvas);
   }

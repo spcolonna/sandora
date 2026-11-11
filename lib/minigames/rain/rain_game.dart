@@ -219,9 +219,11 @@ class RainGame extends FlameGame with TapCallbacks {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
+    // Centrado en la vasija, pero sin salirse por los costados.
+    final fit = keepOnScreen(world, Vector2(at.x, at.y - vesselR - 30), Vector2(tp.width, tp.height));
     world.add(
       ParticleSystemComponent(
-        position: at,
+        position: Vector2(fit.x, at.y),
         particle: ComputedParticle(
           lifespan: 1.1,
           renderer: (canvas, p) {

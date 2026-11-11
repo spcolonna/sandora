@@ -1,3 +1,4 @@
+import 'package:flame/components.dart' show Anchor;
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/widgets/soft.dart';
 import '../../ui/widgets/washi.dart';
+import 'grade.dart';
 import 'intro_card.dart';
 import 'result_panel.dart';
 
@@ -92,6 +94,10 @@ class _MinigameScreenState extends State<MinigameScreen> {
     _game = widget.build((o) {
       if (round == _round) _finish(o);
     });
+    // Los juegos pintan y tocan en coordenadas de pantalla: el mundo (donde
+    // van los avisos y las lucecitas) tiene que usar las mismas. Con el ancla
+    // centrada de Flame todo salía corrido medio ancho y medio alto.
+    _game.camera.viewfinder.anchor = Anchor.topLeft;
   }
 
   void _finish(RunOutcome outcome) {
@@ -203,6 +209,7 @@ class _MinigameScreenState extends State<MinigameScreen> {
 
   Widget _play(BuildContext context) {
     final playing = _outcome == null;
+    feedbackInsets = MediaQuery.paddingOf(context);
     return Scaffold(
       body: Stack(
         children: [

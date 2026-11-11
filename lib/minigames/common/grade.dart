@@ -28,6 +28,26 @@ enum Grade {
 
 final _rng = Random();
 
+/// Lo que tapan la isla, la barra de inicio y el botón de pausa: los avisos
+/// flotantes no se meten ahí. Lo fija la pantalla del minijuego.
+EdgeInsets feedbackInsets = EdgeInsets.zero;
+
+/// Corre [center] lo justo para que una caja de [box] (centrada ahí, que
+/// después sube [rise]) quede entera dentro de la pantalla del juego.
+Vector2 keepOnScreen(Component parent, Vector2 center, Vector2 box, {double rise = 0, double margin = 12}) {
+  final game = parent.findGame();
+  if (game == null || !game.hasLayout) return center;
+  final size = game.size;
+  double fit(double v, double lo, double hi) => lo > hi ? (lo + hi) / 2 : v.clamp(lo, hi);
+  // El botón de pausa ocupa la franja de arriba (44 pt más su margen).
+  final top = feedbackInsets.top + 60;
+  final bottom = feedbackInsets.bottom + margin;
+  return Vector2(
+    fit(center.x, feedbackInsets.left + margin + box.x / 2, size.x - feedbackInsets.right - margin - box.x / 2),
+    fit(center.y, top + box.y / 2 + rise, size.y - bottom - box.y / 2),
+  );
+}
+
 /// Festeja [grade] en [position] (coordenadas de [parent]). Con [sound] en
 /// false solo hay partículas, texto y vibración: en la lluvia el sonido es la
 /// nota de la vasija.
@@ -103,6 +123,7 @@ void celebrate(
       onComplete: text.removeFromParent,
     ),
   );
+  text.position = keepOnScreen(parent, text.position, text.size, rise: 28 * scale);
   if (label) parent.add(text);
   if (streak >= 2) {
     _float(parent, '×$streak', position + Vector2(0, 2 * scale), 15 * scale, Palette.lantern, delay: 0.12);
@@ -179,6 +200,7 @@ void _float(Component parent, String label, Vector2 position, double size, Color
       ),
     ),
   );
+  text.position = keepOnScreen(parent, position, text.size, rise: 26);
   text.add(MoveByEffect(Vector2(0, -26), EffectController(duration: 1.3, startDelay: delay, curve: Curves.easeOut)));
   text.add(
     OpacityEffect.fadeOut(
