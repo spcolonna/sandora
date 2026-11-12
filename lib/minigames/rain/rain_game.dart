@@ -13,6 +13,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'rain_chart.dart';
@@ -21,7 +22,7 @@ import 'rain_chart.dart';
 /// gota se toca cuando llega a su vasija. Las notas están en pentatónica, así
 /// que cualquier secuencia de aciertos suena bien. Sin sonido se juega
 /// mirando: cada gota proyecta un anillo que se cierra sobre su vasija.
-class RainGame extends FlameGame with TapCallbacks {
+class RainGame extends FlameGame with ScreenSpace, TapCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.rain;
 
@@ -56,7 +57,6 @@ class RainGame extends FlameGame with TapCallbacks {
 
   @override
   Future<void> onLoad() async {
-    camera.viewfinder.anchor = Anchor.topLeft;
     final best = Progress.instance.rainBest;
     vessels = (b.i('vesselsStart') + (best >= 600 ? 2 : (best >= 300 ? 1 : 0))).clamp(3, b.i('vesselsMax'));
     final seed = DateTime.now().millisecondsSinceEpoch;

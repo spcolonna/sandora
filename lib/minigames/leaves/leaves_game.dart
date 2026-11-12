@@ -11,6 +11,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 
@@ -50,7 +51,7 @@ Offset sweepPush(Offset leaf, Offset from, Offset to, double reach, double weigh
 /// deslizando el dedo. Cada tanto llega una ráfaga (avisada) que desparrama
 /// las que están sueltas; las del montón aguantan, pero no todas. Cuentan las
 /// hojas que terminan en el montón y barrer con pocos gestos.
-class LeavesGame extends FlameGame with DragCallbacks {
+class LeavesGame extends FlameGame with ScreenSpace, DragCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.section('leaves');
   final hud = ValueNotifier(const LeavesHud());

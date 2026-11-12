@@ -11,6 +11,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'pond_rules.dart';
@@ -35,7 +36,7 @@ class _Vanish {
 /// las líneas largas dejan especiales (ondas, flores, lunas). No hay reloj:
 /// hay [moves] jugadas. Cada tanto la corriente corre una fila (avisada una
 /// jugada antes): puede armar líneas sola o desarmar un plan.
-class PondGame extends FlameGame with DragCallbacks, TapCallbacks {
+class PondGame extends FlameGame with ScreenSpace, DragCallbacks, TapCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.section('pond');
   final hud = ValueNotifier(const PondHud());

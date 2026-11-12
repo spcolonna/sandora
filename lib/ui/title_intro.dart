@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../boot.dart';
 import 'fx/calm.dart';
 import 'fx/sfx.dart';
 import 'theme/palette.dart';
@@ -40,9 +41,13 @@ class _TitleIntroState extends State<TitleIntro> with SingleTickerProviderStateM
     precacheImage(const AssetImage(_wordmark), context);
   }
 
-  void _leave() {
+  Future<void> _leave() async {
     if (_left || !mounted) return;
     _left = true;
+    // El jardín necesita la partida y el arte: si todavía cargan, el título
+    // se queda quieto un momento más.
+    await Boot.instance.ready;
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(calmRoute<void>(widget.next));
   }
 

@@ -11,6 +11,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'bell_rules.dart';
@@ -18,7 +19,7 @@ import 'bell_rules.dart';
 /// Campana del templo: se tira el tronco colgado hacia atrás hasta la marca
 /// y se suelta. Cinco golpes, cada uno con su fuerza; entre golpe y golpe hay
 /// que esperar a que la campana se apague.
-class BellGame extends FlameGame with DragCallbacks {
+class BellGame extends FlameGame with ScreenSpace, DragCallbacks {
   final void Function(RunOutcome) finish;
   final BellRules rules = BellRules(Balance.instance.section('bell'));
   BellGame(this.finish);

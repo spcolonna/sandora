@@ -11,6 +11,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'lantern_rules.dart';
@@ -19,7 +20,7 @@ import 'lantern_rules.dart';
 /// y se toca la linterna para soltarla. Las piedras la desvían hasta su
 /// muelle. Si pasa de largo o se apaga, vuelve arriba con las piedras como
 /// estaban.
-class LanternsGame extends FlameGame with TapCallbacks, DragCallbacks {
+class LanternsGame extends FlameGame with ScreenSpace, TapCallbacks, DragCallbacks {
   final void Function(RunOutcome) finish;
   final LanternRules rules = LanternRules(Balance.instance.section('lanterns'));
   LanternsGame(this.finish);

@@ -12,6 +12,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 
@@ -78,7 +79,7 @@ class MossField {
 /// Musgo: se pinta musgo sobre las piedras con el dedo sin manchar la arena.
 /// El musgo además crece solo, a su manera. Puntaje: lo cubierto menos lo
 /// manchado. Lo pintado queda en las piedras del jardín.
-class MossGame extends FlameGame with DragCallbacks {
+class MossGame extends FlameGame with ScreenSpace, DragCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.section('moss');
   MossGame(this.finish);

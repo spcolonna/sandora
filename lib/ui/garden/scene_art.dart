@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
@@ -162,15 +163,34 @@ class SceneArt {
 
   final _images = <String, ui.Image>{};
 
+  /// Lado mayor con que se guarda cada pieza. Los fondos vienen a 1536 px de
+  /// alto: a 1280 se ven igual en el teléfono y ocupan un tercio menos de
+  /// memoria (todo el arte junto pasaba de 250 MB). El kit de interfaz (`ui`)
+  /// queda entero porque se corta en nine-slice con medidas en píxeles.
+  static const maxSide = 1280;
+
   Future<void> load() async {
     for (final MapEntry(key: name, value: folder) in _names.entries) {
+      if (_images.containsKey(name)) continue;
       try {
         final data = await rootBundle.load('assets/images/$folder/$name.webp');
-        final frame = await (await ui.instantiateImageCodec(data.buffer.asUint8List())).getNextFrame();
-        _images[name] = frame.image;
+        final buffer = await ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+        final desc = await ui.ImageDescriptor.encoded(buffer);
+        final big = max(desc.width, desc.height);
+        final k = folder == 'ui' || big <= maxSide ? 1.0 : maxSide / big;
+        final codec = await desc.instantiateCodec(
+          targetWidth: (desc.width * k).round(),
+          targetHeight: (desc.height * k).round(),
+        );
+        _images[name] = (await codec.getNextFrame()).image;
+        codec.dispose();
+        desc.dispose();
+        buffer.dispose();
       } catch (_) {
         // Sin la imagen no se dibuja esa pieza; el resto sigue igual.
       }
+      // Un respiro entre pieza y pieza: la intro sigue fluida mientras carga.
+      await Future<void>.delayed(Duration.zero);
     }
   }
 

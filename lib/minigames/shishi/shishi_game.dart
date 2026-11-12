@@ -12,6 +12,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 
@@ -30,7 +31,7 @@ Grade? shishiGrade(double fill, BalanceSection b) {
 /// ronda y late un poco (nunca es igual), y al soltar todavía cae lo que
 /// quedaba en el caño: hay que anticiparse. Al final de cada ronda el bambú
 /// vuelca el agua en el cuenco y al volver golpea la piedra.
-class ShishiGame extends FlameGame with TapCallbacks {
+class ShishiGame extends FlameGame with ScreenSpace, TapCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.section('shishi');
   ShishiGame(this.finish);
@@ -446,18 +447,31 @@ class ShishiGame extends FlameGame with TapCallbacks {
     final left = body.left + (painted ? _len * 0.12 : 4);
     final front = body.left + reach;
     if (painted) {
-      // La boca en bisel: ahí se ve la superficie del agua.
+      // La boca en bisel: adentro se ve el agua subir a medida que se llena.
       final mouth = Rect.fromCenter(
-        center: Offset(body.left + _len * 0.085, 0),
-        width: _len * 0.09,
-        height: body.height * 0.58,
+        center: Offset(body.left + _len * 0.1, body.top + body.height * 0.43),
+        width: _len * 0.08,
+        height: body.height * 0.54,
       );
-      canvas.drawOval(
-        mouth.deflate(2),
+      final level = mouth.bottom - mouth.height * min(1.0, 0.25 + reach / (_len * 0.55) * 0.75);
+      canvas.save();
+      canvas.clipPath(Path()..addOval(mouth));
+      canvas.drawRect(
+        Rect.fromLTRB(mouth.left, level, mouth.right, mouth.bottom),
         Paint()
-          ..shader = Gradient.radial(mouth.center, mouth.height / 2, [const Color(0xE07FBAC4), const Color(0xCC3F7F8C)])
-          ..color = Color.fromRGBO(0, 0, 0, min(1, reach / (_len * 0.1))),
+          ..shader = Gradient.linear(Offset(0, level), Offset(0, mouth.bottom), [
+            const Color(0xEE9FD3D9),
+            const Color(0xEE3F7F8C),
+          ]),
       );
+      canvas.drawLine(
+        Offset(mouth.left, level + 1),
+        Offset(mouth.right, level + 1),
+        Paint()
+          ..color = const Color(0xCCFFFFFF)
+          ..strokeWidth = 1.5,
+      );
+      canvas.restore();
     }
     if (front <= left + 2) return;
     // El frente no es recto: se mece con el chorro.
@@ -472,13 +486,12 @@ class ShishiGame extends FlameGame with TapCallbacks {
     canvas.drawPath(
       path,
       Paint()
-        ..blendMode = painted ? BlendMode.multiply : BlendMode.srcOver
         ..shader = Gradient.linear(Offset(0, top), Offset(0, bottom), [
-          const Color(0xFFCFEFF0),
-          const Color(0xFF8CC7CF),
-          const Color(0xFF5C9EA8),
+          const Color(0x66CFEFF0),
+          const Color(0x998CC7CF),
+          const Color(0xB34A8F9B),
         ], [0, 0.5, 1])
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
     );
     // Brillo fino arriba y un reflejo que corre despacio.
     final shine = Paint()

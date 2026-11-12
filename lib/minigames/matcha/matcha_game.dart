@@ -11,13 +11,14 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'matcha_rules.dart';
 
 /// Casa de té: se bate el matcha en zigzag siguiendo el ritmo de la cuenta
 /// que se mece sobre el cuenco. Con cada batida a tiempo crece la espuma.
-class MatchaGame extends FlameGame with DragCallbacks {
+class MatchaGame extends FlameGame with ScreenSpace, DragCallbacks {
   final void Function(RunOutcome) finish;
   final MatchaRules rules = MatchaRules(Balance.instance.section('matcha'));
   MatchaGame(this.finish);

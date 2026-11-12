@@ -10,6 +10,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 
@@ -47,7 +48,7 @@ class _Branch {
 /// silueta se cortan deslizando el dedo sobre ellas (el corte va al nodo).
 /// Cortar una rama que crecía bien resta. Cada rama crece a su ritmo y no se
 /// sabe del todo hasta dónde va a llegar.
-class BonsaiGame extends FlameGame with DragCallbacks {
+class BonsaiGame extends FlameGame with ScreenSpace, DragCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.section('bonsai');
   BonsaiGame(this.finish);

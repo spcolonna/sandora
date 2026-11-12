@@ -46,7 +46,7 @@ enum GameCenter {
           a.showsCompletionBanner = false
           return a
         }
-        GKAchievement.report(list) { error in result(error == nil) }
+        GKAchievement.report(list) { error in DispatchQueue.main.async { result(error == nil) } }
       case "show":
         result(show())
       default:
@@ -59,7 +59,8 @@ enum GameCenter {
   private static func authenticate() {
     GKLocalPlayer.local.authenticateHandler = { vc, _ in
       login = vc
-      channel?.invokeMethod("auth", arguments: GKLocalPlayer.local.isAuthenticated)
+      // GameKit puede llamar desde otro hilo: Flutter solo se habla desde el principal.
+      DispatchQueue.main.async { channel?.invokeMethod("auth", arguments: GKLocalPlayer.local.isAuthenticated) }
     }
   }
 

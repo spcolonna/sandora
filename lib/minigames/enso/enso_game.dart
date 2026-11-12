@@ -11,6 +11,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'enso_ink.dart';
@@ -19,7 +20,7 @@ import 'enso_scorer.dart';
 /// Ensō (Sala de caligrafía): un círculo de un solo trazo con el pincel. El
 /// ancho de la tinta sigue la velocidad del dedo: despacio carga más tinta,
 /// rápido la afina, y al final del trazo el pincel se seca.
-class EnsoGame extends FlameGame with DragCallbacks {
+class EnsoGame extends FlameGame with ScreenSpace, DragCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.section('enso');
   EnsoGame(this.finish);

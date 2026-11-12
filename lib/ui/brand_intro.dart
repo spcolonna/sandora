@@ -10,6 +10,8 @@ const _splashColor = Color(0xFF231E1A);
 /// termina la pantalla de carga y no se nota el cambio.
 const _logoWidth = 130.0;
 
+const _logo = 'assets/brand/oraki_logo_light_on_dark.webp';
+
 /// Presentación del estudio al abrir la app: el logo de Oraki Games que dejó la
 /// pantalla de carga brilla un momento y da paso a [next]. Tocar la salta.
 class BrandIntro extends StatefulWidget {
@@ -20,15 +22,36 @@ class BrandIntro extends StatefulWidget {
   State<BrandIntro> createState() => _BrandIntroState();
 }
 
+bool _firstFrameAllowed = false;
+
 class _BrandIntroState extends State<BrandIntro> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1900))
-    ..forward().whenComplete(_leave);
-  bool _left = false;
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1900));
+  bool _left = false, _started = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    precacheImage(const AssetImage('assets/brand/oraki_logo_light_on_dark.webp'), context);
+    if (_started) return;
+    _started = true;
+    // La animación arranca recién con el logo decodificado: si no, los
+    // primeros cuadros salían sin logo y se veía "cargar dos veces".
+    precacheImage(const AssetImage(_logo), context).whenComplete(_go);
+    Future<void>.delayed(const Duration(milliseconds: 700), _go);
+    // El título viene después: que su fondo se decodifique ya, sin trabas.
+    precacheImage(const AssetImage('assets/images/title/title_bg.webp'), context);
+    precacheImage(const AssetImage('assets/images/brand/logo_symbol.webp'), context);
+    precacheImage(const AssetImage('assets/images/brand/logo_wordmark.webp'), context);
+  }
+
+  void _go() {
+    if (!_firstFrameAllowed) {
+      _firstFrameAllowed = true;
+      // main() retuvo el primer cuadro: la pantalla nativa sigue hasta que el
+      // logo está listo y el cambio no se nota.
+      WidgetsBinding.instance.allowFirstFrame();
+    }
+    if (!mounted || _c.isAnimating || _c.isCompleted) return;
+    _c.forward().whenComplete(_leave);
   }
 
   void _leave() {
@@ -85,8 +108,9 @@ class _BrandIntroState extends State<BrandIntro> with SingleTickerProviderStateM
                       children: [
                         Positioned.fill(child: CustomPaint(painter: _GlowPainter(glow, t))),
                         Image.asset(
-                          'assets/brand/oraki_logo_light_on_dark.webp',
+                          _logo,
                           width: _logoWidth,
+                          gaplessPlayback: true,
                           filterQuality: FilterQuality.high,
                         ),
                         Positioned(

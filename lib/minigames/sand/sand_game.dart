@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/painting.dart' show TextStyle, FontWeight, TextPainter, TextSpan, TextAlign;
@@ -11,6 +10,7 @@ import '../../garden/progress.dart';
 import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../stack/stack_rules.dart';
 import '../stack/stone_painter.dart';
@@ -25,7 +25,7 @@ enum _Phase { draw, rake, done }
 /// La figura sale al azar y cada vez distinta (tamaño, giro, rasgo), y a veces
 /// hay una piedrita cerca del camino: el rastrillo la rodea, y rodearla limpio
 /// suma un poco. El dibujo queda en el jardín hasta el próximo.
-class SandGame extends FlameGame with DragCallbacks {
+class SandGame extends FlameGame with ScreenSpace, DragCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.sand;
 
@@ -53,7 +53,6 @@ class SandGame extends FlameGame with DragCallbacks {
 
   @override
   Future<void> onLoad() async {
-    camera.viewfinder.anchor = Anchor.topLeft;
     final p = Progress.instance;
     final done = p.sandFigures;
     final learning = b.i('hardAfterFigures');

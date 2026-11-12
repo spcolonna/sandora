@@ -11,6 +11,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'stack_rules.dart';
@@ -60,7 +61,7 @@ const _debugTower = int.fromEnvironment('SANDORA_TOWER');
 /// la altura. Si queda muy corrida puede ceder: se cae un tramo de arriba que
 /// depende de lo mal que quedó y de la altura, con algo de azar
 /// ([StackRules]). A veces llega una ráfaga: mantener apretado la sostiene.
-class StackGame extends FlameGame with TapCallbacks {
+class StackGame extends FlameGame with ScreenSpace, TapCallbacks {
   final void Function(RunOutcome) finish;
   final BalanceSection b = Balance.instance.stack;
   late final rules = StackRules(b);
@@ -110,6 +111,14 @@ class StackGame extends FlameGame with TapCallbacks {
   double get _topY => _tower.isEmpty ? 0 : _tower.last.top;
 
   Offset _toScreen(double x, double y) => Offset(size.x / 2 + x * _ppm, size.y / 2 + (y - _camY) * _ppm);
+
+  @override
+  void onRemove() {
+    // El fondo horneado pesa varios MB: se suelta al salir del juego.
+    _far?.dispose();
+    _far = null;
+    super.onRemove();
+  }
 
   @override
   Future<void> onLoad() async {

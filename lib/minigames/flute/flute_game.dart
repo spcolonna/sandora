@@ -11,6 +11,7 @@ import '../../i18n/i18n.dart';
 import '../../ui/fx/sfx.dart';
 import '../../ui/garden/scene_art.dart';
 import '../../ui/theme/palette.dart';
+import '../common/screen_space.dart';
 import '../common/grade.dart';
 import '../common/minigame_screen.dart';
 import 'flute_rules.dart';
@@ -19,7 +20,7 @@ import 'flute_rules.dart';
 /// de un hueco de la flauta. Mientras pasa por la flauta, hay que tapar ese
 /// hueco (mantener el dedo en su fila). Cualquier hueco suena: la melodía es
 /// pentatónica y nunca desafina.
-class FluteGame extends FlameGame with TapCallbacks {
+class FluteGame extends FlameGame with ScreenSpace, TapCallbacks {
   final void Function(RunOutcome) finish;
   final FluteRules rules = FluteRules(Balance.instance.section('flute'));
   FluteGame(this.finish);

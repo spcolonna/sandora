@@ -99,22 +99,16 @@ class SoundBoard {
       debugPrint('Contexto de audio: $e');
     }
     try {
-      // Cada sonido se carga por su cuenta y en paralelo: si uno falla, los
-      // demás suenan igual.
-      final names = [
-        for (final s in Sfx.values)
-          for (var i = 1; i <= s.variants; i++) _name(s, i),
-      ];
-      await Future.wait([
-        for (final name in names)
-          () async {
-            try {
-              _pools[name] = await Future.wait([for (var v = 0; v < voices; v++) _Voice.load('audio/$name.m4a')]);
-            } catch (e) {
-              debugPrint('Sin $name: $e');
-            }
-          }(),
-      ]);
+      // De a un reproductor por vez (como en Hexiege): crear más de cien
+      // AVPlayer juntos trababa el arranque y en iOS puede tumbar la app.
+      // Primero una voz por sonido; las voces extra llegan después, sin apuro.
+      for (final name in _names) {
+        try {
+          _pools[name] = [await _Voice.load('audio/$name.m4a')];
+        } catch (e) {
+          debugPrint('Sin $name: $e');
+        }
+      }
       for (final a in Ambience.values) {
         try {
           final p = AudioPlayer();
@@ -164,6 +158,27 @@ class SoundBoard {
       debugPrint('Audio no disponible: $e');
     }
     if (!_loaded.isCompleted) _loaded.complete();
+    if (_ready) _moreVoices();
+  }
+
+  static final _names = [
+    for (final s in Sfx.values)
+      for (var i = 1; i <= s.variants; i++) _name(s, i),
+  ];
+
+  /// Las voces 2 y 3 de cada sonido (golpes iguales superpuestos), de a una.
+  Future<void> _moreVoices() async {
+    for (var v = 1; v < voices; v++) {
+      for (final name in _names) {
+        final pool = _pools[name];
+        if (pool == null) continue;
+        try {
+          pool.add(await _Voice.load('audio/$name.m4a'));
+        } catch (_) {
+          // Con una voz menos suena igual.
+        }
+      }
+    }
   }
 
   static String _name(Sfx s, int i) => s.variants > 1 ? '${s.file}_${i.toString().padLeft(2, '0')}' : s.file;

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flame/components.dart' show Anchor;
 import 'package:flame/game.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sandora/balance/balance.dart';
@@ -84,6 +85,8 @@ void main() {
       final FlameGame game = e.value((_) {});
       game.onGameResize(Vector2(390, 844));
       await game.onLoad();
+      game.onMount();
+      expect(game.camera.viewfinder.anchor, Anchor.topLeft, reason: 'avisos en coordenadas de pantalla');
       for (var k = 0; k < 120; k++) {
         game.update(1 / 60);
       }

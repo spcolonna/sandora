@@ -1,23 +1,17 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'balance/balance.dart';
-import 'garden/achievements.dart';
-import 'garden/cloud_save.dart';
-import 'garden/game_center.dart';
-import 'garden/lotus_store.dart';
-import 'garden/progress.dart';
-import 'garden/reminders.dart';
-import 'garden/weather_service.dart';
+import 'boot.dart';
 import 'i18n/i18n.dart';
 import 'minigames/catalog.dart';
 import 'settings.dart';
 import 'ui/meditation/meditation_screen.dart';
 import 'ui/brand_intro.dart';
-import 'ui/fx/sfx.dart';
 import 'ui/garden/garden_gate.dart';
-import 'ui/garden/scene_art.dart';
 import 'ui/garden_screen.dart';
 import 'ui/title_intro.dart';
 import 'ui/theme/palette.dart';
@@ -28,25 +22,31 @@ Future<void> main() async {
   Balance.instance = Balance.parse(await rootBundle.loadString('assets/balance/game_balance.json'));
   final locales = WidgetsBinding.instance.platformDispatcher.locales.map((l) => l.languageCode);
   await AppSettings.instance.load(locales);
-  // Si la copia de iCloud va más adelantada (otro aparato, reinstalación),
-  // entra antes de cargar la partida.
-  await CloudSave.instance.pull();
-  await Progress.instance.load(Balance.instance);
-  CloudSave.instance.start();
-  // Los logros miran la partida; Game Center entra en silencio si puede.
-  GameCenter.instance.start();
-  Achievements.instance.start(minigames.map((m) => m.id));
-  await WeatherService.instance.load(Balance.instance);
-  await Reminders.instance.load(Balance.instance);
-  await SceneArt.instance.load();
-  // La venta de lotos (si está prendida) carga en segundo plano.
-  LotusStore.instance.load(Balance.instance);
-  // El clima real (si el jugador lo eligió) llega cuando llega.
-  WeatherService.instance.refresh();
-  // El audio carga en segundo plano: la app abre sin esperarlo.
-  SoundBoard.instance.init();
+  _catchErrors();
+  // Imágenes ya decodificadas que Flutter guarda por si vuelven: con 60 MB
+  // alcanza (el arte del jardín vive aparte, en SceneArt).
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 60 << 20;
   _redrawOnLanguage();
+  // La pantalla nativa se queda hasta que la intro tenga el logo decodificado
+  // (BrandIntro suelta el primer cuadro); en modo prueba de juego, no.
+  if (_gameOverride.isEmpty) WidgetsBinding.instance.deferFirstFrame();
   runApp(const SandoraApp());
+  // La carga pesada, mientras se ven las intros.
+  Boot.instance.run();
+}
+
+/// Los errores de Dart no cierran la app, pero que queden en el registro del
+/// aparato (Consola de macOS / Xcode) para poder rastrearlos.
+void _catchErrors() {
+  final previous = FlutterError.onError;
+  FlutterError.onError = (details) {
+    debugPrint('Error de Flutter: ${details.exceptionAsString()}\n${details.stack}');
+    previous?.call(details);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Error sin atrapar: $error\n$stack');
+    return true;
+  };
 }
 
 /// Al cambiar el idioma, todo se redibuja: los widgets const que usan `tr`
@@ -107,7 +107,8 @@ class _DebugGameState extends State<_DebugGame> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Boot.instance.ready.then((_) {
+      if (!mounted) return;
       // `meditation` abre la meditación, que no es un minijuego del catálogo.
       final screen = _gameOverride == 'meditation'
           ? const MeditationScreen()
@@ -117,5 +118,8 @@ class _DebugGameState extends State<_DebugGame> {
   }
 
   @override
-  Widget build(BuildContext context) => const GardenScreen();
+  Widget build(BuildContext context) => FutureBuilder(
+    future: Boot.instance.ready,
+    builder: (context, snap) => snap.connectionState == ConnectionState.done ? const GardenScreen() : const SizedBox(),
+  );
 }
