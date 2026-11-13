@@ -1760,7 +1760,10 @@ class PanoScene {
       _Item(d, r, open ? null : PanoTarget(PanoHit.gate, id: o.id), () {
         if (art == null) return _filtered(r, d, () => _gateSketch(r, open));
         _art(art, r, d);
-        if (!open && own == null) {
+        if (!open && own != null) {
+          // El candado en la placa redonda que cuelga de la soga (medida sobre el arte).
+          _glyph(Icons.lock_rounded, Offset(r.center.dx, r.top + r.height * 0.6), r.width * 0.05, const Color(0xFF4A3424));
+        } else if (!open) {
           // El sello con candado de las zonas que vienen.
           final seal = Offset(r.center.dx - r.width * 0.02, r.top + r.height * 0.62);
           _c.drawCircle(seal, r.width * 0.06, Paint()..color = Palette.clay);

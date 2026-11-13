@@ -1589,6 +1589,10 @@ INCLUDED = {
     'obj_station_sand': ('assets/images/path/obj_station_sand.webp', 'El Arenero, 768 px.'),
     'obj_station_leaves': ('assets/images/path/obj_station_leaves.webp', 'Hojas al viento: el arce con la escoba, 768 px.'),
     'obj_station_meditation': ('assets/images/path/obj_station_meditation.webp', 'Rincón de meditación en la galería, 768 px.'),
+    'pano_sky': ('assets/images/path/pano_sky.webp', 'Cielo de los Miradores, franja de 360° opaca, 1440 px con costura fundida (`_sky`); de noche manda el degradado.'),
+    'pano_forest': ('assets/images/path/pano_forest.webp', 'Bosque detrás del muro, franja de 360° (dos vueltas), 1440 px, costura fundida y recortada al alfa (`_wall`).'),
+    'obj_gate_future': ('assets/images/path/obj_gate_future.webp', 'Portón cerrado de las zonas que vienen, 1024 px; el candado sobre la placa lo pinta el juego (`_gate`).'),
+    'spr_path_glow_stone': ('assets/images/path/spr_path_glow_stone.webp', 'Piedra con luz para caminar al otro mirador, 512 px, acostada en perspectiva con la flecha encima.'),
 }
 
 
