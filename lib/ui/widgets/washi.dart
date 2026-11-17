@@ -994,7 +994,10 @@ class InkChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const InkChip({super.key, required this.label, required this.selected, required this.onTap});
+
+  /// Ícono pintado (`icon_*`) a la izquierda del texto, si existe el arte.
+  final String? art;
+  const InkChip({super.key, required this.label, required this.selected, required this.onTap, this.art});
 
   @override
   Widget build(BuildContext context) {
@@ -1003,9 +1006,22 @@ class InkChip extends StatelessWidget {
       fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
       color: selected ? Palette.sandLight : Palette.ink.withValues(alpha: 0.72),
     );
+    final icon = art == null ? null : SceneArt.instance[art!];
     final label = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Center(widthFactor: 1, child: Text(this.label, style: style)),
+      padding: EdgeInsets.only(left: icon != null ? 10 : 16, right: 16),
+      child: Center(
+        widthFactor: 1,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              SizedBox.square(dimension: 24, child: CustomPaint(painter: _ChipArt(icon))),
+              const SizedBox(width: 6),
+            ],
+            Text(this.label, style: style),
+          ],
+        ),
+      ),
     );
     return Semantics(
       button: true,
@@ -1142,3 +1158,24 @@ Widget liftedFeedback(Widget child) => Transform.scale(
     child: child,
   ),
 );
+
+/// El ícono pintado de un [InkChip], centrado sin deformar.
+class _ChipArt extends CustomPainter {
+  final ui.Image img;
+  _ChipArt(this.img);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final box = Offset.zero & size;
+    final r = artRectIn(img, box);
+    drawArt(
+      canvas,
+      img,
+      r.translate(0, -(size.height - r.height) / 2),
+      paint: Paint()..filterQuality = FilterQuality.medium,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ChipArt old) => old.img != img;
+}

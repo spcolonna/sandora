@@ -27,6 +27,7 @@ import 'model_screen.dart';
 import 'mirador/mirador_view.dart';
 import 'mirador/pano_painter.dart';
 import 'rest_sheet.dart';
+import 'widgets/painted_icon.dart';
 import 'widgets/daily_goals.dart';
 import 'widgets/garden_sign.dart';
 import 'meditation/meditation_screen.dart';
@@ -1151,34 +1152,36 @@ class _SenderoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Progress.instance;
-    Widget button(Key key, IconData icon, String label, VoidCallback onTap, {bool pulse = false}) => Pressable(
-      key: key,
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 19, color: pulse ? Palette.lantern : Palette.wood),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Palette.ink),
+    Widget button(Key key, String art, IconData icon, String label, VoidCallback onTap, {bool pulse = false}) =>
+        Pressable(
+          key: key,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PaintedIcon(art, fallback: icon, glow: pulse),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: Palette.ink),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
     return Glass(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          button(const ValueKey('quick'), Icons.signpost_rounded, tr('sendero.quick'), onQuick),
+          button(const ValueKey('quick'), 'icon_btn_quick', Icons.signpost_rounded, tr('sendero.quick'), onQuick),
           if (onDecor != null) ...[
             Container(width: 1, height: 22, color: Palette.ink.withValues(alpha: 0.15)),
             button(
               const ValueKey('aerial'),
+              'icon_btn_aerial',
               Icons.map_rounded,
               tr('aerial.title'),
               onDecor!,

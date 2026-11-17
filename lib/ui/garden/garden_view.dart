@@ -13,6 +13,7 @@ import '../theme/palette.dart';
 import '../widgets/glass.dart';
 import '../widgets/washi.dart';
 import 'garden_scene.dart';
+import 'scene_art.dart';
 
 part 'garden_gifts.dart';
 part 'garden_moment.dart';

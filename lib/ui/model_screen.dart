@@ -19,6 +19,7 @@ import 'theme/palette.dart';
 import 'upgrade_sheet.dart';
 import 'widgets/currency.dart';
 import 'widgets/glass.dart';
+import 'widgets/painted_icon.dart';
 import 'widgets/washi.dart';
 
 /// Lo que pidió ver la Maqueta al cerrarse: la decoración [index] en la vista
@@ -560,7 +561,12 @@ class _Cell extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.lock_rounded, size: 18, color: Palette.ink.withValues(alpha: 0.45)),
+                      PaintedIcon(
+                        'spr_path_slot_locked',
+                        fallback: Icons.lock_rounded,
+                        size: 30,
+                        color: Palette.ink.withValues(alpha: 0.45),
+                      ),
                       _CostLine(p.parcelCost(side)),
                     ],
                   ),
@@ -940,7 +946,7 @@ class _AerialPainter extends CustomPainter {
     canvas.clipRect(Offset.zero & size);
     final paper = SceneArt.instance['bg_path_aerial_paper'];
     if (paper != null) {
-      drawArt(canvas, paper, Offset.zero & size);
+      drawArtCover(canvas, paper, Offset.zero & size);
       canvas.drawRect(Offset.zero & size, Paint()..color = _zones[side].withValues(alpha: 0.35));
     } else {
       canvas.drawRect(Offset.zero & size, Paint()..color = Color.lerp(_zones[side], Palette.paper, 0.35)!);

@@ -159,6 +159,18 @@ class SceneArt {
     'spr_path_slot': 'path',
     'spr_path_slot_locked': 'path',
     'bg_path_aerial_paper': 'path',
+    'icon_btn_aerial': 'path',
+    'icon_btn_quick': 'path',
+    'icon_btn_path': 'path',
+    'icon_btn_classic': 'path',
+    // El cielo (Bloque 22): sol y luna en los Miradores, nubes y pájaros que pasan.
+    'spr_sun': 'path',
+    'spr_moon': 'path',
+    'spr_cloud_01': 'path',
+    'spr_cloud_02': 'path',
+    'spr_bird': 'path',
+    // Las puertas shoji de la entrada (`garden_gate.dart`).
+    'obj_gate_shoji': 'court',
   };
 
   final _images = <String, ui.Image>{};

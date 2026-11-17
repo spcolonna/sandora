@@ -36,6 +36,7 @@ class _SkyLifePainter extends CustomPainter {
       }
     }
     _paintClouds(canvas, size, t);
+    _paintBird(canvas, size, t);
     if (windy) _paintWindLeaves(canvas, size, t);
     if (_wet > 0.01) _paintRain(canvas, size, t);
     if (_storm > 0.01) _paintFlash(canvas, size, t);
@@ -61,6 +62,7 @@ class _SkyLifePainter extends CustomPainter {
     final base = Color.lerp(Colors.white, const Color(0xFFF6D3B8), warmth * (1 - grey))!;
     final cloud = Color.lerp(base, const Color(0xFF6E7781), grey)!;
     final a = _clear * (0.08 + 0.6 * daylight).clamp(0.0, 0.7) + (1 - _clear) * (0.25 + 0.55 * daylight);
+    final sprites = [SceneArt.instance['spr_cloud_01'], SceneArt.instance['spr_cloud_02']];
     // Despejado hay 3 nubes; las otras 3 aparecen a medida que se nubla.
     for (var i = 0; i < 6; i++) {
       final shown = i < 3 ? 1.0 : 1 - _clear;
@@ -70,6 +72,22 @@ class _SkyLifePainter extends CustomPainter {
       final x = (i * 157 * big + t * speed * big) % span - 80 * big;
       final y = h * (0.06 + 0.05 * (i % 3)) + (i >= 3 ? h * 0.02 : 0);
       final scale = (0.8 + 0.1 * (i % 3) + (i >= 3 ? 0.35 : 0)) * big;
+      final img = sprites[i % 2];
+      if (img != null) {
+        final cw = 130 * scale * (i % 2 == 0 ? 1.0 : 1.2), ch = cw * img.height / img.width;
+        canvas.drawImageRect(
+          img,
+          Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+          Rect.fromCenter(center: Offset(x + 42 * scale, y), width: cw, height: ch),
+          Paint()
+            ..filterQuality = FilterQuality.medium
+            ..colorFilter = ColorFilter.mode(
+              cloud.withValues(alpha: (a * 1.25 * shown).clamp(0.0, 1.0)),
+              BlendMode.modulate,
+            ),
+        );
+        continue;
+      }
       // Difusas, como pintadas en húmedo (círculos nítidos se ven pegados).
       final p = Paint()
         ..color = cloud.withValues(alpha: a * 0.8 * shown)
@@ -86,6 +104,35 @@ class _SkyLifePainter extends CustomPainter {
         );
       }
     }
+  }
+
+  /// De día y sin lluvia, de vez en cuando un pájaro cruza el cielo de
+  /// izquierda a derecha, subiendo y bajando con el aleteo.
+  void _paintBird(Canvas canvas, Size size, double t) {
+    final img = SceneArt.instance['spr_bird'];
+    final a = daylight * (1 - _wet).clamp(0.0, 1.0) * (1 - blend.amount(Weather.snow));
+    if (img == null || a < 0.05) return;
+    const period = 40.0, cross = 9.0;
+    final k = (t % period) / cross;
+    if (k >= 1) return;
+    final w = size.width, h = size.height;
+    final big = (w / 400).clamp(1.0, 2.6);
+    final pass = (t / period).floor();
+    final bw = 30 * big, bh = bw * img.height / img.width;
+    final x = -bw + (w + bw * 2) * k;
+    final y = h * (0.1 + 0.08 * ((pass * 7) % 4) / 3) - h * 0.04 * k + sin(t * 9) * 3 * big;
+    canvas.save();
+    canvas.translate(x, y);
+    canvas.scale(1, 0.9 + 0.1 * sin(t * 18));
+    canvas.drawImageRect(
+      img,
+      Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+      Rect.fromCenter(center: Offset.zero, width: bw, height: bh),
+      Paint()
+        ..filterQuality = FilterQuality.medium
+        ..color = Color.fromRGBO(0, 0, 0, a),
+    );
+    canvas.restore();
   }
 
   void _paintRain(Canvas canvas, Size size, double t) {

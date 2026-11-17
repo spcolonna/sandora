@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -175,6 +176,8 @@ class _DoorsPainter extends CustomPainter {
   /// papel se ilumina con la luz de atrás.
   void _door(Canvas canvas, Rect r, {required bool left}) {
     if (r.right <= 0 || r.left >= r.width * 2) return;
+    final art = SceneArt.instance['obj_gate_shoji'];
+    if (art != null) return _doorArt(canvas, art, r, left: left);
     final frame = r.width * 0.07;
     canvas.drawRect(r, Paint()..color = _frame);
     final paper = r.deflate(frame);
@@ -212,6 +215,61 @@ class _DoorsPainter extends CustomPainter {
       ),
       Paint()..color = const Color(0xFF3E2A1D),
     );
+    // Sombra del borde que se abre.
+    final edge = left
+        ? Rect.fromLTRB(r.right - 4, 0, r.right, r.bottom)
+        : Rect.fromLTRB(r.left, 0, r.left + 4, r.bottom);
+    canvas.drawRect(edge, Paint()..color = Palette.ink.withValues(alpha: 0.25));
+  }
+
+  /// La puerta pintada (`obj_gate_shoji`, con el tirador a la derecha). Es más
+  /// ancha que media pantalla: arriba y abajo van enteros a lo ancho y las
+  /// filas de la cuadrícula del medio se repiten (estiradas como mucho 1,6×)
+  /// hasta llenar el alto. La derecha va espejada, con el tirador al centro.
+  void _doorArt(Canvas canvas, ui.Image img, Rect r, {required bool left}) {
+    final iw = img.width.toDouble(), ih = img.height.toDouble();
+    // Dos filas de papel, de travesaño a travesaño (medido sobre el arte).
+    final t0 = ih * 0.2572, t1 = ih * 0.4720;
+    final sx = r.width / iw;
+    final sy = max(sx, min(sx * 1.6, r.height / ih));
+    final top = t0 * sy, bottom = (ih - t1) * sy, tile = (t1 - t0) * sy;
+    final paint = Paint()..filterQuality = FilterQuality.medium;
+    canvas.save();
+    canvas.clipRect(r);
+    if (!left) {
+      canvas.translate(r.center.dx, 0);
+      canvas.scale(-1, 1);
+      canvas.translate(-r.center.dx, 0);
+    }
+    canvas.drawImageRect(img, Rect.fromLTWH(0, 0, iw, t0), Rect.fromLTWH(r.left, r.top, r.width, top), paint);
+    final end = r.bottom - bottom;
+    for (var y = r.top + top; y < end; y += tile) {
+      final hh = min(tile, end - y);
+      canvas.drawImageRect(
+        img,
+        Rect.fromLTWH(0, t0, iw, (t1 - t0) * hh / tile),
+        Rect.fromLTWH(r.left, y, r.width, hh + 0.5),
+        paint,
+      );
+    }
+    canvas.drawImageRect(img, Rect.fromLTWH(0, t1, iw, ih - t1), Rect.fromLTWH(r.left, end, r.width, bottom), paint);
+    // La luz de atrás: el papel se aclara desde la rendija.
+    if (light > 0) {
+      canvas.drawRect(
+        r,
+        Paint()
+          ..blendMode = BlendMode.screen
+          ..shader = RadialGradient(
+            center: Alignment.centerRight,
+            radius: 1.3,
+            colors: [
+              const Color(0xFFFFF3D6).withValues(alpha: 0.55 * light),
+              const Color(0xFFFFF3D6).withValues(alpha: 0),
+            ],
+          ).createShader(r),
+      );
+    }
+    canvas.restore();
     // Sombra del borde que se abre.
     final edge = left
         ? Rect.fromLTRB(r.right - 4, 0, r.right, r.bottom)

@@ -1593,6 +1593,19 @@ INCLUDED = {
     'pano_forest': ('assets/images/path/pano_forest.webp', 'Bosque detrás del muro, franja de 360° (dos vueltas), 1440 px, costura fundida y recortada al alfa (`_wall`).'),
     'obj_gate_future': ('assets/images/path/obj_gate_future.webp', 'Portón cerrado de las zonas que vienen, 1024 px; el candado sobre la placa lo pinta el juego (`_gate`).'),
     'spr_path_glow_stone': ('assets/images/path/spr_path_glow_stone.webp', 'Piedra con luz para caminar al otro mirador, 512 px, acostada en perspectiva con la flecha encima.'),
+    'spr_path_slot': ('assets/images/path/spr_path_slot.webp', 'Lugar libre del mirador, 512 px, acostado en perspectiva y latiendo (`_marker`).'),
+    'spr_path_slot_locked': ('assets/images/path/spr_path_slot_locked.webp', 'Lugar cerrado, 512 px: en la Maqueta, en vez del candado, sobre el precio (`_Cell`).'),
+    'icon_btn_aerial': ('assets/images/path/icon_btn_aerial.webp', 'Botón de la Maqueta en la barra de abajo, 192 px; en la guía lleva halo de farol (`PaintedIcon`).'),
+    'icon_btn_quick': ('assets/images/path/icon_btn_quick.webp', 'Botón de juego rápido en la barra de abajo, 192 px.'),
+    'icon_btn_path': ('assets/images/path/icon_btn_path.webp', 'Vista Sendero en Ajustes, 192 px, al lado del texto (`InkChip`).'),
+    'icon_btn_classic': ('assets/images/path/icon_btn_classic.webp', 'Vista Clásica en Ajustes, 192 px, al lado del texto (`InkChip`).'),
+    'bg_path_aerial_paper': ('assets/images/path/bg_path_aerial_paper.webp', 'Papel de la Maqueta, 1024 px opaco, cubriendo sin deformar con el tinte de la zona encima.'),
+    'obj_gate_shoji': ('assets/images/court/obj_gate_shoji.webp', 'Puerta shoji de la entrada, 768×1152 opaca; arriba y abajo enteros y las filas del medio se repiten hasta el alto; la derecha va espejada (`_doorArt`).'),
+    'spr_sun': ('assets/images/path/spr_sun.webp', 'Sol de los Miradores, 384 px, en un rumbo fijo del cielo; se apaga al anochecer (`_sunMoon`).'),
+    'spr_moon': ('assets/images/path/spr_moon.webp', 'Luna, 384 px, del lado opuesto al sol; aparece de noche.'),
+    'spr_cloud_01': ('assets/images/path/spr_cloud_01.webp', 'Nube, 768 px: gira con la vista en los Miradores y pasa por el cielo de la pantalla, teñida por el clima.'),
+    'spr_cloud_02': ('assets/images/path/spr_cloud_02.webp', 'Nube larga, 768 px, alternada con la otra.'),
+    'spr_bird': ('assets/images/path/spr_bird.webp', 'Pájaro, 256 px: de día y sin lluvia cruza el cielo cada 40 s (`_paintBird`).'),
 }
 
 

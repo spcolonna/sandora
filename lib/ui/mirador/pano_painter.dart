@@ -503,18 +503,56 @@ class PanoScene {
       );
       return;
     }
-    // Nubes que giran con la mirada.
+    _sunMoon();
+    // Nubes que giran con la mirada (pintadas si están, si no óvalos).
     final cloud = Paint()..color = Colors.white.withValues(alpha: 0.35 * dl + 0.05);
+    final sprites = [SceneArt.instance['spr_cloud_01'], SceneArt.instance['spr_cloud_02']];
+    final spritePaint = Paint()
+      ..filterQuality = FilterQuality.medium
+      ..colorFilter = ColorFilter.mode(_tint.withValues(alpha: 0.4 + 0.5 * dl), BlendMode.modulate);
     for (var i = 0; i < 9; i++) {
       final a = i * 2 * pi / 9 + (i.isEven ? 0.2 : 0);
       final x = cam.xAt(PanoCamera.wrap(a - cam.yaw));
       final y = cam.horizon * (0.25 + 0.4 * ((i * 37) % 10) / 10);
       final wpx = cam.f * (0.35 + (i % 3) * 0.12);
       if (x + wpx < 0 || x - wpx > size.width) continue;
+      final img = sprites[i % 2];
+      if (img != null) {
+        final w = wpx * 1.3, h = w * img.height / img.width;
+        _c.drawImageRect(
+          img,
+          Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+          Rect.fromCenter(center: Offset(x, y), width: w, height: h),
+          spritePaint,
+        );
+        continue;
+      }
       _c.drawOval(Rect.fromCenter(center: Offset(x, y), width: wpx, height: wpx * 0.22), cloud);
       _c.drawOval(
         Rect.fromCenter(center: Offset(x + wpx * 0.2, y - wpx * 0.06), width: wpx * 0.55, height: wpx * 0.2),
         cloud,
+      );
+    }
+  }
+
+  /// El sol de día y la luna de noche, pintados, en un rumbo fijo del cielo
+  /// (giran con la mirada); al atardecer uno se apaga mientras el otro aparece.
+  void _sunMoon() {
+    final dl = v.daylight;
+    for (final (name, a, alpha) in [('spr_sun', 0.9, dl), ('spr_moon', 0.9 + pi, 1 - dl)]) {
+      final img = SceneArt.instance[name];
+      if (img == null || alpha < 0.02) continue;
+      final x = cam.xAt(PanoCamera.wrap(a - cam.yaw));
+      final w = cam.f * 0.16;
+      if (x + w < 0 || x - w > size.width) continue;
+      final h = w * img.height / img.width;
+      _c.drawImageRect(
+        img,
+        Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+        Rect.fromCenter(center: Offset(x, cam.horizon * 0.3), width: w, height: h),
+        Paint()
+          ..filterQuality = FilterQuality.medium
+          ..color = Color.fromRGBO(0, 0, 0, alpha),
       );
     }
   }
@@ -1762,7 +1800,12 @@ class PanoScene {
         _art(art, r, d);
         if (!open && own != null) {
           // El candado en la placa redonda que cuelga de la soga (medida sobre el arte).
-          _glyph(Icons.lock_rounded, Offset(r.center.dx, r.top + r.height * 0.6), r.width * 0.05, const Color(0xFF4A3424));
+          _glyph(
+            Icons.lock_rounded,
+            Offset(r.center.dx, r.top + r.height * 0.6),
+            r.width * 0.05,
+            const Color(0xFF4A3424),
+          );
         } else if (!open) {
           // El sello con candado de las zonas que vienen.
           final seal = Offset(r.center.dx - r.width * 0.02, r.top + r.height * 0.62);
